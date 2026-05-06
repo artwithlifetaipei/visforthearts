@@ -1,0 +1,136 @@
+'use client';
+
+import { useState, useEffect, useRef } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { motion } from 'framer-motion';
+import html2canvas from 'html2canvas';
+
+const ZODIAC_QUOTES: Record<string, { quote: string, artist: string, bg: string }> = {
+    'Aries': { quote: "I am my own experiment. I am my own work of art.", artist: "Madonna", bg: "bg-red-950" },
+    'Taurus': { quote: "Everything is beautiful. All you have to do is look.", artist: "Andy Warhol", bg: "bg-emerald-950" },
+    'Gemini': { quote: "Art is the only way to run away without leaving home.", artist: "Twyla Tharp", bg: "bg-yellow-950" },
+    'Cancer': { quote: "I found I could say things with color and shapes that I couldn't say any other way.", artist: "Georgia O'Keeffe", bg: "bg-blue-950" },
+    'Leo': { quote: "Creativity takes courage.", artist: "Henri Matisse", bg: "bg-orange-950" },
+    'Virgo': { quote: "Have no fear of perfection - you'll never reach it.", artist: "Salvador Dalí", bg: "bg-stone-900" },
+    'Libra': { quote: "The position of the artist is humble. He is essentially a channel.", artist: "Piet Mondrian", bg: "bg-pink-950" },
+    'Scorpio': { quote: "Art is a lie that makes us realize truth.", artist: "Pablo Picasso", bg: "bg-purple-950" },
+    'Sagittarius': { quote: "Every child is an artist. The problem is how to remain an artist once we grow up.", artist: "Pablo Picasso", bg: "bg-indigo-950" },
+    'Capricorn': { quote: "An artist is not paid for his labor but for his vision.", artist: "James Whistler", bg: "bg-neutral-900" },
+    'Aquarius': { quote: "The job of the artist is always to deepen the mystery.", artist: "Francis Bacon", bg: "bg-cyan-950" },
+    'Pisces': { quote: "I dream my painting and I paint my dream.", artist: "Vincent van Gogh", bg: "bg-teal-950" },
+};
+
+function getZodiac(dateStr: string) {
+    const date = new Date(dateStr);
+    const day = date.getDate();
+    const month = date.getMonth() + 1;
+    if ((month == 3 && day >= 21) || (month == 4 && day <= 19)) return "Aries";
+    if ((month == 4 && day >= 20) || (month == 5 && day <= 20)) return "Taurus";
+    if ((month == 5 && day >= 21) || (month == 6 && day <= 20)) return "Gemini";
+    if ((month == 6 && day >= 21) || (month == 7 && day <= 22)) return "Cancer";
+    if ((month == 7 && day >= 23) || (month == 8 && day <= 22)) return "Leo";
+    if ((month == 8 && day >= 23) || (month == 9 && day <= 22)) return "Virgo";
+    if ((month == 9 && day >= 23) || (month == 10 && day <= 22)) return "Libra";
+    if ((month == 10 && day >= 23) || (month == 11 && day <= 21)) return "Scorpio";
+    if ((month == 11 && day >= 22) || (month == 12 && day <= 21)) return "Sagittarius";
+    if ((month == 12 && day >= 22) || (month == 1 && day <= 19)) return "Capricorn";
+    if ((month == 1 && day >= 20) || (month == 2 && day <= 18)) return "Aquarius";
+    return "Pisces";
+}
+
+export default function ZodiacStoryPage() {
+    const router = useRouter();
+    const [profile, setProfile] = useState<any>(null);
+    const [zodiac, setZodiac] = useState('');
+    const storyRef = useRef<HTMLDivElement>(null);
+    const [isGenerating, setIsGenerating] = useState(false);
+
+    useEffect(() => {
+        const fetchProfile = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) { router.push('/vip'); return; }
+            const { data } = await supabase.from('users').select('*').eq('id', user.id).single();
+            setProfile(data);
+            if (data?.birthdate) {
+                setZodiac(getZodiac(data.birthdate));
+            }
+        };
+        fetchProfile();
+    }, [router]);
+
+    const handleDownload = async () => {
+        if (!storyRef.current) return;
+        setIsGenerating(true);
+        const canvas = await html2canvas(storyRef.current, {
+            scale: 2,
+            useCORS: true,
+            backgroundColor: null,
+        });
+        const link = document.createElement('a');
+        link.download = `VIS_Zodiac_Story_${zodiac}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        setIsGenerating(false);
+    };
+
+    if (!profile || !zodiac) return null;
+
+    const data = ZODIAC_QUOTES[zodiac];
+
+    return (
+        <div className="min-h-screen bg-black text-white p-6 flex flex-col font-sans">
+            <header className="py-4 flex justify-between items-center relative z-10">
+                <button onClick={() => router.push('/vip/dashboard')} className="text-neutral-500 text-[10px] tracking-widest uppercase">
+                    ← Back
+                </button>
+            </header>
+
+            <main className="flex-1 flex flex-col items-center justify-center gap-12">
+                {/* IG Story Preview (9:16) */}
+                <div 
+                    ref={storyRef}
+                    className={`relative w-[280px] aspect-[9/16] ${data.bg} rounded-xl overflow-hidden p-8 flex flex-col justify-between shadow-2xl`}
+                >
+                    <div className="flex justify-between items-start">
+                        <div className="text-[8px] tracking-[0.4em] uppercase opacity-70">
+                            VIS / {zodiac}
+                        </div>
+                        <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-light">
+                            {profile.email[0].toUpperCase()}
+                        </div>
+                    </div>
+
+                    <div className="space-y-6">
+                        <p className="text-xl md:text-2xl font-light italic leading-relaxed tracking-wide">
+                            "{data.quote}"
+                        </p>
+                        <p className="text-[10px] tracking-[0.3em] uppercase opacity-60">
+                            — {data.artist}
+                        </p>
+                    </div>
+
+                    <div className="text-center pt-8 border-t border-white/10">
+                        <img 
+                            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                            className="h-4 mx-auto invert opacity-50"
+                        />
+                    </div>
+                </div>
+
+                <div className="text-center space-y-6">
+                    <p className="text-[10px] text-neutral-500 tracking-[0.2em] uppercase">
+                        一鍵生成您的專屬藝術語錄
+                    </p>
+                    <button
+                        onClick={handleDownload}
+                        disabled={isGenerating}
+                        className="px-10 py-4 bg-white text-black text-[10px] tracking-[0.4em] uppercase hover:scale-105 transition-all duration-500 disabled:opacity-50"
+                    >
+                        {isGenerating ? 'Generating...' : 'Download Story'}
+                    </button>
+                </div>
+            </main>
+        </div>
+    );
+}

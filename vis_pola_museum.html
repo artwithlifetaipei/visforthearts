@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIS FOR THE ARTS | Museum Experience</title>
+    <!-- Google Fonts: Elegant Pairing -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
+    <!-- Animation Engines -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
+    <script src="https://unpkg.com/lenis@1.0.45/dist/lenis.min.js"></script>
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        :root {
+            /* Pola Museum Aesthetic Palette */
+            --museum-white: #FFFFFF;
+            --museum-beige: #F9F9F7;
+            --museum-glass: rgba(255, 255, 255, 0.7);
+            --museum-charcoal: #1A1A1A;
+            --pola-gold: #B08D57;
+            
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-sans: 'Outfit', sans-serif;
+            
+            --border-thin: 0.5px;
+            --ease-pola: cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        * {
+            margin: 0; padding: 0; box-sizing: border-box;
+            cursor: none !important;
+        }
+
+        body {
+            background-color: var(--museum-beige);
+            color: var(--museum-charcoal);
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            overflow: hidden; /* Controlled by Lenis */
+        }
+
+        /* --- Transitions Elements --- */
+        .page-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--museum-charcoal);
+            z-index: 9999;
+            transform: scaleY(0);
+            transform-origin: top;
+        }
+
+        /* --- UI Components --- */
+        .custom-cursor {
+            position: fixed;
+            width: 8px; height: 8px;
+            background: var(--pola-gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.2s var(--ease-pola);
+        }
+        .cursor-ring {
+            position: fixed;
+            width: 40px; height: 40px;
+            border: var(--border-thin) solid var(--pola-gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 9999;
+            transition: transform 0.4s var(--ease-pola);
+        }
+
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 2rem 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+        }
+        .nav-logo {
+            font-family: var(--font-serif);
+            font-size: 1.2rem;
+            letter-spacing: 0.4em;
+            font-weight: 300;
+            text-transform: uppercase;
+        }
+        .nav-links { display: flex; gap: 4rem; }
+        .nav-link {
+            font-size: 9px;
+            text-transform: uppercase;
+            letter-spacing: 0.4em;
+            font-weight: 700;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            padding-bottom: 5px;
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0;
+            width: 0; height: var(--border-thin);
+            background: var(--pola-gold);
+            transition: width 0.6s var(--ease-pola);
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        /* --- Page Structure --- */
+        .page {
+            position: absolute;
+            top: 0; left: 0;
+            width: 100%;
+            height: 100vh;
+            display: none;
+            opacity: 0;
+        }
+        .page.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* --- Home Page Styles --- */
+        .hero-section {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-bg {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+        }
+        .hero-img {
+            width: 100%; height: 110%;
+            object-fit: cover;
+            filter: brightness(0.9);
+        }
+        .glass-panel {
+            background: var(--museum-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 5rem 8rem;
+            border: var(--border-thin) solid rgba(255,255,255,0.3);
+            text-align: center;
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        .hero-title {
+            font-family: var(--font-serif);
+            font-size: clamp(40px, 8vw, 120px);
+            font-style: italic;
+            line-height: 0.9;
+            margin-bottom: 2rem;
+        }
+        .hero-title span { font-style: normal; font-weight: 200; }
+
+        /* --- Exhibition Page Styles --- */
+        .exhibit-grid {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            gap: 2rem;
+            padding: 15vh 5vw;
+        }
+        .exhibit-card {
+            grid-column: span 6;
+            position: relative;
+            overflow: hidden;
+            aspect-ratio: 16/10;
+        }
+        .exhibit-card img {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            transition: transform 1.5s var(--ease-pola);
+        }
+        .exhibit-card:hover img { transform: scale(1.05); }
+        .exhibit-info {
+            margin-top: 1.5rem;
+        }
+        .exhibit-label {
+            font-size: 8px;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--pola-gold);
+            margin-bottom: 0.5rem;
+        }
+        .exhibit-title {
+            font-family: var(--font-serif);
+            font-size: 2rem;
+            font-style: italic;
+        }
+
+        /* --- Button --- */
+        .btn-museum {
+            background: var(--museum-charcoal);
+            color: white;
+            padding: 1.2rem 3rem;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.5em;
+            font-weight: 700;
+            border: none;
+            transition: var(--ease-pola);
+            display: inline-block;
+            margin-top: 2rem;
+        }
+        .btn-museum:hover {
+            background: var(--pola-gold);
+            transform: translateY(-5px);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="page-overlay"></div>
+    <div class="custom-cursor"></div>
+    <div class="cursor-ring"></div>
+
+    <nav>
+        <div class="nav-logo">VIS FOR THE ARTS</div>
+        <div class="nav-links">
+            <a href="javascript:void(0)" onclick="navigateTo('home')" class="nav-link">Resonance</a>
+            <a href="javascript:void(0)" onclick="navigateTo('exhibition')" class="nav-link">Curation</a>
+            <a href="javascript:void(0)" onclick="navigateTo('vip')" class="nav-link">Looom Club</a>
+        </div>
+        <div style="font-size: 10px; letter-spacing: 0.2em; font-weight: 300;">TOKYO / TAIPEI</div>
+    </nav>
+
+    <!-- PAGE 1: HOME -->
+    <div id="home" class="page active">
+        <section class="hero-section">
+            <div class="hero-bg">
+                <img src="https://images.unsplash.com/photo-1518998053901-5348d3961a04?auto=format&fit=crop&q=80&w=2000" class="hero-img">
+            </div>
+            <div class="glass-panel">
+                <p style="font-size: 10px; letter-spacing: 0.8em; text-transform: uppercase; margin-bottom: 2rem;">2026 Lifestyle Art Festival</p>
+                <h1 class="hero-title">Nature <br> & <span>Creation.</span></h1>
+                <p style="font-size: 14px; letter-spacing: 0.1em; color: rgba(0,0,0,0.5); max-width: 400px; margin: 0 auto;">
+                    A harmonious symbiosis between Hakone's forest and contemporary human spirit.
+                </p>
+                <button class="btn-museum" onclick="navigateTo('exhibition')">Enter Exhibition</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- PAGE 2: EXHIBITION -->
+    <div id="exhibition" class="page" style="overflow-y: auto;">
+        <div class="exhibit-grid">
+            <div class="exhibit-card" style="grid-column: span 12; aspect-ratio: 21/9;">
+                <img src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&q=80&w=2000">
+            </div>
+            
+            <div class="exhibit-card" style="grid-column: span 7;">
+                <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/https___popbee.com_image_2023_04_m4a00188-2-sc.jpg">
+                <div class="exhibit-info">
+                    <p class="exhibit-label">Gallery Series 01</p>
+                    <h3 class="exhibit-title">The Silence of Space</h3>
+                </div>
+            </div>
+
+            <div class="exhibit-card" style="grid-column: span 5;">
+                <img src="https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=1200">
+                <div class="exhibit-info">
+                    <p class="exhibit-label">Gallery Series 02</p>
+                    <h3 class="exhibit-title">Modern Resonance</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PAGE 3: VIP -->
+    <div id="vip" class="page">
+        <section style="height: 100vh; display: flex; align-items: center; justify-content: center; background: #fff;">
+            <div style="text-align: center; max-width: 600px;">
+                <p class="exhibit-label">Exclusive Access</p>
+                <h2 style="font-family: var(--font-serif); font-size: 5rem; font-style: italic; margin-bottom: 2rem;">The Looom Club.</h2>
+                <div style="width: 60px; height: 1px; background: var(--pola-gold); margin: 0 auto 3rem;"></div>
+                <p style="font-weight: 300; line-height: 2; color: #666;">
+                    An invitation-only community where cultural capital meets aesthetic discernment. 
+                    Unlock the vault of 2026 art investments and global brand partnerships.
+                </p>
+                <button class="btn-museum">Request Invitation</button>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        lucide.createIcons();
+
+        // 1. Lenis Smooth Scroll
+        const lenis = new Lenis();
+        function raf(time) {
+            lenis.raf(time);
+            requestAnimationFrame(raf);
+        }
+        requestAnimationFrame(raf);
+
+        // 2. Custom Cursor
+        const cursor = document.querySelector('.custom-cursor');
+        const ring = document.querySelector('.cursor-ring');
+        window.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0 });
+            gsap.to(ring, { x: e.clientX, y: e.clientY, duration: 0.15 });
+        });
+
+        // 3. Page Navigation Logic (Motion Design Expert)
+        function navigateTo(pageId) {
+            const overlay = document.querySelector('.page-overlay');
+            const targetPage = document.getElementById(pageId);
+            const currentPage = document.querySelector('.page.active');
+
+            if (currentPage.id === pageId) return;
+
+            const tl = gsap.timeline();
+
+            // Shutter Transition
+            tl.to(overlay, { 
+                scaleY: 1, 
+                duration: 0.8, 
+                ease: "power4.inOut",
+                transformOrigin: "bottom"
+            })
+            .set(currentPage, { display: 'none', className: 'page' })
+            .set(targetPage, { display: 'block', className: 'page active', opacity: 0 })
+            .to(overlay, { 
+                scaleY: 0, 
+                duration: 0.8, 
+                ease: "power4.inOut",
+                transformOrigin: "top",
+                onComplete: () => {
+                    // Reset scroll for new page
+                    lenis.scrollTo(0, { immediate: true });
+                    // Trigger inner page animations
+                    triggerPageAnimations(pageId);
+                }
+            })
+            .to(targetPage, { opacity: 1, duration: 0.5 }, "-=0.4");
+        }
+
+        // 4. Initial & Internal Animations
+        function triggerPageAnimations(pageId) {
+            if (pageId === 'home') {
+                gsap.to('.glass-panel', { opacity: 1, y: 0, duration: 1.5, ease: "power4.out", delay: 0.2 });
+                gsap.from('.hero-img', { scale: 1.2, duration: 2, ease: "power2.out" });
+            }
+            if (pageId === 'exhibition') {
+                gsap.from('.exhibit-card', { 
+                    opacity: 0, 
+                    y: 50, 
+                    duration: 1.2, 
+                    stagger: 0.2, 
+                    ease: "power3.out" 
+                });
+            }
+        }
+
+        // Initial Launch
+        window.onload = () => triggerPageAnimations('home');
+
+    </script>
+</body>
+</html>

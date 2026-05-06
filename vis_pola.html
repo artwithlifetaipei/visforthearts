@@ -3,11 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIS FOR THE ARTS | POLA Fluid Motion Edition</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>VIS FOR THE ARTS | EXHIBITION</title>
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Jost:wght@200;300;400;600&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300..700;1,300..700&family=Outfit:wght@100..900&display=swap" rel="stylesheet">
     <!-- Animation Engines -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js"></script>
@@ -15,385 +13,646 @@
     <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
     
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    fontFamily: {
-                        serif: ['Cormorant Garamond', 'serif'],
-                        sans: ['Jost', 'sans-serif'],
-                    },
-                    colors: {
-                        pola: {
-                            bg: '#FBFBFA',
-                            text: '#0D0D0D',
-                            gold: '#B08D57',
-                            border: '#E8E8E6',
-                        }
-                    }
-                }
-            }
-        }
-    </script>
     <style>
-        body {
-            background-color: #FBFBFA;
-            color: #0D0D0D;
-            -webkit-font-smoothing: antialiased;
-            overflow-x: hidden;
+        :root {
+            --bg: #FBFBFA;
+            --text: #0D0D0D;
+            --gold: #C9A96E;
+            --border: rgba(13, 13, 13, 0.08);
+            --font-serif: 'Cormorant Garamond', serif;
+            --font-sans: 'Outfit', sans-serif;
+            --transition-primary: all 1.2s cubic-bezier(0.77, 0, 0.175, 1);
         }
-        
-        /* Smooth Scroll Config */
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            cursor: none !important;
+        }
+
         html.lenis { height: auto; }
         .lenis-smooth { scroll-behavior: auto !important; }
+        .lenis-smooth [data-lenis-prevent] { overscroll-behavior: contain; }
 
-        .parallax-img {
-            will-change: transform;
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: var(--font-sans);
+            -webkit-font-smoothing: antialiased;
+            line-height: 1.6;
+            overflow-x: hidden;
         }
 
-        .img-reveal-container {
-            position: relative;
-            overflow: hidden;
-            clip-path: inset(0 0 100% 0);
-            transition: clip-path 1.2s cubic-bezier(0.77, 0, 0.175, 1);
-        }
-        .img-reveal-container.active {
-            clip-path: inset(0 0 0 0);
-        }
-
-        .vertical-text {
-            writing-mode: vertical-rl;
-            text-orientation: mixed;
-        }
-
-        /* Art Basel Login Panel */
-        .login-panel {
+        /* Noise Texture Overlay */
+        .noise-overlay {
             position: fixed;
-            top: 0; right: -100%;
-            width: 100%;
-            max-width: 500px;
-            height: 100%;
-            background: #FFFFFF;
-            z-index: 100;
-            transition: right 0.8s cubic-bezier(0.77, 0, 0.175, 1);
-        }
-        .login-panel.active { right: 0 !important; }
-        
-        .overlay-bg {
-            position: fixed;
-            inset: 0;
-            background: rgba(0,0,0,0.4);
-            opacity: 0;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: url('data:image/svg+xml;base64,PHN2ZyB2aWV3Qm94PSIwIDAgMjAwIDIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KICA8ZmlsdGVyIGlkPSJub2lzZUZpbHRlciI+CiAgICA8ZmVUdXJidWxlbmNlIHR5cGU9ImZyYWN0YWxOb2lzZSIgYmFzZUZyZXF1ZW5jeT0iMC42NSIgbnVtT2N0YXZlcz0iMyIgc3RpdGNoVGlsZXM9InN0aXRjaCIvPgogIDwvZmlsdGVyPgogIDxyZWN0IHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIGZpbHRlcj0idXJsKCNub2lzZUZpbHRlcikiLz4KPC9zdmc+');
+            opacity: 0.04;
             pointer-events: none;
-            transition: opacity 0.8s ease;
-            z-index: 80;
+            z-index: 9000;
         }
-        .overlay-bg.active { opacity: 1; pointer-events: auto; }
 
-        /* Floating Nav */
-        nav { transition: transform 0.6s ease, background 0.6s ease; }
-        nav.nav-hidden { transform: translateY(-100%); }
+        /* Custom Cursor */
+        .cursor-follower {
+            position: fixed;
+            width: 25px;
+            height: 25px;
+            border: 1px solid var(--gold);
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.1s ease-out, opacity 0.3s ease;
+            transform: translate(-50%, -50%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .cursor-dot {
+            width: 4px;
+            height: 4px;
+            background-color: var(--gold);
+            border-radius: 50%;
+        }
 
-        .hover-lift {
-            transition: transform 0.6s cubic-bezier(0.2, 1, 0.3, 1);
+        /* Nav - Enhanced Logo & Links */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 4rem 8vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 1000;
+            transition: all 0.5s ease;
         }
-        .hover-lift:hover {
-            transform: translateY(-10px);
+        nav.scrolled {
+            background: rgba(251, 251, 250, 0.8);
+            backdrop-filter: blur(20px);
+            padding: 2rem 8vw;
         }
-    </style>
+        .nav-logo { height: 60px; transition: height 0.5s ease; } /* Zwirner style logo */
+        .nav-links { display: flex; gap: 4rem; }
+        .nav-link {
+            font-size: 13px; /* Zwirner style text */
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.2em;
+            text-decoration: none;
+            color: inherit;
+            position: relative;
+            transition: font-size 0.5s ease;
+        }
+        nav.scrolled .nav-logo { height: 30px; }
+        nav.scrolled .nav-link { font-size: 11px; }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: -5px; left: 0;
+            width: 0; height: 1px;
+            background: var(--gold);
+            transition: width 0.5s ease;
+        }
+        .nav-link:hover::after { width: 100%; }
+
+        .btn-access {
+            font-size: 8px;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            font-weight: 700;
+            border: 1px solid var(--text);
+            padding: 0.8rem 1.5rem;
+            text-decoration: none;
+            color: var(--text);
+            transition: all 0.3s ease;
+        }
+        .btn-access:hover { background: var(--text); color: #fff; }
+
+        /* Hero (ABOUT) - Elegant Gallery Layout */
+        .hero-layout {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            height: 100vh;
+            background: #fff;
+            padding-top: 25vh; /* Proper distance from Nav */
+            padding-bottom: 12vh;
+            padding-left: 8vw;
+            padding-right: 8vw;
+        }
+        .hero-img-container {
+            height: 100%;
+            width: 50vw;
+            display: flex;
+            align-items: flex-end;
+            justify-content: flex-start;
+        }
+        .hero-img-container img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            object-position: left bottom;
+        }
+        .hero-text-container {
+            max-width: 450px;
+            text-align: right;
+        }
+        .hero-zh {
+            font-size: 1rem;
+            font-weight: 300;
+            line-height: 2;
+            color: var(--text);
+            margin-bottom: 1.5rem;
+        }
+        .hero-en {
+            font-size: 0.65rem;
+            letter-spacing: 0.15em;
+            text-transform: uppercase;
+            color: #888;
+        }
+
+        /* Exhibition - Zwirner/Ropac Style */
+        .exhibition-section {
+            background: #fff;
+            overflow: hidden;
+        }
+        .exhibition-scroller {
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 0 15vw;
+            gap: 12vw;
+            width: fit-content;
+        }
+        .exhibit-item {
+            width: 25vw;
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+        }
+        .exhibit-item.intro { 
+            width: 30vw; 
+            justify-content: center;
+        }
+        .exhibit-title {
+            font-size: 1rem;
+            font-weight: 400;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 4rem;
+        }
+        .exhibit-title span {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 1.2rem;
+            margin-left: 0.5rem;
+            letter-spacing: 0;
+        }
+        .exhibit-intro-zh {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            font-weight: 300;
+            margin-bottom: 1.5rem;
+            color: var(--text);
+        }
+        .exhibit-intro-en {
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: #888;
+            font-family: var(--font-serif);
+            font-style: italic;
+        }
+        .img-card {
+            width: 100%;
+            aspect-ratio: 2/3;
+            overflow: hidden;
+            transition: transform 1s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .img-card:hover { transform: scale(1.02); }
+        .card-text-zh { font-size: 1.2rem; font-weight: 400; margin-top: 2rem; line-height: 1.5; font-family: var(--font-serif); font-style: italic; }
+        .card-text-en { font-size: 0.6rem; color: #888; text-transform: uppercase; letter-spacing: 0.1em; margin-top: 0.5rem; }
+        .img-parallax { width: 100%; height: 120%; object-fit: cover; }
+
+        /* VIP Luxury Portal (Chanel/Art Basel style) */
+        .vip-section {
+            padding: 20vh 10vw;
+            background: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-top: 1px solid var(--border);
+        }
+        .vip-portal-wrapper {
+            max-width: 800px;
+            margin: 0 auto;
+            background: transparent;
+            text-align: center;
+            border: 1px solid var(--border);
+            padding: 8vh 5vw;
+        }
+        .vip-portal-title {
+            font-size: 1rem;
+            font-weight: 500;
+            letter-spacing: 0.3em;
+            text-transform: uppercase;
+            margin-bottom: 3rem;
+            color: var(--text);
+        }
+        .vip-portal-desc {
+            font-size: 1.8rem;
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: var(--text);
+            margin-bottom: 1rem;
+            line-height: 1.4;
+        }
+        .vip-portal-en {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: #888;
+            margin-bottom: 4rem;
+        }
+
+        /* Press */
+        .press-section {
+            padding: 20vh 10vw;
+            background: #fff;
+        }
+        .press-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5vw;
+            margin-top: 10vh;
+        }
+        .press-title-main {
+            font-size: 2.25rem; /* 1.5x bigger */
+            font-weight: 400;
+            letter-spacing: 0.2em;
+            text-transform: uppercase;
+            margin-bottom: 4rem;
+        }
+        .press-title-main span {
+            font-family: var(--font-serif);
+            font-style: italic;
+            font-size: 1.5rem;
+            margin-left: 0.5rem;
+            letter-spacing: 0;
+        }
+        .press-item {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 2rem;
+        }
+        .press-img {
+            width: 100%;
+            aspect-ratio: 16/9;
+            object-fit: cover;
+            margin-bottom: 1rem;
+            transition: transform 0.5s ease;
+        }
+        .press-item:hover .press-img {
+            transform: scale(1.02);
+        }
+        .press-media {
+            font-size: 2rem;
+            font-family: var(--font-serif);
+            font-style: italic;
+            color: var(--text);
+            margin: 0;
+            line-height: 1;
+        }
+        .press-title {
+            font-size: 0.9rem;
+            font-weight: 300;
+            color: #666;
+            line-height: 1.6;
+            margin: 0;
+        }
+
+        /* Global Utils */
+        .section-tag {
+            font-size: 10px;
+            letter-spacing: 0.4em;
+            text-transform: uppercase;
+            color: var(--gold);
+            margin-bottom: 2rem;
+            display: block;
+            font-weight: 600;
+        }
+        .btn-pola {
+            display: inline-block;
+            background: var(--text);
+            color: white;
+            padding: 1.25rem 3rem;
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 0.4em;
+            font-weight: 700;
+            border: none;
+            transition: all 0.5s ease;
+            text-decoration: none;
+            width: fit-content;
+        }
+        .btn-pola:hover { background: var(--gold); letter-spacing: 0.5em; }
+
+        h2 { font-size: 5rem; line-height: 1; font-weight: 300; }
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 768px) {
+            nav { padding: 2rem 5vw; }
+            nav.scrolled { padding: 1.5rem 5vw; }
+            .nav-logo { height: 40px; }
+            nav.scrolled .nav-logo { height: 25px; }
+            .nav-links { display: none; /* Hide standard links on mobile for minimal look, rely on scrolling */ }
+            
+            .hero-layout {
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                padding-top: 20vh;
+                padding-left: 5vw;
+                padding-right: 5vw;
+                padding-bottom: 5vh;
+            }
+            .hero-img-container {
+                width: 100%;
+                height: 50vh;
+                justify-content: center;
+                align-items: center;
+            }
+            .hero-img-container img {
+                object-position: center;
+            }
+            .hero-text-container {
+                margin-top: 5vh;
+                max-width: 100%;
+                text-align: center;
+            }
+            
+            .exhibition-scroller { padding: 0 10vw; gap: 15vw; }
+            .exhibit-item { width: 75vw; }
+            .exhibit-item.intro { width: 85vw; text-align: center; }
+            
+            .press-grid { grid-template-columns: 1fr; gap: 8vh; }
+            .press-section, .vip-section { padding: 10vh 5vw; }
+            .press-title-main { font-size: 1.8rem; }
+            .vip-portal-desc { font-size: 1.4rem; }
+        }    </style>
 </head>
-<body class="font-sans antialiased">
+<body>
 
-    <div class="overlay-bg" onclick="closeAllPanels()"></div>
-
-    <!-- Login Panel -->
-    <div class="login-panel p-12 flex flex-col">
-        <div class="flex justify-between items-center mb-24">
-            <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" class="h-5">
-            <button onclick="toggleLogin()" class="p-2 hover:rotate-90 transition-transform duration-500">
-                <i data-lucide="x" class="w-6 h-6"></i>
-            </button>
-        </div>
-        <form onsubmit="handleLogin(event)" class="flex flex-col gap-8">
-            <h3 class="font-serif text-4xl italic mb-4">VIP Gateway.</h3>
-            <input type="email" placeholder="Email" class="border-b border-gray-200 py-4 outline-none focus:border-black transition-colors rounded-none">
-            <input type="password" placeholder="Password" class="border-b border-gray-200 py-4 outline-none focus:border-black transition-colors rounded-none">
-            <button class="bg-black text-white py-5 mt-8 text-xs uppercase font-bold tracking-[0.4em] hover:bg-pola-gold transition-all duration-500">Sign In</button>
-        </form>
-    </div>
+    <div class="noise-overlay"></div>
+    <div class="cursor-follower"><div class="cursor-dot"></div></div>
 
     <!-- Nav -->
-    <nav class="fixed top-0 w-full z-50 px-6 md:px-12 py-8 flex justify-between items-center mix-blend-difference text-white">
-        <div class="flex items-center gap-12">
-            <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" class="h-6 invert cursor-pointer">
-            <div class="hidden md:flex gap-10 text-[9px] uppercase font-bold tracking-[0.4em]">
-                <a href="#about" class="hover:text-pola-gold transition-colors">Vision</a>
-                <a href="#exhibit" class="hover:text-pola-gold transition-colors">Exhibition</a>
-                <a href="#club" class="hover:text-pola-gold transition-colors">VIP Club</a>
+    <nav id="main-nav">
+        <div style="display: flex; align-items: center; gap: 6rem;">
+            <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" class="nav-logo">
+            <div class="nav-links">
+                <a href="#about" class="nav-link">ABOUT 關於</a>
+                <a href="#exhibition" class="nav-link">EXHIBITION 參展</a>
+                <a href="#vip" class="nav-link">VIP-Looom Club 禮賓入口</a>
+                <a href="#press" class="nav-link">PRESS 媒體</a>
             </div>
         </div>
-        <div class="flex items-center gap-8">
-            <button onclick="toggleLogin()" class="text-[9px] uppercase font-bold tracking-[0.4em]">Log In</button>
-            <div class="w-10 h-[1px] bg-white"></div>
+        <div>
+            <a href="/vip" class="btn-access">VIP ACCESS</a>
         </div>
     </nav>
 
-    <!-- 1. Hero Section (Parallax & Liquid) -->
-    <section class="relative h-screen flex items-center justify-center overflow-hidden">
-        <div class="absolute inset-0 z-0">
-            <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%202026%20%E4%B8%BB%E8%A6%96%E8%A6%BA%20version%202.jpg" 
-                 class="parallax-img w-full h-[120%] object-cover scale-110 brightness-75" data-speed="0.2">
-        </div>
-        <div class="relative z-10 text-center text-white px-6">
-            <p class="text-[10px] md:text-[12px] uppercase font-bold tracking-[0.8em] mb-8 animate-pola-fade opacity-0" style="animation-fill-mode: forwards;">2026 Lifestyle Art Festival</p>
-            <h1 class="font-serif text-5xl md:text-[10vw] leading-none font-light italic mb-12 animate-pola-fade opacity-0" style="animation-delay: 0.2s; animation-fill-mode: forwards;">
-                Dialogue <br> with <span class="not-italic">Spirit.</span>
-            </h1>
-            <div class="flex flex-col md:flex-row justify-center gap-12 mt-12 animate-pola-fade opacity-0" style="animation-delay: 0.4s; animation-fill-mode: forwards;">
-                <div class="flex items-center gap-4 group cursor-pointer">
-                    <span class="text-[9px] uppercase font-bold tracking-widest">Explore More</span>
-                    <div class="w-12 h-[1px] bg-white group-hover:w-20 transition-all duration-700"></div>
-                </div>
+    <!-- Section: ABOUT -->
+    <section class="hero" id="about">
+        <div class="hero-layout">
+            <div class="hero-img-container">
+                <img src="hero_main.png">
             </div>
-        </div>
-        <div class="absolute bottom-12 left-12 z-10 text-white hidden md:block">
-            <span class="vertical-text text-[9px] uppercase font-bold tracking-[0.5em] opacity-50">SCROLL TO EXPERIENCE</span>
+            <div class="hero-text-container">
+                <p class="hero-zh">
+                    VIS 始於2024年，至今已與無數的品味質富人士們，<br>實踐著人文與美感如何展現於美好的生活中。
+                </p>
+                <p class="hero-en">
+                    Established in 2024. Curating Aesthetic Dialogues with Spirit.
+                </p>
+            </div>
         </div>
     </section>
 
-    <!-- 2. Atmosphere Section (Big Imagery) -->
-    <section id="about" class="py-48 bg-pola-bg">
-        <div class="max-w-7xl mx-auto px-6 md:px-12">
-            <div class="grid grid-cols-1 md:grid-cols-12 gap-24 items-center">
-                <div class="md:col-span-7">
-                    <div class="img-reveal-container aspect-[16/10] shadow-2xl active">
-                        <img src="https://images.unsplash.com/photo-1494438639946-1ebd1d20bf85?auto=format&fit=crop&q=80&w=1200" 
-                             class="parallax-img w-full h-[110%] object-cover" data-speed="0.1">
-                    </div>
-                </div>
-                <div class="md:col-span-5 flex flex-col gap-12">
-                    <h2 class="font-serif text-5xl md:text-7xl italic leading-none">The Space <br> of <span class="text-pola-gold">Silence.</span></h2>
-                    <p class="text-sm font-light leading-relaxed text-gray-500">
-                        這不只是一個博覽會，而是一個建構而成的高質量場域。在這裡，藝術不再是牆上的裝飾，而是生活呼吸的節奏。
+    <!-- Section: EXHIBITION -->
+    <section class="exhibition-section" id="exhibition">
+        <div id="exhibition-trigger">
+            <div class="exhibition-scroller">
+                
+                <div class="exhibit-item intro">
+                    <h2 class="exhibit-title">EXHIBITION <span>參展</span></h2>
+                    <p class="exhibit-intro-zh">
+                        不只是一個博覽會，而是一個聚集品味人士<br>所建構而成的高質量場域。
                     </p>
-                    <div class="flex items-center gap-6">
-                        <div class="h-[1px] w-12 bg-pola-gold"></div>
-                        <span class="text-[10px] font-bold uppercase tracking-widest">Our Mission</span>
-                    </div>
+                    <p class="exhibit-intro-en">
+                        More than a fair, but a purposefully architected space for intellectual and aesthetic elevation.
+                    </p>
+                    <a href="mailto:artwithlifetaipei@gmail.com" class="btn-pola" style="margin-top: 4rem;">Apply 索取2027年簡章</a>
                 </div>
+
+                <div class="exhibit-item">
+                    <div class="img-card">
+                        <img src="blue_island.png" class="img-parallax">
+                    </div>
+                    <p class="card-text-zh">告別獨立品牌行銷的商業孤島</p>
+                    <p class="card-text-en">Bridging the commercial islands of independent branding.</p>
+                </div>
+
+                <div class="exhibit-item" style="padding-top: 15vh;">
+                    <div class="img-card">
+                        <img src="traditional_formats.png" class="img-parallax">
+                    </div>
+                    <p class="card-text-zh">跳脫傳統展位的框架</p>
+                    <p class="card-text-en">Beyond traditional formats.</p>
+                </div>
+
+                <div class="exhibit-item">
+                    <div class="img-card">
+                        <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/IMG_4751%20(1).PNG" class="img-parallax">
+                    </div>
+                    <p class="card-text-zh">精準觸及兼具高消費力與<br>生活美學品味的場域</p>
+                    <p class="card-text-en">A curated space for discerning tastes.</p>
+                </div>
+
+                <div class="exhibit-item" style="width: 10vw;"></div>
+
             </div>
         </div>
     </section>
 
-    <!-- 3. Dynamic Gallery (Masonry-like Parallax) -->
-    <section id="exhibit" class="py-48 bg-white border-y border-pola-border">
-        <div class="max-w-[1400px] mx-auto px-6 md:px-12">
-            <div class="flex justify-between items-end mb-32">
-                <h2 class="font-serif text-6xl md:text-[120px] italic leading-none opacity-10">Archive</h2>
-                <div class="text-right">
-                    <p class="text-[10px] uppercase font-bold tracking-widest text-pola-gold mb-4">Current Series</p>
-                    <p class="font-serif text-3xl italic">Visualizing 2026</p>
-                </div>
-            </div>
+    <!-- Section: VIP Luxury Portal -->
+    <section class="vip-section" id="vip">
+        <div class="vip-portal-wrapper">
+            <h2 class="vip-portal-title">VIP ACCESS</h2>
+            <p class="vip-portal-desc">專屬於美感、影響力交會的私密網絡。</p>
+            <p class="vip-portal-en">An intimate nexus of aesthetics and influence.</p>
+            
+            <a href="/vip" class="btn-pola">VIP ACCESS 貴賓禮賓入口</a>
+        </div>
+    </section>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-16 md:gap-24">
-                <div class="md:pt-48 flex flex-col gap-12 hover-lift">
-                    <div class="img-reveal-container aspect-[3/4] shadow-xl active">
-                        <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/https___popbee.com_image_2023_04_m4a00188-2-sc.jpg" 
-                             class="parallax-img w-full h-[115%] object-cover" data-speed="0.05">
-                    </div>
-                    <h3 class="font-serif text-2xl italic">Lifestyle Curation</h3>
-                </div>
-                <div class="flex flex-col gap-12 hover-lift">
-                    <div class="img-reveal-container aspect-[3/5] shadow-xl active">
-                        <img src="https://images.unsplash.com/photo-1549490349-8643362247b5?auto=format&fit=crop&q=80&w=800" 
-                             class="parallax-img w-full h-[115%] object-cover" data-speed="0.15">
-                    </div>
-                    <h3 class="font-serif text-2xl italic">Modern Dialogue</h3>
-                </div>
-                <div class="md:pt-24 flex flex-col gap-12 hover-lift">
-                    <div class="img-reveal-container aspect-[4/5] shadow-xl active">
-                        <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/IMG_4751%20(1).PNG" 
-                             class="parallax-img w-full h-[115%] object-cover" data-speed="0.08">
-                    </div>
-                    <h3 class="font-serif text-2xl italic">VIP Collection</h3>
-                </div>
+    <!-- Section: PRESS -->
+    <section class="press-section" id="press">
+        <span class="section-tag">Archive & News</span>
+        <h2 class="press-title-main">PRESS <span>媒體</span></h2>
+        
+        <div class="press-grid">
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/GettyImages-2209624027-1024x683.jpg" class="press-img"></div>
+                <h3 class="press-media">artnet</h3>
+                <p class="press-title">New Art Fair Alternative Plans 2026 Launch in Taipei, Hong Kong</p>
+            </div>
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/hong-kong4-1.jpg" class="press-img"></div>
+                <h3 class="press-media">Prestige</h3>
+                <p class="press-title">週末逛街好去處！從時尚、藝術與居家設計感受來自日本、台灣以及香港獨立品牌魅力</p>
+            </div>
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/%E6%9C%A8%E4%BB%8B%E7%94%9F%E6%B4%BBMujieLiving_2025%20Lifestyle%20and%20Art%20Festiva.jpg" class="press-img"></div>
+                <h3 class="press-media">Mujie Living</h3>
+                <p class="press-title">當代社會品味或風格，藝術如何自外於生活？全台首個以生活為核心的藝術節</p>
+            </div>
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/mottimes_images_3620230407121417.jpeg" class="press-img"></div>
+                <h3 class="press-media">Mujie Living</h3>
+                <p class="press-title">來自台灣獨立品牌們的聲音！匯聚20組質感設計品牌、3位藝術家，2023 vis ™ - gratia 藝術與生活風格博覽會</p>
+            </div>
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/172535144791714_P22278065.jpg" class="press-img"></div>
+                <h3 class="press-media">Tatler Taiwan</h3>
+                <p class="press-title">跳脫代工思維的質感品牌，若僅透過網路其質地如何能傳遞？ 這次獨立品牌不單打獨鬥，共11個品牌齊聲同台</p>
+            </div>
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/atl_m_230023176_260.jpg" class="press-img"></div>
+                <h3 class="press-media">Tatler Taiwan</h3>
+                <p class="press-title">2023 vis™️-wild 藝術與潮流聯合文化祭重磅登場，這間「GD 愛店」也參展！</p>
+            </div>
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/02104210-0-1_cover_1600x1201.jpeg" class="press-img"></div>
+                <h3 class="press-media">聯合報 - 500輯</h3>
+                <p class="press-title">首屆 vis-gratia 藝術與生活風格博覽會：匯集20個台灣設計師品牌、3組當代藝術</p>
+            </div>
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/d8ca1a39-6bfb-40a3-8fa6-1ae3fba45157-172465816.jpg" class="press-img"></div>
+                <h3 class="press-media">聯合報 - 500輯</h3>
+                <p class="press-title">2023vis™-wild藝術與潮流文化祭！限期三天，酉5PM TWCAUDE攜10組設計品牌、藝術家亮相</p>
+            </div>
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/mottimes_images_8120230407121424.jpg" class="press-img"></div>
+                <h3 class="press-media">Mujie Living</h3>
+                <p class="press-title">永續設計、文化思維，來自台灣獨立品牌們的聲音：匯聚20組質感設計品牌、3位藝術家</p>
+            </div>
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/3e696a6ac6ae77c4822c5f5daf23a7f8.jpeg" class="press-img"></div>
+                <h3 class="press-media">Mujie Living</h3>
+                <p class="press-title">一個聚集「美」的市集：3 個必逛品牌，從減法保養到最美保健食品！</p>
+            </div>
+            <div class="press-item">
+                <div style="overflow: hidden;"><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/800x.jpg" class="press-img"></div>
+                <h3 class="press-media">YAHOO NEWS</h3>
+                <p class="press-title">11組設計師原創品牌同台！2023 vis ™ – terra設計與生活風格博覽會 置身喧囂城市之外</p>
             </div>
         </div>
     </section>
 
-    <!-- 4. Massive Full-width Image -->
-    <section class="h-screen w-full overflow-hidden">
-        <img src="https://images.unsplash.com/photo-1513364233141-b836b707773f?auto=format&fit=crop&q=80&w=2000" 
-             class="parallax-img w-full h-[130%] object-cover" data-speed="0.3">
-    </section>
-
-    <!-- 5. VIP Section (Unlocked logic) -->
-    <section id="club" class="py-48 bg-pola-bg">
-        <div class="max-w-7xl mx-auto px-6 md:px-12">
-            <div class="flex flex-col md:flex-row gap-24 items-start">
-                <div class="md:w-1/3">
-                    <div class="sticky top-48">
-                        <p class="text-[10px] uppercase font-bold tracking-[0.5em] text-pola-gold mb-8">Member Vault</p>
-                        <h2 class="font-serif text-6xl italic leading-tight mb-8">The <br> LOOOM <br> Club.</h2>
-                        <button onclick="toggleLogin()" class="bg-black text-white px-10 py-4 text-[10px] uppercase font-bold tracking-widest hover:bg-pola-gold transition-all">VIP Entrance</button>
-                    </div>
-                </div>
-                <div class="md:w-2/3 grid grid-cols-1 md:grid-cols-2 gap-12">
-                    <div class="relative group aspect-square bg-white border border-pola-border p-10 flex flex-col justify-end hover-lift">
-                        <div class="absolute inset-0 bg-white/60 backdrop-blur-[5px] z-10 flex flex-col items-center justify-center text-center p-8 lock-overlay">
-                            <i data-lucide="lock" class="w-8 h-8 mb-4"></i>
-                            <p class="text-[9px] uppercase font-bold tracking-[0.4em]">VIP Exclusive</p>
-                        </div>
-                        <p class="text-[10px] font-bold text-pola-gold mb-4 uppercase tracking-widest">Report</p>
-                        <h4 class="font-serif text-3xl italic">2026 藝術投資白皮書</h4>
-                    </div>
-                    <div class="relative group aspect-square bg-white border border-pola-border p-10 flex flex-col justify-end hover-lift">
-                        <div class="absolute inset-0 bg-white/60 backdrop-blur-[5px] z-10 flex flex-col items-center justify-center text-center p-8 lock-overlay">
-                            <i data-lucide="lock" class="w-8 h-8 mb-4"></i>
-                            <p class="text-[9px] uppercase font-bold tracking-[0.4em]">VIP Invitation</p>
-                        </div>
-                        <p class="text-[10px] font-bold text-pola-gold mb-4 uppercase tracking-widest">Event</p>
-                        <h4 class="font-serif text-3xl italic">私藏畫廊晚宴邀請</h4>
-                    </div>
-                    <div class="md:col-span-2 relative group aspect-[21/9] bg-white border border-pola-border p-10 flex flex-col justify-end hover-lift overflow-hidden">
-                         <div class="absolute inset-0 bg-white/60 backdrop-blur-[5px] z-10 flex flex-col items-center justify-center text-center p-8 lock-overlay">
-                            <i data-lucide="lock" class="w-8 h-8 mb-4"></i>
-                            <p class="text-[9px] uppercase font-bold tracking-[0.4em]">Global Perks</p>
-                        </div>
-                        <p class="text-[10px] font-bold text-pola-gold mb-4 uppercase tracking-widest">Benefit</p>
-                        <h4 class="font-serif text-4xl italic">100+ 頂級品牌禮遇計畫</h4>
-                    </div>
-                </div>
-            </div>
+    <footer style="padding: 10vh 10vw; border-top: 1px solid var(--border); text-align: center;">
+        <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" style="height: 24px; opacity: 0.3; margin-bottom: 2rem;">
+        <div style="margin-bottom: 2rem;">
+            <a href="https://www.instagram.com/vis_for_the_arts/" target="_blank" style="color: var(--text); text-decoration: none; opacity: 0.4; transition: opacity 0.3s;" onmouseover="this.style.opacity=1" onmouseout="this.style.opacity=0.4">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+            </a>
         </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="py-24 border-t border-pola-border bg-white">
-        <div class="max-w-7xl mx-auto px-12 text-center">
-            <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" class="h-6 mx-auto mb-16 grayscale opacity-30">
-            <div class="flex justify-center gap-16 text-[9px] uppercase font-bold tracking-[0.5em] mb-16">
-                <a href="#" class="pola-btn">Archive</a>
-                <a href="#" class="pola-btn">Inquiry</a>
-                <a href="#" class="pola-btn">Terms</a>
-            </div>
-            <p class="text-[8px] text-gray-300 uppercase tracking-[0.8em] font-bold">Fluid Motion & Art Concept</p>
-        </div>
+        <p style="font-size: 9px; letter-spacing: 0.4em; margin-top: 1rem; opacity: 0.3;">&copy; 2026 VIS FOR THE ARTS. ALL RIGHTS RESERVED.</p>
     </footer>
 
     <script>
-        lucide.createIcons();
+        gsap.registerPlugin(ScrollTrigger);
 
-        // 1. Initialize Lenis Smooth Scroll
+        // 1. Smooth Scroll
         const lenis = new Lenis({
-            duration: 1.2,
+            duration: 1.5,
             easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-            orientation: 'vertical',
-            gestureOrientation: 'vertical',
-            smoothWheel: true,
-            wheelMultiplier: 1,
-            smoothTouch: false,
-            touchMultiplier: 2,
-            infinite: false,
         });
-
         function raf(time) {
             lenis.raf(time);
             requestAnimationFrame(raf);
         }
         requestAnimationFrame(raf);
 
-        // 2. GSAP Animations
-        gsap.registerPlugin(ScrollTrigger);
+        // 2. Navigation State
+        const nav = document.querySelector('nav');
+        window.addEventListener('scroll', () => {
+            if (window.scrollY > 100) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
+            }
+        });
 
-        // Parallax Effect
-        document.querySelectorAll('.parallax-img').forEach(img => {
-            const speed = img.getAttribute('data-speed') || 0.1;
+        // 3. Exhibition Horizontal Scroll
+        const exhibitionScroller = document.querySelector('.exhibition-scroller');
+        gsap.to(exhibitionScroller, {
+            x: () => -(exhibitionScroller.scrollWidth - window.innerWidth),
+            ease: "none",
+            scrollTrigger: {
+                trigger: ".exhibition-section",
+                start: "top top",
+                end: () => `+=${exhibitionScroller.scrollWidth}`,
+                scrub: 1,
+                pin: true,
+                anticipatePin: 1,
+                invalidateOnRefresh: true
+            }
+        });
+
+        // 4. Parallax
+        document.querySelectorAll('.img-parallax').forEach(img => {
             gsap.to(img, {
-                y: (i, target) => -target.offsetHeight * speed,
+                y: -60,
                 ease: "none",
                 scrollTrigger: {
                     trigger: img.parentElement,
-                    start: "top bottom",
-                    end: "bottom top",
                     scrub: true
                 }
             });
         });
 
-        // Image Reveal Clip Path
-        document.querySelectorAll('.img-reveal-container').forEach(container => {
-            gsap.to(container, {
-                clipPath: "inset(0% 0% 0% 0%)",
-                ease: "power4.inOut",
-                duration: 1.5,
-                scrollTrigger: {
-                    trigger: container,
-                    start: "top 85%",
-                }
+        // 5. Custom Cursor
+        const cursor = document.querySelector('.cursor-follower');
+        const dot = document.querySelector('.cursor-dot');
+        window.addEventListener('mousemove', (e) => {
+            gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.6, ease: "power3.out" });
+            gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0.1 });
+        });
+
+        document.querySelectorAll('a, button, .img-card').forEach(el => {
+            el.addEventListener('mouseenter', () => {
+                gsap.to(cursor, { scale: 1.8, borderColor: "var(--gold)", duration: 0.3 });
+                gsap.to(dot, { scale: 0, duration: 0.3 });
+            });
+            el.addEventListener('mouseleave', () => {
+                gsap.to(cursor, { scale: 1, borderColor: "var(--gold)", duration: 0.3 });
+                gsap.to(dot, { scale: 1, duration: 0.3 });
             });
         });
 
-        // Nav Hide/Show on Scroll
-        let lastScroll = 0;
-        const nav = document.querySelector('nav');
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset;
-            if (currentScroll > lastScroll && currentScroll > 100) {
-                nav.classList.add('nav-hidden');
-            } else {
-                nav.classList.remove('nav-hidden');
-            }
-            // Change nav background on scroll
-            if (currentScroll > 100) {
-                nav.classList.remove('mix-blend-difference');
-                nav.classList.remove('text-white');
-                nav.classList.add('bg-pola-bg/90', 'text-black', 'border-b', 'border-pola-border');
-                document.querySelector('nav img').classList.remove('invert');
-            } else {
-                nav.classList.add('mix-blend-difference');
-                nav.classList.add('text-white');
-                nav.classList.remove('bg-pola-bg/90', 'text-black', 'border-b', 'border-pola-border');
-                document.querySelector('nav img').classList.add('invert');
-            }
-            lastScroll = currentScroll;
+        // Anchor links smooth scroll
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const target = document.querySelector(link.getAttribute('href'));
+                lenis.scrollTo(target);
+            });
         });
 
-        // Login Panel Logic
-        function toggleLogin() {
-            document.querySelector('.login-panel').classList.toggle('active');
-            document.querySelector('.overlay-bg').classList.toggle('active');
-        }
-
-        function closeAllPanels() {
-            document.querySelector('.login-panel').classList.remove('active');
-            document.querySelector('.overlay-bg').classList.remove('active');
-        }
-
-        function handleLogin(e) {
-            e.preventDefault();
-            const btn = e.target.querySelector('button');
-            btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin mx-auto"></i>`;
-            lucide.createIcons();
-
-            setTimeout(() => {
-                btn.innerHTML = `<i data-lucide="check" class="w-4 h-4 mx-auto"></i> AUTHENTICATED`;
-                btn.style.backgroundColor = "#B08D57";
-                lucide.createIcons();
-                
-                setTimeout(() => {
-                    toggleLogin();
-                    // Unlock animation
-                    gsap.to('.lock-overlay', {
-                        opacity: 0,
-                        duration: 1,
-                        stagger: 0.2,
-                        onComplete: () => document.querySelectorAll('.lock-overlay').forEach(el => el.remove())
-                    });
-                }, 1000);
-            }, 1500);
-        }
     </script>
 </body>
 </html>
