@@ -42,8 +42,11 @@ export default function OnboardingPage() {
 
         const { error } = await supabase
             .from('users')
-            .update({ birthdate: birthdate })
-            .eq('id', user.id);
+            .upsert({ 
+                id: user.id, 
+                email: user.email,
+                birthdate: birthdate 
+            }, { onConflict: 'id' });
 
         if (!error) {
             router.push('/vip/dashboard');
