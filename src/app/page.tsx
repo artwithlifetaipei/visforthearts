@@ -27,7 +27,7 @@ export default function Home() {
           <span className="italic">Contemporary</span> Creativity.
         </h1>
         <p className="max-w-xl text-sm md:text-base leading-relaxed tracking-wide text-gray-500 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-200">
-          Join us for the 2024 edition of VIS FOR THE ARTS, 
+          Join us for the 2026 edition of VIS FOR THE ARTS, 
           showcasing over 100 international artists at the 
           Hong Kong Convention & Exhibition Centre.
         </p>
@@ -40,7 +40,7 @@ export default function Home() {
 
       {/* Footer Info */}
       <footer className="fixed bottom-8 left-8 right-8 flex justify-between items-end text-[10px] uppercase tracking-widest text-gray-400">
-        <div>15—28 October 2024</div>
+        <div>15—28 October 2026</div>
         <div>HKCEC, Hong Kong</div>
       </footer>
     </main>

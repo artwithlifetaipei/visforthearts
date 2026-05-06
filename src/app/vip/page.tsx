@@ -156,7 +156,7 @@ export default function VIPLoginPage() {
 
                 <footer className="mt-32">
                     <p className="text-[8px] tracking-[0.5em] text-[#CCCCCC] uppercase font-light">
-                        &copy; 2024 VIS FOR THE ARTS
+                        &copy; 2026 VIS FOR THE ARTS
                     </p>
                 </footer>
             </motion.div>

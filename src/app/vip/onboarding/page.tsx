@@ -71,7 +71,7 @@ export default function OnboardingPage() {
                         transition={{ delay: 0.5, duration: 1 }}
                         className="text-[10px] tracking-[0.6em] text-neutral-400 uppercase"
                     >
-                        Welcome to VIS Universe
+                        Welcome to VIS
                     </motion.h2>
                     <motion.h1 
                         initial={{ y: 20, opacity: 0 }}
@@ -79,9 +79,9 @@ export default function OnboardingPage() {
                         transition={{ delay: 0.8, duration: 1 }}
                         className="text-xl md:text-2xl font-light tracking-widest leading-relaxed"
                     >
-                        請留下您的誕生印記<br/>
+                        請寫下您的個人生日<br/>
                         <span className="text-sm text-neutral-500 italic mt-4 block">
-                            解鎖 VIS 專屬星象美學與迎賓禮遇
+                            解鎖 VIS 獻給您的專屬貴賓通行證
                         </span>
                     </motion.h1>
                 </div>

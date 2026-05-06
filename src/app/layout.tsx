@@ -14,7 +14,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "VIS FOR THE ARTS",
-  description: "Celebrating Contemporary Creativity. Art Festival 2024.",
+  description: "Celebrating Contemporary Creativity. Art Festival 2026.",
 };
 
 export default function RootLayout({
