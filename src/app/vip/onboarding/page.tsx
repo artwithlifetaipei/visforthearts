@@ -42,14 +42,17 @@ export default function OnboardingPage() {
 
         const { error } = await supabase
             .from('users')
-            .update({ birthdate })
-            .eq('id', user.id);
+            .upsert({ 
+                id: user.id, 
+                email: user.email,
+                birthdate: birthdate 
+            }, { onConflict: 'id' });
 
         if (!error) {
             router.push('/vip/dashboard');
         } else {
             console.error(error);
-            alert('發生錯誤，請稍後再試。');
+            alert(`驗證失敗 (${error.message || error.code})。請嘗試重新登入。`);
         }
         setIsLoading(false);
     };
