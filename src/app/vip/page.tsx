@@ -53,7 +53,7 @@ export default function VIPLoginPage() {
                     <img 
                         src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
                         alt="VIS" 
-                        className="h-8 mx-auto mb-12 opacity-90"
+                        className="h-16 mx-auto mb-12 opacity-90"
                     />
                 </motion.div>
 
