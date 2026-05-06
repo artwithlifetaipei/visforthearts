@@ -51,89 +51,107 @@ export default function VIPDashboard() {
 
     const isSVIP = profile.vip_level === 'SVIP';
 
+    // Theme Variables based on SVIP/VIP
+    const bgClass = isSVIP ? 'bg-[#111111] text-[#FAF9F6]' : 'bg-[#FAF9F6] text-[#1A1A1A]';
+    const cardClass = isSVIP 
+        ? 'bg-[#1A1A1A]/80 border-[#333333] shadow-black/50' 
+        : 'bg-white/80 border-[#E5E5E5] shadow-black/5';
+    const accentColor = '#D4AF37'; // Pola Gold
+    const blurClass = isSVIP ? 'bg-[#D4AF37]/10' : 'bg-[#D4AF37]/5';
+
     return (
-        <div className={`min-h-screen ${isSVIP ? 'bg-zinc-950 text-white' : 'bg-white text-black'} transition-colors duration-1000 font-sans`}>
+        <div className={`min-h-screen ${bgClass} transition-colors duration-1000 font-sans relative overflow-hidden pb-12`}>
+            {/* Ambient Background */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div className={`absolute top-[-5%] right-[-10%] w-[60vw] h-[60vw] rounded-full blur-[100px] ${blurClass}`}></div>
+            </div>
+
             {/* Header */}
-            <header className="px-6 py-8 flex justify-between items-center">
+            <header className="px-6 py-10 flex justify-between items-start relative z-10">
                 <div className="flex flex-col">
-                    <span className="text-[8px] tracking-[0.4em] uppercase opacity-50 mb-1">Pass Issued To</span>
-                    <span className="text-[10px] tracking-widest font-medium uppercase">
+                    <span className="text-[8px] tracking-[0.4em] uppercase opacity-40 mb-2 font-light">
+                        Digital Pass
+                    </span>
+                    <span className="text-[14px] tracking-[0.2em] font-serif uppercase">
                         {profile.first_name || profile.email.split('@')[0]}
                     </span>
                 </div>
                 <div className="text-right">
-                    <span className={`text-[8px] tracking-[0.4em] uppercase px-3 py-1 border ${isSVIP ? 'border-zinc-800 bg-zinc-900' : 'border-neutral-100 bg-neutral-50'}`}>
-                        {profile.vip_level}
-                    </span>
+                    <div className={`inline-block px-4 py-1.5 border-[0.5px] ${isSVIP ? 'border-[#D4AF37] text-[#D4AF37]' : 'border-[#1A1A1A] text-[#1A1A1A]'}`}>
+                        <span className="text-[9px] tracking-[0.4em] uppercase font-light">
+                            {profile.vip_level}
+                        </span>
+                    </div>
                 </div>
             </header>
 
-            {/* Main Pass Section (60% height) */}
-            <main className="px-6 pt-4 pb-12 flex flex-col items-center">
+            {/* Main Pass Section */}
+            <main className="px-6 pt-2 pb-12 flex flex-col items-center relative z-10">
                 <motion.div 
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    className={`relative w-full aspect-[3/4] max-w-sm rounded-3xl overflow-hidden flex flex-col items-center justify-center shadow-2xl ${isSVIP ? 'bg-gradient-to-br from-zinc-800 to-black' : 'bg-white border border-neutral-100'}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                    className={`relative w-full aspect-[3/4] max-w-sm rounded-none overflow-hidden flex flex-col items-center justify-center shadow-2xl border-[0.5px] backdrop-blur-xl ${cardClass}`}
                 >
-                    {/* Animated Background Polish */}
-                    <div className="absolute inset-0 pointer-events-none opacity-30">
-                        <motion.div 
-                            animate={{ 
-                                x: [0, 100, 0],
-                                y: [0, -50, 0],
-                            }}
-                            transition={{ duration: 10, repeat: Infinity, ease: "linear" }}
-                            className={`absolute -top-20 -left-20 w-64 h-64 rounded-full blur-[80px] ${isSVIP ? 'bg-zinc-700' : 'bg-neutral-200'}`}
-                        />
-                    </div>
+                    {/* Corner Accents */}
+                    <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
+                    <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
+                    <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
+                    <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
 
                     {/* QR Code Container */}
-                    <div className={`p-6 rounded-2xl ${isSVIP ? 'bg-white' : 'bg-white'}`}>
+                    <div className={`p-5 bg-white`}>
                         <QRCodeSVG 
                             value={qrValue} 
                             size={180}
                             level="H"
                             includeMargin={false}
+                            fgColor="#1A1A1A"
                         />
                     </div>
 
-                    <div className="mt-8 text-center space-y-2">
-                        <p className={`text-[10px] tracking-[0.5em] uppercase font-light ${isSVIP ? 'text-zinc-400' : 'text-neutral-400'}`}>
+                    <div className="mt-10 text-center space-y-3">
+                        <p className={`text-[9px] tracking-[0.6em] uppercase font-light opacity-60`}>
                             Scan for Access
                         </p>
-                        <p className={`text-[8px] tracking-[0.2em] font-mono opacity-30`}>
+                        <p className={`text-[10px] tracking-[0.3em] font-mono opacity-30`}>
                             {new Date().toLocaleTimeString([], { hour12: false })}
                         </p>
                     </div>
 
-                    {/* Apple Wallet Button Mockup */}
-                    <button className="absolute bottom-8 px-6 py-2 rounded-full bg-black text-white text-[9px] tracking-widest uppercase flex items-center gap-3 hover:scale-105 transition-transform">
-                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.1 2.48-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91 1.13.05 2.14.46 2.87 1.14-.15.11-1.39.81-1.39 2.41 0 1.93 1.57 2.61 1.6 2.62-.01.03-.25.87-.84 1.73zM13 5c-.03-2.04 1.69-3.77 3.69-3.81.03 2.04-1.69 3.77-3.69 3.81z"/></svg>
-                        Add to Wallet
+                    {/* Apple Wallet Button - Minimalist */}
+                    <button className="absolute bottom-10 flex items-center gap-2 group">
+                        <span className="w-6 h-[1px] bg-current opacity-30 group-hover:w-8 transition-all duration-300"></span>
+                        <span className="text-[8px] tracking-[0.3em] uppercase opacity-50 group-hover:opacity-100 transition-opacity">
+                            Add to Wallet
+                        </span>
+                        <span className="w-6 h-[1px] bg-current opacity-30 group-hover:w-8 transition-all duration-300"></span>
                     </button>
                 </motion.div>
             </main>
 
             {/* Aesthetic Entrances */}
-            <section className="px-6 grid grid-cols-2 gap-4 pb-12">
+            <section className="px-6 grid grid-cols-2 gap-4 relative z-10">
                 <motion.button 
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 0.98 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => router.push('/vip/blind-box')}
-                    className={`aspect-square rounded-2xl p-6 flex flex-col justify-between text-left ${isSVIP ? 'bg-zinc-900 border border-zinc-800' : 'bg-neutral-50 border border-neutral-100'}`}
+                    className={`aspect-square p-6 flex flex-col justify-between text-left border-[0.5px] backdrop-blur-md transition-colors duration-500 hover:border-[#D4AF37] ${cardClass}`}
                 >
-                    <span className="text-[8px] tracking-[0.3em] uppercase opacity-50 font-medium">禮遇</span>
-                    <h3 className="text-sm font-light tracking-widest leading-relaxed">
+                    <span className="text-[8px] tracking-[0.4em] uppercase opacity-40 font-light">Curated</span>
+                    <h3 className="text-sm font-serif tracking-[0.2em] leading-relaxed">
                         品味預測<br/>迎賓禮
                     </h3>
                 </motion.button>
 
                 <motion.button 
-                    whileTap={{ scale: 0.98 }}
+                    whileHover={{ scale: 0.98 }}
+                    whileTap={{ scale: 0.95 }}
                     onClick={() => router.push('/vip/story')}
-                    className={`aspect-square rounded-2xl p-6 flex flex-col justify-between text-left ${isSVIP ? 'bg-zinc-900 border border-zinc-800' : 'bg-neutral-50 border border-neutral-100'}`}
+                    className={`aspect-square p-6 flex flex-col justify-between text-left border-[0.5px] backdrop-blur-md transition-colors duration-500 hover:border-[#D4AF37] ${cardClass}`}
                 >
-                    <span className="text-[8px] tracking-[0.3em] uppercase opacity-50 font-medium">美學</span>
-                    <h3 className="text-sm font-light tracking-widest leading-relaxed">
+                    <span className="text-[8px] tracking-[0.4em] uppercase opacity-40 font-light">Aesthetic</span>
+                    <h3 className="text-sm font-serif tracking-[0.2em] leading-relaxed">
                         星座藝術<br/>生成器
                     </h3>
                 </motion.button>

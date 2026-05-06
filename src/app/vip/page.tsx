@@ -32,83 +32,111 @@ export default function VIPLoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-white flex flex-col items-center justify-center p-6 font-sans">
-            <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-                className="w-full max-w-md text-center"
-            >
-                <img 
-                    src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
-                    alt="VIS" 
-                    className="h-8 mx-auto mb-16 opacity-80"
-                />
+        <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-6 font-sans relative overflow-hidden">
+            {/* Atmospheric Background Blurs */}
+            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
+                <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-[#D4AF37]/5 rounded-full blur-[100px]"></div>
+                <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-black/5 rounded-full blur-[120px]"></div>
+            </div>
 
-                <h1 className="text-sm tracking-[0.3em] font-medium text-black uppercase mb-8">
-                    Digital VIP Access
+            <motion.div 
+                initial={{ opacity: 0, y: 30 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                className="w-full max-w-md text-center relative z-10"
+            >
+                <motion.div
+                    initial={{ scale: 0.9, opacity: 0 }}
+                    animate={{ scale: 1, opacity: 1 }}
+                    transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
+                >
+                    <img 
+                        src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                        alt="VIS" 
+                        className="h-8 mx-auto mb-12 opacity-90"
+                    />
+                </motion.div>
+
+                <h1 className="text-3xl font-serif text-[#1A1A1A] mb-2 tracking-tight">
+                    Digital Portal
                 </h1>
+                <p className="text-[9px] tracking-[0.4em] font-light text-[#D4AF37] uppercase mb-16">
+                    VIP / SVIP Exclusive Access
+                </p>
 
                 <AnimatePresence mode="wait">
                     {!isSent ? (
                         <motion.form 
                             key="login"
-                            initial={{ opacity: 0 }}
-                            animate={{ opacity: 1 }}
-                            exit={{ opacity: 0 }}
+                            initial={{ opacity: 0, filter: "blur(10px)" }}
+                            animate={{ opacity: 1, filter: "blur(0px)" }}
+                            exit={{ opacity: 0, filter: "blur(10px)", y: -20 }}
+                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
                             onSubmit={handleLogin} 
-                            className="space-y-8"
+                            className="space-y-12"
                         >
-                            <p className="text-neutral-500 text-xs leading-relaxed tracking-wider mb-8">
+                            <p className="text-[#666666] text-xs leading-[2] tracking-wider mb-8 font-light">
                                 請輸入您的電子信箱以驗證貴賓身份。<br/>
                                 系統將為您開啟專屬的數位門卡與禮遇空間。
                             </p>
                             
-                            <div className="relative border-b border-neutral-200 focus-within:border-black transition-colors duration-300">
+                            <div className="relative border-b border-[#E5E5E5] focus-within:border-[#1A1A1A] transition-colors duration-500 group">
                                 <input
                                     type="email"
                                     placeholder="EMAIL ADDRESS"
                                     required
-                                    className="w-full py-4 bg-transparent outline-none text-xs tracking-widest uppercase placeholder:text-neutral-300"
+                                    className="w-full py-4 bg-transparent outline-none text-xs tracking-widest uppercase placeholder:text-[#CCCCCC] text-center text-[#1A1A1A]"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     disabled={isLoading}
                                 />
+                                <div className="absolute bottom-[-1px] left-1/2 w-0 h-[1px] bg-[#1A1A1A] transition-all duration-500 group-focus-within:w-full group-focus-within:left-0"></div>
                             </div>
 
-                            <button
+                            <motion.button
+                                whileHover={{ scale: 0.98 }}
+                                whileTap={{ scale: 0.95 }}
                                 type="submit"
                                 disabled={isLoading}
-                                className="w-full py-4 border border-black text-[10px] tracking-[0.4em] uppercase hover:bg-black hover:text-white transition-all duration-500 disabled:opacity-50"
+                                className="w-full py-5 bg-[#1A1A1A] text-white text-[10px] tracking-[0.4em] uppercase transition-all duration-500 disabled:opacity-50 shadow-2xl shadow-black/10 hover:shadow-black/20"
                             >
-                                {isLoading ? 'Verifying...' : 'Authenticate'}
-                            </button>
+                                {isLoading ? (
+                                    <span className="flex items-center justify-center gap-3">
+                                        <div className="w-3 h-3 border-r-transparent border-[1.5px] border-white rounded-full animate-spin"></div>
+                                        Authenticating
+                                    </span>
+                                ) : 'Authenticate'}
+                            </motion.button>
                         </motion.form>
                     ) : (
                         <motion.div 
                             key="success"
-                            initial={{ opacity: 0, scale: 0.95 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            className="space-y-8"
+                            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
+                            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
+                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+                            className="space-y-10"
                         >
-                            <div className="py-12 flex justify-center">
+                            <div className="py-10 flex justify-center">
                                 <motion.div 
-                                    initial={{ scale: 0 }}
-                                    animate={{ scale: 1 }}
-                                    transition={{ type: "spring", damping: 12, stiffness: 200 }}
-                                    className="w-12 h-12 rounded-full border border-neutral-100 flex items-center justify-center"
+                                    initial={{ scale: 0, rotate: -90 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    transition={{ type: "spring", damping: 15, stiffness: 100, delay: 0.2 }}
+                                    className="w-16 h-16 rounded-full border-[0.5px] border-[#D4AF37] flex items-center justify-center bg-white shadow-xl shadow-[#D4AF37]/10"
                                 >
-                                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
-                                        <path d="M20 6L9 17L4 12" strokeLinecap="round" strokeLinejoin="round"/>
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                                        <path d="M20 6L9 17L4 12" />
                                     </svg>
                                 </motion.div>
                             </div>
-                            <p className="text-neutral-500 text-xs leading-relaxed tracking-wider">
-                                {message}
-                            </p>
+                            <div className="space-y-4">
+                                <h3 className="text-sm font-serif text-[#1A1A1A] tracking-wider">Invitation Sent</h3>
+                                <p className="text-[#666666] text-xs leading-[2] tracking-wider max-w-[280px] mx-auto font-light">
+                                    {message}
+                                </p>
+                            </div>
                             <button
                                 onClick={() => setIsSent(false)}
-                                className="text-[10px] tracking-[0.2em] uppercase text-neutral-400 hover:text-black transition-colors"
+                                className="text-[9px] tracking-[0.3em] uppercase text-[#999999] hover:text-[#1A1A1A] transition-colors duration-300 border-b border-transparent hover:border-[#1A1A1A] pb-1"
                             >
                                 Back to login
                             </button>
@@ -117,12 +145,18 @@ export default function VIPLoginPage() {
                 </AnimatePresence>
 
                 {message && !isSent && (
-                    <p className="mt-8 text-[10px] text-red-400 tracking-widest">{message}</p>
+                    <motion.p 
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="mt-8 text-[10px] text-red-500/80 tracking-widest font-light"
+                    >
+                        {message}
+                    </motion.p>
                 )}
 
                 <footer className="mt-32">
-                    <p className="text-[8px] tracking-[0.5em] text-neutral-300 uppercase">
-                        &copy; 2026 VIS FOR THE ARTS
+                    <p className="text-[8px] tracking-[0.5em] text-[#CCCCCC] uppercase font-light">
+                        &copy; 2024 VIS FOR THE ARTS
                     </p>
                 </footer>
             </motion.div>
