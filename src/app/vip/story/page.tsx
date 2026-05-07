@@ -10,15 +10,15 @@ const ZODIAC_QUOTES: Record<string, { quote: string, artist: string, bg: string 
     'Aries': { quote: "Creativity takes courage.", artist: "Henri Matisse", bg: "bg-rose-950" },
     'Taurus': { quote: "I found I could say things with color and shapes that I couldn't say any other way.", artist: "Georgia O'Keeffe", bg: "bg-emerald-950" },
     'Gemini': { quote: "My work is a game, a very serious game.", artist: "M.C. Escher", bg: "bg-amber-950" },
-    'Cancer': { quote: "What I like about photographs is that they capture a moment that's gone forever, impossible to reproduce.", artist: "Karl Lagerfeld", bg: "bg-slate-800" },
+    'Cancer': { quote: "I don't paint dreams or nightmares, I paint my own reality.", artist: "Frida Kahlo", bg: "bg-slate-800" },
     'Leo': { quote: "I don't design clothes. I design dreams.", artist: "Ralph Lauren", bg: "bg-orange-950" },
     'Virgo': { quote: "Details are not the details. They make the design.", artist: "Charles Eames", bg: "bg-stone-800" },
-    'Libra': { quote: "Elegance is refusal.", artist: "Coco Chanel", bg: "bg-pink-950" },
+    'Libra': { quote: "I am going to make everything around me beautiful — that will be my life.", artist: "Elsie de Wolfe", bg: "bg-pink-950" },
     'Scorpio': { quote: "Art is a lie that makes us realize truth.", artist: "Pablo Picasso", bg: "bg-purple-950" },
     'Sagittarius': { quote: "There are 360 degrees, so why stick to one?", artist: "Zaha Hadid", bg: "bg-blue-950" },
-    'Capricorn': { quote: "Good design is long-lasting.", artist: "Dieter Rams", bg: "bg-neutral-900" },
+    'Capricorn': { quote: "I prefer drawing to talking. Drawing is faster, and leaves less room for lies.", artist: "Le Corbusier", bg: "bg-neutral-900" },
     'Aquarius': { quote: "I want to make the beautiful accessible to everyone.", artist: "Issey Miyake", bg: "bg-cyan-950" },
-    'Pisces': { quote: "To take a photograph is to align the head, the eye and the heart. It's a way of life.", artist: "Henri Cartier-Bresson", bg: "bg-sky-950" },
+    'Pisces': { quote: "It is good to love many things, for therein lies the true strength, and whosoever loves much performs much, and can accomplish much, and what is done in love is well done.", artist: "Vincent van Gogh", bg: "bg-sky-950" },
 };
 
 function getZodiac(dateStr: string) {
