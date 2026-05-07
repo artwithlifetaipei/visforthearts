@@ -37,10 +37,13 @@ export default function LandingPage() {
             
             gsap.registerPlugin(ScrollTrigger);
 
-            // 1. Smooth Scroll (Lenis)
+            // 1. Snappy Smooth Scroll (Lenis)
             const lenis = new Lenis({
-                duration: 1.5,
+                duration: 0.8,
+                lerp: 0.1,
                 easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+                smoothWheel: true,
+                wheelMultiplier: 1.2,
             });
             function raf(time: number) {
                 lenis.raf(time);
