@@ -94,7 +94,7 @@ export default function ZodiacStoryPage() {
                 >
                     <div className="flex justify-between items-start">
                         <div className="text-[8px] tracking-[0.4em] uppercase opacity-70">
-                            VIS / {zodiac}
+                            VIS / VIP
                         </div>
                         <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-light">
                             {profile.email[0].toUpperCase()}
@@ -113,15 +113,12 @@ export default function ZodiacStoryPage() {
                     <div className="text-center pt-8 border-t border-white/10">
                         <img 
                             src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
-                            className="h-4 mx-auto invert opacity-50"
+                            className="h-6 mx-auto invert opacity-50"
                         />
                     </div>
                 </div>
 
                 <div className="text-center space-y-6">
-                    <p className="text-[10px] text-neutral-500 tracking-[0.2em] uppercase">
-                        一鍵生成您的專屬藝術語錄
-                    </p>
                     <button
                         onClick={handleDownload}
                         disabled={isGenerating}
