@@ -152,7 +152,7 @@ export default function VIPDashboard() {
                 >
                     <span className="text-[8px] tracking-[0.4em] uppercase opacity-40 font-light">Aesthetic</span>
                     <h3 className="text-sm font-serif tracking-[0.2em] leading-relaxed">
-                        星座藝術<br/>生成器
+                        你與哪位<br/>藝術家共鳴？
                     </h3>
                 </motion.button>
             </section>

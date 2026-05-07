@@ -62,16 +62,32 @@ export default function ZodiacStoryPage() {
     const handleDownload = async () => {
         if (!storyRef.current) return;
         setIsGenerating(true);
-        const canvas = await html2canvas(storyRef.current, {
-            scale: 2,
-            useCORS: true,
-            backgroundColor: null,
-        });
-        const link = document.createElement('a');
-        link.download = `VIS_Zodiac_Story_${zodiac}.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        setIsGenerating(false);
+        try {
+            const { default: html2canvas } = await import('html2canvas');
+            const canvas = await html2canvas(storyRef.current, {
+                scale: 3,
+                useCORS: true,
+                allowTaint: false,
+                backgroundColor: null,
+                logging: false,
+            });
+            canvas.toBlob((blob) => {
+                if (!blob) return;
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.download = `VIS_Story_${zodiac}.png`;
+                link.href = url;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }, 'image/png');
+        } catch (err) {
+            console.error('Download failed:', err);
+            alert('下載失敗，請稍後再試。');
+        } finally {
+            setIsGenerating(false);
+        }
     };
 
     if (!profile || !zodiac) return null;
