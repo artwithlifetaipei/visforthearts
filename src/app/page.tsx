@@ -68,8 +68,8 @@ export default function LandingPage() {
                     scrollTrigger: {
                         trigger: ".exhibition-section",
                         start: "top top",
-                        end: () => `+=${scroller.scrollWidth * 0.8}`,
-                        scrub: 0.5,
+                        end: () => `+=${scroller.scrollWidth}`,
+                        scrub: 1,
                         pin: true,
                         anticipatePin: 1,
                         invalidateOnRefresh: true
@@ -207,10 +207,10 @@ export default function LandingPage() {
                 .exhibition-section { background: #fff; overflow: hidden; }
                 .exhibition-scroller {
                     height: 100vh; display: flex; align-items: center;
-                    padding: 0 8vw; gap: 8vw; width: fit-content;
+                    padding: 0 15vw; gap: 12vw; width: fit-content;
                 }
-                .exhibit-item { width: 28vw; flex-shrink: 0; display: flex; flex-direction: column; }
-                .exhibit-item.intro { width: 40vw; padding-right: 4vw; }
+                .exhibit-item { width: 25vw; flex-shrink: 0; display: flex; flex-direction: column; }
+                .exhibit-item.intro { width: 30vw; justify-content: center; }
                 .exhibit-title { font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4rem; }
                 .exhibit-title span { font-family: var(--font-serif); font-style: italic; font-size: 1.2rem; }
                 .exhibit-intro-zh { font-size: 1.3rem; line-height: 1.8; font-weight: 300; margin-bottom: 1.5rem; }
