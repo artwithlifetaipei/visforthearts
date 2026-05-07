@@ -15,6 +15,21 @@ export default function VIPLoginPage() {
         setIsLoading(true);
         setMessage('');
 
+        // Step 1: Check if email is on the VIP allowlist
+        const { data: allowed, error: checkError } = await supabase
+            .from('vip_allowlist')
+            .select('email')
+            .eq('email', email.toLowerCase().trim())
+            .single();
+
+        if (checkError || !allowed) {
+            // Not on the list — show an elegant, on-brand message
+            setMessage('此信箱尚未在 VIS 貴賓名單中。\n如您有任何疑問，歡迎與我們聯繫。');
+            setIsLoading(false);
+            return;
+        }
+
+        // Step 2: Email is approved — send the magic link
         const { error } = await supabase.auth.signInWithOtp({
             email: email,
             options: {
