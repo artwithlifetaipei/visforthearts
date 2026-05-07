@@ -100,21 +100,25 @@ export default function OnboardingPage() {
                         <input
                             type="date"
                             required
-                            className="w-full py-4 bg-transparent outline-none text-sm tracking-[0.2em] uppercase text-center appearance-none"
+                            min="1920-01-01"
+                            max="2020-12-31"
+                            className="w-full py-4 bg-transparent outline-none text-xl tracking-[0.2em] text-center text-white font-light appearance-none"
+                            style={{ colorScheme: 'dark' }}
                             value={birthdate}
                             onChange={(e) => setBirthdate(e.target.value)}
                             disabled={isLoading}
-                            style={{ colorScheme: 'dark' }}
                         />
                     </div>
 
-                    <button
+                    <motion.button
+                        whileHover={{ scale: 0.98 }}
+                        whileTap={{ scale: 0.95 }}
                         type="submit"
                         disabled={isLoading || !birthdate}
-                        className="px-12 py-4 border border-white text-[10px] tracking-[0.5em] uppercase hover:bg-white hover:text-black transition-all duration-700 disabled:opacity-20"
+                        className="px-16 py-4 border border-[#D4AF37] text-[#D4AF37] text-[10px] tracking-[0.5em] uppercase hover:bg-[#D4AF37] hover:text-black transition-all duration-700 disabled:opacity-30"
                     >
-                        {isLoading ? 'Decrypting Stars...' : 'Unlock Portal'}
-                    </button>
+                        {isLoading ? 'Verifying...' : 'Unlock Portal'}
+                    </motion.button>
                 </motion.form>
 
                 <div className="fixed inset-0 -z-10 opacity-20 pointer-events-none">

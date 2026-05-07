@@ -102,43 +102,48 @@ export default function ZodiacStoryPage() {
                 </button>
             </header>
 
-            <main className="flex-1 flex flex-col items-center justify-center gap-12">
+            <main className="flex-1 flex flex-col items-center justify-center gap-8 py-4">
                 {/* IG Story Preview (9:16) */}
                 <div 
                     ref={storyRef}
-                    className={`relative w-[280px] aspect-[9/16] ${data.bg} rounded-xl overflow-hidden p-8 flex flex-col justify-between shadow-2xl`}
+                    className={`relative w-[85vw] max-w-[320px] max-h-[80vh] aspect-[9/16] ${data.bg} rounded-xl overflow-hidden p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-all duration-700`}
                 >
-                    <div className="flex justify-between items-start">
-                        <div className="text-[8px] tracking-[0.4em] uppercase opacity-70">
+                    <div className="flex justify-between items-start relative z-10">
+                        <div className="text-[10px] tracking-[0.5em] uppercase opacity-70 font-light">
                             VIS / VIP
                         </div>
-                        <div className="w-8 h-8 rounded-full border border-white/20 flex items-center justify-center text-[10px] font-light">
+                        <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-xs font-light backdrop-blur-sm">
                             {profile.email[0].toUpperCase()}
                         </div>
                     </div>
 
-                    <div className="space-y-6">
-                        <p className="text-xl md:text-2xl font-light italic leading-relaxed tracking-wide">
+                    <div className="relative z-10 py-10">
+                        <p className="text-xl md:text-2xl font-light italic leading-relaxed tracking-wide text-white/90">
                             "{data.quote}"
                         </p>
-                        <p className="text-[10px] tracking-[0.3em] uppercase opacity-60">
+                        <div className="h-px w-12 bg-[#D4AF37] my-6 opacity-60"></div>
+                        <p className="text-[11px] tracking-[0.4em] uppercase opacity-60 font-light">
                             — {data.artist}
                         </p>
                     </div>
 
-                    <div className="text-center pt-8 border-t border-white/10">
+                    <div className="text-center pt-8 border-t border-white/10 relative z-10">
                         <img 
                             src="/vis_logo.png" 
-                            className="h-6 mx-auto invert opacity-50"
+                            className="h-7 mx-auto invert opacity-60"
+                            alt="VIS Logo"
                         />
                     </div>
+
+                    {/* Subtle background texture */}
+                    <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
                 </div>
 
-                <div className="text-center space-y-6">
+                <div className="text-center pt-4">
                     <button
                         onClick={handleDownload}
                         disabled={isGenerating}
-                        className="px-10 py-4 bg-white text-black text-[10px] tracking-[0.4em] uppercase hover:scale-105 transition-all duration-500 disabled:opacity-50"
+                        className="px-12 py-4 bg-white text-black text-[10px] tracking-[0.5em] uppercase hover:bg-neutral-200 transition-all duration-500 disabled:opacity-50 shadow-xl"
                     >
                         {isGenerating ? 'Generating...' : 'Download Story'}
                     </button>
