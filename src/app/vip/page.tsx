@@ -29,11 +29,12 @@ export default function VIPLoginPage() {
             return;
         }
 
-        // Step 2: Email is approved — send the magic link
+        // Step 2: Email is approved — send the magic link (OTP)
         const { error } = await supabase.auth.signInWithOtp({
             email: email,
             options: {
                 emailRedirectTo: `${window.location.origin}/vip/onboarding`,
+                shouldCreateUser: true, // This ensures new users are created AND sent the Magic Link template
             },
         });
 
