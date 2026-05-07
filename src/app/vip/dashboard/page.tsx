@@ -6,10 +6,13 @@ import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 
+const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'amelie@theartpressasia.com'];
+
 export default function VIPDashboard() {
     const router = useRouter();
     const [profile, setProfile] = useState<any>(null);
     const [qrValue, setQrValue] = useState('');
+    const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -18,6 +21,7 @@ export default function VIPDashboard() {
                 router.push('/vip');
                 return;
             }
+            if (ADMIN_EMAILS.includes(user.email ?? '')) setIsAdmin(true);
 
             const { data } = await supabase
                 .from('users')
@@ -156,6 +160,18 @@ export default function VIPDashboard() {
                     </h3>
                 </motion.button>
             </section>
+
+            {/* Admin-only link — invisible to regular VIPs */}
+            {isAdmin && (
+                <div className="text-center mt-8">
+                    <button
+                        onClick={() => router.push('/vip/admin')}
+                        className="text-[9px] tracking-[0.4em] uppercase text-neutral-600 hover:text-[#D4AF37] transition-colors duration-500"
+                    >
+                        ⚙ 貴賓名單管理
+                    </button>
+                </div>
+            )}
         </div>
     );
 }
