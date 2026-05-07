@@ -45,21 +45,29 @@ export default function LandingPage() {
                 }
             });
 
-            // Exhibition Horizontal Scroll
+            // Exhibition Horizontal Scroll (with read pause)
             const scroller = document.querySelector('.exhibition-scroller') as HTMLElement;
             if (scroller) {
-                gsap.to(scroller, {
-                    x: () => -(scroller.scrollWidth - window.innerWidth),
-                    ease: "none",
+                const tl = gsap.timeline({
                     scrollTrigger: {
                         trigger: ".exhibition-section",
                         start: "top top",
-                        end: () => `+=${scroller.scrollWidth}`,
+                        end: () => `+=${scroller.scrollWidth + window.innerHeight}`, // Extended scroll distance
                         scrub: 1,
                         pin: true,
                         anticipatePin: 1,
                         invalidateOnRefresh: true
                     }
+                });
+
+                // 1. Pause phase: User scrolls down, but nothing moves (allows reading)
+                tl.to({}, { duration: 0.8 }); 
+                
+                // 2. Scroll phase: Horizontal movement begins
+                tl.to(scroller, {
+                    x: () => -(scroller.scrollWidth - window.innerWidth),
+                    ease: "none",
+                    duration: 3
                 });
             }
 
