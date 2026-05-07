@@ -7,18 +7,18 @@ import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 
 const ZODIAC_QUOTES: Record<string, { quote: string, artist: string, bg: string }> = {
-    'Aries': { quote: "Creativity takes courage.", artist: "Henri Matisse", bg: "bg-rose-950" },
-    'Taurus': { quote: "I found I could say things with color and shapes that I couldn't say any other way.", artist: "Georgia O'Keeffe", bg: "bg-emerald-950" },
-    'Gemini': { quote: "My work is a game, a very serious game.", artist: "M.C. Escher", bg: "bg-amber-950" },
-    'Cancer': { quote: "I don't paint dreams or nightmares, I paint my own reality.", artist: "Frida Kahlo", bg: "bg-slate-800" },
-    'Leo': { quote: "I don't design clothes. I design dreams.", artist: "Ralph Lauren", bg: "bg-orange-950" },
-    'Virgo': { quote: "Details are not the details. They make the design.", artist: "Charles Eames", bg: "bg-stone-800" },
-    'Libra': { quote: "I am going to make everything around me beautiful — that will be my life.", artist: "Elsie de Wolfe", bg: "bg-pink-950" },
-    'Scorpio': { quote: "Art is a lie that makes us realize truth.", artist: "Pablo Picasso", bg: "bg-purple-950" },
-    'Sagittarius': { quote: "There are 360 degrees, so why stick to one?", artist: "Zaha Hadid", bg: "bg-blue-950" },
-    'Capricorn': { quote: "I prefer drawing to talking. Drawing is faster, and leaves less room for lies.", artist: "Le Corbusier", bg: "bg-neutral-900" },
-    'Aquarius': { quote: "I want to make the beautiful accessible to everyone.", artist: "Issey Miyake", bg: "bg-cyan-950" },
-    'Pisces': { quote: "It is good to love many things, for therein lies the true strength, and whosoever loves much performs much, and can accomplish much, and what is done in love is well done.", artist: "Vincent van Gogh", bg: "bg-sky-950" },
+    'Aries': { quote: "Creativity takes courage.", artist: "Henri Matisse / 亨利·馬諦斯", bg: "bg-rose-950" },
+    'Taurus': { quote: "I found I could say things with color and shapes that I couldn't say any other way.", artist: "Georgia O'Keeffe / 喬治亞·歐姬芙", bg: "bg-emerald-950" },
+    'Gemini': { quote: "My work is a game, a very serious game.", artist: "M.C. Escher / 艾雪", bg: "bg-amber-950" },
+    'Cancer': { quote: "I don't paint dreams or nightmares, I paint my own reality.", artist: "Frida Kahlo / 芙烈達·卡蘿", bg: "bg-slate-800" },
+    'Leo': { quote: "I don't design clothes. I design dreams.", artist: "Ralph Lauren / 拉爾夫·勞倫", bg: "bg-orange-950" },
+    'Virgo': { quote: "Details are not the details. They make the design.", artist: "Charles Eames / 查爾斯·伊姆斯", bg: "bg-stone-800" },
+    'Libra': { quote: "I am going to make everything around me beautiful — that will be my life.", artist: "Elsie de Wolfe / 艾爾西·德·沃夫", bg: "bg-pink-950" },
+    'Scorpio': { quote: "Art is a lie that makes us realize truth.", artist: "Pablo Picasso / 巴勃羅·畢卡索", bg: "bg-purple-950" },
+    'Sagittarius': { quote: "There are 360 degrees, so why stick to one?", artist: "Zaha Hadid / 札哈·哈蒂", bg: "bg-blue-950" },
+    'Capricorn': { quote: "I prefer drawing to talking. Drawing is faster, and leaves less room for lies.", artist: "Le Corbusier / 柯比意", bg: "bg-neutral-900" },
+    'Aquarius': { quote: "I want to make the beautiful accessible to everyone.", artist: "Issey Miyake / 三宅一生", bg: "bg-cyan-950" },
+    'Pisces': { quote: "It is good to love many things, for therein lies the true strength...", artist: "Vincent van Gogh / 文森·梵谷", bg: "bg-sky-950" },
 };
 
 function getZodiac(dateStr: string) {
@@ -62,29 +62,34 @@ export default function ZodiacStoryPage() {
     const handleDownload = async () => {
         if (!storyRef.current) return;
         setIsGenerating(true);
+        
+        // Wait a small bit to ensure fonts and styles are fully applied
+        await new Promise(r => setTimeout(r, 500));
+
         try {
             const { default: html2canvas } = await import('html2canvas');
             const canvas = await html2canvas(storyRef.current, {
-                scale: 3,
+                scale: 2, // Use 2x for better mobile compatibility while maintaining quality
                 useCORS: true,
-                allowTaint: false,
+                allowTaint: true, // Allow tainted canvas for local resources
                 backgroundColor: null,
                 logging: false,
+                width: storyRef.current.offsetWidth,
+                height: storyRef.current.offsetHeight,
             });
-            canvas.toBlob((blob) => {
-                if (!blob) return;
-                const url = URL.createObjectURL(blob);
-                const link = document.createElement('a');
-                link.download = `VIS_Story_${zodiac}.png`;
-                link.href = url;
-                document.body.appendChild(link);
-                link.click();
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            }, 'image/png');
+
+            // Fallback for some mobile browsers using direct dataURL if Blob fails
+            const dataUrl = canvas.toDataURL('image/png', 1.0);
+            const link = document.createElement('a');
+            link.download = `VIS_Story_${zodiac}.png`;
+            link.href = dataUrl;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
         } catch (err) {
             console.error('Download failed:', err);
-            alert('下載失敗，請稍後再試。');
+            alert('下載失敗，請嘗試使用瀏覽器內建截圖功能保存，或更換瀏覽器重試。');
         } finally {
             setIsGenerating(false);
         }
@@ -106,7 +111,7 @@ export default function ZodiacStoryPage() {
                 {/* IG Story Preview (9:16) */}
                 <div 
                     ref={storyRef}
-                    className={`relative w-[85vw] max-w-[320px] max-h-[80vh] aspect-[9/16] ${data.bg} rounded-xl overflow-hidden p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-all duration-700`}
+                    className={`relative w-[85vw] max-w-[320px] aspect-[9/16] ${data.bg} rounded-xl overflow-hidden p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-all duration-700`}
                 >
                     <div className="flex justify-between items-start relative z-10">
                         <div className="text-[10px] tracking-[0.5em] uppercase opacity-70 font-light">
@@ -122,7 +127,7 @@ export default function ZodiacStoryPage() {
                             "{data.quote}"
                         </p>
                         <div className="h-px w-12 bg-[#D4AF37] my-6 opacity-60"></div>
-                        <p className="text-[11px] tracking-[0.4em] uppercase opacity-60 font-light">
+                        <p className="text-[10px] tracking-[0.3em] uppercase opacity-60 font-light leading-relaxed">
                             — {data.artist}
                         </p>
                     </div>
