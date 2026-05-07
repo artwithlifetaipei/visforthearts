@@ -36,21 +36,23 @@ export default function LandingPage() {
             
             gsap.registerPlugin(ScrollTrigger);
 
-            // 1. Ultra-Snappy Smooth Scroll (Lenis)
+            // 1. Smooth Scroll (Lenis) — synced with GSAP ScrollTrigger
             const lenis = new Lenis({
-                duration: 0.5,
-                lerp: 0.15,
+                duration: 1.2,
                 easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
                 smoothWheel: true,
-                wheelMultiplier: 1.5,
             });
             // @ts-ignore
             window.lenis = lenis;
-            function raf(time: number) {
-                lenis.raf(time);
-                requestAnimationFrame(raf);
-            }
-            requestAnimationFrame(raf);
+
+            // Critical: sync Lenis scroll position with ScrollTrigger
+            lenis.on('scroll', ScrollTrigger.update);
+
+            // Use GSAP ticker to drive Lenis (instead of separate RAF loop)
+            gsap.ticker.add((time: number) => {
+                lenis.raf(time * 1000);
+            });
+            gsap.ticker.lagSmoothing(0);
 
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 100) {
@@ -77,6 +79,9 @@ export default function LandingPage() {
                 });
             }
 
+            // Recalculate after images load and after hydration
+            setTimeout(() => ScrollTrigger.refresh(), 500);
+            window.addEventListener('load', () => ScrollTrigger.refresh());
             document.querySelectorAll('.img-parallax').forEach(img => {
                 gsap.to(img, {
                     y: -60,
