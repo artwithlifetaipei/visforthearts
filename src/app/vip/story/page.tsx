@@ -117,9 +117,6 @@ export default function ZodiacStoryPage() {
                         <div className="text-[10px] tracking-[0.5em] uppercase opacity-70 font-light">
                             VIS / VIP
                         </div>
-                        <div className="w-10 h-10 rounded-full border border-white/20 flex items-center justify-center text-xs font-light backdrop-blur-sm">
-                            {profile.email[0].toUpperCase()}
-                        </div>
                     </div>
 
                     <div className="relative z-10 py-10">
