@@ -51,7 +51,15 @@ export default function ZodiacStoryPage() {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) { router.push('/vip'); return; }
             const { data } = await supabase.from('users').select('*').eq('id', user.id).single();
-            setProfile(data);
+            
+            // Fetch tier from allowlist
+            const { data: allowlistData } = await supabase
+                .from('vip_allowlist')
+                .select('tier')
+                .eq('email', user.email)
+                .single();
+            
+            setProfile({ ...data, tier: allowlistData?.tier || 'VIP' });
             if (data?.birthdate) {
                 setZodiac(getZodiac(data.birthdate));
             }
@@ -115,7 +123,7 @@ export default function ZodiacStoryPage() {
                 >
                     <div className="flex justify-between items-start relative z-10">
                         <div className="text-[10px] tracking-[0.5em] uppercase opacity-70 font-light">
-                            VIS / VIP
+                            VIS / {profile.tier}
                         </div>
                     </div>
 

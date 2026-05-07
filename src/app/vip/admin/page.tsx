@@ -24,6 +24,7 @@ export default function VIPAdminPage() {
     const [vipList, setVipList] = useState<VIPEntry[]>([]);
     const [newEmail, setNewEmail] = useState('');
     const [newName, setNewName] = useState('');
+    const [newTier, setNewTier] = useState<'VIP' | 'SVIP'>('VIP');
     const [isAdding, setIsAdding] = useState(false);
     const [feedback, setFeedback] = useState('');
     const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -58,7 +59,11 @@ export default function VIPAdminPage() {
 
         const { error } = await supabase
             .from('vip_allowlist')
-            .insert({ email: newEmail.toLowerCase().trim(), name: newName.trim() || null });
+            .insert({ 
+                email: newEmail.toLowerCase().trim(), 
+                name: newName.trim() || null,
+                tier: newTier
+            });
 
         if (error) {
             if (error.code === '23505') {
@@ -130,6 +135,22 @@ export default function VIPAdminPage() {
                                     className="w-full py-3 bg-transparent outline-none text-xs tracking-widest placeholder:text-neutral-600 text-white"
                                 />
                             </div>
+                            <div className="flex gap-4">
+                                <button
+                                    type="button"
+                                    onClick={() => setNewTier('VIP')}
+                                    className={`flex-1 py-3 text-[10px] tracking-[0.3em] uppercase border transition-all duration-300 ${newTier === 'VIP' ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5' : 'border-neutral-800 text-neutral-600'}`}
+                                >
+                                    VIP
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setNewTier('SVIP')}
+                                    className={`flex-1 py-3 text-[10px] tracking-[0.3em] uppercase border transition-all duration-300 ${newTier === 'SVIP' ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5' : 'border-neutral-800 text-neutral-600'}`}
+                                >
+                                    SVIP
+                                </button>
+                            </div>
                         </div>
                         <div className="flex items-center gap-6">
                             <motion.button
@@ -163,7 +184,7 @@ export default function VIPAdminPage() {
 
                     <div className="space-y-px">
                         <AnimatePresence>
-                            {vipList.map((vip, i) => (
+                            {vipList.map((vip: any, i) => (
                                 <motion.div
                                     key={vip.id}
                                     initial={{ opacity: 0, x: -20 }}
@@ -172,11 +193,16 @@ export default function VIPAdminPage() {
                                     transition={{ duration: 0.4, delay: i * 0.05 }}
                                     className="flex items-center justify-between bg-neutral-900 px-6 py-4 group hover:bg-neutral-800 transition-colors duration-300"
                                 >
-                                    <div>
-                                        <p className="text-xs tracking-wider text-white">{vip.email}</p>
-                                        {vip.name && (
-                                            <p className="text-[10px] tracking-widest text-neutral-500 mt-1">{vip.name}</p>
-                                        )}
+                                    <div className="flex items-center gap-4">
+                                        <div className={`text-[8px] px-2 py-0.5 border ${vip.tier === 'SVIP' ? 'border-[#D4AF37] text-[#D4AF37]' : 'border-neutral-700 text-neutral-500'} tracking-tighter`}>
+                                            {vip.tier}
+                                        </div>
+                                        <div>
+                                            <p className="text-xs tracking-wider text-white">{vip.email}</p>
+                                            {vip.name && (
+                                                <p className="text-[10px] tracking-widest text-neutral-500 mt-1">{vip.name}</p>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="flex items-center gap-6">
                                         <p className="text-[9px] tracking-wider text-neutral-600 hidden md:block">
