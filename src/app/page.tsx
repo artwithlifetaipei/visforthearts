@@ -196,13 +196,18 @@ export default function LandingPage() {
                 .hero-zh { font-size: 1rem; font-weight: 300; line-height: 2; margin-bottom: 1.5rem; }
                 .hero-en { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: #888; white-space: nowrap; }
 
-                .exhibition-section { background: #fff; overflow: hidden; }
+                .exhibition-section { 
+                    background: #fff; 
+                    overflow: hidden; 
+                    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+                    mask-image: linear-gradient(to right, transparent 0%, black 10%, black 90%, transparent 100%);
+                }
                 .exhibition-scroller {
                     height: 100vh; display: flex; align-items: center;
                     padding: 0 15vw; gap: 12vw; width: fit-content;
                 }
                 .exhibit-item { width: 25vw; flex-shrink: 0; display: flex; flex-direction: column; }
-                .exhibit-item.intro { width: 30vw; justify-content: center; }
+                .exhibit-item.intro { width: 30vw; justify-content: center; margin-right: 25vw; }
                 .exhibit-title { font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4rem; }
                 .exhibit-title span { font-family: var(--font-serif); font-style: italic; font-size: 1.2rem; }
                 .exhibit-intro-zh { font-size: 1.3rem; line-height: 1.8; font-weight: 300; margin-bottom: 1.5rem; }
@@ -286,7 +291,6 @@ export default function LandingPage() {
             </section>
 
             <section className="exhibition-section" id="exhibition">
-                <div id="exhibition-trigger">
                 <div className="exhibition-scroller">
                     <div className="exhibit-item intro">
                         <h2 className="exhibit-title">EXHIBITION <span>參展</span></h2>
@@ -322,7 +326,6 @@ export default function LandingPage() {
                         <p className="card-text-zh">精準觸及兼具高消費力與<br />生活美學品味的場域</p>
                         <p className="card-text-en">A curated space for discerning tastes.</p>
                     </div>
-                </div>
                 </div>
             </section>
 
