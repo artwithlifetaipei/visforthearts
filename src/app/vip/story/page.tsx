@@ -112,7 +112,7 @@ export default function ZodiacStoryPage() {
 
                     <div className="text-center pt-8 border-t border-white/10">
                         <img 
-                            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                            src="/vis_logo.png" 
                             className="h-6 mx-auto invert opacity-50"
                         />
                     </div>
