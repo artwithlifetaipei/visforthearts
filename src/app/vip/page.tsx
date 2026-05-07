@@ -76,7 +76,6 @@ export default function VIPLoginPage() {
                 <h1 className="text-3xl font-serif text-[#1A1A1A] mb-2 tracking-tight">
                     Digital Portal
                 </h1>
-                <p className="text-[9px] tracking-[0.4em] font-light text-[#D4AF37] uppercase mb-16">
                 <AnimatePresence mode="wait">
                     {!isSent ? (
                         <motion.form 
