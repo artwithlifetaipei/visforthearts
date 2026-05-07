@@ -1,14 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { supabase } from '@/lib/supabase';
 
 export default function LandingPage() {
     const navRef = useRef<HTMLElement>(null);
-    const storyRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        // Load external scripts for GSAP, Lenis, etc.
+        // 動態載入外部腳本 (GSAP, Lenis, Lucide)
         const scripts = [
             'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js',
@@ -39,7 +37,7 @@ export default function LandingPage() {
             
             gsap.registerPlugin(ScrollTrigger);
 
-            // 1. Smooth Scroll
+            // 1. Smooth Scroll (Lenis)
             const lenis = new Lenis({
                 duration: 1.5,
                 easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
@@ -50,7 +48,7 @@ export default function LandingPage() {
             }
             requestAnimationFrame(raf);
 
-            // 2. Navigation State
+            // 2. Navigation State Change
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 100) {
                     navRef.current?.classList.add('scrolled');
@@ -77,7 +75,7 @@ export default function LandingPage() {
                 });
             }
 
-            // 4. Parallax
+            // 4. Parallax Effect
             document.querySelectorAll('.img-parallax').forEach(img => {
                 gsap.to(img, {
                     y: -60,
@@ -92,23 +90,25 @@ export default function LandingPage() {
             // 5. Custom Cursor
             const cursor = document.querySelector('.cursor-follower');
             const dot = document.querySelector('.cursor-dot');
-            window.addEventListener('mousemove', (e) => {
-                gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.6, ease: "power3.out" });
-                gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0.1 });
-            });
-
-            document.querySelectorAll('a, button, .img-card').forEach(el => {
-                el.addEventListener('mouseenter', () => {
-                    gsap.to(cursor, { scale: 1.8, borderColor: "#C9A96E", duration: 0.3 });
-                    gsap.to(dot, { scale: 0, duration: 0.3 });
+            if (cursor && dot) {
+                window.addEventListener('mousemove', (e) => {
+                    gsap.to(cursor, { x: e.clientX, y: e.clientY, duration: 0.6, ease: "power3.out" });
+                    gsap.to(dot, { x: e.clientX, y: e.clientY, duration: 0.1 });
                 });
-                el.addEventListener('mouseleave', () => {
-                    gsap.to(cursor, { scale: 1, borderColor: "#C9A96E", duration: 0.3 });
-                    gsap.to(dot, { scale: 1, duration: 0.3 });
-                });
-            });
 
-            // Anchor links smooth scroll
+                document.querySelectorAll('a, button, .img-card').forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        gsap.to(cursor, { scale: 1.8, borderColor: "#C9A96E", duration: 0.3 });
+                        gsap.to(dot, { scale: 0, duration: 0.3 });
+                    });
+                    el.addEventListener('mouseleave', () => {
+                        gsap.to(cursor, { scale: 1, borderColor: "#C9A96E", duration: 0.3 });
+                        gsap.to(dot, { scale: 1, duration: 0.3 });
+                    });
+                });
+            }
+
+            // 6. Anchor Links Smooth Scroll
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
@@ -164,20 +164,16 @@ export default function LandingPage() {
 
                 .cursor-follower {
                     position: fixed;
-                    width: 25px;
-                    height: 25px;
+                    width: 25px; height: 25px;
                     border: 1px solid var(--gold);
                     border-radius: 50%;
                     pointer-events: none;
                     z-index: 10000;
                     transform: translate(-50%, -50%);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
+                    display: flex; align-items: center; justify-content: center;
                 }
                 .cursor-dot {
-                    width: 4px;
-                    height: 4px;
+                    width: 4px; height: 4px;
                     background-color: var(--gold);
                     border-radius: 50%;
                 }
@@ -186,9 +182,7 @@ export default function LandingPage() {
                     position: fixed;
                     top: 0; width: 100%;
                     padding: 4rem 8vw;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
+                    display: flex; justify-content: space-between; align-items: center;
                     z-index: 1000;
                     transition: all 0.5s ease;
                 }
@@ -200,84 +194,43 @@ export default function LandingPage() {
                 .nav-logo { height: 60px; transition: height 0.5s ease; }
                 .nav-links { display: flex; gap: 4rem; }
                 .nav-link {
-                    font-size: 13px;
-                    font-weight: 500;
-                    text-transform: uppercase;
-                    letter-spacing: 0.2em;
-                    text-decoration: none;
-                    color: inherit;
+                    font-size: 13px; font-weight: 500;
+                    text-transform: uppercase; letter-spacing: 0.2em;
+                    text-decoration: none; color: inherit;
                     position: relative;
                 }
                 nav.scrolled .nav-logo { height: 30px; }
                 nav.scrolled .nav-link { font-size: 11px; }
 
                 .btn-access {
-                    font-size: 8px;
-                    letter-spacing: 0.2em;
-                    text-transform: uppercase;
-                    font-weight: 700;
-                    border: 1px solid var(--text);
-                    padding: 0.8rem 1.5rem;
-                    text-decoration: none;
-                    color: var(--text);
+                    font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;
+                    font-weight: 700; border: 1px solid var(--text);
+                    padding: 0.8rem 1.5rem; text-decoration: none; color: var(--text);
                     transition: all 0.3s ease;
                 }
                 .btn-access:hover { background: var(--text); color: #fff; }
 
                 .hero-layout {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: flex-end;
-                    height: 100vh;
-                    padding: 25vh 8vw 12vh 8vw;
+                    display: flex; justify-content: space-between; align-items: flex-end;
+                    height: 100vh; padding: 25vh 8vw 12vh 8vw;
                 }
-                .hero-img-container {
-                    height: 100%;
-                    width: 50vw;
-                    display: flex;
-                    align-items: flex-end;
-                }
-                .hero-img-container img {
-                    max-width: 100%;
-                    max-height: 100%;
-                    object-fit: contain;
-                }
-                .hero-text-container {
-                    max-width: 450px;
-                    text-align: right;
-                }
-                .hero-zh {
-                    font-size: 1rem;
-                    font-weight: 300;
-                    line-height: 2;
-                    margin-bottom: 1.5rem;
-                }
-                .hero-en {
-                    font-size: 0.65rem;
-                    letter-spacing: 0.15em;
-                    text-transform: uppercase;
-                    color: #888;
-                }
+                .hero-img-container { height: 100%; width: 50vw; display: flex; align-items: flex-end; }
+                .hero-img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+                .hero-text-container { max-width: 450px; text-align: right; }
+                .hero-zh { font-size: 1rem; font-weight: 300; line-height: 2; margin-bottom: 1.5rem; }
+                .hero-en { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: #888; }
 
                 .exhibition-section { background: #fff; overflow: hidden; }
                 .exhibition-scroller {
-                    height: 100vh;
-                    display: flex;
-                    align-items: center;
-                    padding: 0 15vw;
-                    gap: 12vw;
-                    width: fit-content;
+                    height: 100vh; display: flex; align-items: center;
+                    padding: 0 15vw; gap: 12vw; width: fit-content;
                 }
                 .exhibit-item { width: 25vw; flex-shrink: 0; display: flex; flex-direction: column; }
                 .exhibit-item.intro { width: 30vw; }
-                .exhibit-title {
-                    font-size: 1rem;
-                    letter-spacing: 0.2em;
-                    text-transform: uppercase;
-                    margin-bottom: 4rem;
-                }
+                .exhibit-title { font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4rem; }
                 .exhibit-title span { font-family: var(--font-serif); font-style: italic; font-size: 1.2rem; }
                 .exhibit-intro-zh { font-size: 1.3rem; line-height: 1.8; font-weight: 300; margin-bottom: 1.5rem; }
+                
                 .img-card { width: 100%; aspect-ratio: 2/3; overflow: hidden; transition: transform 1s ease; }
                 .img-card:hover { transform: scale(1.02); }
                 .card-text-zh { font-size: 1.2rem; margin-top: 2rem; font-family: var(--font-serif); font-style: italic; }
@@ -288,15 +241,9 @@ export default function LandingPage() {
                 .vip-portal-desc { font-size: 1.8rem; font-family: var(--font-serif); font-style: italic; margin-bottom: 1rem; }
                 
                 .btn-pola {
-                    display: inline-block;
-                    background: var(--text);
-                    color: white;
-                    padding: 1.25rem 3rem;
-                    font-size: 10px;
-                    text-transform: uppercase;
-                    letter-spacing: 0.4em;
-                    font-weight: 700;
-                    transition: all 0.5s ease;
+                    display: inline-block; background: var(--text); color: white;
+                    padding: 1.25rem 3rem; font-size: 10px; text-transform: uppercase;
+                    letter-spacing: 0.4em; font-weight: 700; transition: all 0.5s ease;
                     text-decoration: none;
                 }
                 .btn-pola:hover { background: var(--gold); }
