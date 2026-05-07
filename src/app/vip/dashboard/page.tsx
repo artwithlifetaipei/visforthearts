@@ -12,7 +12,7 @@ export default function VIPDashboard() {
     const router = useRouter();
     const [profile, setProfile] = useState<any>(null);
     const [qrValue, setQrValue] = useState('');
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [userEmail, setUserEmail] = useState('');
 
     useEffect(() => {
         const fetchProfile = async () => {
@@ -21,7 +21,7 @@ export default function VIPDashboard() {
                 router.push('/vip');
                 return;
             }
-            if (ADMIN_EMAILS.includes(user.email ?? '')) setIsAdmin(true);
+            setUserEmail(user.email ?? '');
 
             const { data } = await supabase
                 .from('users')
@@ -162,7 +162,7 @@ export default function VIPDashboard() {
             </section>
 
             {/* Admin-only link — invisible to regular VIPs */}
-            {isAdmin && (
+            {ADMIN_EMAILS.includes(userEmail) && (
                 <div className="text-center mt-8">
                     <button
                         onClick={() => router.push('/vip/admin')}
