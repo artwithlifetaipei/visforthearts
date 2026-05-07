@@ -77,7 +77,7 @@ export default function VIPLoginPage() {
                         >
                             <p className="text-[#666666] text-xs leading-[2] tracking-wider mb-8 font-light">
                                 請輸入您的電子信箱以驗證貴賓身份。<br/>
-                                系統將為您開啟專屬的數位門卡與禮遇空間。
+                                系統將為您開啟專屬的貴賓門卡與禮遇空間。
                             </p>
                             
                             <div className="relative border-b border-[#E5E5E5] focus-within:border-[#1A1A1A] transition-colors duration-500 group">
