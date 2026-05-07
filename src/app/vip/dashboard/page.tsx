@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 
-const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'amelie@theartpressasia.com'];
+const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com'];
 
 export default function VIPDashboard() {
     const router = useRouter();
