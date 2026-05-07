@@ -9,8 +9,6 @@ export default function LandingPage() {
         const scripts = [
             'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js',
-            'https://unpkg.com/lenis@1.0.45/dist/lenis.min.js',
-            'https://unpkg.com/lucide@latest'
         ];
 
         const loadScript = (src: string) => {
@@ -31,29 +29,13 @@ export default function LandingPage() {
             const gsap = window.gsap;
             // @ts-ignore
             const ScrollTrigger = window.ScrollTrigger;
-            // @ts-ignore
-            const Lenis = window.Lenis;
             
             gsap.registerPlugin(ScrollTrigger);
 
-            // 1. Smooth Scroll (Lenis) — synced with GSAP ScrollTrigger
-            const lenis = new Lenis({
-                duration: 1.2,
-                easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-                smoothWheel: true,
-            });
-            // @ts-ignore
-            window.lenis = lenis;
+            // Smooth CSS scroll behavior
+            document.documentElement.style.scrollBehavior = 'smooth';
 
-            // Critical: sync Lenis scroll position with ScrollTrigger
-            lenis.on('scroll', ScrollTrigger.update);
-
-            // Use GSAP ticker to drive Lenis (instead of separate RAF loop)
-            gsap.ticker.add((time: number) => {
-                lenis.raf(time * 1000);
-            });
-            gsap.ticker.lagSmoothing(0);
-
+            // Navigation shrink on scroll
             window.addEventListener('scroll', () => {
                 if (window.scrollY > 100) {
                     navRef.current?.classList.add('scrolled');
@@ -62,6 +44,7 @@ export default function LandingPage() {
                 }
             });
 
+            // Exhibition Horizontal Scroll
             const scroller = document.querySelector('.exhibition-scroller') as HTMLElement;
             if (scroller) {
                 gsap.to(scroller, {
@@ -79,9 +62,11 @@ export default function LandingPage() {
                 });
             }
 
-            // Recalculate after images load and after hydration
+            // Recalculate after images load
             setTimeout(() => ScrollTrigger.refresh(), 500);
             window.addEventListener('load', () => ScrollTrigger.refresh());
+
+            // Parallax
             document.querySelectorAll('.img-parallax').forEach(img => {
                 gsap.to(img, {
                     y: -60,
@@ -93,6 +78,7 @@ export default function LandingPage() {
                 });
             });
 
+            // Custom Cursor
             const cursor = document.querySelector('.cursor-follower');
             const dot = document.querySelector('.cursor-dot');
             if (cursor && dot) {
@@ -113,13 +99,14 @@ export default function LandingPage() {
                 });
             }
 
+            // Nav anchor smooth scroll (native)
             document.querySelectorAll('.nav-link').forEach(link => {
                 link.addEventListener('click', (e) => {
                     e.preventDefault();
                     const href = link.getAttribute('href');
                     if (href && href.startsWith('#')) {
                         const target = document.querySelector(href);
-                        if (target) lenis.scrollTo(target);
+                        if (target) target.scrollIntoView({ behavior: 'smooth' });
                     }
                 });
             });
@@ -266,8 +253,7 @@ export default function LandingPage() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6rem' }}>
                     <a href="#" className="nav-logo-link" onClick={(e) => {
                         e.preventDefault();
-                        // @ts-ignore
-                        window.lenis?.scrollTo(0);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
                     }}>
                         <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" className="nav-logo" alt="VIS Logo" />
                     </a>
