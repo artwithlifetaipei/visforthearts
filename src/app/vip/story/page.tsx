@@ -7,18 +7,18 @@ import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 
 const ZODIAC_QUOTES: Record<string, { quote: string, artist: string, bg: string }> = {
-    'Aries': { quote: "I am my own experiment. I am my own work of art.", artist: "Madonna", bg: "bg-red-950" },
-    'Taurus': { quote: "Everything is beautiful. All you have to do is look.", artist: "Andy Warhol", bg: "bg-emerald-950" },
-    'Gemini': { quote: "Art is the only way to run away without leaving home.", artist: "Twyla Tharp", bg: "bg-yellow-950" },
-    'Cancer': { quote: "I found I could say things with color and shapes that I couldn't say any other way.", artist: "Georgia O'Keeffe", bg: "bg-blue-950" },
-    'Leo': { quote: "Creativity takes courage.", artist: "Henri Matisse", bg: "bg-orange-950" },
-    'Virgo': { quote: "Have no fear of perfection - you'll never reach it.", artist: "Salvador Dalí", bg: "bg-stone-900" },
-    'Libra': { quote: "The position of the artist is humble. He is essentially a channel.", artist: "Piet Mondrian", bg: "bg-pink-950" },
+    'Aries': { quote: "Creativity takes courage.", artist: "Henri Matisse", bg: "bg-rose-950" },
+    'Taurus': { quote: "I found I could say things with color and shapes that I couldn't say any other way.", artist: "Georgia O'Keeffe", bg: "bg-emerald-950" },
+    'Gemini': { quote: "My work is a game, a very serious game.", artist: "M.C. Escher", bg: "bg-amber-950" },
+    'Cancer': { quote: "What I like about photographs is that they capture a moment that's gone forever, impossible to reproduce.", artist: "Karl Lagerfeld", bg: "bg-slate-800" },
+    'Leo': { quote: "I don't design clothes. I design dreams.", artist: "Ralph Lauren", bg: "bg-orange-950" },
+    'Virgo': { quote: "Details are not the details. They make the design.", artist: "Charles Eames", bg: "bg-stone-800" },
+    'Libra': { quote: "Elegance is refusal.", artist: "Coco Chanel", bg: "bg-pink-950" },
     'Scorpio': { quote: "Art is a lie that makes us realize truth.", artist: "Pablo Picasso", bg: "bg-purple-950" },
-    'Sagittarius': { quote: "Every child is an artist. The problem is how to remain an artist once we grow up.", artist: "Pablo Picasso", bg: "bg-indigo-950" },
-    'Capricorn': { quote: "An artist is not paid for his labor but for his vision.", artist: "James Whistler", bg: "bg-neutral-900" },
-    'Aquarius': { quote: "The job of the artist is always to deepen the mystery.", artist: "Francis Bacon", bg: "bg-cyan-950" },
-    'Pisces': { quote: "I dream my painting and I paint my dream.", artist: "Vincent van Gogh", bg: "bg-teal-950" },
+    'Sagittarius': { quote: "There are 360 degrees, so why stick to one?", artist: "Zaha Hadid", bg: "bg-blue-950" },
+    'Capricorn': { quote: "Good design is long-lasting.", artist: "Dieter Rams", bg: "bg-neutral-900" },
+    'Aquarius': { quote: "I want to make the beautiful accessible to everyone.", artist: "Issey Miyake", bg: "bg-cyan-950" },
+    'Pisces': { quote: "To take a photograph is to align the head, the eye and the heart. It's a way of life.", artist: "Henri Cartier-Bresson", bg: "bg-sky-950" },
 };
 
 function getZodiac(dateStr: string) {
