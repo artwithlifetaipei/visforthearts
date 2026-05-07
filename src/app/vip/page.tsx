@@ -24,7 +24,7 @@ export default function VIPLoginPage() {
 
         if (checkError || !allowed) {
             // Not on the list — show an elegant, on-brand message
-            setMessage('此信箱尚未在 VIS 貴賓名單中。\n如您有任何疑問，歡迎與我們聯繫。');
+            setMessage('此信箱尚未在 VIS 貴賓名單中。\n如您有任何疑問，歡迎與 visvipteam@gmail.com 聯繫。');
             setIsLoading(false);
             return;
         }
