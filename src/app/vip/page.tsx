@@ -91,9 +91,13 @@ export default function VIPLoginPage() {
                             onSubmit={handleLogin} 
                             className="space-y-12"
                         >
-                            <p className="text-[#666666] text-xs leading-[2] tracking-wider mb-8 font-light">
+                            <p className="text-[#666666] text-[10px] leading-[2.2] tracking-widest mb-10 font-light">
                                 請輸入您的電子信箱以驗證貴賓身份。<br/>
-                                系統將為您開啟專屬的貴賓門卡與禮遇空間。
+                                系統將為您開啟專屬的貴賓門卡與禮遇空間。<br/>
+                                <span className="opacity-60 text-[9px] mt-2 block italic">
+                                    Enter your email to verify your VIP status and unlock your<br/>
+                                    exclusive digital key and premium benefits.
+                                </span>
                             </p>
                             
                             <div className="relative border-b border-[#E5E5E5] focus-within:border-[#1A1A1A] transition-colors duration-500 group">
