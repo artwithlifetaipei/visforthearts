@@ -7,18 +7,18 @@ import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 
 const ZODIAC_QUOTES: Record<string, { quote: string, artist: string, bg: string }> = {
-    'Aries': { quote: "Creativity takes courage.", artist: "Henri Matisse / 亨利·馬諦斯", bg: "bg-rose-950" },
+    'Aries': { quote: "Creativity takes courage.", artist: "Henri Émile Benoît Matisse / 亨利·馬諦斯", bg: "bg-rose-950" },
     'Taurus': { quote: "I found I could say things with color and shapes that I couldn't say any other way.", artist: "Georgia O'Keeffe / 喬治亞·歐姬芙", bg: "bg-emerald-950" },
-    'Gemini': { quote: "My work is a game, a very serious game.", artist: "M.C. Escher / 艾雪", bg: "bg-amber-950" },
+    'Gemini': { quote: "My work is a game, a very serious game.", artist: "Maurits Cornelis Escher / 莫里茲·柯尼利斯·艾雪", bg: "bg-amber-950" },
     'Cancer': { quote: "I don't paint dreams or nightmares, I paint my own reality.", artist: "Frida Kahlo / 芙烈達·卡蘿", bg: "bg-slate-800" },
     'Leo': { quote: "I don't design clothes. I design dreams.", artist: "Ralph Lauren / 拉爾夫·勞倫", bg: "bg-orange-950" },
     'Virgo': { quote: "Details are not the details. They make the design.", artist: "Charles Eames / 查爾斯·伊姆斯", bg: "bg-stone-800" },
     'Libra': { quote: "I am going to make everything around me beautiful — that will be my life.", artist: "Elsie de Wolfe / 艾爾西·德·沃夫", bg: "bg-pink-950" },
-    'Scorpio': { quote: "Art is a lie that makes us realize truth.", artist: "Pablo Picasso / 巴勃羅·畢卡索", bg: "bg-purple-950" },
-    'Sagittarius': { quote: "There are 360 degrees, so why stick to one?", artist: "Zaha Hadid / 札哈·哈蒂", bg: "bg-blue-950" },
-    'Capricorn': { quote: "I prefer drawing to talking. Drawing is faster, and leaves less room for lies.", artist: "Le Corbusier / 柯比意", bg: "bg-neutral-900" },
+    'Scorpio': { quote: "Art is a lie that makes us realize truth.", artist: "Pablo Ruiz Picasso / 巴勃羅·畢卡索", bg: "bg-purple-950" },
+    'Sagittarius': { quote: "There are 360 degrees, so why stick to one?", artist: "Dame Zaha Mohammad Hadid / 札哈·哈蒂", bg: "bg-blue-950" },
+    'Capricorn': { quote: "I prefer drawing to talking. Drawing is faster, and leaves less room for lies.", artist: "Le Corbusier (Charles-Édouard Jeanneret) / 勒·柯比意", bg: "bg-neutral-900" },
     'Aquarius': { quote: "I want to make the beautiful accessible to everyone.", artist: "Issey Miyake / 三宅一生", bg: "bg-cyan-950" },
-    'Pisces': { quote: "It is good to love many things, for therein lies the true strength...", artist: "Vincent van Gogh / 文森·梵谷", bg: "bg-sky-950" },
+    'Pisces': { quote: "It is good to love many things, for therein lies the true strength...", artist: "Vincent Willem van Gogh / 文森·梵谷", bg: "bg-sky-950" },
 };
 
 function getZodiac(dateStr: string) {
