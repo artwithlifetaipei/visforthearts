@@ -1,9 +1,10 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 export default function LandingPage() {
     const navRef = useRef<HTMLElement>(null);
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
     useEffect(() => {
         const scripts = [
@@ -239,15 +240,35 @@ export default function LandingPage() {
                 .press-media { font-size: 2rem; font-family: var(--font-serif); font-style: italic; line-height: 1; }
                 .press-title { font-size: 0.9rem; font-weight: 300; color: #666; line-height: 1.6; }
 
+                .desktop-br { display: block; }
+                .mobile-br { display: none; }
+                .offset-card { padding-top: 15vh; }
+                .mobile-menu-btn { display: none; background: none; border: none; color: var(--text); z-index: 10001; }
+                .mobile-menu-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; background: #fff; z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3rem; transform: translateY(-100%); transition: transform 0.5s ease; }
+                .mobile-menu-overlay.open { transform: translateY(0); }
+                .mobile-menu-overlay .nav-link { font-size: 18px; }
+
                 @media (max-width: 768px) {
-                    nav { padding: 2rem 5vw; }
+                    nav { padding: 1.5rem 5vw; }
                     .nav-links { display: none; }
-                    .hero-layout { flex-direction: column; align-items: center; padding-top: 20vh; }
-                    .hero-img-container { width: 100%; height: 50vh; }
-                    .hero-text-container { text-align: center; margin-top: 5vh; }
-                    .exhibit-item { width: 75vw; }
+                    .btn-access { display: none; }
+                    .mobile-menu-btn { display: block; }
+                    .hero-layout { flex-direction: column; align-items: center; padding-top: 15vh; height: auto; }
+                    .hero-img-container { width: 100%; height: 45vh; justify-content: center; }
+                    .hero-text-container { text-align: center; margin-top: 4vh; }
+                    .hero-zh { font-size: 0.95rem; line-height: 1.8; margin-bottom: 1rem; }
+                    .hero-en { white-space: normal; line-height: 1.5; }
+                    .desktop-br { display: none; }
+                    .mobile-br { display: block; }
+                    .exhibition-scroller { padding: 0 10vw; gap: 10vw; }
+                    .exhibit-item, .exhibit-item.intro { width: 80vw !important; margin-right: 0 !important; padding-right: 0 !important; justify-content: flex-start; padding-top: 15vh; }
+                    .exhibit-title { margin-bottom: 2rem; }
+                    .offset-card { padding-top: 15vh; }
                     .press-grid { grid-template-columns: 1fr; }
-                    .hero-en { white-space: normal; }
+                    .exhibition-section {
+                        -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+                        mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+                    }
                 }
             `}</style>
 
@@ -269,10 +290,25 @@ export default function LandingPage() {
                         <a href="#press" className="nav-link">PRESS 媒體</a>
                     </div>
                 </div>
-                <div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
                     <a href="/vip" className="btn-access">VIP ACCESS</a>
+                    <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
+                        {isMobileMenuOpen ? (
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        ) : (
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                        )}
+                    </button>
                 </div>
             </nav>
+
+            <div className={`mobile-menu-overlay ${isMobileMenuOpen ? 'open' : ''}`}>
+                <a href="#about" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>ABOUT 關於</a>
+                <a href="#exhibition" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>EXHIBITION 參展</a>
+                <a href="#vip" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>VIP-Looom Club 禮賓入口</a>
+                <a href="#press" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>PRESS 媒體</a>
+                <a href="/vip" className="btn-access" style={{ display: 'block', marginTop: '2rem' }}>VIP ACCESS</a>
+            </div>
 
             <section className="hero" id="about">
                 <div className="hero-layout">
@@ -281,7 +317,7 @@ export default function LandingPage() {
                     </div>
                     <div className="hero-text-container">
                         <p className="hero-zh">
-                            VIS 始於2022年，至今已與無數的品味質富人士們，<br />實踐著人文與美感如何展現於美好的生活中。
+                            VIS 始於2022年，至今已與無數的品味質富人士們，<br className="desktop-br" />實踐著人文與美感如何展現於美好的生活中。
                         </p>
                         <p className="hero-en">
                             Established in 2024. Curating Aesthetic Dialogues with Spirit.
@@ -295,12 +331,12 @@ export default function LandingPage() {
                     <div className="exhibit-item intro">
                         <h2 className="exhibit-title">EXHIBITION <span>參展</span></h2>
                         <p className="exhibit-intro-zh">
-                            不只是一個博覽會，而是一個聚集品味人士<br />所建構而成的高質量場域。
+                            不只是一個博覽會，而是一個聚集品味人士<span style={{ display: 'inline-block' }}>所建構而成的高質量場域。</span>
                         </p>
                         <p className="exhibit-intro-en">
                             More than a fair, but a purposefully architected space for intellectual and aesthetic elevation.
                         </p>
-                        <a href="mailto:artwithlifetaipei@gmail.com" className="btn-pola" style={{ marginTop: '4rem' }}>Apply 索取2027年簡章</a>
+                        <a href="mailto:artwithlifetaipei@gmail.com" className="btn-pola" style={{ marginTop: '3rem', width: 'fit-content' }}>Apply 索取2027年簡章</a>
                     </div>
 
                     <div className="exhibit-item">
@@ -311,7 +347,7 @@ export default function LandingPage() {
                         <p className="card-text-en">Bridging the commercial islands of independent branding.</p>
                     </div>
 
-                    <div className="exhibit-item" style={{ paddingTop: '15vh' }}>
+                    <div className="exhibit-item offset-card">
                         <div className="img-card">
                             <img src="traditional_formats.png" className="img-parallax" alt="Formats" />
                         </div>
