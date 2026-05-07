@@ -36,13 +36,16 @@ export default function LandingPage() {
             
             gsap.registerPlugin(ScrollTrigger);
 
+            // 1. Ultra-Snappy Smooth Scroll (Lenis)
             const lenis = new Lenis({
-                duration: 0.8,
-                lerp: 0.1,
+                duration: 0.5,
+                lerp: 0.15,
                 easing: (t: number) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
                 smoothWheel: true,
-                wheelMultiplier: 1.2,
+                wheelMultiplier: 1.5,
             });
+            // @ts-ignore
+            window.lenis = lenis;
             function raf(time: number) {
                 lenis.raf(time);
                 requestAnimationFrame(raf);
@@ -256,7 +259,13 @@ export default function LandingPage() {
 
             <nav ref={navRef}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '6rem' }}>
-                    <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" className="nav-logo" alt="VIS Logo" />
+                    <a href="#" className="nav-logo-link" onClick={(e) => {
+                        e.preventDefault();
+                        // @ts-ignore
+                        window.lenis?.scrollTo(0);
+                    }}>
+                        <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" className="nav-logo" alt="VIS Logo" />
+                    </a>
                     <div className="nav-links">
                         <a href="#about" className="nav-link">ABOUT 關於</a>
                         <a href="#exhibition" className="nav-link">EXHIBITION 參展</a>
