@@ -77,9 +77,6 @@ export default function VIPLoginPage() {
                     Digital Portal
                 </h1>
                 <p className="text-[9px] tracking-[0.4em] font-light text-[#D4AF37] uppercase mb-16">
-                    VIP / SVIP Exclusive Access
-                </p>
-
                 <AnimatePresence mode="wait">
                     {!isSent ? (
                         <motion.form 
@@ -91,10 +88,17 @@ export default function VIPLoginPage() {
                             onSubmit={handleLogin} 
                             className="space-y-12"
                         >
-                            <p className="text-[#666666] text-[10px] leading-[2.2] tracking-widest mb-10 font-light">
+                            <div className="mb-16">
+                                <h2 className="text-[#999999] text-[15px] tracking-[0.4em] mb-4 font-light">DIGITAL PORTAL</h2>
+                                <h1 className="text-4xl font-light tracking-[0.2em] text-[#1A1A1A]">
+                                    VIP / SVIP <span className="italic font-serif">Exclusive Access</span>
+                                </h1>
+                            </div>
+                            
+                            <p className="text-[#666666] text-[15px] leading-[2.2] tracking-widest mb-12 font-light">
                                 請輸入您的電子信箱以驗證貴賓身份。<br/>
                                 系統將為您開啟專屬的貴賓門卡與禮遇空間。<br/>
-                                <span className="opacity-60 text-[9px] mt-2 block italic">
+                                <span className="opacity-60 text-[13.5px] mt-4 block italic font-serif">
                                     Enter your email to verify your VIP status and unlock your<br/>
                                     exclusive digital key and premium benefits.
                                 </span>
