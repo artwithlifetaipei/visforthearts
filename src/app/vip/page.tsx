@@ -176,9 +176,10 @@ export default function VIPLoginPage() {
                     </motion.p>
                 )}
 
-                <footer className="mt-32">
-                    <p className="text-[8px] tracking-[0.5em] text-[#CCCCCC] uppercase font-light">
-                        &copy; 2026 VIS FOR THE ARTS
+                <footer className="absolute bottom-8 left-0 w-full text-center">
+                    <div className="w-6 h-[1px] bg-[#E5E5E5] mx-auto mb-6 transition-all duration-700 hover:w-12"></div>
+                    <p className="text-[9px] tracking-[0.4em] text-[#999999] uppercase font-light">
+                        &copy; 2026 VIS FOR THE ARTS <span className="mx-2 opacity-30">|</span> PORTAL
                     </p>
                 </footer>
             </motion.div>
