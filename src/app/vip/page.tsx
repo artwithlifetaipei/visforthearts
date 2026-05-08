@@ -48,19 +48,20 @@ export default function VIPLoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-6 font-sans relative overflow-hidden">
+        <div className="min-h-screen bg-[#FAF9F6] flex flex-col p-6 font-sans relative overflow-x-hidden">
             {/* Atmospheric Background Blurs */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
                 <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-[#D4AF37]/5 rounded-full blur-[100px]"></div>
                 <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-black/5 rounded-full blur-[120px]"></div>
             </div>
 
-            <motion.div 
-                initial={{ opacity: 0, y: 30 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                className="w-full max-w-md text-center relative z-10"
-            >
+            <div className="flex-1 flex flex-col items-center justify-center w-full">
+                <motion.div 
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full max-w-md text-center relative z-10"
+                >
                 <motion.div
                     initial={{ scale: 0.9, opacity: 0 }}
                     animate={{ scale: 1, opacity: 1 }}
@@ -175,14 +176,20 @@ export default function VIPLoginPage() {
                         {message}
                     </motion.p>
                 )}
+                </motion.div>
+            </div>
 
-                <footer className="absolute bottom-8 left-0 w-full text-center">
-                    <div className="w-6 h-[1px] bg-[#E5E5E5] mx-auto mb-6 transition-all duration-700 hover:w-12"></div>
-                    <p className="text-[9px] tracking-[0.4em] text-[#999999] uppercase font-light">
-                        &copy; 2026 VIS FOR THE ARTS <span className="mx-2 opacity-30">|</span> PORTAL
-                    </p>
-                </footer>
-            </motion.div>
+            <motion.footer 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 1.5, delay: 0.5 }}
+                className="w-full text-center mt-12 shrink-0 relative z-10 pb-4"
+            >
+                <div className="w-6 h-[1px] bg-[#E5E5E5] mx-auto mb-6 transition-all duration-700 hover:w-12"></div>
+                <p className="text-[9px] tracking-[0.4em] text-[#999999] uppercase font-light">
+                    &copy; 2026 VIS FOR THE ARTS <span className="mx-2 opacity-30">|</span> PORTAL
+                </p>
+            </motion.footer>
         </div>
     );
 }
