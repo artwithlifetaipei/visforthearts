@@ -284,7 +284,7 @@ export default function LandingPage() {
             <div className="cursor-follower"><div className="cursor-dot"></div></div>
 
             <nav ref={navRef}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '6rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
                     <a href="#" className="nav-logo-link" onClick={(e) => {
                         e.preventDefault();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
