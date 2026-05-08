@@ -88,7 +88,7 @@ export default function VIPLoginPage() {
                             className="space-y-12"
                         >
                             <div className="mb-10 mt-2">
-                                <h1 className="text-3xl font-serif tracking-[0.1em] text-[#D4AF37] uppercase">
+                                <h1 className="text-[15px] font-serif tracking-[0.1em] text-[#D4AF37] uppercase">
                                     VIP / SVIP Exclusive Access
                                 </h1>
                             </div>
