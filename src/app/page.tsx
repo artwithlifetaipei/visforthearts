@@ -176,7 +176,7 @@ export default function LandingPage() {
                     background: rgba(251, 251, 250, 0.8);
                     backdrop-filter: blur(20px); padding: 2rem 8vw;
                 }
-                .nav-logo { height: 40px; transition: height 0.5s ease; }
+                .nav-logo { height: 80px; transition: height 0.5s ease; }
                 .nav-links { display: flex; gap: 2.5rem; }
                 .nav-link {
                     font-size: 10px; font-weight: 500;
@@ -184,7 +184,7 @@ export default function LandingPage() {
                     text-decoration: none; color: inherit;
                     position: relative;
                 }
-                nav.scrolled .nav-logo { height: 28px; }
+                nav.scrolled .nav-logo { height: 56px; }
                 nav.scrolled .nav-link { font-size: 10px; }
 
                 .btn-access {
