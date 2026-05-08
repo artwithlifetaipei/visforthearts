@@ -87,10 +87,9 @@ export default function VIPLoginPage() {
                             onSubmit={handleLogin} 
                             className="space-y-12"
                         >
-                            <div className="mb-16">
-                                <h2 className="text-[#999999] text-[15px] tracking-[0.4em] mb-4 font-light">DIGITAL PORTAL</h2>
-                                <h1 className="text-4xl font-light tracking-[0.2em] text-[#1A1A1A]">
-                                    VIP / SVIP <span className="italic font-serif">Exclusive Access</span>
+                            <div className="mb-10 mt-2">
+                                <h1 className="text-3xl font-serif tracking-[0.1em] text-[#D4AF37] uppercase">
+                                    VIP / SVIP Exclusive Access
                                 </h1>
                             </div>
                             
