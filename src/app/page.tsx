@@ -458,22 +458,45 @@ export default function LandingPage() {
                 </div>
             </section>
 
-            <footer style={{ padding: '10vh 10vw', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-                <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" style={{ height: '24px', opacity: 0.3, marginBottom: '2.5rem' }} alt="Footer Logo" />
-                <div style={{ marginBottom: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.7 }}>
-                    <span style={{ fontSize: '0.5rem', letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase', marginBottom: '8px' }}>Sponsored by</span>
-                    <img src="/footer_sponsor_logo.png" alt="Sponsor Logo" style={{ height: '20px', objectFit: 'contain' }} />
+            <footer style={{ padding: '12vh 10vw 8vh 10vw', borderTop: '0.5px solid #E5E5E5', textAlign: 'center', backgroundColor: '#FAF9F6' }}>
+                <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
+                    {/* Brand & Sponsor Group */}
+                    <div style={{ marginBottom: '6rem' }}>
+                        <img 
+                            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                            style={{ height: '32px', opacity: 0.6, marginBottom: '4rem' }} 
+                            alt="Footer Logo" 
+                        />
+                        
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.75rem' }}>
+                            <span style={{ fontSize: '9px', letterSpacing: '0.3em', color: '#999', textTransform: 'uppercase' }}>Main Sponsor</span>
+                            <img 
+                                src="/footer_sponsor_logo.png" 
+                                alt="Sponsor Logo" 
+                                style={{ height: '26px', objectFit: 'contain', opacity: 0.8 }} 
+                            />
+                        </div>
+                    </div>
+
+                    {/* Info & Social Group */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3rem', marginBottom: '6rem' }}>
+                        <a href="https://www.instagram.com/vis_for_the_arts/" target="_blank" style={{ color: 'var(--text)', opacity: 0.5, transition: 'opacity 0.3s' }}>
+                            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                        </a>
+                        
+                        <div style={{ fontSize: '11px', letterSpacing: '0.08em', lineHeight: '2.4', color: '#666', fontWeight: 3 }}>
+                            <p>參展聯繫 / <a href="mailto:artwithlifetaipei@gmail.com" style={{ color: 'inherit', textDecoration: 'none', borderBottom: '1px solid #EEE' }}>artwithlifetaipei@gmail.com</a></p>
+                            <p>貴賓服務 / <a href="mailto:visvipteam@gmail.com" style={{ color: 'inherit', textDecoration: 'none', borderBottom: '1px solid #EEE' }}>visvipteam@gmail.com</a></p>
+                        </div>
+                    </div>
+
+                    {/* Legal */}
+                    <div style={{ borderTop: '0.5px solid #f0f0f0' }}>
+                        <p style={{ fontSize: '9px', letterSpacing: '0.4em', color: '#BBB', textTransform: 'uppercase', marginTop: '3rem' }}>
+                            &copy; 2026 VIS FOR THE ARTS. ALL RIGHTS RESERVED.
+                        </p>
+                    </div>
                 </div>
-                <div style={{ marginBottom: '2rem' }}>
-                    <a href="https://www.instagram.com/vis_for_the_arts/" target="_blank" style={{ color: 'var(--text)', textDecoration: 'none', opacity: 0.4 }}>
-                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                    </a>
-                </div>
-                <div style={{ marginBottom: '2rem', fontSize: '11px', letterSpacing: '0.1em', lineHeight: 2, opacity: 0.6 }}>
-                    <p>欲聯繫 參展 TEAM 請至 artwithlifetaipei@gmail.com</p>
-                    <p>欲聯繫 貴賓 TEAM 請至 visvipteam@gmail.com</p>
-                </div>
-                <p style={{ fontSize: '9px', letterSpacing: '0.4em', opacity: 0.3 }}>&copy; 2026 VIS FOR THE ARTS. ALL RIGHTS RESERVED.</p>
             </footer>
         </main>
     );
