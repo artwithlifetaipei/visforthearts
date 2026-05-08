@@ -298,8 +298,14 @@ export default function LandingPage() {
                         <a href="#press" className="nav-link">PRESS 媒體</a>
                     </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
                     <a href="/vip" className="btn-access">VIP ACCESS</a>
+                    
+                    {/* Sponsor Block */}
+                    <div style={{ borderLeft: '1px solid #E5E5E5', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} className="hidden md:flex">
+                        <span style={{ fontSize: '0.5rem', letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Sponsored by</span>
+                        <span style={{ fontFamily: 'var(--font-serif)', fontSize: '0.85rem', color: '#1A1A1A' }}>Fountain Tokyo</span>
+                    </div>
                     <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                         {isMobileMenuOpen ? (
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
