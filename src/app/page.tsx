@@ -302,9 +302,13 @@ export default function LandingPage() {
                     <a href="/vip" className="btn-access">VIP ACCESS</a>
                     
                     {/* Sponsor Block */}
-                    <div style={{ borderLeft: '1px solid #E5E5E5', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }} className="hidden md:flex">
-                        <span style={{ fontSize: '0.5rem', letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase', marginBottom: '0.2rem' }}>Sponsored by</span>
-                        <span style={{ fontFamily: 'var(--font-serif)', fontSize: '0.85rem', color: '#1A1A1A' }}>Fountain Tokyo</span>
+                    <div style={{ borderLeft: '1px solid #E5E5E5', paddingLeft: '1.5rem', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', justifyContent: 'center' }} className="hidden md:flex">
+                        <span style={{ fontSize: '0.5rem', letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase', marginBottom: '4px' }}>Sponsored by</span>
+                        <img 
+                            src="/fountain_logo.png" 
+                            alt="Fountain Tokyo" 
+                            className="h-[22px] object-contain opacity-90 transition-opacity hover:opacity-100" 
+                        />
                     </div>
                     <button className="mobile-menu-btn" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
                         {isMobileMenuOpen ? (
