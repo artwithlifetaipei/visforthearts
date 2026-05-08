@@ -326,6 +326,10 @@ export default function LandingPage() {
                 <a href="#vip" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>VIP-Looom Club 禮賓入口</a>
                 <a href="#press" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>PRESS 媒體</a>
                 <a href="/vip" className="btn-access" style={{ display: 'block', marginTop: '2rem' }}>VIP ACCESS</a>
+                <div style={{ marginTop: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.9 }}>
+                    <span style={{ fontSize: '0.55rem', letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase', marginBottom: '8px' }}>Sponsored by</span>
+                    <img src="/fountain_logo.png" alt="Fountain Tokyo" style={{ height: '24px', objectFit: 'contain' }} />
+                </div>
             </div>
 
             <section className="hero" id="about">
@@ -455,7 +459,11 @@ export default function LandingPage() {
             </section>
 
             <footer style={{ padding: '10vh 10vw', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-                <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" style={{ height: '24px', opacity: 0.3, marginBottom: '2rem' }} alt="Footer Logo" />
+                <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" style={{ height: '24px', opacity: 0.3, marginBottom: '2.5rem' }} alt="Footer Logo" />
+                <div style={{ marginBottom: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.7 }}>
+                    <span style={{ fontSize: '0.5rem', letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase', marginBottom: '8px' }}>Sponsored by</span>
+                    <img src="/fountain_logo.png" alt="Fountain Tokyo" style={{ height: '20px', objectFit: 'contain' }} />
+                </div>
                 <div style={{ marginBottom: '2rem' }}>
                     <a href="https://www.instagram.com/vis_for_the_arts/" target="_blank" style={{ color: 'var(--text)', textDecoration: 'none', opacity: 0.4 }}>
                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
