@@ -176,16 +176,16 @@ export default function LandingPage() {
                     background: rgba(251, 251, 250, 0.8);
                     backdrop-filter: blur(20px); padding: 2rem 8vw;
                 }
-                .nav-logo { height: 60px; transition: height 0.5s ease; }
-                .nav-links { display: flex; gap: 4rem; }
+                .nav-logo { height: 40px; transition: height 0.5s ease; }
+                .nav-links { display: flex; gap: 2.5rem; }
                 .nav-link {
-                    font-size: 13px; font-weight: 500;
-                    text-transform: uppercase; letter-spacing: 0.2em;
+                    font-size: 10px; font-weight: 500;
+                    text-transform: uppercase; letter-spacing: 0.25em;
                     text-decoration: none; color: inherit;
                     position: relative;
                 }
-                nav.scrolled .nav-logo { height: 30px; }
-                nav.scrolled .nav-link { font-size: 11px; }
+                nav.scrolled .nav-logo { height: 28px; }
+                nav.scrolled .nav-link { font-size: 10px; }
 
                 .btn-access {
                     font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;
@@ -284,7 +284,7 @@ export default function LandingPage() {
             <div className="cursor-follower"><div className="cursor-dot"></div></div>
 
             <nav ref={navRef}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '3rem' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '2.5rem' }}>
                     <a href="#" className="nav-logo-link" onClick={(e) => {
                         e.preventDefault();
                         window.scrollTo({ top: 0, behavior: 'smooth' });
