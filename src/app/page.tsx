@@ -462,7 +462,7 @@ export default function LandingPage() {
                 <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" style={{ height: '24px', opacity: 0.3, marginBottom: '2.5rem' }} alt="Footer Logo" />
                 <div style={{ marginBottom: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.7 }}>
                     <span style={{ fontSize: '0.5rem', letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase', marginBottom: '8px' }}>Sponsored by</span>
-                    <img src="/fountain_logo.png" alt="Fountain Tokyo" style={{ height: '20px', objectFit: 'contain' }} />
+                    <img src="/footer_sponsor_logo.png" alt="Sponsor Logo" style={{ height: '20px', objectFit: 'contain' }} />
                 </div>
                 <div style={{ marginBottom: '2rem' }}>
                     <a href="https://www.instagram.com/vis_for_the_arts/" target="_blank" style={{ color: 'var(--text)', textDecoration: 'none', opacity: 0.4 }}>
