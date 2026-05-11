@@ -12,27 +12,58 @@ export default function OnboardingPage() {
     const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
-        const checkUser = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) {
-                router.push('/vip');
-                return;
-            }
-            
-            // Check if birthdate already exists
-            const { data: profile } = await supabase
-                .from('users')
-                .select('birthdate')
-                .eq('id', user.id)
-                .single();
+        setIsLoading(true);
+        // Listen for auth state changes — especially crucial for catching Magic Link sessions
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session?.user) {
+                const user = session.user;
+                
+                // Check if profile exists in users table
+                const { data: profile } = await supabase
+                    .from('users')
+                    .select('birthdate')
+                    .eq('id', user.id)
+                    .single();
 
-            if (profile?.birthdate) {
-                router.push('/vip/dashboard');
+                if (profile?.birthdate) {
+                    router.push('/vip/dashboard');
+                } else {
+                    setUser(user);
+                    setIsLoading(false);
+                }
+            } else if (event === 'SIGNED_OUT') {
+                router.push('/vip');
+            }
+        });
+
+        // Initial check in case they are already logged in
+        const checkCurrentSession = async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session?.user) {
+                const user = session.user;
+                const { data: profile } = await supabase
+                    .from('users')
+                    .select('birthdate')
+                    .eq('id', user.id)
+                    .single();
+
+                if (profile?.birthdate) {
+                    router.push('/vip/dashboard');
+                } else {
+                    setUser(user);
+                    setIsLoading(false);
+                }
             } else {
-                setUser(user);
+                // If no session after a small delay (allowing hash processing), go back
+                const timeout = setTimeout(() => {
+                    if (!user) router.push('/vip');
+                }, 3000);
+                return () => clearTimeout(timeout);
             }
         };
-        checkUser();
+        checkCurrentSession();
+
+        return () => subscription.unsubscribe();
     }, [router]);
 
     const handleSubmit = async (e: React.FormEvent) => {

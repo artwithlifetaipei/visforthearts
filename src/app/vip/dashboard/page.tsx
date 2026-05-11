@@ -10,13 +10,13 @@ const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com'];
 
 export default function VIPDashboard() {
     const router = useRouter();
+    const [isLoading, setIsLoading] = useState(true);
     const [profile, setProfile] = useState<any>(null);
     const [qrValue, setQrValue] = useState('');
     const [userEmail, setUserEmail] = useState('');
 
     useEffect(() => {
-        const fetchProfile = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
+        const fetchProfile = async (user: any) => {
             if (!user) {
                 router.push('/vip');
                 return;
@@ -35,23 +35,49 @@ export default function VIPDashboard() {
             }
 
             setProfile(data);
-            // Dynamic QR: user_id + timestamp
             setQrValue(`${data.id}:${Date.now()}`);
+            setIsLoading(false);
         };
 
-        fetchProfile();
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (event === 'SIGNED_IN' && session?.user) {
+                fetchProfile(session.user);
+            } else if (event === 'SIGNED_OUT') {
+                router.push('/vip');
+            }
+        });
 
-        // Refresh QR every 30 seconds for security
+        // Initial check
+        supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user) fetchProfile(user);
+            else {
+                // Wait a bit before kicking to login
+                setTimeout(() => {
+                    if (!user) router.push('/vip');
+                }, 2000);
+            }
+        });
+
+        // Refresh QR every 30 seconds
         const interval = setInterval(() => {
             if (profile) {
                 setQrValue(`${profile.id}:${Date.now()}`);
             }
         }, 30000);
 
-        return () => clearInterval(interval);
+        return () => {
+            subscription.unsubscribe();
+            clearInterval(interval);
+        };
     }, [router, profile?.id]);
 
-    if (!profile) return null;
+    if (isLoading || !profile) {
+        return (
+            <div className="min-h-screen bg-black flex items-center justify-center">
+                <div className="w-4 h-4 border-t-2 border-[#D4AF37] rounded-full animate-spin"></div>
+            </div>
+        );
+    }
 
     const isSVIP = profile.vip_level === 'SVIP';
 
