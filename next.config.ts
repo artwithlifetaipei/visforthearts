@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
   typescript: {
     ignoreBuildErrors: true,
   },
+  logging: {
+    incomingRequests: false,
+  },
 };
 
 export default withPWA(nextConfig);
