@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 
 const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com'];
@@ -14,6 +14,7 @@ export default function VIPDashboard() {
     const [profile, setProfile] = useState<any>(null);
     const [qrValue, setQrValue] = useState('');
     const [userEmail, setUserEmail] = useState('');
+    const [isWalletOpen, setIsWalletOpen] = useState(false);
 
     useEffect(() => {
         const fetchProfile = async (user: any) => {
@@ -89,6 +90,42 @@ export default function VIPDashboard() {
     const accentColor = '#D4AF37'; // Pola Gold
     const blurClass = isSVIP ? 'bg-[#D4AF37]/10' : 'bg-[#D4AF37]/5';
 
+    const generateICS = () => {
+        if (!profile) return;
+        const icsContent = [
+            'BEGIN:VCALENDAR',
+            'VERSION:2.0',
+            'PRODID:-//VIS FOR THE ARTS//VIP Pass//EN',
+            'BEGIN:VEVENT',
+            `UID:vis-vip-${profile.id}`,
+            'DTSTAMP:20260530T000000Z',
+            'DTSTART:20270107T030000Z',
+            'DTEND:20270110T100000Z',
+            'SUMMARY:VIS FOR THE ARTS 2027 藝術博覽會 (VIP)',
+            'DESCRIPTION:您專屬的 VIS 貴賓尊榮通行證提醒。請於入場時出示您的數位禮賓卡通關。\\n\\n聯絡信箱：visvipteam@gmail.com',
+            'LOCATION:台北市中正區延平南路98號',
+            'END:VEVENT',
+            'END:VCALENDAR'
+        ].join('\r\n');
+
+        const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = 'vis-vip-reminder.ics';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    const googleCalendarUrl = () => {
+        const text = encodeURIComponent("VIS FOR THE ARTS 2027 藝術博覽會 (VIP)");
+        const dates = "20270107T030000Z/20270110T100000Z"; // Jan 7, 11:00 AM to Jan 10, 6:00 PM Taipei time (UTC+8)
+        const details = encodeURIComponent("您專屬的 VIS 貴賓尊榮通行證提醒。請於入場時出示您的數位禮賓卡通關。\n\n聯絡信箱：visvipteam@gmail.com");
+        const location = encodeURIComponent("台北市中正區延平南路98號");
+        return `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${dates}&details=${details}&location=${location}&sf=true&output=xml`;
+    };
+
     return (
         <div className={`min-h-screen ${bgClass} transition-colors duration-1000 font-sans relative overflow-hidden pb-12`}>
             {/* Ambient Background */}
@@ -121,7 +158,8 @@ export default function VIPDashboard() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                    className={`relative w-full aspect-[3/4] max-w-sm rounded-none overflow-hidden flex flex-col items-center justify-center shadow-2xl border-[0.5px] backdrop-blur-xl ${cardClass}`}
+                    className={`relative w-full max-w-sm rounded-none overflow-hidden flex flex-col items-center justify-between shadow-2xl border-[0.5px] backdrop-blur-xl p-8 py-12 ${cardClass}`}
+                    style={{ minHeight: '520px' }}
                 >
                     {/* Corner Accents */}
                     <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
@@ -129,18 +167,29 @@ export default function VIPDashboard() {
                     <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
                     <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
 
+                    {/* VIP Invitation / Event details */}
+                    <div className="text-center mb-6 space-y-2.5 w-full">
+                        <h2 className="text-[13px] tracking-[0.4em] uppercase font-semibold text-[#D4AF37]">VIS FOR THE ARTS</h2>
+                        <p className="text-[10px] tracking-[0.2em] font-mono opacity-80">2027/1/7 - 1/10</p>
+                        <p className="text-[9.5px] tracking-widest opacity-60">台北市中正區延平南路98號</p>
+                        <p className="text-[8.5px] tracking-wider opacity-60 mt-3 border-t border-current/10 pt-3 px-2 leading-relaxed">
+                            如需貴賓服務，請聯絡VIP辦公室<br/>
+                            <a href="mailto:visvipteam@gmail.com" className="underline text-[#D4AF37] hover:text-white transition-colors duration-300">visvipteam@gmail.com</a>
+                        </p>
+                    </div>
+
                     {/* QR Code Container */}
-                    <div className={`p-5 bg-white`}>
+                    <div className={`p-4 bg-white shadow-xl`}>
                         <QRCodeSVG 
                             value={qrValue} 
-                            size={180}
+                            size={160}
                             level="H"
                             includeMargin={false}
                             fgColor="#1A1A1A"
                         />
                     </div>
 
-                    <div className="mt-10 text-center space-y-3">
+                    <div className="mt-6 text-center space-y-2">
                         <p className={`text-[9px] tracking-[0.6em] uppercase font-light opacity-60`}>
                             Scan for Access
                         </p>
@@ -150,7 +199,10 @@ export default function VIPDashboard() {
                     </div>
 
                     {/* Apple Wallet Button - Minimalist */}
-                    <button className="absolute bottom-10 flex items-center gap-2 group">
+                    <button 
+                        onClick={() => setIsWalletOpen(true)}
+                        className="mt-6 flex items-center gap-2 group cursor-pointer"
+                    >
                         <span className="w-6 h-[1px] bg-current opacity-30 group-hover:w-8 transition-all duration-300"></span>
                         <span className="text-[8px] tracking-[0.3em] uppercase opacity-50 group-hover:opacity-100 transition-opacity">
                             Add to Wallet
@@ -198,6 +250,116 @@ export default function VIPDashboard() {
                     </button>
                 </div>
             )}
+
+            {/* Add to Wallet & Calendar Modal */}
+            <AnimatePresence>
+                {isWalletOpen && (
+                    <motion.div 
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 bg-black/90 backdrop-blur-xl z-50 flex items-center justify-center p-4 overflow-y-auto"
+                    >
+                        <motion.div 
+                            initial={{ scale: 0.95, y: 30, opacity: 0 }}
+                            animate={{ scale: 1, y: 0, opacity: 1 }}
+                            exit={{ scale: 0.95, y: 30, opacity: 0 }}
+                            transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                            className="bg-[#121212] border border-[#222222] text-white w-full max-w-md p-8 relative flex flex-col items-center"
+                        >
+                            {/* Close button */}
+                            <button 
+                                onClick={() => setIsWalletOpen(false)}
+                                className="absolute top-4 right-4 text-neutral-500 hover:text-white transition-colors p-2 text-lg"
+                            >
+                                ✕
+                            </button>
+
+                            <h3 className="text-xs tracking-[0.4em] text-[#D4AF37] uppercase mb-8 font-medium">Add to Wallet / 錢包與提醒</h3>
+
+                            {/* Wallet Ticket Mockup */}
+                            <div className="relative w-full max-w-[280px] bg-gradient-to-b from-[#1E1C18] to-[#0F0E0D] border-[0.5px] border-[#D4AF37]/30 p-6 flex flex-col items-center mb-8 shadow-2xl rounded-lg">
+                                {/* Ticket Header */}
+                                <div className="w-full flex justify-between items-center border-b border-white/10 pb-4 mb-4">
+                                    <img 
+                                        src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                                        alt="VIS Logo" 
+                                        className="h-5 brightness-200 opacity-80"
+                                    />
+                                    <span className="text-[9px] tracking-[0.2em] font-mono text-[#D4AF37] border border-[#D4AF37]/40 px-2 py-0.5 uppercase">
+                                        {profile.vip_level} PASS
+                                    </span>
+                                </div>
+
+                                {/* Ticket Details */}
+                                <div className="w-full space-y-3 mb-6">
+                                    <div>
+                                        <p className="text-[7px] tracking-[0.3em] uppercase text-neutral-500">MEMBER</p>
+                                        <p className="text-[11px] tracking-[0.1em] font-medium font-serif mt-0.5 text-neutral-200">
+                                            {profile.first_name || profile.email.split('@')[0]}
+                                        </p>
+                                    </div>
+                                    <div className="grid grid-cols-2 gap-2">
+                                        <div>
+                                            <p className="text-[7px] tracking-[0.3em] uppercase text-neutral-500">EVENT</p>
+                                            <p className="text-[9px] tracking-[0.1em] text-neutral-300 mt-0.5">VIS Art Festival</p>
+                                        </div>
+                                        <div>
+                                            <p className="text-[7px] tracking-[0.3em] uppercase text-neutral-500">DATE</p>
+                                            <p className="text-[9px] tracking-[0.1em] font-mono text-neutral-300 mt-0.5">2027.01.07 - 10</p>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <p className="text-[7px] tracking-[0.3em] uppercase text-neutral-500">LOCATION</p>
+                                        <p className="text-[9px] tracking-[0.1em] text-neutral-300 mt-0.5 leading-snug">台北市延平南路98號</p>
+                                    </div>
+                                </div>
+
+                                {/* Dynamic QR Code */}
+                                <div className="p-4 bg-white rounded-sm shadow-inner mb-4">
+                                    <QRCodeSVG 
+                                        value={qrValue} 
+                                        size={120}
+                                        level="M"
+                                        fgColor="#1A1A1A"
+                                    />
+                                </div>
+                                <span className="text-[8px] tracking-[0.4em] text-neutral-600 uppercase font-light">VIP Digital Key</span>
+                            </div>
+
+                            {/* Wallet Guidelines */}
+                            <div className="w-full text-center space-y-4 mb-8">
+                                <p className="text-[11px] leading-[1.8] text-neutral-400 font-light tracking-wide px-4">
+                                    <strong className="text-white">📱 快速保存說明：</strong><br/>
+                                    請直接對上方卡片進行<strong>「螢幕截圖 (Screenshot)」</strong>，即可將專屬 QR Code 條碼保存在手機相簿中，於展覽現場向工作人員出示即可直接通關。
+                                </p>
+                            </div>
+
+                            {/* Action Buttons */}
+                            <div className="w-full space-y-4 px-4">
+                                <span className="block text-[8px] tracking-[0.3em] text-center text-neutral-500 uppercase">💡 同步加入行事曆，提醒您重要展期：</span>
+                                
+                                <div className="grid grid-cols-2 gap-3">
+                                    <a 
+                                        href={googleCalendarUrl()}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="py-3 bg-white/5 border border-white/10 hover:border-[#D4AF37] hover:text-[#D4AF37] text-center text-[9px] tracking-[0.2em] text-neutral-300 uppercase transition-all duration-300"
+                                    >
+                                        Google 日曆
+                                    </a>
+                                    <button 
+                                        onClick={generateICS}
+                                        className="py-3 bg-white/5 border border-white/10 hover:border-[#D4AF37] hover:text-[#D4AF37] text-center text-[9px] tracking-[0.2em] text-neutral-300 uppercase transition-all duration-300 cursor-pointer"
+                                    >
+                                        Apple / Outlook
+                                    </button>
+                                </div>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
         </div>
     );
 }
