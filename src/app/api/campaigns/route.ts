@@ -167,56 +167,76 @@ function wrapEmailInVisAesthetic(subject: string, content: string): string {
 
 export async function POST(req: Request) {
     try {
+        const body = await req.json();
+        const { campaignId, subject, content, recipients } = body;
+
+        let emailSubject = subject;
+        let emailContent = content;
+        let emailRecipients = recipients;
+
         const supabase = await createSupabaseServerClient();
-        const { campaignId } = await req.json();
-        if (!campaignId) {
-            return NextResponse.json({ error: 'Missing campaignId' }, { status: 400 });
-        }
 
-        // 1. Fetch Campaign Details
-        const { data: campaign, error: campError } = await supabase
-            .from('email_campaigns')
-            .select('*')
-            .eq('id', campaignId)
-            .single();
+        // If payload is not fully supplied, fall back to fetching from DB using campaignId
+        if (!emailSubject || !emailContent || !emailRecipients) {
+            if (!campaignId) {
+                return NextResponse.json({ error: 'Missing campaign details or campaignId' }, { status: 400 });
+            }
 
-        if (campError || !campaign) {
-            return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
-        }
+            // 1. Fetch Campaign Details
+            const { data: campaign, error: campError } = await supabase
+                .from('email_campaigns')
+                .select('*')
+                .eq('id', campaignId)
+                .single();
 
-        // 2. Determine target audience based on campaign.target_role
-        let query = supabase.from('vip_allowlist').select('email, name');
-        if (campaign.target_role !== 'All') {
-            query = query.eq('role', campaign.target_role);
-        }
-        const { data: recipients, error: recipError } = await query;
+            if (campError || !campaign) {
+                return NextResponse.json({ error: 'Campaign not found' }, { status: 404 });
+            }
 
-        if (recipError || !recipients || recipients.length === 0) {
-            return NextResponse.json({ message: 'No recipients found for this campaign' }, { status: 200 });
+            emailSubject = campaign.subject;
+            emailContent = campaign.content;
+
+            // 2. Determine target audience based on campaign.target_role
+            let query = supabase.from('vip_allowlist').select('email, name');
+            if (campaign.target_role !== 'All') {
+                query = query.eq('role', campaign.target_role);
+            }
+            const { data: fetchedRecipients, error: recipError } = await query;
+
+            if (recipError || !fetchedRecipients || fetchedRecipients.length === 0) {
+                return NextResponse.json({ message: 'No recipients found for this campaign' }, { status: 200 });
+            }
+            emailRecipients = fetchedRecipients;
         }
 
         // 3. Render premium email content
-        const htmlBody = wrapEmailInVisAesthetic(campaign.subject, campaign.content);
+        const htmlBody = wrapEmailInVisAesthetic(emailSubject, emailContent);
 
         // 4. Send Emails via Gmail SMTP (or fall back to Mock if no transporter is present)
         if (transporter) {
             // Send email to all recipients concurrently
-            const sendPromises = recipients.map(async (r) => {
+            const sendPromises = emailRecipients.map(async (r: any) => {
                 try {
                     await transporter.sendMail({
                         from: `"VIS VIP TEAM" <${gmailUser}>`,
                         to: r.email,
-                        subject: campaign.subject,
+                        subject: emailSubject,
                         html: htmlBody
                     });
 
-                    // Log to email_logs
-                    await supabase
-                        .from('email_logs')
-                        .insert({
-                            campaign_id: campaignId,
-                            recipient_email: r.email
-                        });
+                    // Log to email_logs on server side as a backup
+                    if (campaignId) {
+                        try {
+                            await supabase
+                                .from('email_logs')
+                                .insert({
+                                    campaign_id: campaignId,
+                                    recipient_email: r.email
+                                });
+                        } catch (logErr) {
+                            console.error('Failed to insert log on server side:', logErr);
+                        }
+                    }
                 } catch (e) {
                     console.error(`Failed to send email to ${r.email}`, e);
                 }
@@ -226,23 +246,35 @@ export async function POST(req: Request) {
         } else {
             console.warn('GMAIL_USER or GMAIL_APP_PASSWORD is not defined. Simulating sending (Mock Mode)...');
             // Populate mock logs so CRM dashboard works
-            const mockLogs = recipients.map(r => ({
-                campaign_id: campaignId,
-                recipient_email: r.email
-            }));
-            await supabase.from('email_logs').insert(mockLogs);
+            if (campaignId) {
+                const mockLogs = emailRecipients.map((r: any) => ({
+                    campaign_id: campaignId,
+                    recipient_email: r.email
+                }));
+                try {
+                    await supabase.from('email_logs').insert(mockLogs);
+                } catch (logErr) {
+                    console.error('Failed to insert mock logs on server side:', logErr);
+                }
+            }
         }
 
-        // Update campaign status
-        await supabase
-            .from('email_campaigns')
-            .update({
-                status: 'Sent',
-                sent_at: new Date().toISOString()
-            })
-            .eq('id', campaignId);
+        // Update campaign status on server side as a backup
+        if (campaignId) {
+            try {
+                await supabase
+                    .from('email_campaigns')
+                    .update({
+                        status: 'Sent',
+                        sent_at: new Date().toISOString()
+                    })
+                    .eq('id', campaignId);
+            } catch (updateErr) {
+                console.error('Failed to update campaign status on server side:', updateErr);
+            }
+        }
 
-        return NextResponse.json({ success: true, recipientsSent: recipients.length });
+        return NextResponse.json({ success: true, recipientsSent: emailRecipients.length });
     } catch (error: any) {
         console.error('Campaign sending API error:', error);
         return NextResponse.json({ error: error.message }, { status: 500 });

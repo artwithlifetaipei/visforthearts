@@ -167,22 +167,64 @@ export default function VIPAdminPage() {
     const handleSendNow = async (id: string) => {
         if (!confirm('確定要立即發送此活動信件給所有指定受眾嗎？')) return;
         
-        // Mark as Sent first
-        await supabase
-            .from('email_campaigns')
-            .update({ status: 'Sent', sent_at: new Date().toISOString() })
-            .eq('id', id);
+        const campaign = campaigns.find(c => c.id === id);
+        if (!campaign) {
+            alert('找不到該行銷活動');
+            return;
+        }
 
-        // Call background API route to send emails (Phase 3)
         try {
-            await fetch('/api/campaigns', {
+            // 1. Fetch recipients directly from DB via authenticated client-side where RLS is satisfied
+            let query = supabase.from('vip_allowlist').select('email, name');
+            if (campaign.target_role !== 'All') {
+                query = query.eq('role', campaign.target_role);
+            }
+            const { data: recipients, error: recipError } = await query;
+
+            if (recipError || !recipients || recipients.length === 0) {
+                alert('沒有找到符合此活動目標受眾的貴賓信箱');
+                return;
+            }
+
+            // 2. Call SMTP background API route with compiled payload
+            const response = await fetch('/api/campaigns', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ campaignId: id })
+                body: JSON.stringify({
+                    campaignId: id,
+                    subject: campaign.subject,
+                    content: campaign.content,
+                    recipients: recipients
+                })
             });
-            alert('信件發送排程已啟動！');
-        } catch (err) {
+
+            const result = await response.json();
+
+            if (!response.ok || result.error) {
+                alert(`發送失敗: ${result.error || '未知錯誤'}`);
+                return;
+            }
+
+            // 3. Mark as Sent in the database from authenticated client-side
+            await supabase
+                .from('email_campaigns')
+                .update({ 
+                    status: 'Sent', 
+                    sent_at: new Date().toISOString() 
+                })
+                .eq('id', id);
+
+            // 4. Insert email logs from authenticated client-side
+            const logs = recipients.map(r => ({
+                campaign_id: id,
+                recipient_email: r.email
+            }));
+            await supabase.from('email_logs').insert(logs);
+
+            alert(`✓ 成功發送給 ${recipients.length} 位受眾成員！`);
+        } catch (err: any) {
             console.error('Failed to trigger send API', err);
+            alert(`發送錯誤: ${err.message || err}`);
         }
         await fetchCampaigns();
     };
