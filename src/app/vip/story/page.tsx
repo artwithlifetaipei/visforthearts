@@ -121,9 +121,12 @@ export default function ZodiacStoryPage() {
                     ref={storyRef}
                     className={`relative w-[85vw] max-w-[320px] aspect-[9/16] ${data.bg} rounded-xl overflow-hidden p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-all duration-700`}
                 >
-                    <div className="flex justify-between items-start relative z-10">
+                    <div className="flex justify-between items-start relative z-10 w-full">
                         <div className="text-[10px] tracking-[0.5em] uppercase opacity-70 font-light">
                             VIS / {profile.tier}
+                        </div>
+                        <div className="text-[10px] tracking-[0.2em] font-mono opacity-70 font-light">
+                            2027
                         </div>
                     </div>
 
@@ -153,9 +156,9 @@ export default function ZodiacStoryPage() {
                     <button
                         onClick={handleDownload}
                         disabled={isGenerating}
-                        className="px-12 py-4 bg-white text-black text-[10px] tracking-[0.5em] uppercase hover:bg-neutral-200 transition-all duration-500 disabled:opacity-50 shadow-xl"
+                        className="px-12 py-4 bg-white text-black text-[10px] tracking-[0.3em] hover:bg-neutral-200 transition-all duration-500 disabled:opacity-50 shadow-xl"
                     >
-                        {isGenerating ? 'Generating...' : 'Download Story'}
+                        {isGenerating ? '正在生成...' : '請截圖分享至Instagram社群'}
                     </button>
                 </div>
             </main>

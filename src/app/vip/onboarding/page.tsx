@@ -54,10 +54,14 @@ export default function OnboardingPage() {
                     setIsLoading(false);
                 }
             } else {
-                // If no session after a small delay (allowing hash processing), go back
+                // If there's a hash or query param, they are authenticating — give them a longer window (8s).
+                // If they have no auth parameters, boot them quickly (2.5s).
+                const isAuthenticating = window.location.hash || window.location.search;
+                const delay = isAuthenticating ? 8000 : 2500;
+
                 const timeout = setTimeout(() => {
                     if (!user) router.push('/vip');
-                }, 3000);
+                }, delay);
                 return () => clearTimeout(timeout);
             }
         };

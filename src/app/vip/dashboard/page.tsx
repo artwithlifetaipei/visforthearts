@@ -35,7 +35,14 @@ export default function VIPDashboard() {
                 return;
             }
 
-            setProfile(data);
+            // Fetch tier from allowlist
+            const { data: allowlistData } = await supabase
+                .from('vip_allowlist')
+                .select('tier')
+                .eq('email', user.email)
+                .single();
+
+            setProfile({ ...data, tier: allowlistData?.tier || 'VIP' });
             setQrValue(`${data.id}:${Date.now()}`);
             setIsLoading(false);
         };
@@ -80,7 +87,7 @@ export default function VIPDashboard() {
         );
     }
 
-    const isSVIP = profile.vip_level === 'SVIP';
+    const isSVIP = profile.tier === 'SVIP';
 
     // Theme Variables based on SVIP/VIP
     const bgClass = isSVIP ? 'bg-[#111111] text-[#FAF9F6]' : 'bg-[#FAF9F6] text-[#1A1A1A]';
@@ -146,7 +153,7 @@ export default function VIPDashboard() {
                 <div className="text-right">
                     <div className={`inline-block px-4 py-1.5 border-[0.5px] ${isSVIP ? 'border-[#D4AF37] text-[#D4AF37]' : 'border-[#1A1A1A] text-[#1A1A1A]'}`}>
                         <span className="text-[9px] tracking-[0.4em] uppercase font-light">
-                            {profile.vip_level}
+                            {profile.tier}
                         </span>
                     </div>
                 </div>
@@ -287,7 +294,7 @@ export default function VIPDashboard() {
                                         className="h-5 brightness-200 opacity-80"
                                     />
                                     <span className="text-[9px] tracking-[0.2em] font-mono text-[#D4AF37] border border-[#D4AF37]/40 px-2 py-0.5 uppercase">
-                                        {profile.vip_level} PASS
+                                        {profile.tier} PASS
                                     </span>
                                 </div>
 

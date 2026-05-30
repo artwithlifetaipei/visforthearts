@@ -9,17 +9,22 @@ export default function LandingPage() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const router = useRouter();
 
-    // Catch Supabase redirect hash and handle auto-login redirection
+    // Catch Supabase redirect and handle auto-login redirection
     useEffect(() => {
-        // If they land with an access token in the hash, wait for Supabase to parse it and redirect them
-        if (window.location.hash && window.location.hash.includes('access_token=')) {
-            const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_IN' && session) {
-                    router.push('/vip/onboarding');
-                }
-            });
-            return () => subscription.unsubscribe();
-        }
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                router.push('/vip/onboarding');
+            }
+        });
+
+        // Check if session is already present or completed in the background
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                router.push('/vip/onboarding');
+            }
+        });
+
+        return () => subscription.unsubscribe();
     }, [router]);
 
     useEffect(() => {
