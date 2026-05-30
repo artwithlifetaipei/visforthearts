@@ -169,7 +169,8 @@ export async function POST(req: Request) {
             const sendPromises = recipients.map(async (r) => {
                 try {
                     const { data, error } = await resend.emails.send({
-                        from: 'VIS FOR THE ARTS <vip@visforthearts.com>',
+                        from: 'VIS VIP TEAM <vip@visforthearts.com>',
+                        replyTo: 'visvipteam@gmail.com',
                         to: r.email,
                         subject: campaign.subject,
                         html: htmlBody
