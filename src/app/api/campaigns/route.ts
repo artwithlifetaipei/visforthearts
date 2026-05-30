@@ -1,10 +1,18 @@
 import { NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
-import { Resend } from 'resend';
+import nodemailer from 'nodemailer';
 
-// Initialize Resend Client gracefully
-const resendApiKey = process.env.RESEND_API_KEY;
-const resend = resendApiKey ? new Resend(resendApiKey) : null;
+// Initialize Nodemailer Transporter gracefully using Gmail SMTP
+const gmailUser = process.env.GMAIL_USER;
+const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+
+const transporter = (gmailUser && gmailAppPassword) ? nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: gmailUser,
+        pass: gmailAppPassword
+    }
+}) : null;
 
 // Premium HTML Wrapper for VIP/Buyer Campaigns
 function wrapEmailInVisAesthetic(subject: string, content: string): string {
@@ -163,28 +171,25 @@ export async function POST(req: Request) {
         // 3. Render premium email content
         const htmlBody = wrapEmailInVisAesthetic(campaign.subject, campaign.content);
 
-        // 4. Send Emails via Resend (or fall back to Mock if no key is present)
-        if (resend) {
+        // 4. Send Emails via Gmail SMTP (or fall back to Mock if no transporter is present)
+        if (transporter) {
             // Send email to all recipients concurrently
             const sendPromises = recipients.map(async (r) => {
                 try {
-                    const { data, error } = await resend.emails.send({
-                        from: 'VIS VIP TEAM <vip@visforthearts.com>',
-                        replyTo: 'visvipteam@gmail.com',
+                    await transporter.sendMail({
+                        from: `"VIS VIP TEAM" <${gmailUser}>`,
                         to: r.email,
                         subject: campaign.subject,
                         html: htmlBody
                     });
 
                     // Log to email_logs
-                    if (!error) {
-                        await supabase
-                            .from('email_logs')
-                            .insert({
-                                campaign_id: campaignId,
-                                recipient_email: r.email
-                            });
-                    }
+                    await supabase
+                        .from('email_logs')
+                        .insert({
+                            campaign_id: campaignId,
+                            recipient_email: r.email
+                        });
                 } catch (e) {
                     console.error(`Failed to send email to ${r.email}`, e);
                 }
@@ -192,7 +197,7 @@ export async function POST(req: Request) {
 
             await Promise.all(sendPromises);
         } else {
-            console.warn('RESEND_API_KEY is not defined. Simulating sending (Mock Mode)...');
+            console.warn('GMAIL_USER or GMAIL_APP_PASSWORD is not defined. Simulating sending (Mock Mode)...');
             // Populate mock logs so CRM dashboard works
             const mockLogs = recipients.map(r => ({
                 campaign_id: campaignId,
