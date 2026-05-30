@@ -1,10 +1,26 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function LandingPage() {
     const navRef = useRef<HTMLElement>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const router = useRouter();
+
+    // Catch Supabase redirect hash and handle auto-login redirection
+    useEffect(() => {
+        // If they land with an access token in the hash, wait for Supabase to parse it and redirect them
+        if (window.location.hash && window.location.hash.includes('access_token=')) {
+            const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+                if (event === 'SIGNED_IN' && session) {
+                    router.push('/vip/onboarding');
+                }
+            });
+            return () => subscription.unsubscribe();
+        }
+    }, [router]);
 
     useEffect(() => {
         const scripts = [

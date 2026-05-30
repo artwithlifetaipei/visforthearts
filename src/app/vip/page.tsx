@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 
@@ -9,6 +10,25 @@ export default function VIPLoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSent, setIsSent] = useState(false);
     const [message, setMessage] = useState('');
+    const router = useRouter();
+
+    // Auto-redirect if already logged in or landing with hash
+    useEffect(() => {
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+            if (event === 'SIGNED_IN' && session) {
+                router.push('/vip/onboarding');
+            }
+        });
+
+        // Initial session check
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session) {
+                router.push('/vip/onboarding');
+            }
+        });
+
+        return () => subscription.unsubscribe();
+    }, [router]);
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
