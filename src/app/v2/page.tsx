@@ -369,6 +369,12 @@ export default function V2LandingPage() {
                     <h2 className="v2-vip-desc">專屬於美感、影響力交會的私密網絡。</h2>
                     <p style={{ opacity: 0.4, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>An intimate nexus of aesthetics and influence.</p>
                     <a href="/vip" className="v2-btn-gold v2-btn-magnetic">VIP ACCESS 貴賓禮賓入口</a>
+                    <div style={{ marginTop: '3.5rem', fontSize: '0.75rem', letterSpacing: '0.08em', color: '#666666', lineHeight: '1.8' }}>
+                        如有貴賓服務相關等任何垂詢，請聯絡VIP辦公室 <a href="mailto:visvipteam@gmail.com" style={{ color: '#C9A96E', textDecoration: 'underline' }}>visvipteam@gmail.com</a>。<br/>
+                        <span style={{ fontSize: '0.65rem', color: '#999999', display: 'block', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                            For any inquiries regarding VIP services, please contact the VIP Office at <a href="mailto:visvipteam@gmail.com" style={{ color: '#C9A96E', textDecoration: 'underline' }}>visvipteam@gmail.com</a>.
+                        </span>
+                    </div>
                 </div>
             </section>
 

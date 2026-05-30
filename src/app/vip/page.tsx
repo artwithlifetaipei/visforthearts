@@ -121,12 +121,6 @@ export default function VIPLoginPage() {
                                     Enter your email to verify your VIP status and unlock your<br/>
                                     exclusive digital key and premium benefits.
                                 </span>
-                                <span className="text-[12px] mt-8 block text-[#888888] leading-relaxed tracking-wider font-light">
-                                    如有貴賓服務相關等任何垂詢，請聯絡VIP辦公室 <a href="mailto:visvipteam@gmail.com" className="underline text-[#D4AF37] hover:text-[#1A1A1A] transition-colors duration-300">visvipteam@gmail.com</a>。<br/>
-                                    <span className="opacity-75 italic text-[11px] block mt-1 font-serif">
-                                        For any inquiries regarding VIP services, please contact the VIP Office at <a href="mailto:visvipteam@gmail.com" className="underline text-[#D4AF37] hover:text-[#1A1A1A] transition-colors duration-300">visvipteam@gmail.com</a>.
-                                    </span>
-                                </span>
                             </p>
                             
                             <div className="relative border-b border-[#E5E5E5] focus-within:border-[#1A1A1A] transition-colors duration-500 group">
