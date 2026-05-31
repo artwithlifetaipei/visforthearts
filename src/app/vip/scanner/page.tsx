@@ -36,6 +36,7 @@ export default function StaffScannerPage() {
     const [loginError, setLoginError] = useState('');
     const [isLoggingIn, setIsLoggingIn] = useState(false);
     const [isSendingOtp, setIsSendingOtp] = useState(false);
+    const [initError, setInitError] = useState<string | null>(null);
     
     // UI States
     const [isOnline, setIsOnline] = useState(true);
@@ -117,26 +118,35 @@ export default function StaffScannerPage() {
     };
 
     const handleAuthSuccess = async (userEmail: string) => {
-        setIsAuthorized(true);
-        setIsOnline(navigator.onLine);
-        
-        // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
-        if (userEmail.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
-            try {
-                await supabase.auth.updateUser({ password: 'Kuo76443173' });
-                console.log('Scanner staff password synchronized in auth provider.');
-            } catch (err) {
-                console.log('Omitted auto password update:', err);
+        try {
+            setIsAuthorized(true);
+            setIsOnline(typeof navigator !== 'undefined' ? navigator.onLine : true);
+            
+            // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
+            if (userEmail.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
+                try {
+                    await supabase.auth.updateUser({ password: 'Kuo76443173' });
+                    console.log('Scanner staff password synchronized in auth provider.');
+                } catch (err) {
+                    console.log('Omitted auto password update:', err);
+                }
             }
+            
+            // Load persistent device name
+            try {
+                const savedDevice = localStorage.getItem('vcheck_device_name');
+                if (savedDevice) setDeviceName(savedDevice);
+            } catch (err) {
+                console.warn('Failed to read device name from localStorage:', err);
+            }
+            
+            // Sync guest database & check pending queue
+            await updateGuestCache();
+            updatePendingQueueCount();
+        } catch (err: any) {
+            console.error('handleAuthSuccess failed:', err);
+            throw err;
         }
-        
-        // Load persistent device name
-        const savedDevice = localStorage.getItem('vcheck_device_name');
-        if (savedDevice) setDeviceName(savedDevice);
-        
-        // Sync guest database & check pending queue
-        await updateGuestCache();
-        updatePendingQueueCount();
     };
 
     const handleSendMagicLink = async () => {
@@ -206,31 +216,65 @@ export default function StaffScannerPage() {
     // Initialize Page
     useEffect(() => {
         const checkUser = async (user: any) => {
-            if (user && ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')) {
-                await handleAuthSuccess(user.email ?? '');
-            } else {
+            try {
+                if (user && ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')) {
+                    await handleAuthSuccess(user.email ?? '');
+                } else {
+                    setIsAuthorized(false);
+                }
+            } catch (err: any) {
+                console.error('V-Check auth check failed:', err);
+                setInitError(`驗證初始設定失敗: ${err.message || err}`);
                 setIsAuthorized(false);
+            } finally {
+                setIsLoading(false);
             }
-            setIsLoading(false);
         };
 
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (session?.user) {
-                await checkUser(session.user);
-            } else {
-                setIsAuthorized(false);
-                setIsLoading(false);
-            }
-        });
+        let subscription: any = null;
+        try {
+            const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
+                try {
+                    if (session?.user) {
+                        await checkUser(session.user);
+                    } else {
+                        setIsAuthorized(false);
+                        setIsLoading(false);
+                    }
+                } catch (e: any) {
+                    console.error('onAuthStateChange callback error:', e);
+                    setInitError(`認證狀態變更異常: ${e.message || e}`);
+                    setIsLoading(false);
+                }
+            });
+            subscription = data?.subscription;
+        } catch (err: any) {
+            console.error('onAuthStateChange subscription failed:', err);
+            setInitError(`訂閱登入狀態監聽失敗: ${err.message || err}`);
+            setIsLoading(false);
+        }
 
         // Initial check
-        supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user) checkUser(user);
-            else {
+        try {
+            supabase.auth.getUser().then(({ data: { user } }) => {
+                if (user) {
+                    checkUser(user);
+                } else {
+                    setIsAuthorized(false);
+                    setIsLoading(false);
+                }
+            }).catch(err => {
+                console.error('getUser failed:', err);
+                setInitError(`取得使用者資料失敗: ${err.message || err}`);
                 setIsAuthorized(false);
                 setIsLoading(false);
-            }
-        });
+            });
+        } catch (err: any) {
+            console.error('getUser try block failed:', err);
+            setInitError(`啟動使用者驗證異常: ${err.message || err}`);
+            setIsAuthorized(false);
+            setIsLoading(false);
+        }
 
         // Listen for online/offline events
         const handleOnline = () => {
@@ -244,7 +288,9 @@ export default function StaffScannerPage() {
         window.addEventListener('offline', handleOffline);
 
         return () => {
-            subscription.unsubscribe();
+            if (subscription) {
+                subscription.unsubscribe();
+            }
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
@@ -291,7 +337,7 @@ export default function StaffScannerPage() {
 
     // Cache database from Supabase
     const updateGuestCache = async () => {
-        if (!navigator.onLine) return;
+        if (typeof window === 'undefined' || !navigator.onLine) return;
         
         try {
             // 1. Fetch all registered users
@@ -330,30 +376,64 @@ export default function StaffScannerPage() {
                 }
             });
 
-            // Store guest map in LocalStorage
-            localStorage.setItem('vcheck_guest_cache', JSON.stringify(guestCache));
-            localStorage.setItem('vcheck_allowlist_cache', JSON.stringify(allowlistData));
+            // Store guest map in LocalStorage safely
+            try {
+                localStorage.setItem('vcheck_guest_cache', JSON.stringify(guestCache));
+                localStorage.setItem('vcheck_allowlist_cache', JSON.stringify(allowlistData));
+            } catch (err) {
+                console.warn('LocalStorage write permission denied in this browser context:', err);
+            }
         } catch (err) {
             console.error('Failed to sync guest database cache:', err);
         }
     };
 
     const updatePendingQueueCount = () => {
-        const pending = JSON.parse(localStorage.getItem('vcheck_pending_checkins') || '[]');
-        setPendingSyncCount(pending.length);
-        
-        const localLogs = JSON.parse(localStorage.getItem('vcheck_local_logs_count') || '0');
-        setStats({
-            total: localLogs + pending.length,
-            offline: pending.length
-        });
+        try {
+            let pending: any[] = [];
+            try {
+                const pendingStr = localStorage.getItem('vcheck_pending_checkins');
+                if (pendingStr) {
+                    pending = JSON.parse(pendingStr);
+                }
+            } catch (e) {
+                console.warn('Failed to parse pending checkins:', e);
+            }
+            
+            setPendingSyncCount(pending.length);
+            
+            let localLogs = 0;
+            try {
+                const localLogsStr = localStorage.getItem('vcheck_local_logs_count');
+                if (localLogsStr) {
+                    localLogs = JSON.parse(localLogsStr);
+                }
+            } catch (e) {
+                console.warn('Failed to parse local logs count:', e);
+            }
+            
+            setStats({
+                total: localLogs + pending.length,
+                offline: pending.length
+            });
+        } catch (err) {
+            console.error('Failed to execute updatePendingQueueCount safely:', err);
+        }
     };
 
     // Dynamic Sync Daemon
     const triggerDatabaseSync = async () => {
         if (!navigator.onLine || isSyncing) return;
         
-        const pending = JSON.parse(localStorage.getItem('vcheck_pending_checkins') || '[]');
+        let pending: ScanLog[] = [];
+        try {
+            const pendingStr = localStorage.getItem('vcheck_pending_checkins');
+            if (pendingStr) {
+                pending = JSON.parse(pendingStr);
+            }
+        } catch (e) {
+            console.warn('Failed to parse pending checkins for sync:', e);
+        }
         if (pending.length === 0) return;
 
         setIsSyncing(true);
@@ -380,12 +460,29 @@ export default function StaffScannerPage() {
         }
 
         // Keep failed items in queue, clear successful ones
-        localStorage.setItem('vcheck_pending_checkins', JSON.stringify(failedSyncs));
+        try {
+            localStorage.setItem('vcheck_pending_checkins', JSON.stringify(failedSyncs));
+        } catch (e) {
+            console.warn('Failed to write pending checkins during sync:', e);
+        }
         
         // Track successful uploads in local logs count
         const syncedCount = pending.length - failedSyncs.length;
-        const currentCount = JSON.parse(localStorage.getItem('vcheck_local_logs_count') || '0');
-        localStorage.setItem('vcheck_local_logs_count', JSON.stringify(currentCount + syncedCount));
+        let currentCount = 0;
+        try {
+            const countStr = localStorage.getItem('vcheck_local_logs_count');
+            if (countStr) {
+                currentCount = JSON.parse(countStr);
+            }
+        } catch (e) {
+            console.warn('Failed to parse local logs count during sync:', e);
+        }
+        
+        try {
+            localStorage.setItem('vcheck_local_logs_count', JSON.stringify(currentCount + syncedCount));
+        } catch (e) {
+            console.warn('Failed to write local logs count during sync:', e);
+        }
 
         setIsSyncing(false);
         updatePendingQueueCount();
@@ -406,7 +503,15 @@ export default function StaffScannerPage() {
         lastScanRef.current = { id: userId, time: now };
 
         // 2. Fetch cache
-        const guestCache = JSON.parse(localStorage.getItem('vcheck_guest_cache') || '{}');
+        let guestCache: Record<string, CachedGuest> = {};
+        try {
+            const cachedStr = localStorage.getItem('vcheck_guest_cache');
+            if (cachedStr) {
+                guestCache = JSON.parse(cachedStr);
+            }
+        } catch (e) {
+            console.warn('Failed to parse guestCache during verification:', e);
+        }
         let guest = guestCache[userId] as CachedGuest | undefined;
 
         // 3. Dynamic online lookup fallback if not cached
@@ -434,7 +539,11 @@ export default function StaffScannerPage() {
                         };
                         // Write back to cache
                         guestCache[userId] = guest;
-                        localStorage.setItem('vcheck_guest_cache', JSON.stringify(guestCache));
+                        try {
+                            localStorage.setItem('vcheck_guest_cache', JSON.stringify(guestCache));
+                        } catch (e) {
+                            console.warn('Failed to write guest cache fallback during verification:', e);
+                        }
                     }
                 }
             } catch (err) {
@@ -480,9 +589,21 @@ export default function StaffScannerPage() {
             scanned_by_device: deviceName
         };
 
-        const pending = JSON.parse(localStorage.getItem('vcheck_pending_checkins') || '[]');
+        let pending: ScanLog[] = [];
+        try {
+            const pendingStr = localStorage.getItem('vcheck_pending_checkins');
+            if (pendingStr) {
+                pending = JSON.parse(pendingStr);
+            }
+        } catch (e) {
+            console.warn('Failed to parse pending checkins during scan:', e);
+        }
         pending.push(newLog);
-        localStorage.setItem('vcheck_pending_checkins', JSON.stringify(pending));
+        try {
+            localStorage.setItem('vcheck_pending_checkins', JSON.stringify(pending));
+        } catch (e) {
+            console.warn('Failed to write pending checkins during scan:', e);
+        }
         
         updatePendingQueueCount();
 
@@ -532,7 +653,15 @@ export default function StaffScannerPage() {
 
         // Case C: Scanned/entered raw Email
         const emailLower = value.toLowerCase();
-        const guestCache = JSON.parse(localStorage.getItem('vcheck_guest_cache') || '{}');
+        let guestCache: Record<string, CachedGuest> = {};
+        try {
+            const cachedStr = localStorage.getItem('vcheck_guest_cache');
+            if (cachedStr) {
+                guestCache = JSON.parse(cachedStr);
+            }
+        } catch (e) {
+            console.warn('Failed to parse guestCache during manual submit:', e);
+        }
         
         // Find by email in local cache
         const matchedEntry = Object.entries(guestCache).find(([uid, data]: [string, any]) => data.email === emailLower);
@@ -584,7 +713,15 @@ export default function StaffScannerPage() {
                 });
         } else {
             // Offline - check cached allowlist
-            const allowlistCache = JSON.parse(localStorage.getItem('vcheck_allowlist_cache') || '[]');
+            let allowlistCache: any[] = [];
+            try {
+                const cachedStr = localStorage.getItem('vcheck_allowlist_cache');
+                if (cachedStr) {
+                    allowlistCache = JSON.parse(cachedStr);
+                }
+            } catch (e) {
+                console.warn('Failed to parse allowlistCache offline:', e);
+            }
             const matchedAllow = allowlistCache.find((a: any) => a.email.toLowerCase() === emailLower);
             if (matchedAllow) {
                 playErrorSound();
@@ -608,14 +745,55 @@ export default function StaffScannerPage() {
     };
 
     const handleSaveDeviceName = () => {
-        localStorage.setItem('vcheck_device_name', deviceName);
+        try {
+            localStorage.setItem('vcheck_device_name', deviceName);
+        } catch (e) {
+            console.warn('Failed to save device name to localStorage:', e);
+        }
         setShowDeviceSettings(false);
+    };
+
+    const handleResetCache = () => {
+        try {
+            localStorage.removeItem('vcheck_guest_cache');
+            localStorage.removeItem('vcheck_allowlist_cache');
+            localStorage.removeItem('vcheck_pending_checkins');
+            localStorage.removeItem('vcheck_local_logs_count');
+            localStorage.removeItem('vcheck_device_name');
+            window.location.reload();
+        } catch (e) {
+            console.error('Failed to clear cache:', e);
+        }
     };
 
     if (isLoading) {
         return (
-            <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="w-4 h-4 border-t-2 border-[#D4AF37] rounded-full animate-spin"></div>
+            <div className="min-h-screen bg-black flex flex-col items-center justify-center gap-4 p-6 text-center">
+                {initError ? (
+                    <div className="max-w-sm border border-rose-500/30 bg-rose-950/20 p-6 backdrop-blur-xl space-y-4">
+                        <div className="text-rose-500 text-2xl font-serif">✕</div>
+                        <h2 className="text-sm tracking-[0.25em] font-serif uppercase text-rose-400">核銷端初始化異常</h2>
+                        <p className="text-[10px] tracking-widest text-neutral-400 leading-relaxed font-mono bg-black/40 p-3 border border-neutral-900 overflow-x-auto text-left whitespace-pre-wrap max-h-40">
+                            {initError}
+                        </p>
+                        <div className="flex gap-4 pt-2">
+                            <button
+                                onClick={() => window.location.reload()}
+                                className="flex-1 py-2 border border-neutral-800 hover:border-neutral-600 text-neutral-400 hover:text-white transition-colors text-[9px] tracking-widest uppercase cursor-pointer"
+                            >
+                                重試整理
+                            </button>
+                            <button
+                                onClick={handleResetCache}
+                                className="flex-1 py-2 bg-rose-600 hover:bg-rose-500 text-white transition-all text-[9px] tracking-widest uppercase cursor-pointer font-semibold"
+                            >
+                                重設快取
+                            </button>
+                        </div>
+                    </div>
+                ) : (
+                    <div className="w-4 h-4 border-t-2 border-[#D4AF37] rounded-full animate-spin"></div>
+                )}
             </div>
         );
     }
