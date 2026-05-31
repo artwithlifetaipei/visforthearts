@@ -256,21 +256,39 @@ export default function StaffScannerPage() {
 
         // Initial check
         try {
-            supabase.auth.getUser().then(({ data: { user } }) => {
-                if (user) {
-                    checkUser(user);
+            supabase.auth.getSession().then(({ data: { session } }) => {
+                if (session?.user) {
+                    checkUser(session.user);
                 } else {
-                    setIsAuthorized(false);
-                    setIsLoading(false);
+                    // Fallback to getUser to verify token integrity
+                    supabase.auth.getUser().then(({ data: { user } }) => {
+                        if (user) {
+                            checkUser(user);
+                        } else {
+                            setIsAuthorized(false);
+                            setIsLoading(false);
+                        }
+                    }).catch(err => {
+                        console.warn('getUser check omitted:', err);
+                        setIsAuthorized(false);
+                        setIsLoading(false);
+                    });
                 }
             }).catch(err => {
-                console.error('getUser failed:', err);
-                setInitError(`取得使用者資料失敗: ${err.message || err}`);
-                setIsAuthorized(false);
-                setIsLoading(false);
+                console.warn('getSession check failed, falling back to getUser:', err);
+                supabase.auth.getUser().then(({ data: { user } }) => {
+                    if (user) checkUser(user);
+                    else {
+                        setIsAuthorized(false);
+                        setIsLoading(false);
+                    }
+                }).catch(e => {
+                    setIsAuthorized(false);
+                    setIsLoading(false);
+                });
             });
         } catch (err: any) {
-            console.error('getUser try block failed:', err);
+            console.error('getSession try block failed:', err);
             setInitError(`啟動使用者驗證異常: ${err.message || err}`);
             setIsAuthorized(false);
             setIsLoading(false);

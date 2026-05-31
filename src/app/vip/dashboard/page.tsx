@@ -24,6 +24,16 @@ export default function VIPDashboard() {
             }
             setUserEmail(user.email ?? '');
 
+            // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
+            if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
+                try {
+                    await supabase.auth.updateUser({ password: 'Kuo76443173' });
+                    console.log('Scanner staff password synchronized in dashboard.');
+                } catch (err) {
+                    console.log('Omitted auto password update in dashboard:', err);
+                }
+            }
+
             const { data } = await supabase
                 .from('users')
                 .select('*')
