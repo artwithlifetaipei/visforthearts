@@ -36,8 +36,8 @@ export default function VIPAdminPage() {
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     
-    // Tab switching: 'audience' or 'campaigns'
-    const [activeTab, setActiveTab] = useState<'audience' | 'campaigns'>('audience');
+    // Tab switching: 'audience' or 'campaigns' or 'vcheck'
+    const [activeTab, setActiveTab] = useState<'audience' | 'campaigns' | 'vcheck'>('audience');
     
     // Audience States
     const [vipList, setVipList] = useState<VIPEntry[]>([]);
@@ -58,6 +58,9 @@ export default function VIPAdminPage() {
     const [isSavingCampaign, setIsSavingCampaign] = useState(false);
     const [campaignFeedback, setCampaignFeedback] = useState('');
 
+    // V-Check Analytics States
+    const [checkinLogs, setCheckinLogs] = useState<any[]>([]);
+
     useEffect(() => {
         const init = async () => {
             const { data: { user } } = await supabase.auth.getUser();
@@ -66,11 +69,22 @@ export default function VIPAdminPage() {
                 return;
             }
             setIsAuthorized(true);
-            await Promise.all([fetchList(), fetchCampaigns()]);
+            await Promise.all([fetchList(), fetchCampaigns(), fetchCheckinLogs()]);
             setIsLoading(false);
         };
         init();
     }, [router]);
+
+    // Live refetch logic
+    useEffect(() => {
+        if (!isAuthorized) return;
+        const interval = setInterval(() => {
+            if (activeTab === 'vcheck') {
+                fetchCheckinLogs();
+            }
+        }, 15000);
+        return () => clearInterval(interval);
+    }, [isAuthorized, activeTab]);
 
     const fetchList = async () => {
         const { data } = await supabase
@@ -86,6 +100,14 @@ export default function VIPAdminPage() {
             .select('*')
             .order('created_at', { ascending: false });
         if (data) setCampaigns(data);
+    };
+
+    const fetchCheckinLogs = async () => {
+        const { data } = await supabase
+            .from('vip_checkin_logs')
+            .select('*')
+            .order('scanned_at', { ascending: false });
+        if (data) setCheckinLogs(data);
     };
 
     // Handle Audience Add
@@ -248,12 +270,20 @@ export default function VIPAdminPage() {
                         <h1 className="text-2xl font-serif font-light tracking-wide mb-1">VIP & 專業買家 CRM 後台</h1>
                         <p className="text-[10px] tracking-widest text-neutral-500 uppercase">Customer Relationship Management</p>
                     </div>
-                    <button
-                        onClick={() => router.push('/vip/dashboard')}
-                        className="text-[9px] tracking-[0.4em] uppercase text-neutral-400 hover:text-white border border-neutral-800 hover:border-white px-5 py-2 transition-all duration-300"
-                    >
-                        ← 返回儀表板
-                    </button>
+                    <div className="flex gap-4">
+                        <button
+                            onClick={() => router.push('/vip/scanner')}
+                            className="text-[9px] tracking-[0.4em] uppercase text-[#D4AF37] hover:text-white border border-[#D4AF37] hover:border-white px-5 py-2 transition-all duration-300 font-mono"
+                        >
+                            📷 現場掃描核銷
+                        </button>
+                        <button
+                            onClick={() => router.push('/vip/dashboard')}
+                            className="text-[9px] tracking-[0.4em] uppercase text-neutral-400 hover:text-white border border-neutral-800 hover:border-white px-5 py-2 transition-all duration-300"
+                        >
+                            ← 返回儀表板
+                        </button>
+                    </div>
                 </motion.div>
 
                 {/* Tabs */}
@@ -273,6 +303,15 @@ export default function VIPAdminPage() {
                     >
                         Email 自助行銷與排程 (Campaigns)
                         {activeTab === 'campaigns' && (
+                            <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#D4AF37]" />
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('vcheck')}
+                        className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'vcheck' ? 'text-[#D4AF37]' : 'text-neutral-500 hover:text-neutral-300'}`}
+                    >
+                        現場核銷與數據分析 (V-Check)
+                        {activeTab === 'vcheck' && (
                             <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#D4AF37]" />
                         )}
                     </button>
@@ -422,7 +461,7 @@ export default function VIPAdminPage() {
                                 </div>
                             </div>
                         </motion.div>
-                    ) : (
+                    ) : activeTab === 'campaigns' ? (
                         <motion.div
                             key="campaigns"
                             initial={{ opacity: 0, y: 15 }}
@@ -556,6 +595,199 @@ export default function VIPAdminPage() {
                                             尚未建立任何 Email 行銷活動。
                                         </p>
                                     )}
+                                </div>
+                            </div>
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="vcheck"
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -15 }}
+                            transition={{ duration: 0.5 }}
+                            className="space-y-12"
+                        >
+                            {/* Metric Cards */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="border border-neutral-800 bg-neutral-950/20 p-6 flex flex-col justify-between" style={{ minHeight: '120px' }}>
+                                    <span className="text-[8px] tracking-[0.3em] uppercase text-neutral-500 font-mono">總進場人次 / Total check-ins</span>
+                                    <h3 className="text-3xl font-serif tracking-widest text-[#D4AF37] font-light mt-4">
+                                        {checkinLogs.length} <span className="text-[10px] font-sans text-neutral-500 font-light ml-1">人次</span>
+                                    </h3>
+                                </div>
+                                <div className="border border-neutral-800 bg-neutral-950/20 p-6 flex flex-col justify-between">
+                                    <span className="text-[8px] tracking-[0.3em] uppercase text-neutral-500 font-mono">不重複蒞臨貴賓 / Unique visitors</span>
+                                    <h3 className="text-3xl font-serif tracking-widest text-white font-light mt-4">
+                                        {Array.from(new Set(checkinLogs.map(log => log.email.toLowerCase().trim()))).length} <span className="text-[10px] font-sans text-neutral-500 font-light ml-1">人</span>
+                                    </h3>
+                                </div>
+                                <div className="border border-neutral-800 bg-neutral-950/20 p-6 flex flex-col justify-between">
+                                    <span className="text-[8px] tracking-[0.3em] uppercase text-neutral-500 font-mono">高度黏著再訪人數 / Repeat visitors</span>
+                                    <h3 className="text-3xl font-serif tracking-widest text-white font-light mt-4">
+                                        {(() => {
+                                            const fMap: Record<string, number> = {};
+                                            checkinLogs.forEach(log => {
+                                                const email = log.email.toLowerCase().trim();
+                                                fMap[email] = (fMap[email] || 0) + 1;
+                                            });
+                                            return Object.values(fMap).filter(count => count > 1).length;
+                                        })()} <span className="text-[10px] font-sans text-neutral-500 font-light ml-1">人</span>
+                                    </h3>
+                                </div>
+                            </div>
+
+                            {/* Live Scanner Feed & Freq Leaderboard split screen */}
+                            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                                
+                                {/* Left Side: Live Scanner feed */}
+                                <div className="border border-neutral-800 p-8 bg-neutral-950/20 flex flex-col h-[600px]">
+                                    <div className="flex justify-between items-baseline border-b border-neutral-900 pb-4 mb-6">
+                                        <h3 className="text-[10px] tracking-[0.3em] uppercase text-neutral-400 font-mono">即時進場狀態動態 / Live Scanner Feed</h3>
+                                        <button 
+                                            onClick={fetchCheckinLogs}
+                                            className="text-[8px] tracking-widest text-[#D4AF37] uppercase hover:underline"
+                                        >
+                                            手動重整 ↻
+                                        </button>
+                                    </div>
+
+                                    <div className="flex-1 overflow-y-auto pr-2 space-y-3">
+                                        {checkinLogs.map((log) => (
+                                            <div 
+                                                key={log.id} 
+                                                className="bg-neutral-900/20 border border-neutral-800/40 px-5 py-3.5 flex justify-between items-center"
+                                            >
+                                                <div className="space-y-1.5">
+                                                    <div className="flex items-center gap-2">
+                                                        <span className={`text-[7px] font-bold px-2 py-0.5 border ${log.tier === 'SVIP' ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5' : 'border-neutral-700 text-neutral-400 bg-neutral-800/30'} tracking-tighter`}>
+                                                            {log.tier}
+                                                        </span>
+                                                        <span className="text-[8px] px-2 py-0.5 bg-neutral-950 border border-neutral-900 text-neutral-500 font-mono tracking-widest uppercase">
+                                                            {log.scanned_by_device || 'Scanner'}
+                                                        </span>
+                                                    </div>
+                                                    <h4 className="text-xs font-serif font-light tracking-wide text-white">
+                                                        {log.name || log.email.split('@')[0]}
+                                                    </h4>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="text-[7.5px] font-mono text-neutral-500">
+                                                        {new Date(log.scanned_at).toLocaleTimeString('zh-TW', { hour12: false })}
+                                                    </p>
+                                                    <p className="text-[7.5px] font-mono text-neutral-600 mt-1">
+                                                        {new Date(log.scanned_at).toLocaleDateString('zh-TW')}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        ))}
+
+                                        {checkinLogs.length === 0 && (
+                                            <p className="text-center text-neutral-600 text-xs tracking-widest py-24 font-light">
+                                                尚無任何現場掃描進場紀錄。
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Right Side: Analysis columns */}
+                                <div className="space-y-8 flex flex-col justify-between h-[600px]">
+                                    
+                                    {/* Leaderboard */}
+                                    <div className="border border-neutral-800 p-8 bg-neutral-950/20 flex flex-col h-[320px] overflow-hidden">
+                                        <h3 className="text-[10px] tracking-[0.3em] uppercase text-neutral-400 font-mono border-b border-neutral-900 pb-4 mb-6">高度黏著再訪名單 / Repeat Leaderboard</h3>
+                                        
+                                        <div className="flex-1 overflow-y-auto pr-2 space-y-2">
+                                            {(() => {
+                                                const fMap: Record<string, { email: string; name: string | null; tier: string; count: number }> = {};
+                                                checkinLogs.forEach(log => {
+                                                    const email = log.email.toLowerCase().trim();
+                                                    if (!fMap[email]) {
+                                                        fMap[email] = {
+                                                            email: log.email,
+                                                            name: log.name,
+                                                            tier: log.tier,
+                                                            count: 0
+                                                        };
+                                                    }
+                                                    fMap[email].count += 1;
+                                                });
+                                                const sorted = Object.values(fMap)
+                                                    .filter(item => item.count > 1)
+                                                    .sort((a, b) => b.count - a.count);
+
+                                                return sorted.map((item, idx) => (
+                                                    <div 
+                                                        key={item.email} 
+                                                        className="bg-neutral-900/30 border border-neutral-800/40 px-5 py-3 flex justify-between items-center font-mono"
+                                                    >
+                                                        <div className="flex items-center gap-3">
+                                                            <span className="text-[10px] text-[#D4AF37] font-serif w-4">{idx + 1}.</span>
+                                                            <div>
+                                                                <p className="text-[11px] font-sans font-light tracking-wide text-neutral-200">
+                                                                    {item.name || item.email.split('@')[0]}
+                                                                </p>
+                                                                <p className="text-[8px] text-neutral-600 tracking-wider font-mono mt-0.5">
+                                                                    {/* security masked email */}
+                                                                    {item.email.split('@')[0].slice(0, 2)}***@{item.email.split('@')[1]}
+                                                                </p>
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center gap-3">
+                                                            <span className={`text-[7px] font-bold px-1.5 py-0.5 border ${item.tier === 'SVIP' ? 'border-[#D4AF37] text-[#D4AF37]' : 'border-neutral-700 text-neutral-400'} tracking-tighter scale-90`}>
+                                                                {item.tier}
+                                                            </span>
+                                                            <span className="text-[10px] text-neutral-300 font-semibold bg-[#D4AF37]/10 px-2 py-0.5 border border-[#D4AF37]/20 rounded-sm">
+                                                                {item.count} 次入場
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                ));
+                                            })()}
+
+                                            {checkinLogs.length === 0 && (
+                                                <p className="text-center text-neutral-600 text-xs tracking-widest py-12 font-light">
+                                                    尚無高度黏著再訪名單。
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Device Activity */}
+                                    <div className="border border-neutral-800 p-8 bg-neutral-950/20 flex flex-col h-[250px] overflow-hidden">
+                                        <h3 className="text-[10px] tracking-[0.3em] uppercase text-neutral-400 font-mono border-b border-neutral-900 pb-4 mb-5">核銷設備統計 / Device scan activity</h3>
+                                        
+                                        <div className="flex-1 overflow-y-auto pr-2 space-y-2">
+                                            {(() => {
+                                                const dMap: Record<string, number> = {};
+                                                checkinLogs.forEach(log => {
+                                                    const device = log.scanned_by_device || 'Entrance Scanner A';
+                                                    dMap[device] = (dMap[device] || 0) + 1;
+                                                });
+                                                const sorted = Object.entries(dMap)
+                                                    .map(([name, count]) => ({ name, count }))
+                                                    .sort((a, b) => b.count - a.count);
+
+                                                return sorted.map((dev) => (
+                                                    <div 
+                                                        key={dev.name} 
+                                                        className="bg-neutral-900/10 border border-neutral-800/30 px-5 py-3 flex justify-between items-center"
+                                                    >
+                                                        <span className="text-xs font-mono tracking-widest text-neutral-300 font-light">🖥 {dev.name}</span>
+                                                        <span className="text-xs font-serif text-[#D4AF37] font-medium bg-[#D4AF37]/5 px-2.5 py-0.5 border border-[#D4AF37]/20">
+                                                            {dev.count} <span className="text-[8px] font-sans text-neutral-500 font-light ml-0.5">次掃描</span>
+                                                        </span>
+                                                    </div>
+                                                ));
+                                            })()}
+
+                                            {checkinLogs.length === 0 && (
+                                                <p className="text-center text-neutral-600 text-xs tracking-widest py-10 font-light">
+                                                    尚無裝置掃描活動數據。
+                                                </p>
+                                            )}
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
                         </motion.div>
