@@ -26,3 +26,14 @@ CREATE POLICY "Admins can do everything on vip_checkin_logs"
 ON vip_checkin_logs FOR ALL 
 USING (auth.email() IN ('artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'))
 WITH CHECK (auth.email() IN ('artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'));
+
+-- 5. Grant SELECT privileges on the users table (essential for scanning lookup)
+GRANT SELECT ON TABLE users TO authenticated;
+GRANT SELECT ON TABLE users TO anon;
+
+-- 6. Create RLS Policy for users table to allow admins to resolve guest user_ids to emails
+DROP POLICY IF EXISTS "Admins can view all profiles" ON users;
+CREATE POLICY "Admins can view all profiles" 
+ON users FOR SELECT 
+USING (auth.email() IN ('artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'));
+

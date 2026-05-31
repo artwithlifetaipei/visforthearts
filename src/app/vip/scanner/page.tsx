@@ -618,10 +618,13 @@ export default function StaffScannerPage() {
                         {isSyncing ? '同步中...' : '手動同步'}
                     </button>
                     <button 
-                        onClick={() => router.push('/vip/admin')}
-                        className="text-[#D4AF37] hover:underline"
+                        onClick={async () => {
+                            await supabase.auth.signOut();
+                            router.push('/vip');
+                        }}
+                        className="text-rose-500 hover:underline cursor-pointer"
                     >
-                        ← CRM 後台
+                        安全登出 ✕
                     </button>
                 </div>
             </footer>

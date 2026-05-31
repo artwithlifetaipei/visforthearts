@@ -272,12 +272,6 @@ export default function VIPAdminPage() {
                     </div>
                     <div className="flex gap-4">
                         <button
-                            onClick={() => router.push('/vip/scanner')}
-                            className="text-[9px] tracking-[0.4em] uppercase text-[#D4AF37] hover:text-white border border-[#D4AF37] hover:border-white px-5 py-2 transition-all duration-300 font-mono"
-                        >
-                            📷 現場掃描核銷
-                        </button>
-                        <button
                             onClick={() => router.push('/vip/dashboard')}
                             className="text-[9px] tracking-[0.4em] uppercase text-neutral-400 hover:text-white border border-neutral-800 hover:border-white px-5 py-2 transition-all duration-300"
                         >
