@@ -31,6 +31,10 @@ export default function StaffScannerPage() {
     const router = useRouter();
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
+    const [loginEmail, setLoginEmail] = useState('');
+    const [loginPassword, setLoginPassword] = useState('');
+    const [loginError, setLoginError] = useState('');
+    const [isLoggingIn, setIsLoggingIn] = useState(false);
     
     // UI States
     const [isOnline, setIsOnline] = useState(true);
@@ -111,26 +115,58 @@ export default function StaffScannerPage() {
         }
     };
 
+    const handleAuthSuccess = async (userEmail: string) => {
+        setIsAuthorized(true);
+        setIsOnline(navigator.onLine);
+        
+        // Load persistent device name
+        const savedDevice = localStorage.getItem('vcheck_device_name');
+        if (savedDevice) setDeviceName(savedDevice);
+        
+        // Sync guest database & check pending queue
+        await updateGuestCache();
+        updatePendingQueueCount();
+    };
+
+    const handleLoginSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsLoggingIn(true);
+        setLoginError('');
+
+        try {
+            const { data, error } = await supabase.auth.signInWithPassword({
+                email: loginEmail.trim(),
+                password: loginPassword
+            });
+
+            if (error) {
+                setLoginError(error.message === 'Invalid login credentials' ? '帳號或密碼輸入錯誤，請確認大會人員權限。' : error.message);
+            } else if (data.user) {
+                if (ADMIN_EMAILS.includes(data.user.email ?? '')) {
+                    await handleAuthSuccess(data.user.email ?? '');
+                } else {
+                    setLoginError('權限不足：此帳號非授權的大會現場工作人員。');
+                    await supabase.auth.signOut();
+                }
+            }
+        } catch (err: any) {
+            setLoginError(`登入失敗：${err.message || err}`);
+        } finally {
+            setIsLoggingIn(false);
+        }
+    };
+
     // Initialize Page
     useEffect(() => {
         const init = async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user || !ADMIN_EMAILS.includes(user.email ?? '')) {
-                router.push('/vip');
+                setIsAuthorized(false);
+                setIsLoading(false);
                 return;
             }
             
-            setIsAuthorized(true);
-            setIsOnline(navigator.onLine);
-            
-            // Load persistent device name
-            const savedDevice = localStorage.getItem('vcheck_device_name');
-            if (savedDevice) setDeviceName(savedDevice);
-            
-            // Sync guest database & check pending queue
-            await updateGuestCache();
-            updatePendingQueueCount();
-            
+            await handleAuthSuccess(user.email ?? '');
             setIsLoading(false);
         };
         init();
@@ -522,7 +558,78 @@ export default function StaffScannerPage() {
         );
     }
 
-    if (!isAuthorized) return null;
+    if (!isAuthorized) {
+        return (
+            <div className="min-h-screen bg-[#0A0A0B] text-white flex flex-col items-center justify-center p-6 font-sans relative overflow-hidden">
+                {/* Ambient subtle glowing mesh background */}
+                <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-amber-500 via-transparent to-transparent"></div>
+                
+                <motion.div 
+                    initial={{ opacity: 0, y: 25 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8 }}
+                    className="w-full max-w-sm border border-neutral-900 bg-neutral-950/60 p-8 py-10 relative backdrop-blur-xl shadow-2xl flex flex-col gap-8"
+                >
+                    {/* Corner accents */}
+                    <div className="absolute top-4 left-4 w-2.5 h-2.5 border-t-[0.5px] border-l-[0.5px] border-[#D4AF37]/50"></div>
+                    <div className="absolute top-4 right-4 w-2.5 h-2.5 border-t-[0.5px] border-r-[0.5px] border-[#D4AF37]/50"></div>
+                    <div className="absolute bottom-4 left-4 w-2.5 h-2.5 border-b-[0.5px] border-l-[0.5px] border-[#D4AF37]/50"></div>
+                    <div className="absolute bottom-4 right-4 w-2.5 h-2.5 border-b-[0.5px] border-r-[0.5px] border-[#D4AF37]/50"></div>
+
+                    <div className="text-center space-y-3">
+                        <img 
+                            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                            alt="VIS Logo" 
+                            className="h-10 mx-auto brightness-200 opacity-90"
+                        />
+                        <p className="text-[7.5px] tracking-[0.5em] text-[#D4AF37] uppercase font-mono mt-4 font-medium">V-Check System</p>
+                        <h2 className="text-sm tracking-[0.25em] font-serif uppercase font-light text-neutral-300">現場核銷工作人員登入</h2>
+                    </div>
+
+                    <form onSubmit={handleLoginSubmit} className="space-y-6">
+                        <div className="space-y-4">
+                            <div className="border-b border-neutral-800 focus-within:border-[#D4AF37] transition-all py-1">
+                                <label className="block text-[7px] tracking-widest text-neutral-600 uppercase mb-1">大會工作人員帳號 (Email)</label>
+                                <input 
+                                    type="email"
+                                    placeholder="attendant@example.com"
+                                    value={loginEmail}
+                                    onChange={(e) => setLoginEmail(e.target.value)}
+                                    required
+                                    className="w-full bg-transparent border-none outline-none text-xs text-white tracking-widest font-mono py-1"
+                                />
+                            </div>
+                            <div className="border-b border-neutral-800 focus-within:border-[#D4AF37] transition-all py-1">
+                                <label className="block text-[7px] tracking-widest text-neutral-600 uppercase mb-1">驗證密碼 (Password)</label>
+                                <input 
+                                    type="password"
+                                    placeholder="••••••••"
+                                    value={loginPassword}
+                                    onChange={(e) => setLoginPassword(e.target.value)}
+                                    required
+                                    className="w-full bg-transparent border-none outline-none text-xs text-white tracking-widest font-mono py-1"
+                                />
+                            </div>
+                        </div>
+
+                        {loginError && (
+                            <p className="text-[10px] tracking-widest text-rose-500 leading-relaxed font-light font-sans bg-rose-500/5 p-3 border border-rose-500/20">
+                                ⚠️ {loginError}
+                            </p>
+                        )}
+
+                        <button 
+                            type="submit"
+                            disabled={isLoggingIn}
+                            className="w-full py-3.5 bg-[#D4AF37] hover:bg-white text-black font-semibold text-[10px] tracking-[0.4em] uppercase disabled:opacity-50 transition-all cursor-pointer font-sans"
+                        >
+                            {isLoggingIn ? '正在驗證...' : '登入核銷端'}
+                        </button>
+                    </form>
+                </motion.div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#0A0A0B] text-white flex flex-col font-sans relative overflow-hidden select-none">
