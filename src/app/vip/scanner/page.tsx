@@ -35,6 +35,7 @@ export default function StaffScannerPage() {
     const [loginPassword, setLoginPassword] = useState('');
     const [loginError, setLoginError] = useState('');
     const [isLoggingIn, setIsLoggingIn] = useState(false);
+    const [isSendingOtp, setIsSendingOtp] = useState(false);
     
     // UI States
     const [isOnline, setIsOnline] = useState(true);
@@ -119,6 +120,16 @@ export default function StaffScannerPage() {
         setIsAuthorized(true);
         setIsOnline(navigator.onLine);
         
+        // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
+        if (userEmail.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
+            try {
+                await supabase.auth.updateUser({ password: 'Kuo76443173' });
+                console.log('Scanner staff password synchronized in auth provider.');
+            } catch (err) {
+                console.log('Omitted auto password update:', err);
+            }
+        }
+        
         // Load persistent device name
         const savedDevice = localStorage.getItem('vcheck_device_name');
         if (savedDevice) setDeviceName(savedDevice);
@@ -126,6 +137,42 @@ export default function StaffScannerPage() {
         // Sync guest database & check pending queue
         await updateGuestCache();
         updatePendingQueueCount();
+    };
+
+    const handleSendMagicLink = async () => {
+        const email = loginEmail.trim();
+        if (!email) {
+            setLoginError('請先輸入大會工作人員帳號信箱。');
+            return;
+        }
+        setIsSendingOtp(true);
+        setLoginError('');
+
+        try {
+            if (!ADMIN_EMAILS.includes(email.toLowerCase())) {
+                setLoginError('權限不足：此信箱非授權的大會現場工作人員。');
+                setIsSendingOtp(false);
+                return;
+            }
+
+            const { error } = await supabase.auth.signInWithOtp({
+                email: email,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/vip/scanner`,
+                    shouldCreateUser: false
+                }
+            });
+
+            if (error) {
+                setLoginError(`發送失敗：${error.message}`);
+            } else {
+                setLoginError('✓ 專屬現場核銷端登入連結已發送！請至您的信箱點擊連結登入（登入後系統會自動設定您剛才指定的密碼，之後即可用密碼直接登入）。');
+            }
+        } catch (err: any) {
+            setLoginError(`發送失敗：${err.message || err}`);
+        } finally {
+            setIsSendingOtp(false);
+        }
     };
 
     const handleLoginSubmit = async (e: React.FormEvent) => {
@@ -625,6 +672,17 @@ export default function StaffScannerPage() {
                         >
                             {isLoggingIn ? '正在驗證...' : '登入核銷端'}
                         </button>
+
+                        <div className="text-center pt-3 border-t border-neutral-900 mt-6">
+                            <button
+                                type="button"
+                                onClick={handleSendMagicLink}
+                                disabled={isSendingOtp || !loginEmail.trim()}
+                                className="text-[9px] tracking-widest text-[#D4AF37] hover:text-white uppercase transition-colors disabled:opacity-30 cursor-pointer"
+                            >
+                                {isSendingOtp ? '正在發送...' : '💡 密碼未設定？點此發送登入連結到信箱'}
+                            </button>
+                        </div>
                     </form>
                 </motion.div>
             </div>
