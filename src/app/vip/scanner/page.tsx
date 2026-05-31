@@ -205,18 +205,32 @@ export default function StaffScannerPage() {
 
     // Initialize Page
     useEffect(() => {
-        const init = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user || !ADMIN_EMAILS.includes(user.email ?? '')) {
+        const checkUser = async (user: any) => {
+            if (user && ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')) {
+                await handleAuthSuccess(user.email ?? '');
+            } else {
                 setIsAuthorized(false);
-                setIsLoading(false);
-                return;
             }
-            
-            await handleAuthSuccess(user.email ?? '');
             setIsLoading(false);
         };
-        init();
+
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (session?.user) {
+                await checkUser(session.user);
+            } else {
+                setIsAuthorized(false);
+                setIsLoading(false);
+            }
+        });
+
+        // Initial check
+        supabase.auth.getUser().then(({ data: { user } }) => {
+            if (user) checkUser(user);
+            else {
+                setIsAuthorized(false);
+                setIsLoading(false);
+            }
+        });
 
         // Listen for online/offline events
         const handleOnline = () => {
@@ -230,6 +244,7 @@ export default function StaffScannerPage() {
         window.addEventListener('offline', handleOffline);
 
         return () => {
+            subscription.unsubscribe();
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
