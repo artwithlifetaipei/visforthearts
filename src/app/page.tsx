@@ -290,7 +290,11 @@ export default function LandingPage() {
                     .desktop-br { display: none; }
                     .mobile-br { display: block; }
                     .exhibition-scroller { padding: 0 10vw; gap: 10vw; }
-                    .exhibit-item, .exhibit-item.intro { width: 80vw !important; margin-right: 0 !important; padding-right: 0 !important; justify-content: flex-start; padding-top: 15vh; }
+                    .exhibit-item { width: 65vw !important; margin-right: 0 !important; padding-right: 0 !important; justify-content: flex-start; padding-top: 15vh; }
+                    .exhibit-item.intro { width: 80vw !important; }
+                    .exhibit-item .img-card { max-height: 42vh; }
+                    .exhibit-item .card-text-zh { font-size: 1.1rem; margin-top: 1.25rem; }
+                    .exhibit-item .card-text-en { font-size: 0.55rem; margin-top: 0.25rem; }
                     .exhibit-title { margin-bottom: 2rem; }
                     .offset-card { padding-top: 15vh; }
                     .press-grid { grid-template-columns: 1fr; }
