@@ -20,12 +20,9 @@ export default function OnboardingPage() {
                 
                 // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
                 if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
-                    try {
-                        await supabase.auth.updateUser({ password: 'Kuo76443173' });
-                        console.log('Scanner staff password synchronized in onboarding.');
-                    } catch (err) {
-                        console.log('Omitted auto password update in onboarding:', err);
-                    }
+                    supabase.auth.updateUser({ password: 'Kuo76443173' })
+                        .then(() => console.log('Scanner staff password synchronized in onboarding.'))
+                        .catch((err) => console.log('Omitted auto password update in onboarding:', err));
                 }
                 
                 // Check if profile exists in users table
@@ -54,12 +51,9 @@ export default function OnboardingPage() {
                 
                 // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
                 if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
-                    try {
-                        await supabase.auth.updateUser({ password: 'Kuo76443173' });
-                        console.log('Scanner staff password synchronized in onboarding session check.');
-                    } catch (err) {
-                        console.log('Omitted auto password update in onboarding session check:', err);
-                    }
+                    supabase.auth.updateUser({ password: 'Kuo76443173' })
+                        .then(() => console.log('Scanner staff password synchronized in onboarding session check.'))
+                        .catch((err) => console.log('Omitted auto password update in onboarding session check:', err));
                 }
                 
                 const { data: profile } = await supabase

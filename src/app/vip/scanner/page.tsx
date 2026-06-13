@@ -124,12 +124,9 @@ export default function StaffScannerPage() {
             
             // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
             if (userEmail.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
-                try {
-                    await supabase.auth.updateUser({ password: 'Kuo76443173' });
-                    console.log('Scanner staff password synchronized in auth provider.');
-                } catch (err) {
-                    console.log('Omitted auto password update:', err);
-                }
+                supabase.auth.updateUser({ password: 'Kuo76443173' })
+                    .then(() => console.log('Scanner staff password synchronized in auth provider.'))
+                    .catch((err) => console.log('Omitted auto password update:', err));
             }
             
             // Load persistent device name
@@ -140,8 +137,8 @@ export default function StaffScannerPage() {
                 console.warn('Failed to read device name from localStorage:', err);
             }
             
-            // Sync guest database & check pending queue
-            await updateGuestCache();
+            // Sync guest database & check pending queue in background (non-blocking)
+            updateGuestCache();
             updatePendingQueueCount();
         } catch (err: any) {
             console.error('handleAuthSuccess failed:', err);
