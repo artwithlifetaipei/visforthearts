@@ -46,6 +46,7 @@ export default function BlindBoxPage() {
     const [isOpening, setIsOpening] = useState(false);
     const [isClaimed, setIsClaimed] = useState(false);
     const [profile, setProfile] = useState<any>(null);
+    const [activeBrands, setActiveBrands] = useState<any[]>(BRAND_CARDS);
 
     // Interactive Swiping Game States
     const [isGameStarted, setIsGameStarted] = useState(false);
@@ -77,6 +78,26 @@ export default function BlindBoxPage() {
                 setReward(rewardData);
                 setIsClaimed(rewardData.is_claimed);
             }
+
+            // Fetch dynamic brands from database
+            try {
+                const { data: dbBrands } = await supabase
+                    .from('vip_blind_box_brands')
+                    .select('*')
+                    .order('id', { ascending: true });
+                
+                if (dbBrands && dbBrands.length > 0) {
+                    const mapped = dbBrands.map(b => ({
+                        id: b.id,
+                        name: b.name,
+                        desc: b.desc_text,
+                        image: b.image_url
+                    }));
+                    setActiveBrands(mapped);
+                }
+            } catch (err) {
+                console.warn('Fallback to static brands configuration:', err);
+            }
         };
         checkAuth();
     }, [router]);
@@ -86,7 +107,7 @@ export default function BlindBoxPage() {
         setSwipeOverlay(action);
         
         setTimeout(async () => {
-            const currentBrand = BRAND_CARDS[currentIndex];
+            const currentBrand = activeBrands[currentIndex];
             let newLiked = [...likedBrands];
             
             if (action === 'like') {
@@ -97,7 +118,7 @@ export default function BlindBoxPage() {
             setSwipeOverlay(null);
             
             // Advance to next card or trigger lottery
-            if (currentIndex < BRAND_CARDS.length - 1) {
+            if (currentIndex < activeBrands.length - 1) {
                 setCurrentIndex(currentIndex + 1);
             } else {
                 // Game finished - pick random from liked, fallback to random of all
@@ -109,7 +130,7 @@ export default function BlindBoxPage() {
                     chosenBrand = newLiked[Math.floor(Math.random() * newLiked.length)];
                 } else {
                     // Fallback to random of all 5 brands
-                    chosenBrand = BRAND_CARDS[Math.floor(Math.random() * BRAND_CARDS.length)];
+                    chosenBrand = activeBrands[Math.floor(Math.random() * activeBrands.length)];
                 }
 
                 // Save to DB
@@ -227,13 +248,13 @@ export default function BlindBoxPage() {
                         >
                             {/* Card Count Indicator */}
                             <div className="text-[10px] tracking-[0.4em] text-neutral-500 uppercase font-mono">
-                                BRAND STACK — <span className="text-white">{currentIndex + 1}</span> / {BRAND_CARDS.length}
+                                BRAND STACK — <span className="text-white">{currentIndex + 1}</span> / {activeBrands.length}
                             </div>
 
                             {/* Cards Deck */}
                             <div className="relative w-full aspect-[3/4]">
                                 <AnimatePresence mode="popLayout">
-                                    {BRAND_CARDS.map((brand, idx) => {
+                                    {activeBrands.map((brand, idx) => {
                                         if (idx !== currentIndex) return null;
                                         return (
                                             <motion.div

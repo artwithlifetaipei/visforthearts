@@ -36,8 +36,47 @@ export default function VIPAdminPage() {
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     
-    // Tab switching: 'audience' or 'campaigns' or 'vcheck'
-    const [activeTab, setActiveTab] = useState<'audience' | 'campaigns' | 'vcheck'>('audience');
+    // Tab switching: 'audience' or 'campaigns' or 'vcheck' or 'blindbox'
+    const [activeTab, setActiveTab] = useState<'audience' | 'campaigns' | 'vcheck' | 'blindbox'>('audience');
+
+    // Blind Box Brands States
+    const [brands, setBrands] = useState<any[]>([]);
+    const [editableBrands, setEditableBrands] = useState<any[]>([]);
+    const [isBrandsLoading, setIsBrandsLoading] = useState(false);
+    const [brandsError, setBrandsError] = useState<string | null>(null);
+    const [brandSavingId, setBrandSavingId] = useState<string | null>(null);
+    const [brandFeedback, setBrandFeedback] = useState<Record<string, string>>({});
+
+    const compressImage = (file: File): Promise<string> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 600;
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > MAX_WIDTH) {
+                        height = Math.round((height * MAX_WIDTH) / width);
+                        width = MAX_WIDTH;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0, width, height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.75);
+                    resolve(dataUrl);
+                };
+                img.onerror = (err) => reject(err);
+            };
+            reader.onerror = (err) => reject(err);
+        });
+    };
     
     // Audience States
     const [vipList, setVipList] = useState<VIPEntry[]>([]);
@@ -69,7 +108,7 @@ export default function VIPAdminPage() {
                 return;
             }
             setIsAuthorized(true);
-            await Promise.all([fetchList(), fetchCampaigns(), fetchCheckinLogs()]);
+            await Promise.all([fetchList(), fetchCampaigns(), fetchCheckinLogs(), fetchBrands()]);
             setIsLoading(false);
         };
         init();
@@ -100,6 +139,128 @@ export default function VIPAdminPage() {
             .select('*')
             .order('created_at', { ascending: false });
         if (data) setCampaigns(data);
+    };
+
+    const fetchBrands = async () => {
+        setIsBrandsLoading(true);
+        setBrandsError(null);
+        try {
+            const { data, error } = await supabase
+                .from('vip_blind_box_brands')
+                .select('*')
+                .order('id', { ascending: true });
+            
+            if (error) {
+                setBrandsError(error.message);
+                setBrands([]);
+                setEditableBrands([]);
+            } else {
+                setBrands(data || []);
+                setEditableBrands(JSON.parse(JSON.stringify(data || [])));
+                setBrandsError(null);
+            }
+        } catch (err: any) {
+            setBrandsError(err.message || 'Failed to fetch brands');
+            setBrands([]);
+            setEditableBrands([]);
+        } finally {
+            setIsBrandsLoading(false);
+        }
+    };
+
+    const handleInitializeBrands = async () => {
+        setIsBrandsLoading(true);
+        const defaultBrands = [
+            {
+                id: 'brand-1',
+                name: 'Fountain Tokyo',
+                desc_text: '源自東京的奢華香氛與生活美學設計。',
+                image_url: 'https://images.unsplash.com/photo-1547887537-6158d64c35b3?q=80&w=600&auto=format&fit=crop'
+            },
+            {
+                id: 'brand-2',
+                name: 'Looom Space',
+                desc_text: '探索光影與永續材質交織的軟裝家居。',
+                image_url: 'https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?q=80&w=600&auto=format&fit=crop'
+            },
+            {
+                id: 'brand-3',
+                name: 'Pola Art Gallery',
+                desc_text: '匯聚東亞當代最受矚目的新銳藝術家作品。',
+                image_url: 'https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop'
+            },
+            {
+                id: 'brand-4',
+                name: 'Aesthetic Design Lab',
+                desc_text: '極簡主義極致工藝的現代家具設計品牌。',
+                image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?q=80&w=600&auto=format&fit=crop'
+            },
+            {
+                id: 'brand-5',
+                name: 'Aura Scent Studio',
+                desc_text: '調配專屬大自然與心靈共感的純淨沙龍香水。',
+                image_url: 'https://images.unsplash.com/photo-1594035910387-fea47794261f?q=80&w=600&auto=format&fit=crop'
+            }
+        ];
+
+        try {
+            const { error } = await supabase
+                .from('vip_blind_box_brands')
+                .insert(defaultBrands);
+            
+            if (error) {
+                alert('匯入失敗：' + error.message);
+            } else {
+                alert('成功匯入 5 家預設品牌！');
+                await fetchBrands();
+            }
+        } catch (err: any) {
+            alert('錯誤：' + err.message);
+        } finally {
+            setIsBrandsLoading(false);
+        }
+    };
+
+    const handleFieldChange = (id: string, field: string, value: string) => {
+        setEditableBrands(prev => prev.map(b => b.id === id ? { ...b, [field]: value } : b));
+    };
+
+    const handleImageUpload = async (id: string, file: File) => {
+        try {
+            setBrandFeedback(prev => ({ ...prev, [id]: '正在處理並壓縮圖片...' }));
+            const compressedBase64 = await compressImage(file);
+            handleFieldChange(id, 'image_url', compressedBase64);
+            setBrandFeedback(prev => ({ ...prev, [id]: '圖片上傳成功，請點擊儲存！' }));
+        } catch (err: any) {
+            setBrandFeedback(prev => ({ ...prev, [id]: '圖片壓縮失敗: ' + err.message }));
+        }
+    };
+
+    const handleSaveBrand = async (brand: any) => {
+        setBrandSavingId(brand.id);
+        setBrandFeedback(prev => ({ ...prev, [brand.id]: '正在儲存至資料庫...' }));
+        try {
+            const { error } = await supabase
+                .from('vip_blind_box_brands')
+                .update({
+                    name: brand.name,
+                    desc_text: brand.desc_text,
+                    image_url: brand.image_url,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', brand.id);
+            
+            if (error) {
+                setBrandFeedback(prev => ({ ...prev, [brand.id]: '儲存失敗：' + error.message }));
+            } else {
+                setBrandFeedback(prev => ({ ...prev, [brand.id]: '✓ 儲存成功！' }));
+                await fetchBrands();
+            }
+        } catch (err: any) {
+            setBrandFeedback(prev => ({ ...prev, [brand.id]: '錯誤：' + err.message }));
+        } finally {
+            setBrandSavingId(null);
+        }
     };
 
     const fetchCheckinLogs = async () => {
@@ -306,6 +467,15 @@ export default function VIPAdminPage() {
                     >
                         現場核銷與數據分析 (V-Check)
                         {activeTab === 'vcheck' && (
+                            <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#DFBA87]" />
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('blindbox')}
+                        className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'blindbox' ? 'text-[#DFBA87]' : 'text-neutral-500 hover:text-neutral-300'}`}
+                    >
+                        品味預測品牌管理 (Prediction)
+                        {activeTab === 'blindbox' && (
                             <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#DFBA87]" />
                         )}
                     </button>
@@ -784,6 +954,195 @@ export default function VIPAdminPage() {
 
                                 </div>
                             </div>
+                        </motion.div>
+                    )}
+
+                    {activeTab === 'blindbox' && (
+                        <motion.div
+                            key="blindbox"
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -15 }}
+                            transition={{ duration: 0.5 }}
+                            className="space-y-8"
+                        >
+                            {brandsError ? (
+                                <div className="border border-neutral-800 p-8 bg-neutral-950/30">
+                                    <h3 className="text-sm tracking-[0.2em] font-serif font-light text-[#DFBA87] mb-4">初始化品味預測品牌資料庫</h3>
+                                    <p className="text-xs text-neutral-400 leading-relaxed mb-6 font-light">
+                                        您好！若要在後台直接上傳圖片與輸入文字，我們需要先在您的 Supabase 資料庫中建立品牌設定資料表。<br/>
+                                        請按照以下簡單步驟完成初始化：
+                                    </p>
+                                    <div className="space-y-4 text-xs font-light text-neutral-400 bg-neutral-900/40 p-6 border border-neutral-800/80 mb-6">
+                                        <p>1. 複製下方的 SQL 語法</p>
+                                        <p>2. 前往您的 <a href="https://supabase.com/dashboard" target="_blank" rel="noopener noreferrer" className="text-[#DFBA87] underline font-semibold">Supabase Dashboard</a></p>
+                                        <p>3. 點選左側選單的 <strong>SQL Editor</strong>，接著開啟新查詢 (New Query)</p>
+                                        <p>4. 貼上語法並按下 <strong>Run</strong> 按鈕執行</p>
+                                        <p>5. 執行成功後，回到此頁面點擊下方「已完成，重新檢測」按鈕即可開始使用！</p>
+                                    </div>
+                                    
+                                    <pre className="bg-neutral-900 p-4 border border-neutral-800 text-[10px] text-neutral-300 font-mono overflow-x-auto mb-6 max-h-48 rounded">
+{`CREATE TABLE IF NOT EXISTS vip_blind_box_brands (
+    id text PRIMARY KEY,
+    name text NOT NULL,
+    desc_text text NOT NULL,
+    image_url text NOT NULL,
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+ALTER TABLE vip_blind_box_brands ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read on blind box brands" 
+ON vip_blind_box_brands FOR SELECT TO public USING (true);
+
+CREATE POLICY "Allow admins all on blind box brands" 
+ON vip_blind_box_brands FOR ALL TO authenticated 
+USING (auth.email() IN ('artwithlifetaipei@gmail.com'))
+WITH CHECK (auth.email() IN ('artwithlifetaipei@gmail.com'));`}
+                                    </pre>
+
+                                    <button
+                                        onClick={() => {
+                                            navigator.clipboard.writeText(`CREATE TABLE IF NOT EXISTS vip_blind_box_brands (
+    id text PRIMARY KEY,
+    name text NOT NULL,
+    desc_text text NOT NULL,
+    image_url text NOT NULL,
+    updated_at timestamp with time zone DEFAULT now()
+);
+
+ALTER TABLE vip_blind_box_brands ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Allow public read on blind box brands" 
+ON vip_blind_box_brands FOR SELECT TO public USING (true);
+
+CREATE POLICY "Allow admins all on blind box brands" 
+ON vip_blind_box_brands FOR ALL TO authenticated 
+USING (auth.email() IN ('artwithlifetaipei@gmail.com'))
+WITH CHECK (auth.email() IN ('artwithlifetaipei@gmail.com'));`);
+                                            alert('SQL 語法已複製至剪貼簿！');
+                                        }}
+                                        className="px-8 py-3 bg-[#DFBA87] text-black text-[10px] tracking-[0.3em] uppercase font-bold hover:bg-white transition-all duration-300 cursor-pointer"
+                                    >
+                                        一鍵複製 SQL 語法
+                                    </button>
+                                    <button
+                                        onClick={fetchBrands}
+                                        className="ml-4 px-8 py-3 border border-neutral-800 hover:border-white text-neutral-400 hover:text-white text-[10px] tracking-[0.3em] uppercase transition-all duration-300 cursor-pointer"
+                                    >
+                                        已完成，重新檢測
+                                    </button>
+                                </div>
+                            ) : brands.length === 0 ? (
+                                <div className="border border-neutral-800 p-8 bg-neutral-950/30 text-center">
+                                    <h3 className="text-sm tracking-[0.2em] font-serif font-light text-[#DFBA87] mb-4">資料庫尚未初始化品牌資料</h3>
+                                    <p className="text-xs text-neutral-400 leading-relaxed mb-6 font-light">
+                                        資料表已成功建立！點擊下方按鈕可快速將系統預設的五個品牌資料（Fountain Tokyo, Looom Space 等）匯入資料庫，方便您直接在此基礎上修改。
+                                    </p>
+                                    <button
+                                        onClick={handleInitializeBrands}
+                                        className="px-10 py-4 bg-[#DFBA87] text-black text-[10px] tracking-[0.3em] uppercase font-bold hover:bg-white transition-all duration-300 cursor-pointer"
+                                    >
+                                        匯入預設品牌資料
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="space-y-8">
+                                    <div className="border-b border-neutral-900 pb-4">
+                                        <h2 className="text-sm tracking-[0.2em] font-serif font-light text-[#DFBA87]">「品味預測迎賓禮」品牌卡片管理</h2>
+                                        <p className="text-[10px] text-neutral-500 tracking-widest mt-1">在這裡您可以自行替換 5 個品味遊戲品牌的名稱、簡介描述與滿版底圖圖片。</p>
+                                    </div>
+
+                                    <div className="grid grid-cols-1 gap-8">
+                                        {editableBrands.map((brand) => (
+                                            <div key={brand.id} className="border border-neutral-800 p-8 bg-neutral-950/20 grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
+                                                {/* Left side: Image and Upload */}
+                                                <div className="md:col-span-4 space-y-4">
+                                                    <label className="block text-[8px] tracking-widest text-neutral-500 uppercase">品牌卡片底圖 / Image Card Preview</label>
+                                                    <div className="relative aspect-[3/4] w-full max-w-[200px] border border-neutral-800 rounded-lg overflow-hidden bg-black/40 flex items-center justify-center">
+                                                        {brand.image_url ? (
+                                                            <img src={brand.image_url} alt={brand.name} className="w-full h-full object-cover" />
+                                                        ) : (
+                                                            <span className="text-[10px] text-neutral-600 tracking-widest uppercase">無圖片</span>
+                                                        )}
+                                                    </div>
+                                                    
+                                                    {/* File Input */}
+                                                    <div className="space-y-2">
+                                                        <label className="block text-[9px] tracking-widest text-neutral-400 hover:text-white cursor-pointer py-2 px-4 border border-neutral-800 text-center uppercase bg-neutral-900/30 hover:bg-neutral-800/40 transition-colors">
+                                                            📷 上傳圖片檔案 (自動壓縮)
+                                                            <input 
+                                                                type="file" 
+                                                                accept="image/*"
+                                                                className="hidden" 
+                                                                onChange={(e) => {
+                                                                    const file = e.target.files?.[0];
+                                                                    if (file) handleImageUpload(brand.id, file);
+                                                                }}
+                                                            />
+                                                        </label>
+                                                        
+                                                        <input 
+                                                            type="text"
+                                                            placeholder="或貼上外部圖片網址 (URL)"
+                                                            value={brand.image_url.startsWith('data:') ? '已上傳為本地圖片數據' : brand.image_url}
+                                                            disabled={brand.image_url.startsWith('data:')}
+                                                            onChange={(e) => handleFieldChange(brand.id, 'image_url', e.target.value)}
+                                                            className="w-full py-2 bg-transparent border-b border-neutral-800 focus:border-[#DFBA87] outline-none text-[10px] tracking-wider text-neutral-300 placeholder:text-neutral-700"
+                                                        />
+                                                        {brand.image_url.startsWith('data:') && (
+                                                            <button 
+                                                                onClick={() => handleFieldChange(brand.id, 'image_url', '')}
+                                                                className="text-[8px] text-rose-500 tracking-wider underline hover:text-rose-400"
+                                                            >
+                                                                重設圖片並重新上傳 / 使用網址
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* Right side: Texts & Actions */}
+                                                <div className="md:col-span-8 space-y-6 flex flex-col justify-between h-full">
+                                                    <div className="space-y-4">
+                                                        <div className="border-b border-neutral-800 focus-within:border-[#DFBA87] transition-all">
+                                                            <label className="block text-[8px] tracking-widest text-neutral-500 uppercase mb-1">品牌名稱 / Brand Name</label>
+                                                            <input 
+                                                                type="text"
+                                                                value={brand.name}
+                                                                onChange={(e) => handleFieldChange(brand.id, 'name', e.target.value)}
+                                                                className="w-full py-2 bg-transparent outline-none text-sm tracking-widest font-serif text-white"
+                                                            />
+                                                        </div>
+
+                                                        <div className="border-b border-neutral-800 focus-within:border-[#DFBA87] transition-all">
+                                                            <label className="block text-[8px] tracking-widest text-neutral-500 uppercase mb-1">品牌描述 / Description</label>
+                                                            <textarea 
+                                                                rows={3}
+                                                                value={brand.desc_text}
+                                                                onChange={(e) => handleFieldChange(brand.id, 'desc_text', e.target.value)}
+                                                                className="w-full py-2 bg-transparent outline-none text-xs tracking-wider text-neutral-300 leading-relaxed resize-none"
+                                                            />
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="pt-4 flex items-center justify-between border-t border-neutral-900/60 mt-4">
+                                                        <span className="text-[10px] text-[#DFBA87] font-mono">
+                                                            {brandFeedback[brand.id] || '準備就緒'}
+                                                        </span>
+                                                        <button
+                                                            onClick={() => handleSaveBrand(brand)}
+                                                            disabled={brandSavingId === brand.id}
+                                                            className="px-8 py-2.5 bg-[#DFBA87] text-black text-[10px] tracking-[0.3em] font-bold hover:bg-white disabled:opacity-50 transition-all uppercase cursor-pointer"
+                                                        >
+                                                            {brandSavingId === brand.id ? '儲存中...' : '儲存此品牌修改'}
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </motion.div>
                     )}
                 </AnimatePresence>
