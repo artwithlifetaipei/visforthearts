@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { motion, AnimatePresence, useMotionValue, useTransform } from 'framer-motion';
+import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
 
 // Easily modifiable configuration array for the 5 brands.
 // You can replace the Unsplash URLs with local image paths (e.g., '/fountain_logo.png' or '/brand1.png') later.
@@ -40,6 +40,98 @@ const BRAND_CARDS = [
     }
 ];
 
+interface SwipeCardProps {
+    brand: any;
+    swipeOverlay: 'like' | 'dislike' | null;
+    onSwipe: (action: 'like' | 'dislike') => void;
+}
+
+function SwipeCard({ brand, swipeOverlay, onSwipe }: SwipeCardProps) {
+    const dragX = useMotionValue(0);
+    const rotate = useTransform(dragX, [-200, 200], [-30, 30]);
+    const opacity = useTransform(dragX, [-200, -150, 0, 150, 200], [0.5, 1, 1, 1, 0.5]);
+
+    useEffect(() => {
+        if (swipeOverlay === 'like') {
+            animate(dragX, 200, { duration: 0.3 });
+        } else if (swipeOverlay === 'dislike') {
+            animate(dragX, -200, { duration: 0.3 });
+        } else {
+            if (dragX.get() !== 0 && Math.abs(dragX.get()) >= 200) {
+                // Currently exiting, don't snap back
+            } else {
+                animate(dragX, 0, { duration: 0.2 });
+            }
+        }
+    }, [swipeOverlay, dragX]);
+
+    const handleDragEnd = (event: any, info: any) => {
+        const threshold = 100;
+        if (info.offset.x > threshold) {
+            onSwipe('like');
+        } else if (info.offset.x < -threshold) {
+            onSwipe('dislike');
+        } else {
+            animate(dragX, 0, { duration: 0.2 });
+        }
+    };
+
+    return (
+        <motion.div
+            key={brand.id}
+            style={{ x: dragX, rotate, opacity }}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            onDragEnd={handleDragEnd}
+            initial={{ scale: 0.95, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ 
+                x: swipeOverlay === 'like' ? 200 : swipeOverlay === 'dislike' ? -200 : 0, 
+                opacity: 0,
+                transition: { duration: 0.3 }
+            }}
+            className="absolute inset-0 w-full h-full flex flex-col justify-between p-6 bg-gradient-to-b from-[#18181B] to-[#09090B] select-none cursor-grab active:cursor-grabbing rounded-2xl overflow-hidden shadow-2xl border border-white/10"
+        >
+            {/* Brand image background */}
+            <img 
+                src={brand.image} 
+                alt={brand.name} 
+                className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-85 brightness-[0.75]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/45 to-black/95 z-0 pointer-events-none"></div>
+
+            {/* Swipe indicator badge */}
+            <AnimatePresence>
+                {swipeOverlay && (
+                    <motion.div 
+                        initial={{ opacity: 0, scale: 0.5 }}
+                        animate={{ opacity: 1, scale: 1.2 }}
+                        className={`absolute top-10 right-10 px-4 py-1.5 border-2 rounded text-[14px] font-bold tracking-[0.2em] z-20 ${
+                            swipeOverlay === 'like' ? 'border-emerald-500 text-emerald-500' : 'border-rose-500 text-rose-500'
+                        }`}
+                    >
+                        {swipeOverlay === 'like' ? '◯ LIKE' : '✕ NO'}
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* Card Header */}
+            <div className="relative z-10 flex justify-between items-center">
+                <span className="text-[8px] tracking-[0.3em] uppercase text-white/50 font-mono">Taste Predict</span>
+                <span className="text-[12px] text-[#DFBA87]">✦</span>
+            </div>
+
+            {/* Card Info */}
+            <div className="relative z-10 space-y-3">
+                <h3 className="text-xl font-serif tracking-widest text-white">{brand.name}</h3>
+                <p className="text-[11px] leading-relaxed text-neutral-300 font-light tracking-wider">
+                    {brand.desc}
+                </p>
+            </div>
+        </motion.div>
+    );
+}
+
 export default function BlindBoxPage() {
     const router = useRouter();
     const [reward, setReward] = useState<any>(null);
@@ -53,11 +145,6 @@ export default function BlindBoxPage() {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [likedBrands, setLikedBrands] = useState<any[]>([]);
     const [swipeOverlay, setSwipeOverlay] = useState<'like' | 'dislike' | null>(null);
-
-    // Motion values for swipe drag gesture
-    const dragX = useMotionValue(0);
-    const rotate = useTransform(dragX, [-200, 200], [-30, 30]);
-    const opacity = useTransform(dragX, [-200, -150, 0, 150, 200], [0.5, 1, 1, 1, 0.5]);
 
     useEffect(() => {
         const checkAuth = async () => {
@@ -120,7 +207,6 @@ export default function BlindBoxPage() {
             // Advance to next card or trigger lottery
             if (currentIndex < activeBrands.length - 1) {
                 setCurrentIndex(currentIndex + 1);
-                dragX.set(0); // Reset drag coordinate so next card mounts centered!
             } else {
                 // Game finished - pick random from liked, fallback to random of all
                 setIsOpening(true);
@@ -154,16 +240,6 @@ export default function BlindBoxPage() {
                 setIsOpening(false);
             }
         }, 350);
-    };
-
-    // Drag-to-swipe handler
-    const handleDragEnd = (event: any, info: any) => {
-        const threshold = 100;
-        if (info.offset.x > threshold) {
-            handleSwipe('like');
-        } else if (info.offset.x < -threshold) {
-            handleSwipe('dislike');
-        }
     };
 
     const handleClaim = async () => {
@@ -231,7 +307,6 @@ export default function BlindBoxPage() {
 
                             <button
                                 onClick={() => {
-                                    dragX.set(0);
                                     setIsGameStarted(true);
                                 }}
                                 className="px-14 py-4 bg-[#DFBA87] hover:bg-white text-black text-[10px] tracking-[0.4em] uppercase font-bold transition-all duration-500 shadow-lg"
@@ -261,58 +336,12 @@ export default function BlindBoxPage() {
                                     {activeBrands.map((brand, idx) => {
                                         if (idx !== currentIndex) return null;
                                         return (
-                                            <motion.div
+                                            <SwipeCard
                                                 key={brand.id}
-                                                style={{ x: dragX, rotate, opacity }}
-                                                drag="x"
-                                                dragConstraints={{ left: 0, right: 0 }}
-                                                onDragEnd={handleDragEnd}
-                                                initial={{ scale: 0.95, opacity: 0 }}
-                                                animate={{ scale: 1, opacity: 1 }}
-                                                exit={{ 
-                                                    x: swipeOverlay === 'like' ? 200 : swipeOverlay === 'dislike' ? -200 : 0, 
-                                                    opacity: 0,
-                                                    transition: { duration: 0.3 }
-                                                }}
-                                                className="absolute inset-0 w-full h-full flex flex-col justify-between p-6 bg-gradient-to-b from-[#18181B] to-[#09090B] select-none cursor-grab active:cursor-grabbing rounded-2xl overflow-hidden shadow-2xl border border-white/10"
-                                            >
-                                                {/* Brand image background */}
-                                                <img 
-                                                    src={brand.image} 
-                                                    alt={brand.name} 
-                                                    className="absolute inset-0 w-full h-full object-cover z-0 pointer-events-none opacity-85 brightness-[0.75]"
-                                                />
-                                                <div className="absolute inset-0 bg-gradient-to-b from-black/25 via-black/45 to-black/95 z-0 pointer-events-none"></div>
-
-                                                {/* Swipe indicator badge */}
-                                                <AnimatePresence>
-                                                    {swipeOverlay && (
-                                                        <motion.div 
-                                                            initial={{ opacity: 0, scale: 0.5 }}
-                                                            animate={{ opacity: 1, scale: 1.2 }}
-                                                            className={`absolute top-10 right-10 px-4 py-1.5 border-2 rounded text-[14px] font-bold tracking-[0.2em] z-20 ${
-                                                                swipeOverlay === 'like' ? 'border-emerald-500 text-emerald-500' : 'border-rose-500 text-rose-500'
-                                                            }`}
-                                                        >
-                                                            {swipeOverlay === 'like' ? '◯ LIKE' : '✕ NO'}
-                                                        </motion.div>
-                                                    )}
-                                                </AnimatePresence>
-
-                                                {/* Card Header */}
-                                                <div className="relative z-10 flex justify-between items-center">
-                                                    <span className="text-[8px] tracking-[0.3em] uppercase text-white/50 font-mono">Taste Predict</span>
-                                                    <span className="text-[12px] text-[#DFBA87]">✦</span>
-                                                </div>
-
-                                                {/* Card Info */}
-                                                <div className="relative z-10 space-y-3">
-                                                    <h3 className="text-xl font-serif tracking-widest text-white">{brand.name}</h3>
-                                                    <p className="text-[11px] leading-relaxed text-neutral-300 font-light tracking-wider">
-                                                        {brand.desc}
-                                                    </p>
-                                                </div>
-                                            </motion.div>
+                                                brand={brand}
+                                                swipeOverlay={swipeOverlay}
+                                                onSwipe={handleSwipe}
+                                            />
                                         );
                                     })}
                                 </AnimatePresence>

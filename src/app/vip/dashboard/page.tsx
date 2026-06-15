@@ -54,8 +54,11 @@ export default function VIPDashboard() {
             setIsLoading(false);
         };
 
+        let authTimeout: NodeJS.Timeout | null = null;
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
+                if (authTimeout) clearTimeout(authTimeout);
                 fetchProfile(session.user);
             } else if (event === 'SIGNED_OUT') {
                 router.push('/vip');
@@ -64,12 +67,17 @@ export default function VIPDashboard() {
 
         // Initial check
         supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user) fetchProfile(user);
-            else {
-                // Wait a bit before kicking to login
-                setTimeout(() => {
-                    if (!user) router.push('/vip');
-                }, 2000);
+            if (user) {
+                if (authTimeout) clearTimeout(authTimeout);
+                fetchProfile(user);
+            } else {
+                // Wait a bit before kicking to login, checking again in 3s
+                authTimeout = setTimeout(async () => {
+                    const { data: { user: currentUser } } = await supabase.auth.getUser();
+                    if (!currentUser) {
+                        router.push('/vip');
+                    }
+                }, 3000);
             }
         });
 
@@ -83,6 +91,7 @@ export default function VIPDashboard() {
         return () => {
             subscription.unsubscribe();
             clearInterval(interval);
+            if (authTimeout) clearTimeout(authTimeout);
         };
     }, [router, profile?.id]);
 

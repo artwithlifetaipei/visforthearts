@@ -44,6 +44,7 @@ export default function OnboardingPage() {
         });
 
         // Initial check in case they are already logged in
+        let authTimeout: NodeJS.Timeout | null = null;
         const checkCurrentSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.user) {
@@ -69,20 +70,35 @@ export default function OnboardingPage() {
                     setIsLoading(false);
                 }
             } else {
-                // If there's a hash or query param, they are authenticating — give them a longer window (8s).
-                // If they have no auth parameters, boot them quickly (2.5s).
-                const isAuthenticating = window.location.hash || window.location.search;
-                const delay = isAuthenticating ? 8000 : 2500;
+                // If there is no session, check if we have OAuth/OTP code or token in URL.
+                // Next.js might still be hydrating, so check query params and hash.
+                const hasCode = typeof window !== 'undefined' && (
+                    new URLSearchParams(window.location.search).has('code') ||
+                    window.location.hash.includes('access_token') ||
+                    window.location.hash.includes('type=recovery') ||
+                    window.location.search.includes('type=magiclink')
+                );
 
-                const timeout = setTimeout(() => {
-                    if (!user) router.push('/vip');
-                }, delay);
-                return () => clearTimeout(timeout);
+                if (!hasCode) {
+                    // Not authenticating and no session -> redirect to login immediately
+                    router.push('/vip');
+                } else {
+                    // Authenticating -> Wait longer (up to 12s) to allow Supabase SDK to complete exchange
+                    authTimeout = setTimeout(async () => {
+                        const { data: { session: s2 } } = await supabase.auth.getSession();
+                        if (!s2?.user) {
+                            router.push('/vip');
+                        }
+                    }, 12000);
+                }
             }
         };
         checkCurrentSession();
 
-        return () => subscription.unsubscribe();
+        return () => {
+            subscription.unsubscribe();
+            if (authTimeout) clearTimeout(authTimeout);
+        };
     }, [router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
