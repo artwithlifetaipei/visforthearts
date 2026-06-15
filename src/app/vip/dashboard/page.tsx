@@ -155,31 +155,47 @@ export default function VIPDashboard() {
     };
 
     return (
-        <div className={`min-h-screen ${bgClass} transition-colors duration-1000 font-sans relative overflow-hidden pb-12`}>
-            {/* Ambient Background */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className={`absolute top-[-5%] right-[-10%] w-[60vw] h-[60vw] rounded-full blur-[100px] ${blurClass}`}></div>
+        <div className={`min-h-screen transition-colors duration-1000 font-sans relative overflow-hidden pb-12 ${isSVIP ? 'text-[#FAF9F6]' : 'text-[#1A1A1A]'}`}>
+            {/* Full-bleed architectural background */}
+            <div className="absolute inset-0 w-full h-full pointer-events-none">
+                <img
+                    src="/vip_lobby_bg.png"
+                    alt=""
+                    className="w-full h-full object-cover object-center"
+                    style={{ filter: isSVIP ? 'brightness(0.28) saturate(0.85)' : 'brightness(0.38) saturate(0.75)' }}
+                />
+                {/* Warm gradient overlay for readability */}
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        background: isSVIP
+                            ? 'linear-gradient(180deg, rgba(10,8,6,0.65) 0%, rgba(12,10,8,0.45) 40%, rgba(10,8,6,0.75) 100%)'
+                            : 'linear-gradient(180deg, rgba(245,242,235,0.82) 0%, rgba(240,235,225,0.6) 40%, rgba(245,242,235,0.88) 100%)'
+                    }}
+                />
+                {/* Subtle gold vignette top */}
+                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(223,186,135,0.08) 0%, transparent 65%)' }} />
             </div>
 
             {/* Header */}
             <header className="px-6 py-10 flex justify-between items-start relative z-10">
                 <div className="flex flex-col">
-                    <span className="text-[8px] tracking-[0.4em] uppercase opacity-40 mb-2 font-light">
+                    <span className={`text-[8px] tracking-[0.4em] uppercase mb-2 font-light ${isSVIP ? 'text-white/40' : 'text-[#1A1A1A]/50'}`}>
                         Digital Pass
                     </span>
-                    <span className="text-[14px] tracking-[0.2em] font-serif uppercase">
+                    <span className={`text-[14px] tracking-[0.2em] font-serif uppercase ${isSVIP ? 'text-white' : 'text-[#1A1A1A]'}`}>
                         {profile.first_name || profile.email.split('@')[0]}
                     </span>
                 </div>
                 <div className="text-right flex flex-col items-end gap-1.5">
-                    <div className={`inline-block px-4 py-1.5 border-[0.5px] ${isSVIP ? 'border-[#DFBA87] text-[#DFBA87]' : 'border-[#1A1A1A] text-[#1A1A1A]'}`}>
+                    <div className={`inline-block px-4 py-1.5 border-[0.5px] ${isSVIP ? 'border-[#DFBA87] text-[#DFBA87]' : 'border-[#1A1A1A]/60 text-[#1A1A1A]'}`}>
                         <span className="text-[9px] tracking-[0.4em] uppercase font-light">
                             {profile.tier}
                         </span>
                     </div>
                     <button 
                         onClick={handleSignOut}
-                        className={`text-[8px] tracking-[0.3em] uppercase opacity-40 hover:opacity-100 transition-opacity cursor-pointer border-b border-transparent hover:border-current mt-0.5`}
+                        className={`text-[8px] tracking-[0.3em] uppercase transition-opacity cursor-pointer border-b border-transparent hover:border-current mt-0.5 ${isSVIP ? 'text-white/40 hover:text-white/100' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/100'}`}
                     >
                         Sign Out / 登出
                     </button>
@@ -193,7 +209,7 @@ export default function VIPDashboard() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
                     className={`relative w-full max-w-sm rounded-none overflow-hidden flex flex-col items-center justify-between shadow-2xl border-[0.5px] backdrop-blur-xl p-8 py-12 ${cardClass}`}
-                    style={{ minHeight: '520px' }}
+                    style={{ minHeight: '520px', boxShadow: isSVIP ? '0 25px 60px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(223,186,135,0.1)' : '0 25px 60px rgba(0,0,0,0.25)' }}
                 >
                     {/* Corner Accents */}
                     <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
@@ -255,8 +271,8 @@ export default function VIPDashboard() {
                     className="aspect-square p-6 flex flex-col justify-between text-left border-[0.5px] border-white/20 backdrop-blur-md relative overflow-hidden group shadow-xl cursor-pointer"
                 >
                     <img 
-                        src="https://images.unsplash.com/photo-1549887534-1541e9326642?q=80&w=600&auto=format&fit=crop"
-                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110"
+                        src="/vip_lobby_bg.png"
+                        className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-[1.2s] ease-out group-hover:scale-110"
                         alt="Taste Prediction BG"
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/25 to-black/85 z-0"></div>
