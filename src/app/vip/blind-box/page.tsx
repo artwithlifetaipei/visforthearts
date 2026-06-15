@@ -165,14 +165,14 @@ export default function BlindBoxPage() {
     return (
         <div className="min-h-screen bg-neutral-950 text-white p-6 flex flex-col font-sans relative overflow-hidden">
             {/* Ambient glows */}
-            <div className="absolute top-[-20%] left-[-20%] w-[80vw] h-[80vw] bg-[#D4AF37]/5 rounded-full blur-[120px] pointer-events-none"></div>
+            <div className="absolute top-[-20%] left-[-20%] w-[80vw] h-[80vw] bg-[#DFBA87]/5 rounded-full blur-[120px] pointer-events-none"></div>
             <div className="absolute bottom-[-20%] right-[-20%] w-[80vw] h-[80vw] bg-neutral-900/40 rounded-full blur-[120px] pointer-events-none"></div>
 
             <header className="py-4 relative z-10 flex justify-between items-center">
                 <button onClick={() => router.push('/vip/dashboard')} className="text-neutral-500 text-[10px] tracking-widest uppercase hover:text-white transition-colors">
                     ← Back
                 </button>
-                <div className="text-[10px] tracking-[0.4em] text-[#D4AF37] font-mono">
+                <div className="text-[10px] tracking-[0.4em] text-[#DFBA87] font-mono">
                     VIS VIP EXCLUSIVE
                 </div>
             </header>
@@ -192,15 +192,15 @@ export default function BlindBoxPage() {
                                 <motion.div 
                                     animate={{ y: [0, -10, 0] }}
                                     transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
-                                    className="w-44 h-44 bg-gradient-to-tr from-[#1A1A1B] to-[#2E2C28] rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.5)] mx-auto flex items-center justify-center border border-[#D4AF37]/20 relative overflow-hidden"
+                                    className="w-44 h-44 bg-gradient-to-tr from-[#1A1A1B] to-[#2E2C28] rounded-3xl shadow-[0_15px_40px_rgba(0,0,0,0.5)] mx-auto flex items-center justify-center border border-[#DFBA87]/20 relative overflow-hidden"
                                 >
-                                    <div className="absolute inset-0 bg-[#D4AF37]/5 animate-pulse"></div>
-                                    <span className="text-5xl text-[#D4AF37] font-light drop-shadow-[0_0_15px_rgba(212,175,87,0.3)]">✧</span>
+                                    <div className="absolute inset-0 bg-[#DFBA87]/5 animate-pulse"></div>
+                                    <span className="text-5xl text-[#DFBA87] font-light drop-shadow-[0_0_15px_rgba(212,175,87,0.3)]">✧</span>
                                 </motion.div>
                             </div>
                             
                             <div className="space-y-3">
-                                <h2 className="text-sm tracking-[0.4em] uppercase text-[#D4AF37] font-medium">品味預測迎賓禮</h2>
+                                <h2 className="text-sm tracking-[0.4em] uppercase text-[#DFBA87] font-medium">品味預測迎賓禮</h2>
                                 <p className="text-xs text-neutral-400 tracking-widest leading-relaxed max-w-[280px]">
                                     歡迎來到 VIS！<br/>
                                     請完成 5 款特選品牌的喜好配對，大會將為您預測並送出專屬的迎賓消費禮遇。
@@ -209,7 +209,7 @@ export default function BlindBoxPage() {
 
                             <button
                                 onClick={() => setIsGameStarted(true)}
-                                className="px-14 py-4 bg-[#D4AF37] hover:bg-white text-black text-[10px] tracking-[0.4em] uppercase font-bold transition-all duration-500 shadow-lg"
+                                className="px-14 py-4 bg-[#DFBA87] hover:bg-white text-black text-[10px] tracking-[0.4em] uppercase font-bold transition-all duration-500 shadow-lg"
                             >
                                 開始品味配對
                             </button>
@@ -277,7 +277,7 @@ export default function BlindBoxPage() {
                                                 {/* Card Header */}
                                                 <div className="relative z-10 flex justify-between items-center">
                                                     <span className="text-[8px] tracking-[0.3em] uppercase text-white/50 font-mono">Taste Predict</span>
-                                                    <span className="text-[12px] text-[#D4AF37]">✦</span>
+                                                    <span className="text-[12px] text-[#DFBA87]">✦</span>
                                                 </div>
 
                                                 {/* Card Info */}
@@ -305,7 +305,7 @@ export default function BlindBoxPage() {
                                 {/* Like Button */}
                                 <button
                                     onClick={() => handleSwipe('like')}
-                                    className="w-16 h-16 rounded-full border border-[#D4AF37]/50 bg-[#D4AF37]/10 hover:bg-[#D4AF37] text-[#D4AF37] hover:text-black flex items-center justify-center text-xl transition-all shadow-[0_0_20px_rgba(212,175,87,0.15)] cursor-pointer"
+                                    className="w-16 h-16 rounded-full border border-[#DFBA87]/50 bg-[#DFBA87]/10 hover:bg-[#DFBA87] text-[#DFBA87] hover:text-black flex items-center justify-center text-xl transition-all shadow-[0_0_20px_rgba(212,175,87,0.15)] cursor-pointer"
                                 >
                                     ◯
                                 </button>
@@ -322,8 +322,8 @@ export default function BlindBoxPage() {
                             exit={{ opacity: 0 }}
                             className="text-center"
                         >
-                            <div className="w-12 h-12 border-t-2 border-[#D4AF37] rounded-full animate-spin mx-auto mb-6"></div>
-                            <p className="text-[10px] tracking-[0.4em] uppercase text-[#D4AF37] font-mono animate-pulse">
+                            <div className="w-12 h-12 border-t-2 border-[#DFBA87] rounded-full animate-spin mx-auto mb-6"></div>
+                            <p className="text-[10px] tracking-[0.4em] uppercase text-[#DFBA87] font-mono animate-pulse">
                                 分析品味偏好中...
                             </p>
                         </motion.div>
@@ -338,7 +338,7 @@ export default function BlindBoxPage() {
                             className="text-center w-full max-w-sm flex flex-col items-center"
                         >
                             <div className="mb-8 space-y-2">
-                                <span className="text-[9px] tracking-[0.6em] text-[#D4AF37] uppercase block font-semibold">Tasting Reward Unlocked</span>
+                                <span className="text-[9px] tracking-[0.6em] text-[#DFBA87] uppercase block font-semibold">Tasting Reward Unlocked</span>
                                 <h2 className="text-xs tracking-widest text-neutral-400 font-mono">您的專屬預測迎賓禮</h2>
                             </div>
 
@@ -346,15 +346,15 @@ export default function BlindBoxPage() {
                             <div className={`w-full p-8 rounded-3xl border relative overflow-hidden backdrop-blur-xl ${
                                 isClaimed 
                                     ? 'border-zinc-800 bg-zinc-900/30' 
-                                    : 'border-[#D4AF37]/30 bg-[#14120E]/80 shadow-[0_15px_40px_rgba(212,175,87,0.05)]'
+                                    : 'border-[#DFBA87]/30 bg-[#14120E]/80 shadow-[0_15px_40px_rgba(212,175,87,0.05)]'
                             } mb-12`}>
                                 {/* Ticket cutout circles for ticket feel */}
-                                <div className="absolute top-1/2 -left-3 w-6 h-6 rounded-full bg-neutral-950 border-r border-[#D4AF37]/20 -translate-y-1/2"></div>
-                                <div className="absolute top-1/2 -right-3 w-6 h-6 rounded-full bg-neutral-950 border-l border-[#D4AF37]/20 -translate-y-1/2"></div>
+                                <div className="absolute top-1/2 -left-3 w-6 h-6 rounded-full bg-neutral-950 border-r border-[#DFBA87]/20 -translate-y-1/2"></div>
+                                <div className="absolute top-1/2 -right-3 w-6 h-6 rounded-full bg-neutral-950 border-l border-[#DFBA87]/20 -translate-y-1/2"></div>
 
                                 <div className="space-y-6">
                                     <div className="space-y-2">
-                                        <p className="text-[10px] tracking-[0.4em] text-[#D4AF37] uppercase font-mono">VIS ART FESTIVAL</p>
+                                        <p className="text-[10px] tracking-[0.4em] text-[#DFBA87] uppercase font-mono">VIS ART FESTIVAL</p>
                                         <h3 className="text-2xl font-serif text-white tracking-widest px-4">{reward.reward_type}</h3>
                                     </div>
 
@@ -373,7 +373,7 @@ export default function BlindBoxPage() {
                                             
                                             <button
                                                 onDoubleClick={handleClaim}
-                                                className="w-full py-4 bg-[#D4AF37] hover:bg-white text-black text-[10px] tracking-[0.4em] uppercase font-bold hover:scale-[0.98] transition-all cursor-pointer"
+                                                className="w-full py-4 bg-[#DFBA87] hover:bg-white text-black text-[10px] tracking-[0.4em] uppercase font-bold hover:scale-[0.98] transition-all cursor-pointer"
                                             >
                                                 專員點擊核銷 (Double Click)
                                             </button>

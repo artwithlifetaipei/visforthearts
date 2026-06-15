@@ -192,8 +192,8 @@ export default function ZodiacStoryPage() {
                         <p className="text-xl md:text-2xl font-light italic leading-relaxed tracking-wide text-white drop-shadow-md">
                             "{data.quote}"
                         </p>
-                        <div className="h-px w-12 bg-[#D4AF37] my-6 opacity-80"></div>
-                        <p className="text-[10px] tracking-[0.3em] uppercase text-[#D4AF37] font-medium leading-relaxed drop-shadow-md">
+                        <div className="h-px w-12 bg-[#DFBA87] my-6 opacity-80"></div>
+                        <p className="text-[10px] tracking-[0.3em] uppercase text-[#DFBA87] font-medium leading-relaxed drop-shadow-md">
                             — {data.artist}
                         </p>
                     </div>

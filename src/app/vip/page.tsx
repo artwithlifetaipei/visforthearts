@@ -71,7 +71,7 @@ export default function VIPLoginPage() {
         <div className="min-h-screen bg-[#FAF9F6] flex flex-col p-6 font-sans relative overflow-x-hidden">
             {/* Atmospheric Background Blurs */}
             <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-[#D4AF37]/5 rounded-full blur-[100px]"></div>
+                <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-[#DFBA87]/5 rounded-full blur-[100px]"></div>
                 <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-black/5 rounded-full blur-[120px]"></div>
             </div>
 
@@ -109,7 +109,7 @@ export default function VIPLoginPage() {
                             className="space-y-12"
                         >
                             <div className="mb-10 mt-2">
-                                <h1 className="text-[15px] font-serif tracking-[0.1em] text-[#D4AF37] uppercase">
+                                <h1 className="text-[15px] font-serif tracking-[0.1em] text-[#DFBA87] uppercase">
                                     VIP / SVIP Exclusive Access
                                 </h1>
                             </div>
@@ -164,9 +164,9 @@ export default function VIPLoginPage() {
                                     initial={{ scale: 0, rotate: -90 }}
                                     animate={{ scale: 1, rotate: 0 }}
                                     transition={{ type: "spring", damping: 15, stiffness: 100, delay: 0.2 }}
-                                    className="w-16 h-16 rounded-full border-[0.5px] border-[#D4AF37] flex items-center justify-center bg-white shadow-xl shadow-[#D4AF37]/10"
+                                    className="w-16 h-16 rounded-full border-[0.5px] border-[#DFBA87] flex items-center justify-center bg-white shadow-xl shadow-[#DFBA87]/10"
                                 >
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#D4AF37" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DFBA87" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
                                         <path d="M20 6L9 17L4 12" />
                                     </svg>
                                 </motion.div>

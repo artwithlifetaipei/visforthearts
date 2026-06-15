@@ -89,7 +89,7 @@ export default function VIPDashboard() {
     if (isLoading || !profile) {
         return (
             <div className="min-h-screen bg-black flex items-center justify-center">
-                <div className="w-4 h-4 border-t-2 border-[#D4AF37] rounded-full animate-spin"></div>
+                <div className="w-4 h-4 border-t-2 border-[#DFBA87] rounded-full animate-spin"></div>
             </div>
         );
     }
@@ -101,8 +101,8 @@ export default function VIPDashboard() {
     const cardClass = isSVIP 
         ? 'bg-[#1A1A1A]/80 border-[#333333] shadow-black/50' 
         : 'bg-white/80 border-[#E5E5E5] shadow-black/5';
-    const accentColor = '#D4AF37'; // Pola Gold
-    const blurClass = isSVIP ? 'bg-[#D4AF37]/10' : 'bg-[#D4AF37]/5';
+    const accentColor = '#DFBA87'; // Pola Gold
+    const blurClass = isSVIP ? 'bg-[#DFBA87]/10' : 'bg-[#DFBA87]/5';
 
     const handleSignOut = async () => {
         await supabase.auth.signOut();
@@ -163,7 +163,7 @@ export default function VIPDashboard() {
                     </span>
                 </div>
                 <div className="text-right flex flex-col items-end gap-1.5">
-                    <div className={`inline-block px-4 py-1.5 border-[0.5px] ${isSVIP ? 'border-[#D4AF37] text-[#D4AF37]' : 'border-[#1A1A1A] text-[#1A1A1A]'}`}>
+                    <div className={`inline-block px-4 py-1.5 border-[0.5px] ${isSVIP ? 'border-[#DFBA87] text-[#DFBA87]' : 'border-[#1A1A1A] text-[#1A1A1A]'}`}>
                         <span className="text-[9px] tracking-[0.4em] uppercase font-light">
                             {profile.tier}
                         </span>
@@ -194,12 +194,12 @@ export default function VIPDashboard() {
 
                     {/* VIP Invitation / Event details */}
                     <div className="text-center mb-6 space-y-2.5 w-full">
-                        <h2 className="text-[13px] tracking-[0.4em] uppercase font-semibold text-[#D4AF37]">VIS FOR THE ARTS</h2>
+                        <h2 className="text-[13px] tracking-[0.4em] uppercase font-semibold text-[#DFBA87]">VIS FOR THE ARTS</h2>
                         <p className="text-[10px] tracking-[0.2em] font-mono opacity-80">2027/1/7 - 1/10</p>
                         <p className="text-[9.5px] tracking-widest opacity-60">台北市中正區延平南路98號</p>
                         <p className="text-[8.5px] tracking-wider opacity-60 mt-3 border-t border-current/10 pt-3 px-2 leading-relaxed">
                             如需貴賓服務，請聯絡VIP辦公室<br/>
-                            <a href="mailto:visvipteam@gmail.com" className="underline text-[#D4AF37] hover:text-white transition-colors duration-300">visvipteam@gmail.com</a>
+                            <a href="mailto:visvipteam@gmail.com" className="underline text-[#DFBA87] hover:text-white transition-colors duration-300">visvipteam@gmail.com</a>
                         </p>
                     </div>
 
@@ -252,7 +252,7 @@ export default function VIPDashboard() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/25 to-black/85 z-0"></div>
 
-                    <span className="relative z-10 text-[8px] tracking-[0.4em] uppercase text-[#D4AF37] font-semibold">Curated</span>
+                    <span className="relative z-10 text-[8px] tracking-[0.4em] uppercase text-[#DFBA87] font-semibold">Curated</span>
                     <h3 className="relative z-10 text-xs font-serif tracking-[0.2em] leading-relaxed text-white">
                         品味預測<br/>迎賓禮
                     </h3>
@@ -271,7 +271,7 @@ export default function VIPDashboard() {
                     />
                     <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/25 to-black/85 z-0"></div>
 
-                    <span className="relative z-10 text-[8px] tracking-[0.4em] uppercase text-[#D4AF37] font-semibold">Aesthetic</span>
+                    <span className="relative z-10 text-[8px] tracking-[0.4em] uppercase text-[#DFBA87] font-semibold">Aesthetic</span>
                     <h3 className="relative z-10 text-xs font-serif tracking-[0.2em] leading-relaxed text-white">
                         你與哪位藝術家之間<br/>有所共感？
                     </h3>
@@ -283,7 +283,7 @@ export default function VIPDashboard() {
                 <div className="text-center mt-8">
                     <button
                         onClick={() => router.push('/vip/admin')}
-                        className="text-[9px] tracking-[0.4em] uppercase text-neutral-600 hover:text-[#D4AF37] transition-colors duration-500"
+                        className="text-[9px] tracking-[0.4em] uppercase text-neutral-600 hover:text-[#DFBA87] transition-colors duration-500"
                     >
                         ⚙ 貴賓名單管理
                     </button>
@@ -314,10 +314,10 @@ export default function VIPDashboard() {
                                 ✕
                             </button>
 
-                            <h3 className="text-xs tracking-[0.4em] text-[#D4AF37] uppercase mb-8 font-medium">Add to Wallet / 錢包與提醒</h3>
+                            <h3 className="text-xs tracking-[0.4em] text-[#DFBA87] uppercase mb-8 font-medium">Add to Wallet / 錢包與提醒</h3>
 
                             {/* Wallet Ticket Mockup */}
-                            <div className="relative w-full max-w-[280px] bg-gradient-to-b from-[#1E1C18] to-[#0F0E0D] border-[0.5px] border-[#D4AF37]/30 p-6 flex flex-col items-center mb-8 shadow-2xl rounded-lg">
+                            <div className="relative w-full max-w-[280px] bg-gradient-to-b from-[#1E1C18] to-[#0F0E0D] border-[0.5px] border-[#DFBA87]/30 p-6 flex flex-col items-center mb-8 shadow-2xl rounded-lg">
                                 {/* Ticket Header */}
                                 <div className="w-full flex justify-between items-center border-b border-white/10 pb-4 mb-4">
                                     <img 
@@ -325,7 +325,7 @@ export default function VIPDashboard() {
                                         alt="VIS Logo" 
                                         className="h-5 brightness-200 opacity-80"
                                     />
-                                    <span className="text-[9px] tracking-[0.2em] font-mono text-[#D4AF37] border border-[#D4AF37]/40 px-2 py-0.5 uppercase">
+                                    <span className="text-[9px] tracking-[0.2em] font-mono text-[#DFBA87] border border-[#DFBA87]/40 px-2 py-0.5 uppercase">
                                         {profile.tier} PASS
                                     </span>
                                 </div>
@@ -383,13 +383,13 @@ export default function VIPDashboard() {
                                         href={googleCalendarUrl()}
                                         target="_blank"
                                         rel="noopener noreferrer"
-                                        className="py-3 bg-white/5 border border-white/10 hover:border-[#D4AF37] hover:text-[#D4AF37] text-center text-[9px] tracking-[0.2em] text-neutral-300 uppercase transition-all duration-300"
+                                        className="py-3 bg-white/5 border border-white/10 hover:border-[#DFBA87] hover:text-[#DFBA87] text-center text-[9px] tracking-[0.2em] text-neutral-300 uppercase transition-all duration-300"
                                     >
                                         Google 日曆
                                     </a>
                                     <button 
                                         onClick={generateICS}
-                                        className="py-3 bg-white/5 border border-white/10 hover:border-[#D4AF37] hover:text-[#D4AF37] text-center text-[9px] tracking-[0.2em] text-neutral-300 uppercase transition-all duration-300 cursor-pointer"
+                                        className="py-3 bg-white/5 border border-white/10 hover:border-[#DFBA87] hover:text-[#DFBA87] text-center text-[9px] tracking-[0.2em] text-neutral-300 uppercase transition-all duration-300 cursor-pointer"
                                     >
                                         Apple / Outlook
                                     </button>

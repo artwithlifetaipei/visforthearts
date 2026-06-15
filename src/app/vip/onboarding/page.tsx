@@ -165,7 +165,7 @@ export default function OnboardingPage() {
                         whileTap={{ scale: 0.95 }}
                         type="submit"
                         disabled={isLoading || !birthdate}
-                        className="px-16 py-4 border border-[#D4AF37] text-[#D4AF37] text-[10px] tracking-[0.5em] uppercase hover:bg-[#D4AF37] hover:text-black transition-all duration-700 disabled:opacity-30"
+                        className="px-16 py-4 border border-[#DFBA87] text-[#DFBA87] text-[10px] tracking-[0.5em] uppercase hover:bg-[#DFBA87] hover:text-black transition-all duration-700 disabled:opacity-30"
                     >
                         {isLoading ? 'Verifying...' : 'Unlock Portal'}
                     </motion.button>

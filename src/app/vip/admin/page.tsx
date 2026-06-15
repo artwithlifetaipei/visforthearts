@@ -266,7 +266,7 @@ export default function VIPAdminPage() {
                     className="mb-12 flex justify-between items-end border-b border-neutral-800 pb-8"
                 >
                     <div>
-                        <p className="text-[9px] tracking-[0.5em] text-[#D4AF37] uppercase mb-3">VIS FOR THE ARTS</p>
+                        <p className="text-[9px] tracking-[0.5em] text-[#DFBA87] uppercase mb-3">VIS FOR THE ARTS</p>
                         <h1 className="text-2xl font-serif font-light tracking-wide mb-1">VIP & 專業買家 CRM 後台</h1>
                         <p className="text-[10px] tracking-widest text-neutral-500 uppercase">Customer Relationship Management</p>
                     </div>
@@ -284,29 +284,29 @@ export default function VIPAdminPage() {
                 <div className="flex gap-8 mb-12 border-b border-neutral-900 pb-px">
                     <button
                         onClick={() => setActiveTab('audience')}
-                        className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'audience' ? 'text-[#D4AF37]' : 'text-neutral-500 hover:text-neutral-300'}`}
+                        className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'audience' ? 'text-[#DFBA87]' : 'text-neutral-500 hover:text-neutral-300'}`}
                     >
                         受眾與名單管理 (Audience)
                         {activeTab === 'audience' && (
-                            <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#D4AF37]" />
+                            <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#DFBA87]" />
                         )}
                     </button>
                     <button
                         onClick={() => setActiveTab('campaigns')}
-                        className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'campaigns' ? 'text-[#D4AF37]' : 'text-neutral-500 hover:text-neutral-300'}`}
+                        className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'campaigns' ? 'text-[#DFBA87]' : 'text-neutral-500 hover:text-neutral-300'}`}
                     >
                         Email 自助行銷與排程 (Campaigns)
                         {activeTab === 'campaigns' && (
-                            <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#D4AF37]" />
+                            <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#DFBA87]" />
                         )}
                     </button>
                     <button
                         onClick={() => setActiveTab('vcheck')}
-                        className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'vcheck' ? 'text-[#D4AF37]' : 'text-neutral-500 hover:text-neutral-300'}`}
+                        className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'vcheck' ? 'text-[#DFBA87]' : 'text-neutral-500 hover:text-neutral-300'}`}
                     >
                         現場核銷與數據分析 (V-Check)
                         {activeTab === 'vcheck' && (
-                            <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#D4AF37]" />
+                            <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#DFBA87]" />
                         )}
                     </button>
                 </div>
@@ -325,7 +325,7 @@ export default function VIPAdminPage() {
                                 <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400 mb-8">新增受眾與設定身分</h2>
                                 <form onSubmit={handleAddAudience} className="space-y-6">
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        <div className="border-b border-neutral-700 focus-within:border-[#D4AF37] transition-colors duration-300">
+                                        <div className="border-b border-neutral-700 focus-within:border-[#DFBA87] transition-colors duration-300">
                                             <input
                                                 type="email"
                                                 placeholder="EMAIL ADDRESS"
@@ -335,7 +335,7 @@ export default function VIPAdminPage() {
                                                 className="w-full py-3 bg-transparent outline-none text-xs tracking-widest placeholder:text-neutral-600 text-white"
                                             />
                                         </div>
-                                        <div className="border-b border-neutral-700 focus-within:border-[#D4AF37] transition-colors duration-300">
+                                        <div className="border-b border-neutral-700 focus-within:border-[#DFBA87] transition-colors duration-300">
                                             <input
                                                 type="text"
                                                 placeholder="姓名 NAME (選填)"
@@ -350,14 +350,14 @@ export default function VIPAdminPage() {
                                                 <button
                                                     type="button"
                                                     onClick={() => setNewTier('VIP')}
-                                                    className={`flex-1 py-2.5 text-[10px] tracking-[0.3em] uppercase border transition-all duration-300 ${newTier === 'VIP' ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5' : 'border-neutral-800 text-neutral-600'}`}
+                                                    className={`flex-1 py-2.5 text-[10px] tracking-[0.3em] uppercase border transition-all duration-300 ${newTier === 'VIP' ? 'border-[#DFBA87] text-[#DFBA87] bg-[#DFBA87]/5' : 'border-neutral-800 text-neutral-600'}`}
                                                 >
                                                     VIP
                                                 </button>
                                                 <button
                                                     type="button"
                                                     onClick={() => setNewTier('SVIP')}
-                                                    className={`flex-1 py-2.5 text-[10px] tracking-[0.3em] uppercase border transition-all duration-300 ${newTier === 'SVIP' ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5' : 'border-neutral-800 text-neutral-600'}`}
+                                                    className={`flex-1 py-2.5 text-[10px] tracking-[0.3em] uppercase border transition-all duration-300 ${newTier === 'SVIP' ? 'border-[#DFBA87] text-[#DFBA87] bg-[#DFBA87]/5' : 'border-neutral-800 text-neutral-600'}`}
                                                 >
                                                     SVIP
                                                 </button>
@@ -383,7 +383,7 @@ export default function VIPAdminPage() {
                                             whileTap={{ scale: 0.95 }}
                                             type="submit"
                                             disabled={isAdding}
-                                            className="px-10 py-3 bg-[#D4AF37] text-black text-[10px] tracking-[0.4em] uppercase disabled:opacity-50 transition-all font-medium"
+                                            className="px-10 py-3 bg-[#DFBA87] text-black text-[10px] tracking-[0.4em] uppercase disabled:opacity-50 transition-all font-medium"
                                         >
                                             {isAdding ? '加入中...' : '加入名單'}
                                         </motion.button>
@@ -415,7 +415,7 @@ export default function VIPAdminPage() {
                                                 className="flex items-center justify-between bg-neutral-900/40 border border-neutral-800/40 px-6 py-4 hover:border-neutral-700 transition-colors duration-300"
                                             >
                                                 <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
-                                                    <div className={`text-[8px] px-2 py-0.5 border ${vip.tier === 'SVIP' ? 'border-[#D4AF37] text-[#D4AF37]' : 'border-neutral-700 text-neutral-400'} tracking-tighter`}>
+                                                    <div className={`text-[8px] px-2 py-0.5 border ${vip.tier === 'SVIP' ? 'border-[#DFBA87] text-[#DFBA87]' : 'border-neutral-700 text-neutral-400'} tracking-tighter`}>
                                                         {vip.tier}
                                                     </div>
                                                     <div className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-300 uppercase tracking-widest font-mono">
@@ -468,7 +468,7 @@ export default function VIPAdminPage() {
                                 <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400 mb-8">建立新活動 / 排程發送通知</h2>
                                 <form onSubmit={handleCreateCampaign} className="space-y-6">
                                     <div className="space-y-6">
-                                        <div className="border-b border-neutral-700 focus-within:border-[#D4AF37] transition-colors duration-300">
+                                        <div className="border-b border-neutral-700 focus-within:border-[#DFBA87] transition-colors duration-300">
                                             <input
                                                 type="text"
                                                 placeholder="EMAIL SUBJECT (信件主旨)"
@@ -515,7 +515,7 @@ export default function VIPAdminPage() {
                                                 value={cContent}
                                                 onChange={(e) => setCContent(e.target.value)}
                                                 required
-                                                className="w-full p-4 bg-neutral-900/50 border border-neutral-800 focus:border-[#D4AF37] outline-none text-xs tracking-widest text-white leading-relaxed placeholder:text-neutral-600 font-light"
+                                                className="w-full p-4 bg-neutral-900/50 border border-neutral-800 focus:border-[#DFBA87] outline-none text-xs tracking-widest text-white leading-relaxed placeholder:text-neutral-600 font-light"
                                             />
                                         </div>
                                     </div>
@@ -525,7 +525,7 @@ export default function VIPAdminPage() {
                                             whileTap={{ scale: 0.95 }}
                                             type="submit"
                                             disabled={isSavingCampaign}
-                                            className="px-10 py-3 bg-[#D4AF37] text-black text-[10px] tracking-[0.4em] uppercase disabled:opacity-50 transition-all font-medium"
+                                            className="px-10 py-3 bg-[#DFBA87] text-black text-[10px] tracking-[0.4em] uppercase disabled:opacity-50 transition-all font-medium"
                                         >
                                             {isSavingCampaign ? '儲存中...' : (cScheduledAt ? '排程活動' : '儲存為草稿')}
                                         </motion.button>
@@ -575,7 +575,7 @@ export default function VIPAdminPage() {
                                                 {camp.status !== 'Sent' && (
                                                     <button
                                                         onClick={() => handleSendNow(camp.id)}
-                                                        className="text-[9px] tracking-[0.3em] uppercase bg-white text-black hover:bg-[#D4AF37] hover:text-black transition-all px-4 py-2 text-center"
+                                                        className="text-[9px] tracking-[0.3em] uppercase bg-white text-black hover:bg-[#DFBA87] hover:text-black transition-all px-4 py-2 text-center"
                                                     >
                                                         立即發送
                                                     </button>
@@ -605,7 +605,7 @@ export default function VIPAdminPage() {
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                                 <div className="border border-neutral-800 bg-neutral-950/20 p-6 flex flex-col justify-between" style={{ minHeight: '120px' }}>
                                     <span className="text-[8px] tracking-[0.3em] uppercase text-neutral-500 font-mono">總進場人次 / Total check-ins</span>
-                                    <h3 className="text-3xl font-serif tracking-widest text-[#D4AF37] font-light mt-4">
+                                    <h3 className="text-3xl font-serif tracking-widest text-[#DFBA87] font-light mt-4">
                                         {checkinLogs.length} <span className="text-[10px] font-sans text-neutral-500 font-light ml-1">人次</span>
                                     </h3>
                                 </div>
@@ -639,7 +639,7 @@ export default function VIPAdminPage() {
                                         <h3 className="text-[10px] tracking-[0.3em] uppercase text-neutral-400 font-mono">即時進場狀態動態 / Live Scanner Feed</h3>
                                         <button 
                                             onClick={fetchCheckinLogs}
-                                            className="text-[8px] tracking-widest text-[#D4AF37] uppercase hover:underline"
+                                            className="text-[8px] tracking-widest text-[#DFBA87] uppercase hover:underline"
                                         >
                                             手動重整 ↻
                                         </button>
@@ -653,7 +653,7 @@ export default function VIPAdminPage() {
                                             >
                                                 <div className="space-y-1.5">
                                                     <div className="flex items-center gap-2">
-                                                        <span className={`text-[7px] font-bold px-2 py-0.5 border ${log.tier === 'SVIP' ? 'border-[#D4AF37] text-[#D4AF37] bg-[#D4AF37]/5' : 'border-neutral-700 text-neutral-400 bg-neutral-800/30'} tracking-tighter`}>
+                                                        <span className={`text-[7px] font-bold px-2 py-0.5 border ${log.tier === 'SVIP' ? 'border-[#DFBA87] text-[#DFBA87] bg-[#DFBA87]/5' : 'border-neutral-700 text-neutral-400 bg-neutral-800/30'} tracking-tighter`}>
                                                             {log.tier}
                                                         </span>
                                                         <span className="text-[8px] px-2 py-0.5 bg-neutral-950 border border-neutral-900 text-neutral-500 font-mono tracking-widest uppercase">
@@ -715,7 +715,7 @@ export default function VIPAdminPage() {
                                                         className="bg-neutral-900/30 border border-neutral-800/40 px-5 py-3 flex justify-between items-center font-mono"
                                                     >
                                                         <div className="flex items-center gap-3">
-                                                            <span className="text-[10px] text-[#D4AF37] font-serif w-4">{idx + 1}.</span>
+                                                            <span className="text-[10px] text-[#DFBA87] font-serif w-4">{idx + 1}.</span>
                                                             <div>
                                                                 <p className="text-[11px] font-sans font-light tracking-wide text-neutral-200">
                                                                     {item.name || item.email.split('@')[0]}
@@ -727,10 +727,10 @@ export default function VIPAdminPage() {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-3">
-                                                            <span className={`text-[7px] font-bold px-1.5 py-0.5 border ${item.tier === 'SVIP' ? 'border-[#D4AF37] text-[#D4AF37]' : 'border-neutral-700 text-neutral-400'} tracking-tighter scale-90`}>
+                                                            <span className={`text-[7px] font-bold px-1.5 py-0.5 border ${item.tier === 'SVIP' ? 'border-[#DFBA87] text-[#DFBA87]' : 'border-neutral-700 text-neutral-400'} tracking-tighter scale-90`}>
                                                                 {item.tier}
                                                             </span>
-                                                            <span className="text-[10px] text-neutral-300 font-semibold bg-[#D4AF37]/10 px-2 py-0.5 border border-[#D4AF37]/20 rounded-sm">
+                                                            <span className="text-[10px] text-neutral-300 font-semibold bg-[#DFBA87]/10 px-2 py-0.5 border border-[#DFBA87]/20 rounded-sm">
                                                                 {item.count} 次入場
                                                             </span>
                                                         </div>
@@ -767,7 +767,7 @@ export default function VIPAdminPage() {
                                                         className="bg-neutral-900/10 border border-neutral-800/30 px-5 py-3 flex justify-between items-center"
                                                     >
                                                         <span className="text-xs font-mono tracking-widest text-neutral-300 font-light">🖥 {dev.name}</span>
-                                                        <span className="text-xs font-serif text-[#D4AF37] font-medium bg-[#D4AF37]/5 px-2.5 py-0.5 border border-[#D4AF37]/20">
+                                                        <span className="text-xs font-serif text-[#DFBA87] font-medium bg-[#DFBA87]/5 px-2.5 py-0.5 border border-[#DFBA87]/20">
                                                             {dev.count} <span className="text-[8px] font-sans text-neutral-500 font-light ml-0.5">次掃描</span>
                                                         </span>
                                                     </div>

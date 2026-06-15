@@ -807,7 +807,7 @@ export default function StaffScannerPage() {
                         </div>
                     </div>
                 ) : (
-                    <div className="w-4 h-4 border-t-2 border-[#D4AF37] rounded-full animate-spin"></div>
+                    <div className="w-4 h-4 border-t-2 border-[#DFBA87] rounded-full animate-spin"></div>
                 )}
             </div>
         );
@@ -826,10 +826,10 @@ export default function StaffScannerPage() {
                     className="w-full max-w-sm border border-neutral-900 bg-neutral-950/60 p-8 py-10 relative backdrop-blur-xl shadow-2xl flex flex-col gap-8"
                 >
                     {/* Corner accents */}
-                    <div className="absolute top-4 left-4 w-2.5 h-2.5 border-t-[0.5px] border-l-[0.5px] border-[#D4AF37]/50"></div>
-                    <div className="absolute top-4 right-4 w-2.5 h-2.5 border-t-[0.5px] border-r-[0.5px] border-[#D4AF37]/50"></div>
-                    <div className="absolute bottom-4 left-4 w-2.5 h-2.5 border-b-[0.5px] border-l-[0.5px] border-[#D4AF37]/50"></div>
-                    <div className="absolute bottom-4 right-4 w-2.5 h-2.5 border-b-[0.5px] border-r-[0.5px] border-[#D4AF37]/50"></div>
+                    <div className="absolute top-4 left-4 w-2.5 h-2.5 border-t-[0.5px] border-l-[0.5px] border-[#DFBA87]/50"></div>
+                    <div className="absolute top-4 right-4 w-2.5 h-2.5 border-t-[0.5px] border-r-[0.5px] border-[#DFBA87]/50"></div>
+                    <div className="absolute bottom-4 left-4 w-2.5 h-2.5 border-b-[0.5px] border-l-[0.5px] border-[#DFBA87]/50"></div>
+                    <div className="absolute bottom-4 right-4 w-2.5 h-2.5 border-b-[0.5px] border-r-[0.5px] border-[#DFBA87]/50"></div>
 
                     <div className="text-center space-y-3">
                         <img 
@@ -837,13 +837,13 @@ export default function StaffScannerPage() {
                             alt="VIS Logo" 
                             className="h-10 mx-auto brightness-200 opacity-90"
                         />
-                        <p className="text-[7.5px] tracking-[0.5em] text-[#D4AF37] uppercase font-mono mt-4 font-medium">V-Check System</p>
+                        <p className="text-[7.5px] tracking-[0.5em] text-[#DFBA87] uppercase font-mono mt-4 font-medium">V-Check System</p>
                         <h2 className="text-sm tracking-[0.25em] font-serif uppercase font-light text-neutral-300">現場核銷工作人員登入</h2>
                     </div>
 
                     <form onSubmit={handleLoginSubmit} className="space-y-6">
                         <div className="space-y-4">
-                            <div className="border-b border-neutral-800 focus-within:border-[#D4AF37] transition-all py-1">
+                            <div className="border-b border-neutral-800 focus-within:border-[#DFBA87] transition-all py-1">
                                 <label className="block text-[7px] tracking-widest text-neutral-600 uppercase mb-1">大會工作人員帳號 (Email)</label>
                                 <input 
                                     type="email"
@@ -854,7 +854,7 @@ export default function StaffScannerPage() {
                                     className="w-full bg-transparent border-none outline-none text-xs text-white tracking-widest font-mono py-1"
                                 />
                             </div>
-                            <div className="border-b border-neutral-800 focus-within:border-[#D4AF37] transition-all py-1">
+                            <div className="border-b border-neutral-800 focus-within:border-[#DFBA87] transition-all py-1">
                                 <label className="block text-[7px] tracking-widest text-neutral-600 uppercase mb-1">驗證密碼 (Password)</label>
                                 <input 
                                     type="password"
@@ -876,7 +876,7 @@ export default function StaffScannerPage() {
                         <button 
                             type="submit"
                             disabled={isLoggingIn}
-                            className="w-full py-3.5 bg-[#D4AF37] hover:bg-white text-black font-semibold text-[10px] tracking-[0.4em] uppercase disabled:opacity-50 transition-all cursor-pointer font-sans"
+                            className="w-full py-3.5 bg-[#DFBA87] hover:bg-white text-black font-semibold text-[10px] tracking-[0.4em] uppercase disabled:opacity-50 transition-all cursor-pointer font-sans"
                         >
                             {isLoggingIn ? '正在驗證...' : '登入核銷端'}
                         </button>
@@ -886,7 +886,7 @@ export default function StaffScannerPage() {
                                 type="button"
                                 onClick={handleSendMagicLink}
                                 disabled={isSendingOtp || !loginEmail.trim()}
-                                className="text-[9px] tracking-widest text-[#D4AF37] hover:text-white uppercase transition-colors disabled:opacity-30 cursor-pointer"
+                                className="text-[9px] tracking-widest text-[#DFBA87] hover:text-white uppercase transition-colors disabled:opacity-30 cursor-pointer"
                             >
                                 {isSendingOtp ? '正在發送...' : '💡 密碼未設定？點此發送登入連結到信箱'}
                             </button>
@@ -907,7 +907,7 @@ export default function StaffScannerPage() {
             <header className="px-6 py-5 border-b border-neutral-900 bg-neutral-950/40 flex justify-between items-center z-10">
                 <div className="flex items-center gap-4">
                     <div>
-                        <p className="text-[7.5px] tracking-[0.4em] text-[#D4AF37] uppercase font-mono font-medium">VIS V-CHECK SYSTEM</p>
+                        <p className="text-[7.5px] tracking-[0.4em] text-[#DFBA87] uppercase font-mono font-medium">VIS V-CHECK SYSTEM</p>
                         <h1 className="text-xs tracking-widest uppercase font-serif mt-0.5 font-light">現場進場核銷系統</h1>
                     </div>
                 </div>
@@ -916,7 +916,7 @@ export default function StaffScannerPage() {
                     {/* Device Status */}
                     <button 
                         onClick={() => setShowDeviceSettings(true)}
-                        className="text-right hover:text-[#D4AF37] transition-all cursor-pointer"
+                        className="text-right hover:text-[#DFBA87] transition-all cursor-pointer"
                     >
                         <p className="text-[7px] text-neutral-500 uppercase tracking-widest font-mono">點位 / 裝置名稱</p>
                         <p className="text-[10px] font-medium tracking-wide mt-0.5 max-w-[150px] truncate">{deviceName}</p>
@@ -945,13 +945,13 @@ export default function StaffScannerPage() {
                         {/* Interactive scan frame visual overlay */}
                         <div className="absolute inset-0 border-[35px] border-black/40 pointer-events-none flex items-center justify-center">
                             <div className="w-full h-full border border-neutral-800/40 relative">
-                                <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#D4AF37]" />
-                                <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-[#D4AF37]" />
-                                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-[#D4AF37]" />
-                                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#D4AF37]" />
+                                <div className="absolute top-0 left-0 w-4 h-4 border-t-2 border-l-2 border-[#DFBA87]" />
+                                <div className="absolute top-0 right-0 w-4 h-4 border-t-2 border-r-2 border-[#DFBA87]" />
+                                <div className="absolute bottom-0 left-0 w-4 h-4 border-b-2 border-l-2 border-[#DFBA87]" />
+                                <div className="absolute bottom-0 right-0 w-4 h-4 border-b-2 border-r-2 border-[#DFBA87]" />
                                 
                                 {/* Red active scan pointer animation */}
-                                <div className="absolute left-0 w-full h-[1px] bg-[#D4AF37]/50 shadow-[0_0_8px_#D4AF37] top-0 animate-[scan_2.5s_infinite_linear]" />
+                                <div className="absolute left-0 w-full h-[1px] bg-[#DFBA87]/50 shadow-[0_0_8px_#DFBA87] top-0 animate-[scan_2.5s_infinite_linear]" />
                             </div>
                         </div>
                     </div>
@@ -967,7 +967,7 @@ export default function StaffScannerPage() {
                         />
                         <button 
                             type="submit"
-                            className="bg-neutral-900 hover:bg-[#D4AF37] hover:text-black border-l border-neutral-800 text-neutral-400 font-serif text-[10px] tracking-[0.2em] uppercase px-5 py-2.5 transition-all cursor-pointer"
+                            className="bg-neutral-900 hover:bg-[#DFBA87] hover:text-black border-l border-neutral-800 text-neutral-400 font-serif text-[10px] tracking-[0.2em] uppercase px-5 py-2.5 transition-all cursor-pointer"
                         >
                             送出
                         </button>
@@ -1014,18 +1014,18 @@ export default function StaffScannerPage() {
                     >
                         {/* Golden VIP Theme */}
                         {feedback.status === 'valid' && feedback.tier === 'VIP' && (
-                            <div className="absolute inset-0 bg-gradient-to-b from-[#1E1912] via-[#0E0C09] to-[#050403] flex flex-col items-center justify-center p-8 text-center border-8 border-[#D4AF37]">
-                                <div className="absolute top-10 left-10 w-8 h-8 border-t-2 border-l-2 border-[#D4AF37] opacity-60" />
-                                <div className="absolute top-10 right-10 w-8 h-8 border-t-2 border-r-2 border-[#D4AF37] opacity-60" />
-                                <div className="absolute bottom-10 left-10 w-8 h-8 border-b-2 border-l-2 border-[#D4AF37] opacity-60" />
-                                <div className="absolute bottom-10 right-10 w-8 h-8 border-b-2 border-r-2 border-[#D4AF37] opacity-60" />
+                            <div className="absolute inset-0 bg-gradient-to-b from-[#1E1912] via-[#0E0C09] to-[#050403] flex flex-col items-center justify-center p-8 text-center border-8 border-[#DFBA87]">
+                                <div className="absolute top-10 left-10 w-8 h-8 border-t-2 border-l-2 border-[#DFBA87] opacity-60" />
+                                <div className="absolute top-10 right-10 w-8 h-8 border-t-2 border-r-2 border-[#DFBA87] opacity-60" />
+                                <div className="absolute bottom-10 left-10 w-8 h-8 border-b-2 border-l-2 border-[#DFBA87] opacity-60" />
+                                <div className="absolute bottom-10 right-10 w-8 h-8 border-b-2 border-r-2 border-[#DFBA87] opacity-60" />
 
-                                <div className="w-16 h-16 rounded-full border border-[#D4AF37] flex items-center justify-center mb-8 shadow-[0_0_20px_rgba(212,175,55,0.15)] bg-[#D4AF37]/5">
-                                    <span className="text-[#D4AF37] text-2xl font-serif">✓</span>
+                                <div className="w-16 h-16 rounded-full border border-[#DFBA87] flex items-center justify-center mb-8 shadow-[0_0_20px_rgba(212,175,55,0.15)] bg-[#DFBA87]/5">
+                                    <span className="text-[#DFBA87] text-2xl font-serif">✓</span>
                                 </div>
-                                <span className="text-[9px] tracking-[0.6em] text-[#D4AF37] uppercase font-mono mb-2">VALID ENTRY PASS</span>
+                                <span className="text-[9px] tracking-[0.6em] text-[#DFBA87] uppercase font-mono mb-2">VALID ENTRY PASS</span>
                                 <h2 className="text-3xl font-serif tracking-widest font-light text-white mb-2">{feedback.name}</h2>
-                                <div className="px-6 py-2 bg-[#D4AF37]/10 border border-[#D4AF37]/30 text-[#D4AF37] text-[10px] tracking-[0.4em] font-mono uppercase mb-8">
+                                <div className="px-6 py-2 bg-[#DFBA87]/10 border border-[#DFBA87]/30 text-[#DFBA87] text-[10px] tracking-[0.4em] font-mono uppercase mb-8">
                                     VIP 貴賓
                                 </div>
                                 <p className="text-[11px] tracking-widest text-neutral-400 font-light leading-relaxed">{feedback.message}</p>
@@ -1040,20 +1040,20 @@ export default function StaffScannerPage() {
                                 <div className="absolute inset-0 opacity-[0.05] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
                                 
                                 {/* Metallic diamond corners */}
-                                <div className="absolute top-10 left-10 w-8 h-8 border-t-2 border-l-2 border-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
-                                <div className="absolute top-10 right-10 w-8 h-8 border-t-2 border-r-2 border-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
-                                <div className="absolute bottom-10 left-10 w-8 h-8 border-b-2 border-l-2 border-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
-                                <div className="absolute bottom-10 right-10 w-8 h-8 border-b-2 border-r-2 border-[#D4AF37] shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
+                                <div className="absolute top-10 left-10 w-8 h-8 border-t-2 border-l-2 border-[#DFBA87] shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
+                                <div className="absolute top-10 right-10 w-8 h-8 border-t-2 border-r-2 border-[#DFBA87] shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
+                                <div className="absolute bottom-10 left-10 w-8 h-8 border-b-2 border-l-2 border-[#DFBA87] shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
+                                <div className="absolute bottom-10 right-10 w-8 h-8 border-b-2 border-r-2 border-[#DFBA87] shadow-[0_0_10px_rgba(212,175,55,0.2)]" />
 
-                                <div className="w-16 h-16 rounded-full border-2 border-[#D4AF37] flex items-center justify-center mb-8 bg-gradient-to-b from-[#2E2C27] to-[#12110F] shadow-[0_0_30px_rgba(212,175,55,0.35)] relative overflow-hidden">
+                                <div className="w-16 h-16 rounded-full border-2 border-[#DFBA87] flex items-center justify-center mb-8 bg-gradient-to-b from-[#2E2C27] to-[#12110F] shadow-[0_0_30px_rgba(212,175,55,0.35)] relative overflow-hidden">
                                     <div className="absolute inset-0 bg-white/5 opacity-40 animate-[pulse_2s_infinite]" />
-                                    <span className="text-[#D4AF37] text-2xl font-serif font-bold relative z-10">★</span>
+                                    <span className="text-[#DFBA87] text-2xl font-serif font-bold relative z-10">★</span>
                                 </div>
                                 
-                                <span className="text-[9px] tracking-[0.7em] text-[#D4AF37] uppercase font-mono mb-2 font-semibold">SVIP ULTIMATE PASS</span>
+                                <span className="text-[9px] tracking-[0.7em] text-[#DFBA87] uppercase font-mono mb-2 font-semibold">SVIP ULTIMATE PASS</span>
                                 <h2 className="text-3xl font-serif tracking-widest font-bold text-white mb-2 drop-shadow-lg">{feedback.name}</h2>
                                 
-                                <div className="px-8 py-2.5 bg-gradient-to-r from-[#1E1D1A] via-[#2F2C24] to-[#1E1D1A] border border-[#D4AF37] text-[#D4AF37] text-[10px] tracking-[0.5em] font-mono font-bold uppercase mb-8 shadow-inner">
+                                <div className="px-8 py-2.5 bg-gradient-to-r from-[#1E1D1A] via-[#2F2C24] to-[#1E1D1A] border border-[#DFBA87] text-[#DFBA87] text-[10px] tracking-[0.5em] font-mono font-bold uppercase mb-8 shadow-inner">
                                     SVIP 榮譽貴賓
                                 </div>
                                 <p className="text-[11px] tracking-widest text-[#E5E5E5] font-light leading-relaxed max-w-sm">{feedback.message}</p>
@@ -1101,7 +1101,7 @@ export default function StaffScannerPage() {
                                 <p className="text-[9px] text-neutral-600 mt-1">請為此 iPad 或手機設定辨識名稱，以便後台流量統計與爭議釐清。</p>
                             </div>
 
-                            <div className="border-b border-neutral-700 focus-within:border-[#D4AF37] transition-all">
+                            <div className="border-b border-neutral-700 focus-within:border-[#DFBA87] transition-all">
                                 <input 
                                     type="text"
                                     placeholder="DEVICE NAME"
@@ -1120,7 +1120,7 @@ export default function StaffScannerPage() {
                                 </button>
                                 <button 
                                     onClick={handleSaveDeviceName}
-                                    className="flex-1 py-3 text-[10px] tracking-widest bg-[#D4AF37] text-black font-semibold hover:bg-white hover:text-black transition-all uppercase cursor-pointer"
+                                    className="flex-1 py-3 text-[10px] tracking-widest bg-[#DFBA87] text-black font-semibold hover:bg-white hover:text-black transition-all uppercase cursor-pointer"
                                 >
                                     儲存
                                 </button>
