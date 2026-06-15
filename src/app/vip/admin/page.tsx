@@ -762,7 +762,7 @@ export default function VIPAdminPage() {
                                 </div>
                             </div>
                         </motion.div>
-                    ) : (
+                    ) : activeTab === 'vcheck' ? (
                         <motion.div
                             key="vcheck"
                             initial={{ opacity: 0, y: 15 }}
@@ -955,9 +955,7 @@ export default function VIPAdminPage() {
                                 </div>
                             </div>
                         </motion.div>
-                    )}
-
-                    {activeTab === 'blindbox' && (
+                    ) : (
                         <motion.div
                             key="blindbox"
                             initial={{ opacity: 0, y: 15 }}
