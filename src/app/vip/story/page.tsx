@@ -6,19 +6,67 @@ import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 
-const ZODIAC_QUOTES: Record<string, { quote: string, artist: string, bg: string }> = {
-    'Aries': { quote: "Creativity takes courage.", artist: "Henri Émile Benoît Matisse / 亨利·馬諦斯", bg: "bg-rose-950" },
-    'Taurus': { quote: "I found I could say things with color and shapes that I couldn't say any other way.", artist: "Georgia O'Keeffe / 喬治亞·歐姬芙", bg: "bg-emerald-950" },
-    'Gemini': { quote: "My work is a game, a very serious game.", artist: "Maurits Cornelis Escher / 莫里茲·柯尼利斯·艾雪", bg: "bg-amber-950" },
-    'Cancer': { quote: "I don't paint dreams or nightmares, I paint my own reality.", artist: "Frida Kahlo / 芙烈達·卡蘿", bg: "bg-slate-800" },
-    'Leo': { quote: "I don't design clothes. I design dreams.", artist: "Ralph Lauren / 拉爾夫·勞倫", bg: "bg-orange-950" },
-    'Virgo': { quote: "Details are not the details. They make the design.", artist: "Charles Eames / 查爾斯·伊姆斯", bg: "bg-stone-800" },
-    'Libra': { quote: "I am going to make everything around me beautiful — that will be my life.", artist: "Elsie de Wolfe / 艾爾西·德·沃夫", bg: "bg-pink-950" },
-    'Scorpio': { quote: "Art is a lie that makes us realize truth.", artist: "Pablo Ruiz Picasso / 巴勃羅·畢卡索", bg: "bg-purple-950" },
-    'Sagittarius': { quote: "There are 360 degrees, so why stick to one?", artist: "Dame Zaha Mohammad Hadid / 札哈·哈蒂", bg: "bg-blue-950" },
-    'Capricorn': { quote: "I prefer drawing to talking. Drawing is faster, and leaves less room for lies.", artist: "Le Corbusier (Charles-Édouard Jeanneret) / 勒·柯比意", bg: "bg-neutral-900" },
-    'Aquarius': { quote: "I want to make the beautiful accessible to everyone.", artist: "Issey Miyake / 三宅一生", bg: "bg-cyan-950" },
-    'Pisces': { quote: "It is good to love many things, for therein lies the true strength...", artist: "Vincent Willem van Gogh / 文森·梵谷", bg: "bg-sky-950" },
+const ZODIAC_QUOTES: Record<string, { quote: string, artist: string, image: string }> = {
+    'Aries': { 
+        quote: "Creativity takes courage.", 
+        artist: "Henri Émile Benoît Matisse / 亨利·馬諦斯", 
+        image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Taurus': { 
+        quote: "I found I could say things with color and shapes that I couldn't say any other way.", 
+        artist: "Georgia O'Keeffe / 喬治亞·歐姬芙", 
+        image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Gemini': { 
+        quote: "My work is a game, a very serious game.", 
+        artist: "Maurits Cornelis Escher / 莫里茲·柯尼利斯·艾雪", 
+        image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Cancer': { 
+        quote: "I don't paint dreams or nightmares, I paint my own reality.", 
+        artist: "Frida Kahlo / 芙烈達·卡蘿", 
+        image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Leo': { 
+        quote: "I don't design clothes. I design dreams.", 
+        artist: "Ralph Lauren / 拉爾夫·勞倫", 
+        image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Virgo': { 
+        quote: "Details are not the details. They make the design.", 
+        artist: "Charles Eames / 查爾斯·伊姆斯", 
+        image: "https://images.unsplash.com/photo-1581428982868-e410dd047a90?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Libra': { 
+        quote: "I am going to make everything around me beautiful — that will be my life.", 
+        artist: "Elsie de Wolfe / 艾爾西·德·沃夫", 
+        image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Scorpio': { 
+        quote: "Art is a lie that makes us realize truth.", 
+        artist: "Pablo Ruiz Picasso / 巴勃羅·畢卡索", 
+        image: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Sagittarius': { 
+        quote: "There are 360 degrees, so why stick to one?", 
+        artist: "Dame Zaha Mohammad Hadid / 札哈·哈蒂", 
+        image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Capricorn': { 
+        quote: "I prefer drawing to talking. Drawing is faster, and leaves less room for lies.", 
+        artist: "Le Corbusier (Charles-Édouard Jeanneret) / 勒·柯比意", 
+        image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Aquarius': { 
+        quote: "I want to make the beautiful accessible to everyone.", 
+        artist: "Issey Miyake / 三宅一生", 
+        image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop" 
+    },
+    'Pisces': { 
+        quote: "It is good to love many things, for therein lies the true strength...", 
+        artist: "Vincent Willem van Gogh / 文森·梵谷", 
+        image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop" 
+    },
 };
 
 function getZodiac(dateStr: string) {
@@ -119,37 +167,47 @@ export default function ZodiacStoryPage() {
                 {/* IG Story Preview (9:16) */}
                 <div 
                     ref={storyRef}
-                    className={`relative w-[85vw] max-w-[320px] aspect-[9/16] ${data.bg} rounded-xl overflow-hidden p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-all duration-700`}
+                    className="relative w-[85vw] max-w-[320px] aspect-[9/16] rounded-xl overflow-hidden p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-all duration-700 bg-black"
                 >
-                    <div className="flex justify-between items-start relative z-10 w-full">
-                        <div className="text-[10px] tracking-[0.5em] uppercase opacity-70 font-light">
+                    {/* Full-bleed background image */}
+                    <img 
+                        src={data.image} 
+                        className="absolute inset-0 w-full h-full object-cover z-0" 
+                        alt={zodiac}
+                    />
+                    
+                    {/* Glassmorphism gradient overlay for high contrast text readability */}
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/85 z-10"></div>
+
+                    <div className="flex justify-between items-start relative z-20 w-full">
+                        <div className="text-[10px] tracking-[0.5em] uppercase text-white/80 font-light">
                             VIS / {profile.tier}
                         </div>
-                        <div className="text-[10px] tracking-[0.2em] font-mono opacity-70 font-light">
+                        <div className="text-[10px] tracking-[0.2em] font-mono text-white/80 font-light">
                             2027
                         </div>
                     </div>
 
-                    <div className="relative z-10 py-10">
-                        <p className="text-xl md:text-2xl font-light italic leading-relaxed tracking-wide text-white/90">
+                    <div className="relative z-20 py-10">
+                        <p className="text-xl md:text-2xl font-light italic leading-relaxed tracking-wide text-white drop-shadow-md">
                             "{data.quote}"
                         </p>
-                        <div className="h-px w-12 bg-[#D4AF37] my-6 opacity-60"></div>
-                        <p className="text-[10px] tracking-[0.3em] uppercase opacity-60 font-light leading-relaxed">
+                        <div className="h-px w-12 bg-[#D4AF37] my-6 opacity-80"></div>
+                        <p className="text-[10px] tracking-[0.3em] uppercase text-[#D4AF37] font-medium leading-relaxed drop-shadow-md">
                             — {data.artist}
                         </p>
                     </div>
 
-                    <div className="text-center pt-8 border-t border-white/10 relative z-10">
+                    <div className="text-center pt-8 border-t border-white/10 relative z-20">
                         <img 
-                            src="/vis_logo.png" 
-                            className="h-7 mx-auto invert opacity-60"
+                            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                            className="h-6 mx-auto brightness-200 opacity-80"
                             alt="VIS Logo"
                         />
                     </div>
 
                     {/* Subtle background texture */}
-                    <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')]"></div>
+                    <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] z-10"></div>
                 </div>
 
                 <div className="text-center pt-4">
@@ -158,7 +216,7 @@ export default function ZodiacStoryPage() {
                         disabled={isGenerating}
                         className="px-12 py-4 bg-white text-black text-[10px] tracking-[0.3em] hover:bg-neutral-200 transition-all duration-500 disabled:opacity-50 shadow-xl"
                     >
-                        {isGenerating ? '正在生成...' : '請截圖分享至Instagram社群'}
+                        {isGenerating ? '正在生成...' : '歡迎截圖分享至Instagram社群'}
                     </button>
                 </div>
             </main>

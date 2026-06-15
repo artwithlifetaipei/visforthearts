@@ -104,6 +104,11 @@ export default function VIPDashboard() {
     const accentColor = '#D4AF37'; // Pola Gold
     const blurClass = isSVIP ? 'bg-[#D4AF37]/10' : 'bg-[#D4AF37]/5';
 
+    const handleSignOut = async () => {
+        await supabase.auth.signOut();
+        router.push('/vip');
+    };
+
     const generateICS = () => {
         if (!profile) return;
         const icsContent = [
@@ -157,12 +162,18 @@ export default function VIPDashboard() {
                         {profile.first_name || profile.email.split('@')[0]}
                     </span>
                 </div>
-                <div className="text-right">
+                <div className="text-right flex flex-col items-end gap-1.5">
                     <div className={`inline-block px-4 py-1.5 border-[0.5px] ${isSVIP ? 'border-[#D4AF37] text-[#D4AF37]' : 'border-[#1A1A1A] text-[#1A1A1A]'}`}>
                         <span className="text-[9px] tracking-[0.4em] uppercase font-light">
                             {profile.tier}
                         </span>
                     </div>
+                    <button 
+                        onClick={handleSignOut}
+                        className={`text-[8px] tracking-[0.3em] uppercase opacity-40 hover:opacity-100 transition-opacity cursor-pointer border-b border-transparent hover:border-current mt-0.5`}
+                    >
+                        Sign Out / 登出
+                    </button>
                 </div>
             </header>
 
@@ -232,10 +243,17 @@ export default function VIPDashboard() {
                     whileHover={{ scale: 0.98 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => router.push('/vip/blind-box')}
-                    className={`aspect-square p-6 flex flex-col justify-between text-left border-[0.5px] backdrop-blur-md transition-colors duration-500 hover:border-[#D4AF37] ${cardClass}`}
+                    className="aspect-square p-6 flex flex-col justify-between text-left border-[0.5px] border-white/20 backdrop-blur-md relative overflow-hidden group shadow-xl cursor-pointer"
                 >
-                    <span className="text-[8px] tracking-[0.4em] uppercase opacity-40 font-light">Curated</span>
-                    <h3 className="text-sm font-serif tracking-[0.2em] leading-relaxed">
+                    <img 
+                        src="https://images.unsplash.com/photo-1549887534-1541e9326642?q=80&w=600&auto=format&fit=crop"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110"
+                        alt="Taste Prediction BG"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/25 to-black/85 z-0"></div>
+
+                    <span className="relative z-10 text-[8px] tracking-[0.4em] uppercase text-[#D4AF37] font-semibold">Curated</span>
+                    <h3 className="relative z-10 text-xs font-serif tracking-[0.2em] leading-relaxed text-white">
                         品味預測<br/>迎賓禮
                     </h3>
                 </motion.button>
@@ -244,10 +262,17 @@ export default function VIPDashboard() {
                     whileHover={{ scale: 0.98 }}
                     whileTap={{ scale: 0.95 }}
                     onClick={() => router.push('/vip/story')}
-                    className={`aspect-square p-6 flex flex-col justify-between text-left border-[0.5px] backdrop-blur-md transition-colors duration-500 hover:border-[#D4AF37] ${cardClass}`}
+                    className="aspect-square p-6 flex flex-col justify-between text-left border-[0.5px] border-white/20 backdrop-blur-md relative overflow-hidden group shadow-xl cursor-pointer"
                 >
-                    <span className="text-[8px] tracking-[0.4em] uppercase opacity-40 font-light">Aesthetic</span>
-                    <h3 className="text-sm font-serif tracking-[0.2em] leading-relaxed">
+                    <img 
+                        src="https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=600&auto=format&fit=crop"
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-[1.2s] ease-out group-hover:scale-110"
+                        alt="Artist Resonance BG"
+                    />
+                    <div className="absolute inset-0 bg-gradient-to-b from-black/75 via-black/25 to-black/85 z-0"></div>
+
+                    <span className="relative z-10 text-[8px] tracking-[0.4em] uppercase text-[#D4AF37] font-semibold">Aesthetic</span>
+                    <h3 className="relative z-10 text-xs font-serif tracking-[0.2em] leading-relaxed text-white">
                         你與哪位藝術家之間<br/>有所共感？
                     </h3>
                 </motion.button>
