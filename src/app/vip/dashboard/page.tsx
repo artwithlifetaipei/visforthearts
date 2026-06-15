@@ -159,7 +159,7 @@ export default function VIPDashboard() {
             {/* Full-bleed architectural background */}
             <div className="absolute inset-0 w-full h-full pointer-events-none">
                 <img
-                    src="/vip_lobby_bg.png"
+                    src="/vip_lobby_bg.jpg"
                     alt=""
                     className="w-full h-full object-cover object-center"
                     style={{ filter: isSVIP ? 'brightness(0.28) saturate(0.85)' : 'brightness(0.38) saturate(0.75)' }}
@@ -271,7 +271,7 @@ export default function VIPDashboard() {
                     className="aspect-square p-6 flex flex-col justify-between text-left border-[0.5px] border-white/20 backdrop-blur-md relative overflow-hidden group shadow-xl cursor-pointer"
                 >
                     <img 
-                        src="/vip_lobby_bg.png"
+                        src="/vip_lobby_bg.jpg"
                         className="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-[1.2s] ease-out group-hover:scale-110"
                         alt="Taste Prediction BG"
                     />
