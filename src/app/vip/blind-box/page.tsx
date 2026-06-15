@@ -120,6 +120,7 @@ export default function BlindBoxPage() {
             // Advance to next card or trigger lottery
             if (currentIndex < activeBrands.length - 1) {
                 setCurrentIndex(currentIndex + 1);
+                dragX.set(0); // Reset drag coordinate so next card mounts centered!
             } else {
                 // Game finished - pick random from liked, fallback to random of all
                 setIsOpening(true);
@@ -148,7 +149,7 @@ export default function BlindBoxPage() {
                     setReward(newReward);
                 } else {
                     console.error('Save reward failed:', error);
-                    alert('領取禮遇失敗，請重試。');
+                    alert(`領取禮遇失敗：${error.message || '請重試'}`);
                 }
                 setIsOpening(false);
             }
@@ -229,7 +230,10 @@ export default function BlindBoxPage() {
                             </div>
 
                             <button
-                                onClick={() => setIsGameStarted(true)}
+                                onClick={() => {
+                                    dragX.set(0);
+                                    setIsGameStarted(true);
+                                }}
                                 className="px-14 py-4 bg-[#DFBA87] hover:bg-white text-black text-[10px] tracking-[0.4em] uppercase font-bold transition-all duration-500 shadow-lg"
                             >
                                 開始品味配對

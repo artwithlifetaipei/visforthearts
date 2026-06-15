@@ -967,6 +967,12 @@ export default function VIPAdminPage() {
                             {brandsError ? (
                                 <div className="border border-neutral-800 p-8 bg-neutral-950/30">
                                     <h3 className="text-sm tracking-[0.2em] font-serif font-light text-[#DFBA87] mb-4">初始化品味預測品牌資料庫</h3>
+                                    
+                                    <div className="mb-6 p-4 bg-rose-950/20 border border-rose-900 text-rose-200 text-xs font-mono tracking-wide leading-relaxed rounded">
+                                        <strong>⚠️ 資料庫連線錯誤 / Database Connection Error:</strong><br/>
+                                        {brandsError}
+                                    </div>
+
                                     <p className="text-xs text-neutral-400 leading-relaxed mb-6 font-light">
                                         您好！若要在後台直接上傳圖片與輸入文字，我們需要先在您的 Supabase 資料庫中建立品牌設定資料表。<br/>
                                         請按照以下簡單步驟完成初始化：
@@ -988,6 +994,10 @@ export default function VIPAdminPage() {
     updated_at timestamp with time zone DEFAULT now()
 );
 
+-- 授權給 Supabase 角色
+GRANT ALL ON TABLE vip_blind_box_brands TO anon, authenticated, service_role;
+
+-- 啟用 RLS
 ALTER TABLE vip_blind_box_brands ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Allow public read on blind box brands" ON vip_blind_box_brands;
@@ -1011,6 +1021,10 @@ WITH CHECK (auth.email() IN ('artwithlifetaipei@gmail.com'));`}
     updated_at timestamp with time zone DEFAULT now()
 );
 
+-- 授權給 Supabase 角色
+GRANT ALL ON TABLE vip_blind_box_brands TO anon, authenticated, service_role;
+
+-- 啟用 RLS
 ALTER TABLE vip_blind_box_brands ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Allow public read on blind box brands" ON vip_blind_box_brands;

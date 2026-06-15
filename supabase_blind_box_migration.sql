@@ -9,6 +9,9 @@ CREATE TABLE IF NOT EXISTS vip_blind_box_brands (
     updated_at timestamp with time zone DEFAULT now()
 );
 
+-- Grant privileges to Supabase default roles
+GRANT ALL ON TABLE vip_blind_box_brands TO anon, authenticated, service_role;
+
 -- Enable Row Level Security (RLS)
 ALTER TABLE vip_blind_box_brands ENABLE ROW LEVEL SECURITY;
 
