@@ -990,9 +990,11 @@ export default function VIPAdminPage() {
 
 ALTER TABLE vip_blind_box_brands ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public read on blind box brands" ON vip_blind_box_brands;
 CREATE POLICY "Allow public read on blind box brands" 
 ON vip_blind_box_brands FOR SELECT TO public USING (true);
 
+DROP POLICY IF EXISTS "Allow admins all on blind box brands" ON vip_blind_box_brands;
 CREATE POLICY "Allow admins all on blind box brands" 
 ON vip_blind_box_brands FOR ALL TO authenticated 
 USING (auth.email() IN ('artwithlifetaipei@gmail.com'))
@@ -1011,9 +1013,11 @@ WITH CHECK (auth.email() IN ('artwithlifetaipei@gmail.com'));`}
 
 ALTER TABLE vip_blind_box_brands ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Allow public read on blind box brands" ON vip_blind_box_brands;
 CREATE POLICY "Allow public read on blind box brands" 
 ON vip_blind_box_brands FOR SELECT TO public USING (true);
 
+DROP POLICY IF EXISTS "Allow admins all on blind box brands" ON vip_blind_box_brands;
 CREATE POLICY "Allow admins all on blind box brands" 
 ON vip_blind_box_brands FOR ALL TO authenticated 
 USING (auth.email() IN ('artwithlifetaipei@gmail.com'))

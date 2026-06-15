@@ -13,12 +13,14 @@ CREATE TABLE IF NOT EXISTS vip_blind_box_brands (
 ALTER TABLE vip_blind_box_brands ENABLE ROW LEVEL SECURITY;
 
 -- Policy 1: Allow public read access (for VIP clients playing the game)
+DROP POLICY IF EXISTS "Allow public read on blind box brands" ON vip_blind_box_brands;
 CREATE POLICY "Allow public read on blind box brands" 
 ON vip_blind_box_brands FOR SELECT 
 TO public 
 USING (true);
 
 -- Policy 2: Allow admins full access (for admin dashboard configuration)
+DROP POLICY IF EXISTS "Allow admins all on blind box brands" ON vip_blind_box_brands;
 CREATE POLICY "Allow admins all on blind box brands" 
 ON vip_blind_box_brands FOR ALL 
 TO authenticated 
