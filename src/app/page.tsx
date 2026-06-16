@@ -398,8 +398,8 @@ export default function LandingPage() {
                         <div className="img-card">
                             <img src="traditional_formats.png" className="img-parallax" alt="Formats" />
                         </div>
-                        <p className="card-text-zh">跳脫傳統展位的框架</p>
-                        <p className="card-text-en">Beyond traditional formats.</p>
+                        <p className="card-text-zh">精緻環境展現平易近人的優雅</p>
+                        <p className="card-text-en">Approachable elegance in a refined setting.</p>
                     </div>
 
                     <div className="exhibit-item">
