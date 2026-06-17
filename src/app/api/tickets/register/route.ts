@@ -239,6 +239,17 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'SLOT_FULL', message: '該預約時段名額已滿，請加入候補。' }, { status: 422 });
         }
 
+        // 2.5. Check if ticket for this email already exists
+        const { data: existingTicket, error: checkErr } = await supabase
+            .from('tickets')
+            .select('id')
+            .eq('email', email.toLowerCase().trim())
+            .maybeSingle();
+
+        if (existingTicket) {
+            return NextResponse.json({ error: '此信箱已註冊過數位觀展憑證。每一組信箱限索取一張憑證。' }, { status: 400 });
+        }
+
         // 3. Create Ticket Record
         const { data: ticket, error: ticketErr } = await supabase
             .from('tickets')
