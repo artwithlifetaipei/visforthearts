@@ -20,3 +20,17 @@ WHERE a.id > b.id AND a.email = b.email;
 
 ALTER TABLE public.tickets DROP CONSTRAINT IF EXISTS tickets_email_key;
 ALTER TABLE public.tickets ADD CONSTRAINT tickets_email_key UNIQUE (email);
+
+-- 5. Seed / Update the new 5 Time Slots schedule
+INSERT INTO public.ticket_slots (id, date_str, name_zh, name_en, time_range, max_tickets, booked_tickets)
+VALUES 
+('slot_1', '2027/1/9 (六)', '午後漫遊場(I)', 'Afternoon Stroll (I)', '12:00 - 14:30', 500, 0),
+('slot_2', '2027/1/9 (六)', '午後漫遊場(II)', 'Afternoon Stroll (II)', '14:30 - 17:00', 500, 0),
+('slot_3', '2027/1/10 (日)', '午後漫遊場(I)', 'Afternoon Stroll (I)', '12:00 - 14:30', 500, 0),
+('slot_4', '2027/1/10 (日)', '午後漫遊場(II)', 'Afternoon Stroll (II)', '14:30 - 17:00', 500, 0),
+('slot_5', '2027/1/10 (日)', '星光探索場(I)', 'Starlight Exploration (I)', '18:00 - 20:00', 500, 0)
+ON CONFLICT (id) DO UPDATE SET
+    date_str = EXCLUDED.date_str,
+    name_zh = EXCLUDED.name_zh,
+    name_en = EXCLUDED.name_en,
+    time_range = EXCLUDED.time_range;
