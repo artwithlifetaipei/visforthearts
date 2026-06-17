@@ -268,7 +268,7 @@ export default function TicketRegistrationPage() {
                                     誠摯邀請您蒞臨，與我們一同探索當代設計、文化與藝術交織的無界美學。
                                     <br />
                                     <span className="block mt-2 font-medium text-[#1A1A1A]">
-                                        您的專屬觀展憑證已為您準備妥當，請選擇您的蒞臨入席時段，完成數位憑證領取。
+                                        您的專屬觀展憑證已為您準備妥當，請選擇您的蒞臨時段，完成數位憑證領取。
                                     </span>
                                 </p>
                             </div>
