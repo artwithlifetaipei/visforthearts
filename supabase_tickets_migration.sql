@@ -43,6 +43,12 @@ CREATE TABLE IF NOT EXISTS public.ticket_waitlist (
     created_at timestamp with time zone DEFAULT now() NOT NULL
 );
 
+-- 4.5. Grant permissions to standard Supabase roles
+GRANT ALL ON TABLE public.ticket_brands TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.ticket_slots TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.tickets TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.ticket_waitlist TO anon, authenticated, service_role;
+
 -- 5. Enable Row Level Security (RLS) on all tables
 ALTER TABLE public.ticket_brands ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.ticket_slots ENABLE ROW LEVEL SECURITY;
@@ -56,7 +62,7 @@ CREATE POLICY "Allow select for public on ticket_brands" ON public.ticket_brands
 
 DROP POLICY IF EXISTS "Allow admin all on ticket_brands" ON public.ticket_brands;
 CREATE POLICY "Allow admin all on ticket_brands" ON public.ticket_brands
-    FOR ALL TO public USING (auth.email() IN ('artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'));
+    FOR ALL TO public USING (lower(auth.jwt() ->> 'email') IN ('artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'));
 
 -- 7. RLS Policies for ticket_slots
 DROP POLICY IF EXISTS "Allow select for public on ticket_slots" ON public.ticket_slots;
@@ -65,7 +71,7 @@ CREATE POLICY "Allow select for public on ticket_slots" ON public.ticket_slots
 
 DROP POLICY IF EXISTS "Allow admin all on ticket_slots" ON public.ticket_slots;
 CREATE POLICY "Allow admin all on ticket_slots" ON public.ticket_slots
-    FOR ALL TO public USING (auth.email() IN ('artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'));
+    FOR ALL TO public USING (lower(auth.jwt() ->> 'email') IN ('artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'));
 
 -- 8. RLS Policies for tickets
 DROP POLICY IF EXISTS "Allow insert for public on tickets" ON public.tickets;

@@ -215,8 +215,8 @@ export default function TicketRegistrationPage() {
                         alt="VIS FOR THE ARTS"
                         className="h-14 md:h-16 object-contain mb-6 opacity-100"
                     />
-                    <h1 className="text-xs uppercase tracking-[0.4em] text-[#C9A96E] font-medium">Digital Entrance Pass</h1>
-                    <div className="w-8 h-[0.5px] bg-[#C9A96E] mt-4 opacity-50" />
+                    <h1 className="text-xs uppercase tracking-[0.4em] text-[#1A1A1A]/60 font-medium">Digital Entrance Pass</h1>
+                    <div className="w-8 h-[0.5px] bg-[#1A1A1A]/20 mt-4" />
                 </div>
 
                 <AnimatePresence mode="wait">

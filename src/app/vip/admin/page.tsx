@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 // Admin emails — only these accounts can access this page
 const ADMIN_EMAILS = [
     'artwithlifetaipei@gmail.com',
+    'ameliecykuo@gmail.com',
 ];
 
 type VIPEntry = {
