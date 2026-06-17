@@ -36,8 +36,8 @@ export default function VIPAdminPage() {
     const [isAuthorized, setIsAuthorized] = useState(false);
     const [isLoading, setIsLoading] = useState(true);
     
-    // Tab switching: 'audience' or 'campaigns' or 'vcheck' or 'blindbox'
-    const [activeTab, setActiveTab] = useState<'audience' | 'campaigns' | 'vcheck' | 'blindbox'>('audience');
+    // Tab switching: 'audience' or 'campaigns' or 'vcheck' or 'blindbox' or 'tickets'
+    const [activeTab, setActiveTab] = useState<'audience' | 'campaigns' | 'vcheck' | 'blindbox' | 'tickets'>('audience');
 
     // Blind Box Brands States
     const [brands, setBrands] = useState<any[]>([]);
@@ -46,6 +46,31 @@ export default function VIPAdminPage() {
     const [brandsError, setBrandsError] = useState<string | null>(null);
     const [brandSavingId, setBrandSavingId] = useState<string | null>(null);
     const [brandFeedback, setBrandFeedback] = useState<Record<string, string>>({});
+
+    // Ticket Management States
+    const [ticketSlots, setTicketSlots] = useState<any[]>([]);
+    const [ticketBrands, setTicketBrands] = useState<any[]>([]);
+    const [ticketsList, setTicketsList] = useState<any[]>([]);
+    const [waitlistList, setWaitlistList] = useState<any[]>([]);
+    const [searchTicketQuery, setSearchTicketQuery] = useState('');
+    const [isTicketLoading, setIsTicketLoading] = useState(false);
+
+    // New Ticket Brand inputs
+    const [newTBrandNameZh, setNewTBrandNameZh] = useState('');
+    const [newTBrandNameEn, setNewTBrandNameEn] = useState('');
+    const [newTBrandIg, setNewTBrandIg] = useState('');
+    const [isAddingTBrand, setIsAddingTBrand] = useState(false);
+    const [tBrandFeedback, setTBrandFeedback] = useState('');
+
+    // Slot capacity edit
+    const [editingSlotId, setEditingSlotId] = useState<string | null>(null);
+    const [editingSlotMax, setEditingSlotMax] = useState<number>(500);
+
+    // Broadcast email states
+    const [broadcastSubject, setBroadcastSubject] = useState('');
+    const [broadcastContent, setBroadcastContent] = useState('');
+    const [isBroadcasting, setIsBroadcasting] = useState(false);
+    const [broadcastFeedback, setBroadcastFeedback] = useState('');
 
     const compressImage = (file: File): Promise<string> => {
         return new Promise((resolve, reject) => {
@@ -108,7 +133,16 @@ export default function VIPAdminPage() {
                 return;
             }
             setIsAuthorized(true);
-            await Promise.all([fetchList(), fetchCampaigns(), fetchCheckinLogs(), fetchBrands()]);
+            await Promise.all([
+                fetchList(),
+                fetchCampaigns(),
+                fetchCheckinLogs(),
+                fetchBrands(),
+                fetchTicketSlots(),
+                fetchTicketBrands(),
+                fetchTickets(),
+                fetchTicketWaitlist()
+            ]);
             setIsLoading(false);
         };
         init();
@@ -139,6 +173,147 @@ export default function VIPAdminPage() {
             .select('*')
             .order('created_at', { ascending: false });
         if (data) setCampaigns(data);
+    };
+
+    const fetchTicketSlots = async () => {
+        const { data } = await supabase.from('ticket_slots').select('*').order('id', { ascending: true });
+        if (data) setTicketSlots(data);
+    };
+
+    const fetchTicketBrands = async () => {
+        const { data } = await supabase.from('ticket_brands').select('*').order('name_zh', { ascending: true });
+        if (data) setTicketBrands(data);
+    };
+
+    const fetchTickets = async () => {
+        const { data } = await supabase
+            .from('tickets')
+            .select('*, ticket_brands(name_zh, name_en, instagram_handle), ticket_slots(name_zh, date_str)')
+            .order('created_at', { ascending: false });
+        if (data) setTicketsList(data);
+    };
+
+    const fetchTicketWaitlist = async () => {
+        const { data } = await supabase
+            .from('ticket_waitlist')
+            .select('*, ticket_slots(name_zh, date_str)')
+            .order('created_at', { ascending: false });
+        if (data) setWaitlistList(data);
+    };
+
+    const handleUpdateCapacity = async (slotId: string, maxVal: number) => {
+        const { error } = await supabase
+            .from('ticket_slots')
+            .update({ max_tickets: maxVal })
+            .eq('id', slotId);
+        
+        if (error) {
+            alert('修改容留額度失敗：' + error.message);
+        } else {
+            setEditingSlotId(null);
+            fetchTicketSlots();
+        }
+    };
+
+    const handleAddTicketBrand = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setTBrandFeedback('');
+        if (!newTBrandNameZh.trim() || !newTBrandIg.trim()) {
+            setTBrandFeedback('中文品牌名稱與 IG 帳號為必填項。');
+            return;
+        }
+
+        setIsAddingTBrand(true);
+        const { error } = await supabase
+            .from('ticket_brands')
+            .insert({
+                name_zh: newTBrandNameZh.trim(),
+                name_en: newTBrandNameEn.trim(),
+                instagram_handle: newTBrandIg.trim().startsWith('@') ? newTBrandIg.trim() : '@' + newTBrandIg.trim()
+            });
+
+        setIsAddingTBrand(false);
+        if (error) {
+            setTBrandFeedback('新增參展商失敗：' + error.message);
+        } else {
+            setTBrandFeedback('✓ 參展商新增成功！');
+            setNewTBrandNameZh('');
+            setNewTBrandNameEn('');
+            setNewTBrandIg('');
+            fetchTicketBrands();
+        }
+    };
+
+    const handleDeleteTicketBrand = async (brandId: string) => {
+        if (!confirm('確定要刪除此參展商嗎？刪除後，之前已發行票券中緩存的品牌名稱仍會保留。')) return;
+        const { error } = await supabase.from('ticket_brands').delete().eq('id', brandId);
+        if (error) {
+            alert('刪除失敗：' + error.message);
+        } else {
+            fetchTicketBrands();
+        }
+    };
+
+    const handleBroadcastTickets = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setBroadcastFeedback('');
+        if (!broadcastSubject.trim() || !broadcastContent.trim()) {
+            setBroadcastFeedback('主旨與內容不可為空。');
+            return;
+        }
+
+        setIsBroadcasting(true);
+        try {
+            const res = await fetch('/api/tickets/broadcast', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    subject: broadcastSubject.trim(),
+                    content: broadcastContent.trim()
+                })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                setBroadcastFeedback(data.error || '發送廣播信件失敗。');
+            } else {
+                setBroadcastFeedback(`✓ 廣播發送完畢！成功發送給 ${data.sentCount} 名購票者。`);
+                setBroadcastSubject('');
+                setBroadcastContent('');
+            }
+        } catch (err) {
+            setBroadcastFeedback('伺服器連線異常，請稍後再試。');
+        } finally {
+            setIsBroadcasting(false);
+        }
+    };
+
+    const handleExportTicketsCSV = () => {
+        if (ticketsList.length === 0) {
+            alert('目前尚無已登記之票券資料。');
+            return;
+        }
+
+        let csvContent = '\uFEFF'; // UTF-8 BOM for Excel Chinese support
+        csvContent += '票券編號(Ticket ID),姓名(Name),Email,邀請參展商(Brand),觀展日期(Date),場次名稱(Slot Name),核銷狀態(Redeemed),核銷時間(Redeemed At),登記時間(Created At)\n';
+
+        ticketsList.forEach((t) => {
+            const dateStr = t.ticket_slots?.date_str || '';
+            const slotName = t.ticket_slots?.name_zh || '';
+            const redeemStatus = t.is_redeemed ? '已核銷' : '未核銷';
+            const redeemedAt = t.redeemed_at ? new Date(t.redeemed_at).toLocaleString() : '';
+            const createdAt = t.created_at ? new Date(t.created_at).toLocaleString() : '';
+
+            csvContent += `"${t.id}","${t.name}","${t.email}","${t.brand_name}","${dateStr}","${slotName}","${redeemStatus}","${redeemedAt}","${createdAt}"\n`;
+        });
+
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.setAttribute('href', url);
+        link.setAttribute('download', `VIS_Digital_Tickets_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
     };
 
     const fetchBrands = async () => {
@@ -476,6 +651,15 @@ export default function VIPAdminPage() {
                     >
                         品味預測品牌管理 (Prediction)
                         {activeTab === 'blindbox' && (
+                            <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#DFBA87]" />
+                        )}
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('tickets')}
+                        className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'tickets' ? 'text-[#DFBA87]' : 'text-neutral-500 hover:text-neutral-300'}`}
+                    >
+                        數位憑證與門票管理 (Tickets)
+                        {activeTab === 'tickets' && (
                             <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#DFBA87]" />
                         )}
                     </button>
@@ -955,7 +1139,7 @@ export default function VIPAdminPage() {
                                 </div>
                             </div>
                         </motion.div>
-                    ) : (
+                    ) : activeTab === 'blindbox' ? (
                         <motion.div
                             key="blindbox"
                             initial={{ opacity: 0, y: 15 }}
@@ -1159,6 +1343,293 @@ WITH CHECK (auth.email() IN ('artwithlifetaipei@gmail.com'));`);
                                     </div>
                                 </div>
                             )}
+                        </motion.div>
+                    ) : (
+                        <motion.div
+                            key="tickets"
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -15 }}
+                            transition={{ duration: 0.5 }}
+                            className="space-y-12"
+                        >
+                            {/* Slots Capacity Panel */}
+                            <div className="border border-neutral-800 p-8 bg-neutral-950/20">
+                                <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400 mb-6">時段人數與上限控制 (Capacity Control)</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {ticketSlots.map((slot) => {
+                                        const isEditing = editingSlotId === slot.id;
+                                        return (
+                                            <div key={slot.id} className="border border-neutral-850 p-6 bg-neutral-950/30 flex flex-col justify-between space-y-4">
+                                                <div>
+                                                    <span className="text-[9px] uppercase tracking-wider text-[#DFBA87]">{slot.date_str}</span>
+                                                    <h3 className="text-sm font-serif text-neutral-200 mt-1">{slot.name_zh}</h3>
+                                                    <p className="text-[11px] text-neutral-500 mt-1">{slot.time_range}</p>
+                                                </div>
+                                                <div className="pt-4 border-t border-neutral-900 flex justify-between items-end">
+                                                    <div>
+                                                        <span className="text-[9px] text-neutral-500 uppercase tracking-widest block">已索取 / 上限</span>
+                                                        <span className="text-xl font-mono text-white mt-1">
+                                                            {slot.booked_tickets} <span className="text-xs text-neutral-500">/</span> {isEditing ? '' : slot.max_tickets}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        {isEditing ? (
+                                                            <div className="flex items-center gap-2">
+                                                                <input
+                                                                    type="number"
+                                                                    value={editingSlotMax}
+                                                                    onChange={(e) => setEditingSlotMax(parseInt(e.target.value) || 0)}
+                                                                    className="w-16 bg-neutral-900 border border-neutral-700 text-xs px-2 py-1 text-white text-center focus:outline-none focus:border-[#DFBA87]"
+                                                                />
+                                                                <button
+                                                                    onClick={() => handleUpdateCapacity(slot.id, editingSlotMax)}
+                                                                    className="bg-[#DFBA87] text-black text-[10px] font-bold px-2 py-1 uppercase"
+                                                                >
+                                                                    儲存
+                                                                </button>
+                                                            </div>
+                                                        ) : (
+                                                            <button
+                                                                onClick={() => {
+                                                                    setEditingSlotId(slot.id);
+                                                                    setEditingSlotMax(slot.max_tickets);
+                                                                }}
+                                                                className="text-[9px] uppercase tracking-wider text-[#DFBA87] hover:underline"
+                                                            >
+                                                                調整額度
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+
+                            {/* Brand Dictionary */}
+                            <div className="border border-neutral-800 p-8 bg-neutral-950/20">
+                                <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400 mb-6">邀請來源品牌管理 (Brand Dictionary)</h2>
+                                
+                                {/* Current Brands Registry */}
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                                    {ticketBrands.map((b) => (
+                                        <div key={b.id} className="border border-neutral-850 p-4 bg-neutral-900/20 flex justify-between items-center text-xs">
+                                            <div>
+                                                <div className="font-medium text-neutral-200">{b.name_zh}</div>
+                                                {b.name_en && <div className="text-neutral-400 text-[10px]">{b.name_en}</div>}
+                                                <div className="text-[#DFBA87] text-[10px] font-mono mt-1">{b.instagram_handle}</div>
+                                            </div>
+                                            <button
+                                                onClick={() => handleDeleteTicketBrand(b.id)}
+                                                className="text-red-500 hover:text-red-400 text-[10px] uppercase font-semibold"
+                                            >
+                                                刪除
+                                            </button>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                {/* Insert New Brand Form */}
+                                <form onSubmit={handleAddTicketBrand} className="border-t border-neutral-900 pt-6 space-y-4">
+                                    <h3 className="text-[10px] tracking-widest text-[#DFBA87] uppercase">新增邀請品牌</h3>
+                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                        <input
+                                            type="text"
+                                            value={newTBrandNameZh}
+                                            onChange={(e) => setNewTBrandNameZh(e.target.value)}
+                                            placeholder="中文品牌名稱 (必填)"
+                                            className="bg-neutral-900 border border-neutral-800 px-3 py-2 text-xs text-white focus:outline-none focus:border-[#DFBA87]"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={newTBrandNameEn}
+                                            onChange={(e) => setNewTBrandNameEn(e.target.value)}
+                                            placeholder="英文品牌名稱"
+                                            className="bg-neutral-900 border border-neutral-800 px-3 py-2 text-xs text-white focus:outline-none focus:border-[#DFBA87]"
+                                        />
+                                        <input
+                                            type="text"
+                                            value={newTBrandIg}
+                                            onChange={(e) => setNewTBrandIg(e.target.value)}
+                                            placeholder="Instagram 帳號 (必填，例: @my_brand)"
+                                            className="bg-neutral-900 border border-neutral-800 px-3 py-2 text-xs text-white focus:outline-none focus:border-[#DFBA87]"
+                                        />
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs text-[#DFBA87]">{tBrandFeedback}</span>
+                                        <button
+                                            type="submit"
+                                            disabled={isAddingTBrand}
+                                            className="bg-[#DFBA87] hover:bg-white text-black font-semibold text-[10px] tracking-widest px-6 py-2.5 uppercase transition-colors"
+                                        >
+                                            {isAddingTBrand ? '新增中...' : '確認新增品牌'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+
+                            {/* Registered Tickets Table */}
+                            <div className="border border-neutral-800 p-8 bg-neutral-950/20 space-y-6">
+                                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+                                    <div>
+                                        <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400">已鑄造電子門票清單 (Issued Tickets)</h2>
+                                        <p className="text-[9px] text-neutral-500 mt-1">目前系統已核發 {ticketsList.length} 張電子觀展憑證。</p>
+                                    </div>
+                                    <div className="flex items-center gap-3 w-full md:w-auto">
+                                        <input
+                                            type="text"
+                                            value={searchTicketQuery}
+                                            onChange={(e) => setSearchTicketQuery(e.target.value)}
+                                            placeholder="搜尋姓名、Email、或參展商..."
+                                            className="bg-neutral-900 border border-neutral-800 text-xs px-4 py-2 text-white focus:outline-none focus:border-[#DFBA87] w-full md:w-64"
+                                        />
+                                        <button
+                                            onClick={handleExportTicketsCSV}
+                                            className="bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 hover:border-white text-neutral-300 hover:text-white text-[9px] tracking-widest px-4 py-2 uppercase transition-all whitespace-nowrap"
+                                        >
+                                            匯出 Excel (CSV)
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-xs border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-neutral-800 text-neutral-500 uppercase tracking-wider text-[9px]">
+                                                <th className="py-3 px-4 font-normal">貴賓姓名</th>
+                                                <th className="py-3 px-4 font-normal">電子信箱</th>
+                                                <th className="py-3 px-4 font-normal">邀請商</th>
+                                                <th className="py-3 px-4 font-normal">預約場次</th>
+                                                <th className="py-3 px-4 font-normal">核銷狀態</th>
+                                                <th className="py-3 px-4 font-normal">登記時間</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {ticketsList
+                                                .filter((t) => {
+                                                    const q = searchTicketQuery.toLowerCase();
+                                                    return (
+                                                        t.name.toLowerCase().includes(q) ||
+                                                        t.email.toLowerCase().includes(q) ||
+                                                        t.brand_name.toLowerCase().includes(q)
+                                                    );
+                                                })
+                                                .map((t) => (
+                                                    <tr key={t.id} className="border-b border-neutral-900 text-neutral-300 hover:bg-neutral-950/40">
+                                                        <td className="py-3.5 px-4 font-medium text-white">{t.name}</td>
+                                                        <td className="py-3.5 px-4 font-light">{t.email}</td>
+                                                        <td className="py-3.5 px-4">{t.brand_name}</td>
+                                                        <td className="py-3.5 px-4">
+                                                            <div className="text-[10px] text-neutral-400">{t.ticket_slots?.date_str}</div>
+                                                            <div className="text-[9px] text-neutral-500">{t.ticket_slots?.name_zh}</div>
+                                                        </td>
+                                                        <td className="py-3.5 px-4">
+                                                            {t.is_redeemed ? (
+                                                                <div className="flex flex-col">
+                                                                    <span className="text-[10px] text-green-400 font-medium">✓ 已核銷</span>
+                                                                    <span className="text-[9px] text-neutral-500">{new Date(t.redeemed_at).toLocaleTimeString()}</span>
+                                                                </div>
+                                                            ) : (
+                                                                <span className="text-neutral-500 font-light">未核銷</span>
+                                                            )}
+                                                        </td>
+                                                        <td className="py-3.5 px-4 text-neutral-500 text-[10px]">
+                                                            {new Date(t.created_at).toLocaleDateString()}
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            {ticketsList.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={6} className="text-center py-8 text-neutral-600">
+                                                        尚未有任何數位憑證發行紀錄。
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* Waitlist list */}
+                            <div className="border border-neutral-800 p-8 bg-neutral-950/20">
+                                <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400 mb-6">時段候補名單 (Waitlists Registry)</h2>
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left text-xs border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-neutral-800 text-neutral-500 uppercase tracking-wider text-[9px]">
+                                                <th className="py-3 px-4 font-normal">候補 Email</th>
+                                                <th className="py-3 px-4 font-normal">候補場次</th>
+                                                <th className="py-3 px-4 font-normal">登記時間</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {waitlistList.map((w) => (
+                                                <tr key={w.id} className="border-b border-neutral-900 text-neutral-300 hover:bg-neutral-950/40">
+                                                    <td className="py-3.5 px-4 font-medium text-white">{w.email}</td>
+                                                    <td className="py-3.5 px-4">
+                                                        <div className="text-[10px] text-neutral-400">{w.ticket_slots?.date_str}</div>
+                                                        <div className="text-[9px] text-neutral-500">{w.ticket_slots?.name_zh}</div>
+                                                    </td>
+                                                    <td className="py-3.5 px-4 text-neutral-500 text-[10px]">
+                                                        {new Date(w.created_at).toLocaleString()}
+                                                    </td>
+                                                </tr>
+                                            ))}
+                                            {waitlistList.length === 0 && (
+                                                <tr>
+                                                    <td colSpan={3} className="text-center py-6 text-neutral-600">
+                                                        目前無候補登記名單。
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+
+                            {/* Broadcast Newsletter */}
+                            <div className="border border-neutral-800 p-8 bg-neutral-950/20 space-y-6">
+                                <div>
+                                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400">發行感謝電子信 / 電子報 (Broadcast newsletter)</h2>
+                                    <p className="text-[9px] text-neutral-500 mt-1">
+                                        此功能會發送設計感極佳的大會郵件，統一發送給所有在上面登記成功的 {ticketsList.length} 位顧客。
+                                    </p>
+                                </div>
+                                <form onSubmit={handleBroadcastTickets} className="space-y-4">
+                                    <div className="border-b border-neutral-800 focus-within:border-[#DFBA87] transition-all">
+                                        <label className="block text-[8px] tracking-widest text-neutral-500 uppercase mb-1">郵件主旨 (Email Subject)</label>
+                                        <input
+                                            type="text"
+                                            value={broadcastSubject}
+                                            onChange={(e) => setBroadcastSubject(e.target.value)}
+                                            placeholder="請輸入主旨，例如：【VIS for the Arts】展會參觀感謝信"
+                                            className="w-full py-2 bg-transparent outline-none text-xs text-white"
+                                        />
+                                    </div>
+                                    <div className="border-b border-neutral-800 focus-within:border-[#DFBA87] transition-all">
+                                        <label className="block text-[8px] tracking-widest text-neutral-500 uppercase mb-1">郵件內容 (Email Body Content)</label>
+                                        <textarea
+                                            rows={6}
+                                            value={broadcastContent}
+                                            onChange={(e) => setBroadcastContent(e.target.value)}
+                                            placeholder="請輸入感謝信內容，段落換行將自動以高質感美感樣式分段呈現。"
+                                            className="w-full py-2 bg-transparent outline-none text-xs text-neutral-300 leading-relaxed resize-none"
+                                        />
+                                    </div>
+                                    <div className="flex justify-between items-center">
+                                        <span className="text-xs text-[#DFBA87]">{broadcastFeedback}</span>
+                                        <button
+                                            type="submit"
+                                            disabled={isBroadcasting}
+                                            className="px-8 py-3 bg-[#DFBA87] hover:bg-white text-black font-bold text-[10px] tracking-widest uppercase transition-colors disabled:opacity-50"
+                                        >
+                                            {isBroadcasting ? '正在發送廣播信件...' : '立即發送廣播'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
                         </motion.div>
                     )}
                 </AnimatePresence>

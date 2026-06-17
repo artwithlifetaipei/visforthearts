@@ -517,6 +517,70 @@ export default function StaffScannerPage() {
 
         lastScanRef.current = { id: userId, time: now };
 
+        // 1.5 Check if this is a general ticket ID (from tickets database)
+        if (navigator.onLine) {
+            try {
+                const { data: ticketData } = await supabase
+                    .from('tickets')
+                    .select('*, ticket_slots(name_zh, date_str)')
+                    .eq('id', userId)
+                    .maybeSingle();
+
+                if (ticketData) {
+                    // It's a digital entry ticket!
+                    if (ticketData.is_redeemed) {
+                        playErrorSound();
+                        setFeedback({
+                            status: 'invalid',
+                            name: ticketData.name,
+                            tier: 'none',
+                            message: `⚠️ 此票券已於 ${new Date(ticketData.redeemed_at).toLocaleTimeString()} 核銷！重複使用無效。`
+                        });
+                        setTimeout(() => {
+                            setFeedback(f => f.status === 'invalid' ? { status: 'none', name: '', tier: 'none', message: '' } : f);
+                            isProcessingRef.current = false;
+                        }, 4000);
+                        return;
+                    }
+
+                    // Proceed to redeem ticket
+                    const { error: redeemError } = await supabase
+                        .from('tickets')
+                        .update({
+                            is_redeemed: true,
+                            redeemed_at: new Date().toISOString()
+                        })
+                        .eq('id', userId);
+
+                    if (redeemError) {
+                        playErrorSound();
+                        setFeedback({
+                            status: 'invalid',
+                            name: ticketData.name,
+                            tier: 'none',
+                            message: '核銷更新失敗：' + redeemError.message
+                        });
+                    } else {
+                        playSuccessSound();
+                        setFeedback({
+                            status: 'valid',
+                            name: ticketData.name,
+                            tier: 'VIP',
+                            message: `門票核銷成功！\n時段：${ticketData.ticket_slots?.date_str || ''} ${ticketData.ticket_slots?.name_zh || ''}\n邀請商：${ticketData.brand_name}`
+                        });
+                    }
+
+                    setTimeout(() => {
+                        setFeedback(f => f.status === 'valid' ? { status: 'none', name: '', tier: 'none', message: '' } : f);
+                        isProcessingRef.current = false;
+                    }, 4000);
+                    return;
+                }
+            } catch (err) {
+                console.log('Ticket lookup lookup fallback error:', err);
+            }
+        }
+
         // 2. Fetch cache
         let guestCache: Record<string, CachedGuest> = {};
         try {
