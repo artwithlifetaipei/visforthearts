@@ -186,15 +186,24 @@ export default function TicketRegistrationPage() {
     };
 
     return (
-        <div className="min-h-screen bg-neutral-950 text-neutral-100 flex flex-col items-center justify-center relative overflow-hidden font-sans selection:bg-[#C9A96E] selection:text-black">
-            {/* Background Full-bleed Image with subtle blur & dark overlay */}
+        <div className="min-h-screen bg-[#FAF9F6] text-[#1A1A1A] flex flex-col items-center justify-center relative overflow-hidden font-sans selection:bg-[#C9A96E] selection:text-white">
+            {/* Full-bleed architectural background matching VIP dashboard light style */}
             <div className="absolute inset-0 z-0 pointer-events-none">
                 <img
-                    src="/vip_lobby_bg.png"
+                    src="/vip_lobby_bg.jpg"
                     alt=""
-                    className="w-full h-full object-cover opacity-25 brightness-50 scale-105"
+                    className="w-full h-full object-cover object-center"
+                    style={{ filter: 'brightness(0.38) saturate(0.75)' }}
                 />
-                <div className="absolute inset-0 bg-gradient-to-b from-neutral-950/80 via-neutral-900/90 to-neutral-950" />
+                {/* Warm light beige gradient overlay for readability */}
+                <div
+                    className="absolute inset-0"
+                    style={{
+                        background: 'linear-gradient(180deg, rgba(245,242,235,0.82) 0%, rgba(240,235,225,0.6) 40%, rgba(245,242,235,0.88) 100%)'
+                    }}
+                />
+                {/* Subtle gold vignette top */}
+                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(223,186,135,0.08) 0%, transparent 65%)' }} />
             </div>
 
             {/* Content Wrapper */}
@@ -204,7 +213,7 @@ export default function TicketRegistrationPage() {
                     <img
                         src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png"
                         alt="VIS FOR THE ARTS"
-                        className="h-10 invert brightness-200 mb-6 opacity-90"
+                        className="h-14 md:h-16 object-contain mb-6 opacity-100"
                     />
                     <h1 className="text-xs uppercase tracking-[0.4em] text-[#C9A96E] font-medium">Digital Entrance Pass</h1>
                     <div className="w-8 h-[0.5px] bg-[#C9A96E] mt-4 opacity-50" />
@@ -218,8 +227,14 @@ export default function TicketRegistrationPage() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -15 }}
                             transition={{ duration: 0.5 }}
-                            className="bg-white/[0.03] border border-white/10 backdrop-blur-2xl p-8 rounded-2xl shadow-2xl"
+                            className="bg-white/95 border border-[#C9A96E]/20 backdrop-blur-xl p-8 rounded-none shadow-2xl relative"
                         >
+                            {/* Corner Accents */}
+                            <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
+                            <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
+                            <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
+                            <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
+
                             {/* Brand dropdown */}
                             <div className="mb-8">
                                 <label className="block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E] font-semibold mb-3">
@@ -229,7 +244,7 @@ export default function TicketRegistrationPage() {
                                     <select
                                         value={selectedBrandId}
                                         onChange={(e) => setSelectedBrandId(e.target.value)}
-                                        className="w-full bg-neutral-900 border border-white/15 px-4 py-3 rounded-lg text-sm text-neutral-100 focus:outline-none focus:border-[#C9A96E] transition-colors appearance-none cursor-pointer"
+                                        className="w-full bg-white/80 border border-neutral-200 px-4 py-3 rounded-none text-sm text-[#1A1A1A] focus:outline-none focus:border-[#C9A96E] transition-colors appearance-none cursor-pointer"
                                     >
                                         {brands.map((b) => (
                                             <option key={b.id} value={b.id}>
@@ -237,22 +252,22 @@ export default function TicketRegistrationPage() {
                                             </option>
                                         ))}
                                     </select>
-                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-neutral-400">
+                                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none text-[#1A1A1A]/40">
                                         ▼
                                     </div>
                                 </div>
                             </div>
 
                             {/* Welcome text */}
-                            <div className="bg-white/[0.02] border border-white/5 p-5 rounded-lg mb-8">
-                                <p className="text-sm font-light leading-relaxed text-neutral-300 tracking-wide">
+                            <div className="bg-neutral-50/55 border border-neutral-100 p-5 rounded-none mb-8">
+                                <p className="text-sm font-light leading-relaxed text-[#2D2D2D] tracking-wide">
                                     歡迎來到 VIS for the Arts。感謝您與{' '}
                                     <span className="text-[#C9A96E] font-medium underline underline-offset-4">
                                         {selectedBrand ? selectedBrand.name_zh : '參展品牌'}
                                     </span>{' '}
                                     共同支持當代設計、文化、藝術，探索當代美學的無界限。
                                     <br />
-                                    <span className="block mt-2 font-medium text-neutral-200">
+                                    <span className="block mt-2 font-medium text-[#1A1A1A]">
                                         您的專屬觀展憑證已解鎖。請選擇入場時段，完成數位憑證鑄造。
                                     </span>
                                 </p>
@@ -270,7 +285,7 @@ export default function TicketRegistrationPage() {
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
                                             placeholder="請輸入真實姓名以利核對"
-                                            className="w-full bg-neutral-900 border border-white/10 px-4 py-3 rounded-lg text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-[#C9A96E] transition-colors"
+                                            className="w-full bg-white/70 border border-neutral-200 px-4 py-3 rounded-none text-sm text-[#1A1A1A] placeholder-neutral-400 focus:outline-none focus:border-[#C9A96E] transition-colors"
                                         />
                                     </div>
                                     <div>
@@ -282,7 +297,7 @@ export default function TicketRegistrationPage() {
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             placeholder="接收數位憑證票券信件"
-                                            className="w-full bg-neutral-900 border border-white/10 px-4 py-3 rounded-lg text-sm text-neutral-100 placeholder-neutral-500 focus:outline-none focus:border-[#C9A96E] transition-colors"
+                                            className="w-full bg-white/70 border border-neutral-200 px-4 py-3 rounded-none text-sm text-[#1A1A1A] placeholder-neutral-400 focus:outline-none focus:border-[#C9A96E] transition-colors"
                                         />
                                     </div>
                                 </div>
@@ -302,12 +317,12 @@ export default function TicketRegistrationPage() {
                                             return (
                                                 <div
                                                     key={s.id}
-                                                    className={`border rounded-lg p-4 transition-all ${
+                                                    className={`border rounded-none p-4 transition-all ${
                                                         isFull
-                                                            ? 'border-neutral-800 bg-neutral-950/40 text-neutral-600'
+                                                            ? 'border-neutral-100 bg-neutral-50/40 text-neutral-400'
                                                             : isSelected
-                                                            ? 'border-[#C9A96E] bg-white/[0.04]'
-                                                            : 'border-white/10 bg-neutral-900/40 hover:border-white/20'
+                                                            ? 'border-[#C9A96E] bg-[#C9A96E]/5'
+                                                            : 'border-neutral-200 bg-white/60 hover:border-[#C9A96E]/40'
                                                     }`}
                                                 >
                                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -322,9 +337,9 @@ export default function TicketRegistrationPage() {
                                                                 className="accent-[#C9A96E] w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
                                                             />
                                                             <div className="text-sm">
-                                                                <span className="font-medium mr-2 text-neutral-200">{s.date_str}</span>
-                                                                <span className="font-light text-neutral-400">{s.name_zh}</span>
-                                                                <span className="block text-[11px] text-neutral-500 mt-0.5">{s.time_range}</span>
+                                                                <span className="font-medium mr-2 text-[#1A1A1A]">{s.date_str}</span>
+                                                                <span className="font-light text-[#2D2D2D]">{s.name_zh}</span>
+                                                                <span className="block text-[11px] text-neutral-400 mt-0.5">{s.time_range}</span>
                                                             </div>
                                                         </label>
 
@@ -332,7 +347,7 @@ export default function TicketRegistrationPage() {
                                                         <div>
                                                             {isFull ? (
                                                                 <div className="flex flex-col items-end gap-1.5">
-                                                                    <span className="text-[10px] bg-red-950/40 text-red-400 px-2 py-0.5 rounded border border-red-900/30">
+                                                                    <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded-none border border-red-200">
                                                                         已額滿
                                                                     </span>
                                                                     <button
@@ -344,11 +359,11 @@ export default function TicketRegistrationPage() {
                                                                     </button>
                                                                 </div>
                                                             ) : isWarning ? (
-                                                                <span className="text-[10px] bg-amber-950/40 text-amber-400 px-2 py-0.5 rounded border border-amber-900/30">
+                                                                <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-none border border-amber-200">
                                                                     名額即將額滿
                                                                 </span>
                                                             ) : (
-                                                                <span className="text-[10px] bg-green-950/40 text-green-400 px-2 py-0.5 rounded border border-green-900/30">
+                                                                <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-none border border-green-200">
                                                                     尚有觀展名額
                                                                 </span>
                                                             )}
@@ -360,9 +375,9 @@ export default function TicketRegistrationPage() {
                                                         <motion.div
                                                             initial={{ opacity: 0, height: 0 }}
                                                             animate={{ opacity: 1, height: 'auto' }}
-                                                            className="mt-4 pt-4 border-t border-white/5 space-y-3"
+                                                            className="mt-4 pt-4 border-t border-neutral-100 space-y-3"
                                                         >
-                                                            <p className="text-[11px] text-neutral-400">
+                                                            <p className="text-[11px] text-neutral-500">
                                                                 該時段目前已滿額。您可以留下您的 Email，一有名額釋出我們會立刻系統通知您候補。
                                                             </p>
                                                             <div className="flex gap-2">
@@ -371,13 +386,13 @@ export default function TicketRegistrationPage() {
                                                                     value={waitlistEmail}
                                                                     onChange={(e) => setWaitlistEmail(e.target.value)}
                                                                     placeholder="請輸入候補通知 Email"
-                                                                    className="flex-1 bg-neutral-950 border border-white/10 px-3 py-2 rounded text-xs focus:outline-none focus:border-[#C9A96E]"
+                                                                    className="flex-1 bg-white border border-neutral-200 px-3 py-2 rounded-none text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C9A96E]"
                                                                 />
                                                                 <button
                                                                     type="button"
                                                                     disabled={isSubmittingWaitlist}
                                                                     onClick={() => handleJoinWaitlist(s.id)}
-                                                                    className="bg-[#C9A96E] text-black text-xs font-semibold px-4 py-2 rounded hover:bg-[#b8975d] transition-colors disabled:opacity-50"
+                                                                    className="bg-[#1A1A1A] text-white text-xs font-light tracking-widest px-4 py-2 rounded-none hover:bg-neutral-800 transition-colors disabled:opacity-50"
                                                                 >
                                                                     {isSubmittingWaitlist ? '登記中' : '加入候補'}
                                                                 </button>
@@ -396,8 +411,8 @@ export default function TicketRegistrationPage() {
                                 </div>
 
                                 {/* Checkbox clauses */}
-                                <div className="space-y-4 pt-4 border-t border-white/5">
-                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-neutral-300 font-light">
+                                <div className="space-y-4 pt-4 border-t border-neutral-100">
+                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-[#2D2D2D] font-light">
                                         <input
                                             type="checkbox"
                                             checked={agreeIg}
@@ -406,7 +421,7 @@ export default function TicketRegistrationPage() {
                                         />
                                         <span>
                                             我同意於入場時出示已追蹤{' '}
-                                            <strong className="text-white">@visforthearts</strong> 與{' '}
+                                            <strong className="text-[#1A1A1A]">@visforthearts</strong> 與{' '}
                                             <strong className="text-[#C9A96E]">
                                                 {selectedBrand ? selectedBrand.instagram_handle : '@參展商品牌'}
                                             </strong>{' '}
@@ -414,7 +429,7 @@ export default function TicketRegistrationPage() {
                                         </span>
                                     </label>
 
-                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-neutral-300 font-light">
+                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-[#2D2D2D] font-light">
                                         <input
                                             type="checkbox"
                                             checked={agreeLimit}
@@ -426,7 +441,7 @@ export default function TicketRegistrationPage() {
                                         </span>
                                     </label>
 
-                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-neutral-300 font-light">
+                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-[#2D2D2D] font-light">
                                         <input
                                             type="checkbox"
                                             checked={agreePrivacy}
@@ -440,7 +455,7 @@ export default function TicketRegistrationPage() {
                                 </div>
 
                                 {submitError && (
-                                    <div className="text-sm bg-red-950/25 border border-red-900/40 p-4 rounded-lg text-red-400 font-light">
+                                    <div className="text-sm bg-red-50 border border-red-200 p-4 rounded-none text-red-600 font-light">
                                         ⚠️ {submitError}
                                     </div>
                                 )}
@@ -449,7 +464,7 @@ export default function TicketRegistrationPage() {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full bg-[#C9A96E] hover:bg-[#b8975d] disabled:opacity-50 text-black text-xs uppercase tracking-[0.4em] font-semibold py-4 rounded-lg transition-colors shadow-lg shadow-[#C9A96E]/10"
+                                    className="w-full bg-[#1A1A1A] hover:bg-neutral-850 disabled:opacity-50 text-white text-xs uppercase tracking-[0.3em] font-light py-4 rounded-none transition-all shadow-md"
                                 >
                                     {isSubmitting ? '正在鑄造憑證中...' : '鑄造專屬電子票券'}
                                 </button>
@@ -461,37 +476,43 @@ export default function TicketRegistrationPage() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5 }}
-                            className="bg-neutral-900 border border-[#C9A96E]/30 p-8 rounded-2xl shadow-2xl text-center space-y-6"
+                            className="bg-white/95 border border-[#C9A96E]/20 p-8 rounded-none shadow-2xl text-center space-y-6 relative text-[#1A1A1A]"
                         >
-                            <div className="w-12 h-12 rounded-full bg-green-950/50 border border-green-800/40 text-green-400 flex items-center justify-center mx-auto text-xl">
+                            {/* Corner Accents */}
+                            <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
+                            <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
+                            <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
+                            <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
+
+                            <div className="w-12 h-12 rounded-full bg-green-50 border border-green-200 text-green-600 flex items-center justify-center mx-auto text-xl">
                                 ✓
                             </div>
                             <div>
                                 <h2 className="text-lg font-medium tracking-wide">憑證鑄造成功！</h2>
-                                <p className="text-xs text-neutral-400 mt-2">
-                                    電子票券已成功發送至您的信箱：<strong className="text-neutral-200">{email}</strong>。<br/>
+                                <p className="text-xs text-neutral-500 mt-2">
+                                    電子票券已成功發送至您的信箱：<strong className="text-[#1A1A1A]">{email}</strong>。<br/>
                                     現場參觀時請出示此畫面或信件 QR Code 核銷。
                                 </p>
                             </div>
 
                             {/* Digital Pass Preview */}
-                            <div className="border border-white/5 bg-neutral-950/60 p-6 rounded-lg max-w-sm mx-auto text-left space-y-4">
-                                <div className="flex justify-between items-center pb-3 border-b border-white/5">
-                                    <span className="text-[10px] uppercase tracking-wider text-[#C9A96E]">VIS ENTRY PASS</span>
-                                    <span className="text-[9px] font-mono text-neutral-500">{mintedTicket.id.slice(0, 8)}...</span>
+                            <div className="border border-neutral-100 bg-neutral-50/70 p-6 rounded-none max-w-sm mx-auto text-left space-y-4">
+                                <div className="flex justify-between items-center pb-3 border-b border-neutral-100">
+                                    <span className="text-[10px] uppercase tracking-wider text-[#DFBA87] font-semibold">VIS ENTRY PASS</span>
+                                    <span className="text-[9px] font-mono text-neutral-400">{mintedTicket.id.slice(0, 8)}...</span>
                                 </div>
                                 <div className="space-y-3 text-xs">
                                     <div>
-                                        <div className="text-[9px] uppercase text-neutral-500 tracking-wider">Guest 貴賓姓名</div>
-                                        <div className="text-neutral-200 text-sm font-medium">{name}</div>
+                                        <div className="text-[9px] uppercase text-neutral-400 tracking-wider">Guest 貴賓姓名</div>
+                                        <div className="text-[#1A1A1A] text-sm font-medium">{name}</div>
                                     </div>
                                     <div>
-                                        <div className="text-[9px] uppercase text-neutral-500 tracking-wider">Invitation Source 邀請商</div>
-                                        <div className="text-neutral-200 text-sm">{selectedBrand ? selectedBrand.name_zh : ''}</div>
+                                        <div className="text-[9px] uppercase text-neutral-400 tracking-wider">Invitation Source 邀請商</div>
+                                        <div className="text-[#1A1A1A] text-sm">{selectedBrand ? selectedBrand.name_zh : ''}</div>
                                     </div>
                                     <div>
-                                        <div className="text-[9px] uppercase text-neutral-500 tracking-wider">Time Slot 預約場次</div>
-                                        <div className="text-neutral-200 text-sm">
+                                        <div className="text-[9px] uppercase text-neutral-400 tracking-wider">Time Slot 預約場次</div>
+                                        <div className="text-[#1A1A1A] text-sm">
                                             {slots.find((s) => s.id === selectedSlotId)?.date_str}{' '}
                                             {slots.find((s) => s.id === selectedSlotId)?.name_zh}
                                         </div>
@@ -521,7 +542,7 @@ export default function TicketRegistrationPage() {
                                     setAgreeLimit(false);
                                     setAgreePrivacy(false);
                                 }}
-                                className="text-xs text-[#C9A96E] hover:underline"
+                                className="text-xs text-[#1A1A1A]/60 hover:text-[#1A1A1A] hover:underline"
                             >
                                 ← 鑄造另一張票券
                             </button>
