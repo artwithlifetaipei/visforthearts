@@ -261,14 +261,14 @@ export default function TicketRegistrationPage() {
                             {/* Welcome text */}
                             <div className="bg-neutral-50/55 border border-neutral-100 p-5 rounded-none mb-8">
                                 <p className="text-sm font-light leading-relaxed text-[#2D2D2D] tracking-wide">
-                                    歡迎來到 VIS for the Arts。感謝您與{' '}
+                                    歡迎來到 VIS for the Arts。{' '}
                                     <span className="text-[#C9A96E] font-medium underline underline-offset-4">
                                         {selectedBrand ? selectedBrand.name_zh : '參展品牌'}
                                     </span>{' '}
-                                    共同支持當代設計、文化、藝術，探索當代美學的無界限。
+                                    誠摯邀請您蒞臨，與我們一同探索當代設計、文化與藝術交織的無界美學。
                                     <br />
                                     <span className="block mt-2 font-medium text-[#1A1A1A]">
-                                        您的專屬觀展憑證已解鎖。請選擇入場時段，完成數位憑證鑄造。
+                                        您的專屬觀展憑證已為您準備妥當，請選擇您的蒞臨入席時段，完成數位憑證領取。
                                     </span>
                                 </p>
                             </div>
