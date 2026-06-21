@@ -179,9 +179,14 @@ export default function ZodiacStoryPage() {
                     {/* Glassmorphism gradient overlay for high contrast text readability */}
                     <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/85 z-10"></div>
 
-                    <div className="flex justify-between items-start relative z-20 w-full">
-                        <div className="text-[10px] tracking-[0.5em] uppercase text-white/80 font-light">
-                            VIS / {profile.tier}
+                    <div className="flex justify-between items-center relative z-20 w-full">
+                        <div className="flex flex-col text-left">
+                            <span className="text-[9px] tracking-[0.4em] uppercase text-white/40 mb-1 leading-none">
+                                PASS TYPE
+                            </span>
+                            <span className="text-[18px] md:text-[20px] tracking-[0.2em] font-serif uppercase text-[#DFBA87] font-semibold leading-none">
+                                {profile.tier}
+                            </span>
                         </div>
                         <div className="text-[10px] tracking-[0.2em] font-mono text-white/80 font-light">
                             2027

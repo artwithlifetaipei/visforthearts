@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence, useMotionValue, useTransform, animate } from 'framer-motion';
+import { QRCodeSVG } from 'qrcode.react';
 
 // Easily modifiable configuration array for the 5 brands.
 // You can replace the Unsplash URLs with local image paths (e.g., '/fountain_logo.png' or '/brand1.png') later.
@@ -152,7 +153,16 @@ export default function BlindBoxPage() {
             if (!user) { router.push('/vip'); return; }
             
             const { data } = await supabase.from('users').select('*').eq('id', user.id).single();
-            setProfile(data);
+            
+            // Fetch name from allowlist
+            const { data: allowlistData } = await supabase
+                .from('vip_allowlist')
+                .select('name')
+                .eq('email', user.email)
+                .single();
+
+            const profileData = { ...data, name: allowlistData?.name || '' };
+            setProfile(profileData);
 
             // Check if already has a reward
             const { data: rewardData } = await supabase
@@ -221,12 +231,14 @@ export default function BlindBoxPage() {
                 }
 
                 // Save to DB
-                const rewardTypeStr = `${chosenBrand.name} 消費給予9折`;
+                const rewardTypeStr = `${chosenBrand.name} 專屬95折消費優惠`;
                 const { data: newReward, error } = await supabase
                     .from('rewards')
                     .insert({
                         user_id: profile.id,
-                        reward_type: rewardTypeStr
+                        reward_type: rewardTypeStr,
+                        user_email: profile.email,
+                        user_name: profile.name || ''
                     })
                     .select()
                     .single();
@@ -431,9 +443,27 @@ export default function BlindBoxPage() {
                                             >
                                                 專員點擊核銷 (Double Click)
                                             </button>
-                                            <p className="text-[8px] text-zinc-500 tracking-widest">
+                                            <p className="text-[8px] text-zinc-500 tracking-widest mb-6">
                                                 * 此操作由專員在您面前執行，請勿自行點擊
                                             </p>
+
+                                            {/* Brand QR Code */}
+                                            <div className="flex flex-col items-center gap-3 pt-6 border-t border-white/10 mt-6">
+                                                <p className="text-[10px] tracking-[0.2em] text-[#DFBA87] uppercase font-mono">
+                                                    品牌結帳核銷碼
+                                                </p>
+                                                <div className="p-3 bg-white rounded-lg shadow-xl inline-block">
+                                                    <QRCodeSVG 
+                                                        value={typeof window !== 'undefined' ? `${window.location.origin}/vip/blind-box/redeem?id=${reward.id}` : ''}
+                                                        size={140}
+                                                        level="M"
+                                                        fgColor="#1A1A1A"
+                                                    />
+                                                </div>
+                                                <p className="text-[9px] text-neutral-400 leading-relaxed px-4 font-light">
+                                                    請出示此 QR Code 供參展品牌掃碼結帳，即可享有專屬 95 折優惠。
+                                                </p>
+                                            </div>
                                         </div>
                                     )}
                                 </div>
