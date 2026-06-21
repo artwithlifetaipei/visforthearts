@@ -13,10 +13,14 @@ export default function OnboardingPage() {
 
     useEffect(() => {
         setIsLoading(true);
+        let currentUser: any = null;
+        let authTimeout: NodeJS.Timeout | null = null;
+
         // Listen for auth state changes — especially crucial for catching Magic Link sessions
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (event === 'SIGNED_IN' && session?.user) {
                 const user = session.user;
+                currentUser = user;
                 
                 // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
                 if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
@@ -39,16 +43,19 @@ export default function OnboardingPage() {
                     setIsLoading(false);
                 }
             } else if (event === 'SIGNED_OUT') {
-                router.push('/vip');
+                // Only redirect if there was an active user session in this component instance
+                if (currentUser) {
+                    router.push('/vip');
+                }
             }
         });
 
         // Initial check in case they are already logged in
-        let authTimeout: NodeJS.Timeout | null = null;
         const checkCurrentSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
             if (session?.user) {
                 const user = session.user;
+                currentUser = user;
                 
                 // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
                 if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
@@ -83,13 +90,13 @@ export default function OnboardingPage() {
                     // Not authenticating and no session -> redirect to login immediately
                     router.push('/vip');
                 } else {
-                    // Authenticating -> Wait shorter (4s) to allow Supabase SDK to complete exchange
+                    // Authenticating -> Wait up to 12s to allow Supabase SDK to complete exchange
                     authTimeout = setTimeout(async () => {
                         const { data: { session: s2 } } = await supabase.auth.getSession();
                         if (!s2?.user) {
                             router.push('/vip');
                         }
-                    }, 4000);
+                    }, 12000);
                 }
             }
         };

@@ -181,16 +181,16 @@ export default function ZodiacStoryPage() {
                     ref={storyRef}
                     className={`relative w-[85vw] max-w-[320px] aspect-[9/16] ${data.bg} rounded-xl overflow-hidden p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-all duration-700`}
                 >
-                    <div className="flex justify-between items-center relative z-20 w-full">
+                    <div className="flex justify-between items-start relative z-20 w-full">
                         <div className="flex flex-col text-left">
-                            <span className="text-[9px] tracking-[0.4em] uppercase text-white/40 mb-1.5 leading-none block">
-                                PASS TYPE
+                            <span className="text-[8px] tracking-[0.4em] uppercase text-white/45 mb-2 leading-none block">
+                                MEMBER TIER
                             </span>
-                            <span className="text-[26px] md:text-[30px] tracking-[0.25em] font-serif uppercase text-[#DFBA87] font-bold leading-none drop-shadow-[0_2px_10px_rgba(223,186,135,0.35)]">
+                            <span className="text-[28px] tracking-[0.2em] font-serif uppercase text-[#DFBA87] font-light leading-none">
                                 {profile.tier}
                             </span>
                         </div>
-                        <div className="text-[10px] tracking-[0.2em] font-mono text-white/80 font-light">
+                        <div className="text-[9px] tracking-[0.2em] font-mono text-white/60 font-light mt-1">
                             2027
                         </div>
                     </div>
