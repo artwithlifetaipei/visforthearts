@@ -6,66 +6,78 @@ import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 import html2canvas from 'html2canvas';
 
-const ZODIAC_QUOTES: Record<string, { quote: string, artist: string, image: string }> = {
+const ZODIAC_QUOTES: Record<string, { quoteEn: string, quoteZh: string, artist: string, bg: string }> = {
     'Aries': { 
-        quote: "Creativity takes courage.", 
-        artist: "Henri Émile Benoît Matisse / 亨利·馬諦斯", 
-        image: "https://images.unsplash.com/photo-1579783902614-a3fb3927b6a5?q=80&w=600&auto=format&fit=crop" 
+        quoteEn: "Creativity takes courage.", 
+        quoteZh: "創意需要勇氣。", 
+        artist: "Henri Matisse / 亨利·馬諦斯", 
+        bg: "bg-[#4E3639]" 
     },
     'Taurus': { 
-        quote: "I found I could say things with color and shapes that I couldn't say any other way.", 
+        quoteEn: "I found I could say things with color and shapes that I couldn't say any other way.", 
+        quoteZh: "我發現，我能用色彩與形狀，表達出我無法用其他方式說出的話語。", 
         artist: "Georgia O'Keeffe / 喬治亞·歐姬芙", 
-        image: "https://images.unsplash.com/photo-1526047932273-341f2a7631f9?q=80&w=600&auto=format&fit=crop" 
+        bg: "bg-[#3C4A3E]" 
     },
     'Gemini': { 
-        quote: "My work is a game, a very serious game.", 
-        artist: "Maurits Cornelis Escher / 莫里茲·柯尼利斯·艾雪", 
-        image: "https://images.unsplash.com/photo-1600585154340-be6161a56a0c?q=80&w=600&auto=format&fit=crop" 
+        quoteEn: "My work is a game, a very serious game.", 
+        quoteZh: "我的創作是一個遊戲，一個非常嚴肅的遊戲。", 
+        artist: "M.C. Escher / 艾雪", 
+        bg: "bg-[#4D4236]" 
     },
     'Cancer': { 
-        quote: "I don't paint dreams or nightmares, I paint my own reality.", 
+        quoteEn: "I don't paint dreams or nightmares, I paint my own reality.", 
+        quoteZh: "我不畫夢境或惡夢，我畫我自己的真實人生。", 
         artist: "Frida Kahlo / 芙烈達·卡蘿", 
-        image: "https://images.unsplash.com/photo-1518531933037-91b2f5f229cc?q=80&w=600&auto=format&fit=crop" 
+        bg: "bg-[#3D454A]" 
     },
     'Leo': { 
-        quote: "I don't design clothes. I design dreams.", 
+        quoteEn: "I don't design clothes. I design dreams.", 
+        quoteZh: "我不設計衣服，我設計夢想。", 
         artist: "Ralph Lauren / 拉爾夫·勞倫", 
-        image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?q=80&w=600&auto=format&fit=crop" 
+        bg: "bg-[#4D3A30]" 
     },
     'Virgo': { 
-        quote: "Details are not the details. They make the design.", 
+        quoteEn: "Details are not the details. They make the design.", 
+        quoteZh: "細節不只是細節，它們造就了設計。", 
         artist: "Charles Eames / 查爾斯·伊姆斯", 
-        image: "https://images.unsplash.com/photo-1581428982868-e410dd047a90?q=80&w=600&auto=format&fit=crop" 
+        bg: "bg-[#403E3B]" 
     },
     'Libra': { 
-        quote: "I am going to make everything around me beautiful — that will be my life.", 
+        quoteEn: "I am going to make everything around me beautiful — that will be my life.", 
+        quoteZh: "我要讓我身邊的一切事物都變得美麗 —— 那將會是我的一生。", 
         artist: "Elsie de Wolfe / 艾爾西·德·沃夫", 
-        image: "https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?q=80&w=600&auto=format&fit=crop" 
+        bg: "bg-[#4C3B43]" 
     },
     'Scorpio': { 
-        quote: "Art is a lie that makes us realize truth.", 
-        artist: "Pablo Ruiz Picasso / 巴勃羅·畢卡索", 
-        image: "https://images.unsplash.com/photo-1605721911519-3dfeb3be25e7?q=80&w=600&auto=format&fit=crop" 
+        quoteEn: "Art is a lie that makes us realize truth.", 
+        quoteZh: "藝術是一個謊言，但它讓我們理解真實。", 
+        artist: "Pablo Picasso / 巴勃羅·畢卡索", 
+        bg: "bg-[#42364D]" 
     },
     'Sagittarius': { 
-        quote: "There are 360 degrees, so why stick to one?", 
-        artist: "Dame Zaha Mohammad Hadid / 札哈·哈蒂", 
-        image: "https://images.unsplash.com/photo-1600585154526-990dced4db0d?q=80&w=600&auto=format&fit=crop" 
+        quoteEn: "There are 360 degrees, so why stick to one?", 
+        quoteZh: "世界有 360 度，何必執著於同一個角度？", 
+        artist: "Zaha Hadid / 札哈·哈蒂", 
+        bg: "bg-[#363B4D]" 
     },
     'Capricorn': { 
-        quote: "I prefer drawing to talking. Drawing is faster, and leaves less room for lies.", 
-        artist: "Le Corbusier (Charles-Édouard Jeanneret) / 勒·柯比意", 
-        image: "https://images.unsplash.com/photo-1513694203232-719a280e022f?q=80&w=600&auto=format&fit=crop" 
+        quoteEn: "I prefer drawing to talking. Drawing is faster, and leaves less room for lies.", 
+        quoteZh: "我寧可繪畫也不願多言。繪畫更快，而且留給謊言的空間更少。", 
+        artist: "Le Corbusier / 柯比意", 
+        bg: "bg-[#353638]" 
     },
     'Aquarius': { 
-        quote: "I want to make the beautiful accessible to everyone.", 
+        quoteEn: "I want to make the beautiful accessible to everyone.", 
+        quoteZh: "我想讓美麗的事物能被每個人所觸及。", 
         artist: "Issey Miyake / 三宅一生", 
-        image: "https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=600&auto=format&fit=crop" 
+        bg: "bg-[#334245]" 
     },
     'Pisces': { 
-        quote: "It is good to love many things, for therein lies the true strength...", 
-        artist: "Vincent Willem van Gogh / 文森·梵谷", 
-        image: "https://images.unsplash.com/photo-1579783900882-c0d3dad7b119?q=80&w=600&auto=format&fit=crop" 
+        quoteEn: "It is good to love many things, for therein lies the true strength...", 
+        quoteZh: "多去愛許多事物是好的，因為那才是力量的泉源...", 
+        artist: "Vincent van Gogh / 文森·梵谷", 
+        bg: "bg-[#3A454C]" 
     },
 };
 
@@ -167,24 +179,14 @@ export default function ZodiacStoryPage() {
                 {/* IG Story Preview (9:16) */}
                 <div 
                     ref={storyRef}
-                    className="relative w-[85vw] max-w-[320px] aspect-[9/16] rounded-xl overflow-hidden p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-all duration-700 bg-black"
+                    className={`relative w-[85vw] max-w-[320px] aspect-[9/16] ${data.bg} rounded-xl overflow-hidden p-8 md:p-10 flex flex-col justify-between shadow-2xl transition-all duration-700`}
                 >
-                    {/* Full-bleed background image */}
-                    <img 
-                        src={data.image} 
-                        className="absolute inset-0 w-full h-full object-cover z-0" 
-                        alt={zodiac}
-                    />
-                    
-                    {/* Glassmorphism gradient overlay for high contrast text readability */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/40 to-black/85 z-10"></div>
-
                     <div className="flex justify-between items-center relative z-20 w-full">
                         <div className="flex flex-col text-left">
-                            <span className="text-[9px] tracking-[0.4em] uppercase text-white/40 mb-2 leading-none block">
+                            <span className="text-[9px] tracking-[0.4em] uppercase text-white/40 mb-1.5 leading-none block">
                                 PASS TYPE
                             </span>
-                            <span className="text-[28px] md:text-[32px] tracking-[0.25em] font-serif uppercase text-[#DFBA87] font-bold leading-none drop-shadow-[0_2px_10px_rgba(223,186,135,0.45)]">
+                            <span className="text-[26px] md:text-[30px] tracking-[0.25em] font-serif uppercase text-[#DFBA87] font-bold leading-none drop-shadow-[0_2px_10px_rgba(223,186,135,0.35)]">
                                 {profile.tier}
                             </span>
                         </div>
@@ -193,26 +195,29 @@ export default function ZodiacStoryPage() {
                         </div>
                     </div>
 
-                    <div className="relative z-20 py-10">
-                        <p className="text-xl md:text-2xl font-light italic leading-relaxed tracking-wide text-white drop-shadow-md">
-                            "{data.quote}"
+                    <div className="relative z-20 py-4 flex-1 flex flex-col justify-center text-left">
+                        <p className="text-base md:text-lg font-serif font-light italic leading-relaxed tracking-wide text-white/95 mb-3">
+                            "{data.quoteEn}"
                         </p>
-                        <div className="h-px w-12 bg-[#DFBA87] my-6 opacity-80"></div>
-                        <p className="text-[10px] tracking-[0.3em] uppercase text-[#DFBA87] font-medium leading-relaxed drop-shadow-md">
+                        <p className="text-xs md:text-sm font-serif font-light leading-relaxed tracking-widest text-white/85">
+                            「{data.quoteZh}」
+                        </p>
+                        <div className="h-px w-10 bg-[#DFBA87]/70 my-4"></div>
+                        <p className="text-[9px] tracking-[0.25em] uppercase text-[#DFBA87]/90 font-medium leading-relaxed">
                             — {data.artist}
                         </p>
                     </div>
 
-                    <div className="text-center pt-8 border-t border-white/10 relative z-20">
+                    <div className="text-center pt-6 border-t border-white/10 relative z-20">
                         <img 
-                            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
-                            className="h-6 mx-auto brightness-200 opacity-80"
+                            src="/vis_logo.png" 
+                            className="h-5 mx-auto brightness-0 invert opacity-75"
                             alt="VIS Logo"
                         />
                     </div>
 
-                    {/* Subtle background texture */}
-                    <div className="absolute inset-0 opacity-10 pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] z-10"></div>
+                    {/* Subtle paper texture overlay */}
+                    <div className="absolute inset-0 opacity-15 pointer-events-none mix-blend-overlay bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] z-10"></div>
                 </div>
 
                 <div className="text-center pt-4">
