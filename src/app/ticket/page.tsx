@@ -188,7 +188,7 @@ export default function TicketRegistrationPage() {
     return (
         <div className="min-h-screen bg-[#FAF9F6] text-[#1A1A1A] flex flex-col items-center justify-center relative overflow-hidden font-sans selection:bg-[#C9A96E] selection:text-white">
             {/* Full-bleed architectural background matching VIP dashboard light style */}
-            <div className="absolute inset-0 z-0 pointer-events-none">
+            <div className="fixed inset-0 z-0 pointer-events-none">
                 <img
                     src="/vip_lobby_bg.jpg"
                     alt=""
@@ -420,7 +420,7 @@ export default function TicketRegistrationPage() {
                                             className="accent-[#C9A96E] mt-1 cursor-pointer"
                                         />
                                         <span>
-                                            我同意於入場時出示已追蹤{' '}
+                                            為協助主辦單位妥善傳遞大展現場與觀展相關之即時資訊，我同意於入場時出示已追蹤{' '}
                                             <strong className="text-[#1A1A1A]">@visforthearts</strong> 與{' '}
                                             <strong className="text-[#C9A96E]">
                                                 {selectedBrand ? selectedBrand.instagram_handle : '@參展商品牌'}

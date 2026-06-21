@@ -83,13 +83,13 @@ export default function OnboardingPage() {
                     // Not authenticating and no session -> redirect to login immediately
                     router.push('/vip');
                 } else {
-                    // Authenticating -> Wait longer (up to 12s) to allow Supabase SDK to complete exchange
+                    // Authenticating -> Wait shorter (4s) to allow Supabase SDK to complete exchange
                     authTimeout = setTimeout(async () => {
                         const { data: { session: s2 } } = await supabase.auth.getSession();
                         if (!s2?.user) {
                             router.push('/vip');
                         }
-                    }, 12000);
+                    }, 4000);
                 }
             }
         };

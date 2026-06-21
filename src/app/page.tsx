@@ -7,10 +7,20 @@ import { supabase } from '@/lib/supabase';
 export default function LandingPage() {
     const navRef = useRef<HTMLElement>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isRedirecting, setIsRedirecting] = useState(true);
     const router = useRouter();
 
     // Catch Supabase redirect and handle auto-login redirection
     useEffect(() => {
+        let active = true;
+
+        const hasCode = typeof window !== 'undefined' && (
+            new URLSearchParams(window.location.search).has('code') ||
+            window.location.hash.includes('access_token') ||
+            window.location.hash.includes('type=recovery') ||
+            window.location.search.includes('type=magiclink')
+        );
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN' && session) {
                 router.push('/vip/onboarding');
@@ -19,13 +29,40 @@ export default function LandingPage() {
 
         // Check if session is already present or completed in the background
         supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!active) return;
             if (session) {
                 router.push('/vip/onboarding');
+            } else if (!hasCode) {
+                setIsRedirecting(false);
             }
         });
 
-        return () => subscription.unsubscribe();
+        // Fallback to prevent infinite loading state if something hangs
+        const timeout = setTimeout(() => {
+            if (active) setIsRedirecting(false);
+        }, 1500);
+
+        return () => {
+            active = false;
+            subscription.unsubscribe();
+            clearTimeout(timeout);
+        };
     }, [router]);
+
+    if (isRedirecting) {
+        return (
+            <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center font-sans">
+                <div className="text-center space-y-4">
+                    <img 
+                        src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                        alt="VIS" 
+                        className="h-12 mx-auto opacity-80 animate-pulse"
+                    />
+                    <div className="w-5 h-5 border-t-2 border-[#DFBA87] rounded-full animate-spin mx-auto"></div>
+                </div>
+            </div>
+        );
+    }
 
     useEffect(() => {
         const scripts = [
@@ -360,7 +397,7 @@ export default function LandingPage() {
             <section className="hero" id="about">
                 <div className="hero-layout">
                     <div className="hero-img-container">
-                        <img src="hero_main.png" alt="Hero" />
+                        <img src="/hero_main.png" alt="Hero" />
                     </div>
                     <div className="hero-text-container">
                         <p className="hero-zh">
@@ -388,7 +425,7 @@ export default function LandingPage() {
 
                     <div className="exhibit-item">
                         <div className="img-card">
-                            <img src="blue_island.png" className="img-parallax" alt="Blue Island" />
+                            <img src="/blue_island.jpg" className="img-parallax" alt="Blue Island" />
                         </div>
                         <p className="card-text-zh">告別獨立品牌行銷的商業孤島</p>
                         <p className="card-text-en">Bridging the commercial islands of independent branding.</p>
@@ -396,7 +433,7 @@ export default function LandingPage() {
 
                     <div className="exhibit-item offset-card">
                         <div className="img-card">
-                            <img src="traditional_formats.png" className="img-parallax" alt="Formats" />
+                            <img src="/traditional_formats.png" className="img-parallax" alt="Formats" />
                         </div>
                         <p className="card-text-zh">精緻環境展現平易近人的優雅設計</p>
                         <p className="card-text-en">Approachable elegance design in a refined setting.</p>

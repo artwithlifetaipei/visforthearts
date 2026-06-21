@@ -65,19 +65,31 @@ export default function VIPDashboard() {
             }
         });
 
-        // Initial check
-        supabase.auth.getUser().then(({ data: { user } }) => {
-            if (user) {
+        // Initial check using fast local session first
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (session?.user) {
                 if (authTimeout) clearTimeout(authTimeout);
-                fetchProfile(user);
+                fetchProfile(session.user);
             } else {
-                // Wait a bit before kicking to login, checking again in 3s
-                authTimeout = setTimeout(async () => {
-                    const { data: { user: currentUser } } = await supabase.auth.getUser();
-                    if (!currentUser) {
-                        router.push('/vip');
-                    }
-                }, 3000);
+                const hasCode = typeof window !== 'undefined' && (
+                    new URLSearchParams(window.location.search).has('code') ||
+                    window.location.hash.includes('access_token') ||
+                    window.location.hash.includes('type=recovery') ||
+                    window.location.search.includes('type=magiclink')
+                );
+
+                if (!hasCode) {
+                    // No active session and not authenticating -> redirect immediately
+                    router.push('/vip');
+                } else {
+                    // Wait a bit before kicking to login, checking again in 4s (only if auth parameters present)
+                    authTimeout = setTimeout(async () => {
+                        const { data: { session: s2 } } = await supabase.auth.getSession();
+                        if (!s2?.user) {
+                            router.push('/vip');
+                        }
+                    }, 4000);
+                }
             }
         });
 
@@ -157,7 +169,7 @@ export default function VIPDashboard() {
     return (
         <div className={`min-h-screen transition-colors duration-1000 font-sans relative overflow-hidden pb-12 ${isSVIP ? 'text-[#FAF9F6]' : 'text-[#1A1A1A]'}`}>
             {/* Full-bleed architectural background */}
-            <div className="absolute inset-0 w-full h-full pointer-events-none">
+            <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
                 <img
                     src="/vip_lobby_bg.jpg"
                     alt=""

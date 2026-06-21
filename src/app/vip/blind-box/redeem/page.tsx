@@ -1,11 +1,11 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { motion } from 'framer-motion';
 
-export default function RewardRedeemPage() {
+function RedeemContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const rewardId = searchParams.get('id');
@@ -181,5 +181,17 @@ export default function RewardRedeemPage() {
                 )}
             </motion.div>
         </div>
+    );
+}
+
+export default function RewardRedeemPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-neutral-950 text-white flex flex-col items-center justify-center p-6 font-sans">
+                <div className="w-10 h-10 border-t-2 border-[#DFBA87] rounded-full animate-spin"></div>
+            </div>
+        }>
+            <RedeemContent />
+        </Suspense>
     );
 }

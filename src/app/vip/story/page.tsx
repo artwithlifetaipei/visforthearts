@@ -181,10 +181,10 @@ export default function ZodiacStoryPage() {
 
                     <div className="flex justify-between items-center relative z-20 w-full">
                         <div className="flex flex-col text-left">
-                            <span className="text-[9px] tracking-[0.4em] uppercase text-white/40 mb-1 leading-none">
+                            <span className="text-[9px] tracking-[0.4em] uppercase text-white/40 mb-2 leading-none block">
                                 PASS TYPE
                             </span>
-                            <span className="text-[18px] md:text-[20px] tracking-[0.2em] font-serif uppercase text-[#DFBA87] font-semibold leading-none">
+                            <span className="text-[28px] md:text-[32px] tracking-[0.25em] font-serif uppercase text-[#DFBA87] font-bold leading-none drop-shadow-[0_2px_10px_rgba(223,186,135,0.45)]">
                                 {profile.tier}
                             </span>
                         </div>
