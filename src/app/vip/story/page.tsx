@@ -183,37 +183,42 @@ export default function ZodiacStoryPage() {
                 >
                     <div className="flex justify-between items-start relative z-20 w-full">
                         <div className="flex flex-col text-left">
-                            <span className="text-[8px] tracking-[0.4em] uppercase text-white/45 mb-2 leading-none block">
-                                MEMBER TIER
+                            <span className="text-[7px] tracking-[0.45em] uppercase text-white/40 mb-1.5 leading-none block font-light">
+                                Member Tier
                             </span>
-                            <span className="text-[28px] tracking-[0.2em] font-serif uppercase text-[#DFBA87] font-light leading-none">
-                                {profile.tier}
-                            </span>
+                            <div className="inline-flex items-center gap-1.5">
+                                <span className="w-3 h-[0.5px] bg-[#DFBA87]/60"></span>
+                                <span className="text-[11px] tracking-[0.35em] font-serif uppercase text-[#DFBA87] font-light leading-none letter-spacing-wide">
+                                    {profile.tier}
+                                </span>
+                                <span className="w-3 h-[0.5px] bg-[#DFBA87]/60"></span>
+                            </div>
                         </div>
-                        <div className="text-[9px] tracking-[0.2em] font-mono text-white/60 font-light mt-1">
-                            2027
+                        <div className="text-[8px] tracking-[0.25em] font-mono text-white/40 font-light mt-0.5">
+                            VIS 2027
                         </div>
                     </div>
 
                     <div className="relative z-20 py-4 flex-1 flex flex-col justify-center text-left">
-                        <p className="text-base md:text-lg font-serif font-light italic leading-relaxed tracking-wide text-white/95 mb-3">
-                            "{data.quoteEn}"
+                        <p className="text-[13px] md:text-[15px] font-serif font-light italic leading-[1.75] tracking-wide text-white/95 mb-3">
+                            &ldquo;{data.quoteEn}&rdquo;
                         </p>
-                        <p className="text-xs md:text-sm font-serif font-light leading-relaxed tracking-widest text-white/85">
+                        <p className="text-[11px] md:text-[13px] font-serif font-light leading-[1.9] tracking-wider text-white/75 mb-1">
                             「{data.quoteZh}」
                         </p>
-                        <div className="h-px w-10 bg-[#DFBA87]/70 my-4"></div>
-                        <p className="text-[9px] tracking-[0.25em] uppercase text-[#DFBA87]/90 font-medium leading-relaxed">
+                        <div className="h-px w-8 bg-[#DFBA87]/60 my-4"></div>
+                        <p className="text-[8px] tracking-[0.3em] uppercase text-[#DFBA87]/80 font-light leading-relaxed">
                             — {data.artist}
                         </p>
                     </div>
 
-                    <div className="text-center pt-6 border-t border-white/10 relative z-20">
+                    <div className="text-center pt-5 border-t border-white/10 relative z-20">
                         <img 
                             src="/vis_logo.png" 
-                            className="h-5 mx-auto brightness-0 invert opacity-75"
+                            className="h-10 mx-auto brightness-0 invert opacity-80"
                             alt="VIS Logo"
                         />
+                        <p className="text-[6.5px] tracking-[0.4em] uppercase text-white/30 mt-1.5 font-light">FOR THE ARTS</p>
                     </div>
 
                     {/* Subtle paper texture overlay */}
