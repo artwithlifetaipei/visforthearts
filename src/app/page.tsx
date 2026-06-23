@@ -49,22 +49,11 @@ export default function LandingPage() {
         };
     }, [router]);
 
-    if (isRedirecting) {
-        return (
-            <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center font-sans">
-                <div className="text-center space-y-4">
-                    <img 
-                        src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
-                        alt="VIS" 
-                        className="h-12 mx-auto opacity-80 animate-pulse"
-                    />
-                    <div className="w-5 h-5 border-t-2 border-[#DFBA87] rounded-full animate-spin mx-auto"></div>
-                </div>
-            </div>
-        );
-    }
-
+    // GSAP animations — must stay BEFORE any conditional return to comply with React Rules of Hooks
     useEffect(() => {
+        // Don't run animations while the page is still determining auth state
+        if (isRedirecting) return;
+
         const scripts = [
             'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js',
             'https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/ScrollTrigger.min.js',
@@ -110,7 +99,7 @@ export default function LandingPage() {
                     scrollTrigger: {
                         trigger: ".exhibition-section",
                         start: "top top",
-                        end: () => `+=${scroller.scrollWidth + window.innerHeight}`, // Extended scroll distance
+                        end: () => `+=${scroller.scrollWidth + window.innerHeight}`,
                         scrub: 1,
                         pin: true,
                         anticipatePin: 1,
@@ -180,7 +169,22 @@ export default function LandingPage() {
         };
 
         initAnimations();
-    }, []);
+    }, [isRedirecting]);
+
+    if (isRedirecting) {
+        return (
+            <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center font-sans">
+                <div className="text-center space-y-4">
+                    <img 
+                        src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                        alt="VIS" 
+                        className="h-12 mx-auto opacity-80 animate-pulse"
+                    />
+                    <div className="w-5 h-5 border-t-2 border-[#DFBA87] rounded-full animate-spin mx-auto"></div>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <main className="landing-root">
