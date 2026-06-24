@@ -315,15 +315,32 @@ export default function VIPDashboard() {
                 </motion.button>
             </section>
 
-            {/* Admin-only link — invisible to regular VIPs */}
-            {ADMIN_EMAILS.includes(userEmail) && (
-                <div className="text-center mt-8">
-                    <button
+            {/* Admin-only CRM link — visible only to admin accounts */}
+            {ADMIN_EMAILS.includes(profile.email ?? '') && (
+                <div className="px-6 mt-6 relative z-10">
+                    <motion.button
+                        whileHover={{ scale: 0.99 }}
+                        whileTap={{ scale: 0.97 }}
                         onClick={() => router.push('/vip/admin')}
-                        className="text-[9px] tracking-[0.4em] uppercase text-neutral-600 hover:text-[#DFBA87] transition-colors duration-500"
+                        className={`w-full py-4 px-6 flex items-center justify-between border-[0.5px] backdrop-blur-md transition-all duration-500 group cursor-pointer ${
+                            isSVIP
+                                ? 'border-[#DFBA87]/30 hover:border-[#DFBA87]/70 bg-[#DFBA87]/5'
+                                : 'border-[#1A1A1A]/20 hover:border-[#1A1A1A]/60 bg-white/30'
+                        }`}
                     >
-                        ⚙ 貴賓名單管理
-                    </button>
+                        <div className="flex items-center gap-3">
+                            <span className="text-[#DFBA87] text-sm">⚙</span>
+                            <div className="text-left">
+                                <p className={`text-[9px] tracking-[0.4em] uppercase font-medium ${isSVIP ? 'text-white/80' : 'text-[#1A1A1A]/80'}`}>
+                                    CRM 後台管理
+                                </p>
+                                <p className={`text-[8px] tracking-wider mt-0.5 ${isSVIP ? 'text-white/40' : 'text-[#1A1A1A]/40'}`}>
+                                    貴賓名單 / 行銷活動 / 入場掃描
+                                </p>
+                            </div>
+                        </div>
+                        <span className={`text-[10px] transition-transform duration-300 group-hover:translate-x-1 ${isSVIP ? 'text-white/40' : 'text-[#1A1A1A]/40'}`}>→</span>
+                    </motion.button>
                 </div>
             )}
 
