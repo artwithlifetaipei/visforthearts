@@ -39,7 +39,8 @@ export default function OnboardingPage() {
             }
         };
 
-        // Handle ALL events including INITIAL_SESSION (fired when already logged in)
+        // Primary mechanism: listen for ALL auth events including INITIAL_SESSION
+        // (INITIAL_SESSION fires when already logged in; SIGNED_IN fires after magic link code exchange)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!isMounted) return;
             if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
@@ -50,22 +51,49 @@ export default function OnboardingPage() {
             }
         });
 
-        // Fallback: if onAuthStateChange doesn't fire within 8s with a valid session, redirect to login
-        authTimeout = setTimeout(async () => {
-            if (!isMounted) return;
+        // Secondary mechanism: manual session check + hasCode detection
+        // Critical for magic link flow: ?code= in URL means code exchange is in progress
+        const checkSession = async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.user) {
-                router.push('/vip');
+            if (!isMounted) return;
+
+            if (session?.user) {
+                // Already have a session — handleUser via onAuthStateChange INITIAL_SESSION
+                // (which fires synchronously when subscribed). This is a no-op duplicate guard.
+                return;
             }
-            // If session exists, onAuthStateChange INITIAL_SESSION will handle it
-        }, 8000);
+
+            // No session yet — check if we're in the middle of a magic link code exchange
+            const hasCode = typeof window !== 'undefined' && (
+                new URLSearchParams(window.location.search).has('code') ||
+                window.location.hash.includes('access_token') ||
+                window.location.hash.includes('type=recovery') ||
+                window.location.search.includes('type=magiclink')
+            );
+
+            if (!hasCode) {
+                // No session AND no auth code → not authenticating → send to login
+                router.push('/vip');
+            } else {
+                // Auth code present → SDK is exchanging it → wait up to 15s for SIGNED_IN
+                authTimeout = setTimeout(async () => {
+                    if (!isMounted) return;
+                    const { data: { session: s2 } } = await supabase.auth.getSession();
+                    if (!s2?.user) {
+                        router.push('/vip');
+                    }
+                    // If session exists by now, SIGNED_IN already fired and handled it
+                }, 15000);
+            }
+        };
+        checkSession();
 
         return () => {
             isMounted = false;
             subscription.unsubscribe();
             if (authTimeout) clearTimeout(authTimeout);
         };
-    }, [router]); // ← ONLY depend on router
+    }, [router]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();

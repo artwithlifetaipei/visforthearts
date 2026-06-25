@@ -307,7 +307,7 @@ export default function V2LandingPage() {
 
             <section className="v2-hero" id="about">
                 <div className="v2-hero-img-box">
-                    <img src="hero_main.png" className="v2-parallax" alt="VIS Hero" />
+                    <img src="/hero_main_new.jpg" className="v2-parallax" alt="VIS Hero" />
                 </div>
                 <div className="v2-hero-content">
                     <div className="v2-hero-text">

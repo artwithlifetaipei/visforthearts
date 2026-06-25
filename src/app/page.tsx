@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import Link from 'next/link';
 
 export default function LandingPage() {
     const navRef = useRef<HTMLElement>(null);
@@ -257,15 +258,36 @@ export default function LandingPage() {
                 }
                 .btn-access:hover { background: var(--text); color: #fff; }
 
-                .hero-layout {
+                 .hero-layout {
                     display: flex; justify-content: space-between; align-items: flex-end;
                     height: 100vh; padding: 25vh 8vw 12vh 8vw;
                 }
-                .hero-img-container { height: 100%; width: 50vw; display: flex; align-items: flex-end; }
-                .hero-img-container img { max-width: 100%; max-height: 100%; object-fit: contain; }
+                .hero-img-container {
+                    height: 100%; width: 50vw; display: flex; align-items: flex-end;
+                    perspective: 1000px;
+                }
+                .hero-img-container img {
+                    max-width: 100%; max-height: 90%; object-fit: cover;
+                    border: 0.5px solid rgba(201, 169, 110, 0.25);
+                    padding: 8px;
+                    background: #FFF;
+                    box-shadow: 0 30px 60px -15px rgba(0, 0, 0, 0.1), 0 10px 30px -10px rgba(0, 0, 0, 0.05);
+                    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .hero-img-container img:hover {
+                    transform: translateY(-8px) rotateY(-2deg) scale(1.01);
+                    box-shadow: 0 45px 80px -20px rgba(201, 169, 110, 0.15), 0 15px 40px -15px rgba(0, 0, 0, 0.08);
+                }
                 .hero-text-container { max-width: 450px; text-align: right; }
                 .hero-zh { font-size: 1rem; font-weight: 300; line-height: 2; margin-bottom: 1.5rem; }
-                .hero-en { font-size: 0.65rem; letter-spacing: 0.15em; text-transform: uppercase; color: #888; white-space: nowrap; }
+                .hero-en {
+                    font-family: var(--font-serif);
+                    font-size: 1.1rem;
+                    font-style: italic;
+                    letter-spacing: 0.05em;
+                    color: #777;
+                    margin-top: 0.5rem;
+                }
 
                 .exhibition-section { 
                     background: #fff; 
@@ -302,6 +324,21 @@ export default function LandingPage() {
                 }
                 .btn-pola:hover { background: var(--gold); }
 
+                .btn-pola-gold {
+                    display: inline-block; background: var(--gold); color: white;
+                    padding: 1.25rem 3rem; font-size: 10px; text-transform: uppercase;
+                    letter-spacing: 0.4em; font-weight: 700; transition: all 0.5s ease;
+                    text-decoration: none;
+                }
+                .btn-pola-gold:hover { background: var(--text); }
+
+                .exhibit-buttons-container {
+                    display: flex;
+                    gap: 1rem;
+                    margin-top: 3rem;
+                    flex-wrap: wrap;
+                }
+
                 .press-section { padding: 20vh 10vw; }
                 .press-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 5vw; margin-top: 10vh; }
                 .press-item { border-bottom: 1px solid var(--border); padding-bottom: 2rem; display: flex; flex-direction: column; gap: 1.5rem; }
@@ -327,7 +364,7 @@ export default function LandingPage() {
                     .hero-img-container { width: 100%; height: 45vh; justify-content: center; }
                     .hero-text-container { text-align: center; margin-top: 4vh; }
                     .hero-zh { font-size: 0.95rem; line-height: 1.8; margin-bottom: 1rem; }
-                    .hero-en { white-space: normal; line-height: 1.5; }
+                    .hero-en { font-family: var(--font-serif); font-size: 1rem; font-style: italic; white-space: normal; line-height: 1.5; }
                     .desktop-br { display: none; }
                     .mobile-br { display: block; }
                     .exhibition-scroller { padding: 0 10vw; gap: 10vw; }
@@ -401,7 +438,7 @@ export default function LandingPage() {
             <section className="hero" id="about">
                 <div className="hero-layout">
                     <div className="hero-img-container">
-                        <img src="/hero_main.png" alt="Hero" />
+                        <img src="/hero_main_new.jpg" alt="Hero" />
                     </div>
                     <div className="hero-text-container">
                         <p className="hero-zh">
@@ -424,7 +461,10 @@ export default function LandingPage() {
                         <p className="exhibit-intro-en">
                             More than a fair, but a purposefully architected space for intellectual and aesthetic elevation.
                         </p>
-                        <a href="mailto:artwithlifetaipei@gmail.com" className="btn-pola" style={{ marginTop: '3rem', width: 'fit-content' }}>Apply 索取2027年簡章</a>
+                        <div className="exhibit-buttons-container">
+                            <Link href="/exhibitor" className="btn-pola">Apply 索取2027年簡章</Link>
+                            <Link href="/exhibitor/apply" className="btn-pola btn-pola-gold">線上申請 Apply Online</Link>
+                        </div>
                     </div>
 
                     <div className="exhibit-item">

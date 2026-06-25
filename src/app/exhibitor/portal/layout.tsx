@@ -1,0 +1,535 @@
+'use client';
+
+import { useState, useEffect } from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { motion, AnimatePresence } from 'framer-motion';
+import { 
+  Menu, X, Calendar, FileCheck, Users, Image as ImageIcon, LogOut, ShieldCheck, 
+  HelpCircle, ArrowRight, Sparkles, Loader2, CheckCircle2 
+} from 'lucide-react';
+
+export default function ExhibitorPortalLayout({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  
+  // Auth state
+  const [session, setSession] = useState<any>(null);
+  const [userEmail, setUserEmail] = useState<string>('');
+  const [brandData, setBrandData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginLoading, setLoginLoading] = useState(false);
+  const [loginSent, setLoginSent] = useState(false);
+  const [loginMessage, setLoginMessage] = useState('');
+
+  // Check auth on mount
+  useEffect(() => {
+    const checkAuth = async () => {
+      setIsLoading(true);
+      const { data: { session: currentSession } } = await supabase.auth.getSession();
+      
+      if (currentSession) {
+        setSession(currentSession);
+        const email = currentSession.user?.email || '';
+        setUserEmail(email);
+        await fetchBrandInfo(email);
+      } else {
+        setSession(null);
+        setBrandData(null);
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
+      if (event === 'SIGNED_IN' && currentSession) {
+        setSession(currentSession);
+        const email = currentSession.user?.email || '';
+        setUserEmail(email);
+        await fetchBrandInfo(email);
+      } else if (event === 'SIGNED_OUT') {
+        setSession(null);
+        setBrandData(null);
+        setIsLoading(false);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchBrandInfo = async (email: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('exhibitor_brands')
+        .select('*')
+        .eq('portal_email', email.toLowerCase().trim())
+        .maybeSingle();
+
+      if (data) {
+        setBrandData(data);
+      } else {
+        setBrandData(null);
+      }
+    } catch (e) {
+      console.error('Error fetching brand data:', e);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // OTP Login Handler
+  const handleLoginSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoginLoading(true);
+    setLoginMessage('');
+
+    const formattedEmail = loginEmail.toLowerCase().trim();
+
+    // Check if email is in exhibitor_brands
+    const { data: allowed, error: checkError } = await supabase
+      .from('exhibitor_brands')
+      .select('brand_name_zh')
+      .eq('portal_email', formattedEmail)
+      .maybeSingle();
+
+    if (!allowed) {
+      setLoginMessage('此信箱尚未登錄為 2027 VIS 參展品牌。\n若您的品牌已通過首期評選，請洽大會秘書處確認登錄信箱。');
+      setLoginLoading(false);
+      return;
+    }
+
+    // Send magic link (OTP)
+    const { error } = await supabase.auth.signInWithOtp({
+      email: formattedEmail,
+      options: {
+        emailRedirectTo: `${window.location.origin}/exhibitor/portal`,
+        shouldCreateUser: true,
+      },
+    });
+
+    if (error) {
+      setLoginMessage(`發送失敗: ${error.message}`);
+    } else {
+      setLoginSent(true);
+      setLoginMessage('專屬協作中心登入連結已寄送至您的信箱，請查收。');
+    }
+    setLoginLoading(false);
+  };
+
+  // Demo Login Handler (Bypasses email for rapid local verification)
+  const handleDemoLogin = async () => {
+    setLoginLoading(true);
+    setLoginMessage('');
+
+    const demoEmail = 'demo-brand@visforthearts.com';
+
+    // Check if brand exists, if not create a demo one
+    const { data: existingBrand } = await supabase
+      .from('exhibitor_brands')
+      .select('*')
+      .eq('portal_email', demoEmail)
+      .maybeSingle();
+
+    if (!existingBrand) {
+      // 1. Create a mock application
+      const { data: mockApp, error: appErr } = await supabase
+        .from('exhibitor_applications')
+        .insert({
+          brand_name_zh: '琉璃藝坊 (測試)',
+          brand_name_en: 'Amber Art Studio',
+          contact_name: '蔡經理',
+          contact_email: demoEmail,
+          contact_phone: '0988-123-456',
+          zone_id: 'artsy',
+          booth_type: 'S01-S06',
+          concept_brief: '融入東方古典意象的琉璃陳設展位。',
+          status: 'approved',
+          deposit_paid: true,
+        })
+        .select()
+        .single();
+
+      if (appErr) {
+        setLoginMessage(`Demo 登入失敗 (Application): ${appErr.message}`);
+        setLoginLoading(false);
+        return;
+      }
+
+      // 2. Create the brand portal record
+      const { error: brandErr } = await supabase
+        .from('exhibitor_brands')
+        .insert({
+          application_id: mockApp.id,
+          brand_name_zh: mockApp.brand_name_zh,
+          brand_name_en: mockApp.brand_name_en,
+          zone_id: mockApp.zone_id,
+          booth_type: mockApp.booth_type,
+          is_micro_exposure: false,
+          portal_email: demoEmail,
+        });
+
+      if (brandErr) {
+        setLoginMessage(`Demo 登入失敗 (Brand): ${brandErr.message}`);
+        setLoginLoading(false);
+        return;
+      }
+    }
+
+    // Now sign in with mock email (we use signInWithOtp but since it is local demo, we can just sign in as demo or sign out)
+    // Wait, the easiest way to log in without real email during local tests is to sign in via a dedicated admin credential or use supabase auth signInWithPassword if credentials exist,
+    // OR we can mock the user login by calling supabase.auth.signUp/signIn if password is set.
+    // For local convenience, let's register/login with password 'vis2027exhibitor' for this email.
+    try {
+      const { error: loginError } = await supabase.auth.signInWithPassword({
+        email: demoEmail,
+        password: 'vis2027exhibitor',
+      });
+
+      if (loginError) {
+        // If password login fails (user does not exist or password mismatch), try creating the user
+        const { error: signUpError } = await supabase.auth.signUp({
+          email: demoEmail,
+          password: 'vis2027exhibitor',
+        });
+
+        if (signUpError) {
+          setLoginMessage(`Demo 登入失敗 (SignUp): ${signUpError.message}`);
+        } else {
+          // Retry login
+          const { error: retryError } = await supabase.auth.signInWithPassword({
+            email: demoEmail,
+            password: 'vis2027exhibitor',
+          });
+          if (retryError) {
+            setLoginMessage(`Demo 登入失敗 (Retry): ${retryError.message}`);
+          }
+        }
+      }
+    } catch (ex) {
+      setLoginMessage('Demo 帳號初始化異常，請以普通 Magic Link 發送。');
+    } finally {
+      setLoginLoading(false);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push('/exhibitor');
+  };
+
+  // Nav Items configuration
+  const getNavItems = () => {
+    const isMicro = brandData?.is_micro_exposure || brandData?.booth_type === 'T';
+    return [
+      {
+        name: '模組 A — 時程與財務管理',
+        href: '/exhibitor/portal',
+        icon: Calendar,
+      },
+      {
+        name: '模組 B — 展位規範簽署',
+        href: '/exhibitor/portal/compliance',
+        icon: FileCheck,
+      },
+      {
+        name: '模組 C — VIP 貴賓名單',
+        href: '/exhibitor/portal/vip',
+        icon: Users,
+        badge: isMicro ? '限一般展商' : null,
+        disabled: isMicro,
+      },
+      {
+        name: '模組 D — 媒體公關素材',
+        href: '/exhibitor/portal/media',
+        icon: ImageIcon,
+        badge: isMicro ? '限一般展商' : null,
+        disabled: isMicro,
+      },
+    ];
+  };
+
+  const navItems = getNavItems();
+
+  // Loading Screen
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-[#DFBA87]">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
+          <p className="text-xs font-light tracking-[0.2em] uppercase">載入品牌專屬中心 Loading...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not Logged In - Show elegant dark login card
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-[#0D0D0D] flex flex-col p-6 font-sans-outfit text-white relative overflow-hidden justify-center items-center">
+        {/* Background glow */}
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#C9A96E1A,transparent_60%)] pointer-events-none" />
+
+        <div className="w-full max-w-md bg-[#111111] border border-[#C9A96E]/20 p-8 rounded-xl relative z-10 shadow-2xl">
+          <img 
+            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+            alt="VIS Logo" 
+            className="h-10 mx-auto mb-8 filter invert brightness-200"
+          />
+          
+          <h2 className="text-xl md:text-2xl font-serif-garamond text-center font-normal tracking-wider mb-2 text-[#DFBA87]">
+            參展品牌協作中心
+          </h2>
+          <p className="text-[10px] text-center text-neutral-400 font-light tracking-[0.2em] uppercase mb-8">
+            Exhibitor Collaboration Portal
+          </p>
+
+          <AnimatePresence mode="wait">
+            {!loginSent ? (
+              <motion.form 
+                key="login-form"
+                onSubmit={handleLoginSubmit}
+                className="space-y-6"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+              >
+                <div>
+                  <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-2">登錄電子信箱 EMAIL ADDRESS</label>
+                  <input 
+                    type="email" 
+                    value={loginEmail}
+                    onChange={(e) => setLoginEmail(e.target.value)}
+                    placeholder="ENTER YOUR REGISTERED EMAIL"
+                    className="w-full text-center text-xs tracking-wider border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-4 py-3 outline-none text-white transition-all uppercase"
+                    required
+                    disabled={loginLoading}
+                  />
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={loginLoading}
+                  className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-3 rounded text-xs font-semibold tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {loginLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : '傳送驗證連結 SEND MAGIC LINK'}
+                </button>
+
+                <div className="relative flex py-2 items-center">
+                  <div className="flex-grow border-t border-white/5"></div>
+                  <span className="flex-shrink mx-4 text-[9px] text-neutral-500 font-semibold tracking-widest uppercase">或者 OR</span>
+                  <div className="flex-grow border-t border-white/5"></div>
+                </div>
+
+                {/* Quick Local Demo Login Button */}
+                <button 
+                  type="button"
+                  onClick={handleDemoLogin}
+                  disabled={loginLoading}
+                  className="w-full border border-dashed border-[#DFBA87]/45 hover:border-[#DFBA87] hover:bg-[#DFBA87]/5 text-[#DFBA87] py-3 rounded text-xs font-semibold tracking-[0.15em] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  <Sparkles className="w-4 h-4" /> 快速本地測試登入 (DEMO KEY)
+                </button>
+
+                {loginMessage && (
+                  <p className="text-[11px] text-rose-400 font-light leading-relaxed whitespace-pre-wrap text-center bg-rose-500/10 p-3 rounded border border-rose-500/20">{loginMessage}</p>
+                )}
+              </motion.form>
+            ) : (
+              <motion.div 
+                key="login-success"
+                className="text-center py-6 space-y-6"
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+              >
+                <div className="w-12 h-12 rounded-full border border-[#DFBA87] flex items-center justify-center bg-white/5 mx-auto text-[#DFBA87]">
+                  <CheckCircle2 className="w-6 h-6" />
+                </div>
+                <div>
+                  <h3 className="text-sm font-semibold tracking-wider text-white">驗證信已寄出</h3>
+                  <p className="text-xs text-neutral-400 font-light leading-relaxed mt-2">{loginMessage}</p>
+                </div>
+                <button 
+                  onClick={() => setLoginSent(false)}
+                  className="text-[10px] tracking-wider text-neutral-500 hover:text-white uppercase transition-colors"
+                >
+                  重新填寫信箱
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged In, but NOT in exhibitor_brands (unauthorized user logged into Supabase auth)
+  if (session && !brandData) {
+    return (
+      <div className="min-h-screen bg-[#0D0D0D] flex flex-col p-6 font-sans-outfit text-white relative overflow-hidden justify-center items-center">
+        <div className="w-full max-w-md bg-[#111111] border border-[#C9A96E]/20 p-8 rounded-xl relative z-10 text-center space-y-6">
+          <div className="w-12 h-12 rounded-full border border-[#DFBA87] flex items-center justify-center bg-white/5 mx-auto text-[#DFBA87]">
+            <ShieldCheck className="w-6 h-6 animate-pulse" />
+          </div>
+          <div>
+            <h2 className="text-lg font-serif-garamond text-[#DFBA87] tracking-wider">信箱授權未核對</h2>
+            <p className="text-xs text-neutral-400 font-light leading-relaxed mt-2">
+              您已成功登入系統，但信箱 (<strong className="text-white">{userEmail}</strong>) 尚未被登錄為 2027 VIS 參展品牌。
+            </p>
+          </div>
+          <div className="space-y-3 pt-4">
+            <button 
+              onClick={handleLogout}
+              className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-2.5 rounded text-xs font-semibold tracking-wider transition-colors flex items-center justify-center gap-1.5"
+            >
+              <LogOut className="w-3.5 h-3.5" /> 登出並返回
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Logged In & Authorized - Render standard premium dashboard layout
+  return (
+    <div className="min-h-screen bg-[#0D0D0D] text-white font-sans-outfit flex flex-col md:flex-row relative">
+      
+      {/* Load Fonts */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Outfit:wght@200;300;400;500;600;700&display=swap');
+        .font-serif-garamond { font-family: 'Cormorant Garamond', Georgia, serif; }
+        .font-sans-outfit { font-family: 'Outfit', sans-serif; }
+      `}} />
+
+      {/* Fixed dashboard light bg pattern */}
+      <div className="fixed inset-0 pointer-events-none opacity-[0.02] bg-[radial-gradient(circle_at_center,#C9A96E_1px,transparent_1px)] bg-[size:24px_24px] z-0" />
+
+      {/* Mobile Sticky Top Header */}
+      <div className="md:hidden sticky top-0 bg-[#0D0D0D]/90 backdrop-blur-md border-b border-white/5 z-50 p-4 flex justify-between items-center w-full">
+        <Link href="/exhibitor/portal">
+          <img 
+            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+            alt="VIS" 
+            className="h-7 filter invert brightness-200"
+          />
+        </Link>
+        <button 
+          onClick={() => setIsSidebarOpen(prev => !prev)}
+          className="text-[#DFBA87] hover:text-white transition-colors"
+        >
+          {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+        </button>
+      </div>
+
+      {/* Sidebar Navigation */}
+      <aside className={`
+        fixed md:sticky top-[57px] md:top-0 bottom-0 left-0 w-64 bg-[#0A0A0A] border-r border-white/5 z-40 
+        transform md:transform-none transition-transform duration-300 ease-in-out flex flex-col justify-between
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
+        <div className="p-6">
+          {/* Logo in desktop sidebar */}
+          <div className="hidden md:block mb-8">
+            <img 
+              src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+              alt="VIS Logo" 
+              className="h-8 filter invert brightness-200"
+            />
+          </div>
+
+          {/* Brand Info Display Card */}
+          <div className="bg-white/5 border border-[#C9A96E]/10 rounded-lg p-4 mb-8">
+            <span className="text-[9px] uppercase tracking-widest text-[#C9A96E] font-semibold">參展商 BRAND</span>
+            <h3 className="font-serif-garamond text-base font-normal tracking-wide text-white truncate mt-1">
+              {brandData?.brand_name_zh}
+            </h3>
+            <p className="text-[9px] text-neutral-400 font-mono tracking-wider truncate uppercase">
+              {brandData?.booth_type} ({brandData?.zone_id === 'artsy' ? '藝蕙' : brandData?.zone_id === 'premier' ? '精鑑' : '匠心'})
+            </p>
+          </div>
+
+          {/* Nav List */}
+          <nav className="space-y-1.5">
+            {navItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = pathname === item.href;
+              
+              if (item.disabled) {
+                return (
+                  <div 
+                    key={item.href} 
+                    className="flex items-center justify-between p-3 rounded text-neutral-600 text-xs tracking-wider cursor-not-allowed select-none border border-transparent"
+                  >
+                    <div className="flex items-center gap-3">
+                      <Icon className="w-4 h-4 opacity-50" />
+                      <span>{item.name}</span>
+                    </div>
+                    {item.badge && (
+                      <span className="text-[8px] bg-neutral-900 border border-white/5 text-neutral-500 px-1.5 py-0.5 rounded uppercase font-semibold scale-90">{item.badge}</span>
+                    )}
+                  </div>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.href}
+                  href={item.href}
+                  onClick={() => setIsSidebarOpen(false)}
+                  className={`
+                    flex items-center justify-between p-3 rounded text-xs tracking-wider transition-all duration-300 border
+                    ${isActive 
+                      ? 'bg-[#C9A96E]/10 border-[#C9A96E]/30 text-[#DFBA87] font-medium' 
+                      : 'border-transparent text-neutral-400 hover:text-white hover:bg-white/5'
+                    }
+                  `}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon className="w-4 h-4" />
+                    <span>{item.name}</span>
+                  </div>
+                  {item.badge && (
+                    <span className="text-[8px] bg-[#C9A96E]/10 border border-[#C9A96E]/20 text-[#DFBA87] px-1.5 py-0.5 rounded uppercase font-semibold">{item.badge}</span>
+                  )}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        {/* Sidebar Footer */}
+        <div className="p-6 border-t border-white/5 flex flex-col gap-3">
+          <div className="flex items-center gap-2.5 text-neutral-500 text-[10px] truncate font-mono">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            <span className="truncate">{userEmail}</span>
+          </div>
+          <button 
+            onClick={handleLogout}
+            className="w-full border border-white/5 hover:border-white/20 bg-white/5 text-neutral-400 hover:text-white py-2 rounded text-xs tracking-widest uppercase transition-colors flex items-center justify-center gap-2"
+          >
+            <LogOut className="w-3.5 h-3.5" /> 登出 LOGOUT
+          </button>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <main className="flex-grow p-6 md:p-12 z-10 relative overflow-x-hidden">
+        {/* Pass Brand Data down to children by copying child elements with extra props */}
+        {children && typeof children === 'object' && 'props' in children
+          ? Object.defineProperty(children, 'props', {
+              value: { ...children.props, brand: brandData },
+              writable: true,
+              configurable: true
+            })
+          : children
+        }
+      </main>
+
+    </div>
+  );
+}
