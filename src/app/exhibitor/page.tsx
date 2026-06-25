@@ -289,8 +289,28 @@ export default function ExhibitorLandingPage() {
         </div>
       </nav>
 
+      {/* Top Banner Section */}
+      <div className="w-full max-w-7xl mx-auto px-6 pt-6 md:pt-10 relative z-10">
+        <motion.div 
+          initial={{ opacity: 0, y: -20, scale: 0.99 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full aspect-[2.35/1] md:aspect-[3.2/1] rounded-none overflow-hidden relative shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-[#C9A96E]/25 p-1 bg-white"
+        >
+          <div className="w-full h-full overflow-hidden relative border border-[#C9A96E]/15">
+            <div className="absolute inset-0 bg-[#C9A96E]/5 mix-blend-multiply z-10 pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 z-10" />
+            <img 
+              src="/exhibitor_banner_new_v2.png" 
+              alt="Zhongshan Hall Interior" 
+              className="w-full h-full object-cover filter brightness-[0.85] contrast-[1.03] transition-transform duration-[12s] ease-out hover:scale-105"
+            />
+          </div>
+        </motion.div>
+      </div>
+
       {/* Hero Section */}
-      <header className="relative z-10 max-w-7xl mx-auto px-6 pt-16 md:pt-28 text-center flex flex-col items-center">
+      <header className="relative z-10 max-w-5xl mx-auto px-6 pt-10 md:pt-14 text-center flex flex-col items-center">
         <motion.p 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -313,107 +333,91 @@ export default function ExhibitorLandingPage() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="text-xs md:text-sm font-serif-garamond tracking-[0.3em] text-[#0D0D0D]/40 uppercase mb-12"
+          className="text-xs md:text-sm font-serif-garamond tracking-[0.3em] text-[#0D0D0D]/40 uppercase mb-10"
         >
           Exhibitor Application Portal
         </motion.p>
 
-        {/* Banner image with premium frame */}
-        <motion.div 
-          initial={{ opacity: 0, scale: 0.99 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 1.2, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full max-w-5xl aspect-[3/1] md:aspect-[4/1] rounded-none overflow-hidden relative shadow-[0_15px_40px_rgba(0,0,0,0.03)] border border-[#C9A96E]/20 mb-16 p-1 bg-white"
-        >
-          <div className="w-full h-full overflow-hidden relative border border-[#C9A96E]/10">
-            <div className="absolute inset-0 bg-[#C9A96E]/8 mix-blend-multiply z-10 pointer-events-none" />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 z-10" />
-            <img 
-              src="/exhibitor_banner_new.png" 
-              alt="Zhongshan Hall Interior" 
-              className="w-full h-full object-cover filter brightness-[0.9] contrast-[1.03] transition-transform duration-[10s] ease-out hover:scale-105"
-            />
-          </div>
-        </motion.div>
-
         <motion.p 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
-          className="text-base md:text-lg max-w-3xl text-[#0D0D0D]/85 font-light leading-relaxed tracking-wider mb-14 font-serif-garamond italic"
+          transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+          className="text-base md:text-lg max-w-3xl text-[#0D0D0D]/85 font-light leading-relaxed tracking-wider mb-10 font-serif-garamond italic"
         >
           不斷地聚集著品味人士所建構而成的高質量場域，VIS 不只是一個博覽會，而是一個最適合「高客單價品牌」的導客解決方案。
         </motion.p>
+        
+        {/* Countdown Timer & Hero CTA Buttons Side by Side for balanced landscape layout */}
+        <div className="w-full flex flex-col items-center gap-8 mb-12">
+          {mounted && (
+            <motion.div 
+              initial={{ opacity: 0, y: 15 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8, delay: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="bg-white/40 backdrop-blur-md rounded-none p-5 border border-[#C9A96E]/20 shadow-[0_10px_30px_rgba(201,169,110,0.02)] w-full max-w-xl relative"
+            >
+              <div className="absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/30 to-transparent" />
+              <div className="flex items-center justify-center gap-2 mb-4 text-[#C9A96E]">
+                <Clock className="w-4 h-4" />
+                <span className="text-[10px] tracking-[0.3em] font-semibold uppercase">申請截止倒數 COUNTDOWN TO DEADLINE</span>
+              </div>
+              <div className="grid grid-cols-4 gap-3 md:gap-5">
+                <div className="border border-[#C9A96E]/15 p-2 bg-white/40">
+                  <span className="block text-xl md:text-2.5xl font-light font-serif-garamond text-[#0D0D0D] tracking-wide">{timeLeft.days}</span>
+                  <span className="text-[8px] tracking-widest text-[#0D0D0D]/40 font-medium uppercase mt-0.5 block">天 Days</span>
+                </div>
+                <div className="border border-[#C9A96E]/15 p-2 bg-white/40">
+                  <span className="block text-xl md:text-2.5xl font-light font-serif-garamond text-[#0D0D0D] tracking-wide">{timeLeft.hours}</span>
+                  <span className="text-[8px] tracking-widest text-[#0D0D0D]/40 font-medium uppercase mt-0.5 block">時 Hours</span>
+                </div>
+                <div className="border border-[#C9A96E]/15 p-2 bg-white/40">
+                  <span className="block text-xl md:text-2.5xl font-light font-serif-garamond text-[#0D0D0D] tracking-wide">{timeLeft.minutes}</span>
+                  <span className="text-[8px] tracking-widest text-[#0D0D0D]/40 font-medium uppercase mt-0.5 block">分 Mins</span>
+                </div>
+                <div className="border border-[#C9A96E]/15 p-2 bg-white/40">
+                  <span className="block text-xl md:text-2.5xl font-light font-serif-garamond text-[#0D0D0D] tracking-wide">{timeLeft.seconds}</span>
+                  <span className="text-[8px] tracking-widest text-[#0D0D0D]/40 font-medium uppercase mt-0.5 block">秒 Secs</span>
+                </div>
+              </div>
+            </motion.div>
+          )}
 
-        {/* Countdown Timer */}
-        {mounted && (
+          {/* Hero CTA Buttons */}
           <motion.div 
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.5, ease: [0.16, 1, 0.3, 1] }}
-            className="bg-white/60 backdrop-blur-md rounded-none p-6 border border-[#C9A96E]/20 shadow-[0_10px_30px_rgba(201,169,110,0.02)] w-full max-w-xl mb-16 relative"
+            transition={{ duration: 0.8, delay: 0.5 }}
+            className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-xl"
           >
-            <div className="absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/30 to-transparent" />
-            <div className="flex items-center justify-center gap-2 mb-5 text-[#C9A96E]">
-              <Clock className="w-4 h-4" />
-              <span className="text-[10px] tracking-[0.3em] font-semibold uppercase">申請截止倒數 COUNTDOWN TO DEADLINE</span>
-            </div>
-            <div className="grid grid-cols-4 gap-3 md:gap-5">
-              <div className="border border-[#C9A96E]/15 p-3 bg-white/40">
-                <span className="block text-2xl md:text-3.5xl font-light font-serif-garamond text-[#0D0D0D] tracking-wide">{timeLeft.days}</span>
-                <span className="text-[9px] tracking-widest text-[#0D0D0D]/40 font-medium uppercase mt-1 block">天 Days</span>
-              </div>
-              <div className="border border-[#C9A96E]/15 p-3 bg-white/40">
-                <span className="block text-2xl md:text-3.5xl font-light font-serif-garamond text-[#0D0D0D] tracking-wide">{timeLeft.hours}</span>
-                <span className="text-[9px] tracking-widest text-[#0D0D0D]/40 font-medium uppercase mt-1 block">時 Hours</span>
-              </div>
-              <div className="border border-[#C9A96E]/15 p-3 bg-white/40">
-                <span className="block text-2xl md:text-3.5xl font-light font-serif-garamond text-[#0D0D0D] tracking-wide">{timeLeft.minutes}</span>
-                <span className="text-[9px] tracking-widest text-[#0D0D0D]/40 font-medium uppercase mt-1 block">分 Mins</span>
-              </div>
-              <div className="border border-[#C9A96E]/15 p-3 bg-white/40">
-                <span className="block text-2xl md:text-3.5xl font-light font-serif-garamond text-[#0D0D0D] tracking-wide">{timeLeft.seconds}</span>
-                <span className="text-[9px] tracking-widest text-[#0D0D0D]/40 font-medium uppercase mt-1 block">秒 Secs</span>
-              </div>
-            </div>
+            {session ? (
+              <Link 
+                href="/exhibitor/apply"
+                className="btn-pola flex-1"
+                onMouseEnter={() => setCursorHovered(true)} 
+                onMouseLeave={() => setCursorHovered(false)}
+              >
+                立即線上申請 APPLY ONLINE
+              </Link>
+            ) : (
+              <button 
+                onClick={() => document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' })}
+                className="btn-pola cursor-pointer flex-1"
+                onMouseEnter={() => setCursorHovered(true)} 
+                onMouseLeave={() => setCursorHovered(false)}
+              >
+                立即線上申請 APPLY ONLINE
+              </button>
+            )}
+            <a 
+              href="mailto:artwithlifetaipei@gmail.com?subject=2027 VIS 參展簡章"
+              className="btn-pola-outline flex-1"
+              onMouseEnter={() => setCursorHovered(true)} 
+              onMouseLeave={() => setCursorHovered(false)}
+            >
+              2027年簡章 PROSPECTUS
+            </a>
           </motion.div>
-        )}
-
-        {/* Hero CTA Buttons */}
-        <motion.div 
-          initial={{ opacity: 0, y: 15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.6 }}
-          className="flex flex-col sm:flex-row gap-5 mb-24 relative z-20"
-        >
-          {session ? (
-            <Link 
-              href="/exhibitor/apply"
-              className="btn-pola"
-              onMouseEnter={() => setCursorHovered(true)} 
-              onMouseLeave={() => setCursorHovered(false)}
-            >
-              立即線上申請 APPLY ONLINE
-            </Link>
-          ) : (
-            <button 
-              onClick={() => document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="btn-pola cursor-pointer"
-              onMouseEnter={() => setCursorHovered(true)} 
-              onMouseLeave={() => setCursorHovered(false)}
-            >
-              立即線上申請 APPLY ONLINE
-            </button>
-          )}
-          <a 
-            href="mailto:artwithlifetaipei@gmail.com?subject=2027 VIS 參展簡章"
-            className="btn-pola-outline"
-            onMouseEnter={() => setCursorHovered(true)} 
-            onMouseLeave={() => setCursorHovered(false)}
-          >
-            2027年簡章 PROSPECTUS
-          </a>
-        </motion.div>
+        </div>
       </header>
 
       {/* Conditionally reveal details based on session */}

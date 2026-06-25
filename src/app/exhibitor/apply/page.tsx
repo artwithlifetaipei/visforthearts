@@ -191,10 +191,22 @@ export default function ExhibitorApplyPage() {
       `}} />
 
       {/* Background Image Overlay */}
-      <div 
-        className="fixed inset-0 pointer-events-none opacity-[0.05] bg-cover bg-center z-0 bg-fixed"
-        style={{ backgroundImage: `url('/venue_bg.jpg')` }}
-      />
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <img
+          src="/vip_lobby_bg.jpg"
+          alt=""
+          className="w-full h-full object-cover object-center"
+          style={{ filter: 'brightness(0.38) saturate(0.75)' }}
+        />
+        <div
+          className="absolute inset-0"
+          style={{
+            background: 'linear-gradient(180deg, rgba(245,242,235,0.82) 0%, rgba(240,235,225,0.6) 40%, rgba(245,242,235,0.88) 100%)'
+          }}
+        />
+        {/* Subtle gold vignette top */}
+        <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(223,186,135,0.08) 0%, transparent 65%)' }} />
+      </div>
 
       {/* Header navbar */}
       <nav className="bg-[#FAF9F6]/80 backdrop-blur-md border-b border-[#0D0D0D]/5 py-4 px-6 md:px-12 flex justify-between items-center relative z-10">
@@ -796,17 +808,31 @@ export default function ExhibitorApplyPage() {
                     </div>
                   </div>
 
-                  {/* Conditions Checkbox */}
-                  <div className="flex items-start gap-3 bg-[#C9A96E]/5 border border-[#C9A96E]/20 p-4 rounded-lg">
-                    <input 
-                      type="checkbox" 
-                      id="agree_terms"
-                      required
-                      className="mt-1 w-4 h-4 accent-[#C9A96E] cursor-pointer"
-                    />
-                    <label htmlFor="agree_terms" className="text-xs text-[#0D0D0D]/75 leading-relaxed font-light cursor-pointer">
-                      我已閱讀並代表參展品牌同意 <strong className="font-semibold text-[#C9A96E]">2027 VIS 生活風格藝術節</strong> 之大會參展商規範。我保證上述填寫內容與所附匯款截圖資訊均屬實，並同意保證金退还與扣除條款：大會若未通過審評，保證金 NT$20,000 將全額退回；若第一階段評選通過卻無故放棄參展，保證金將予沒收。
-                    </label>
+                  {/* Conditions Checkboxes */}
+                  <div className="space-y-4 bg-[#C9A96E]/5 border border-[#C9A96E]/20 p-5 rounded-lg">
+                    <div className="flex items-start gap-3">
+                      <input 
+                        type="checkbox" 
+                        id="agree_terms_1"
+                        required
+                        className="mt-1 w-4 h-4 accent-[#C9A96E] cursor-pointer"
+                      />
+                      <label htmlFor="agree_terms_1" className="text-xs text-[#0D0D0D]/75 leading-relaxed font-light cursor-pointer">
+                        我同意為維護大展申請公正秩序，申請單位須於提交申請表之同時，匯款繳交保證金新台幣 20,000 元整，並提供匯款證明。我保證上述填寫內容與所附匯款截圖資訊均屬實，若未依規定或逾期繳納者，視同未完成申請手續，主辦單位將不予受理審查。
+                      </label>
+                    </div>
+
+                    <div className="flex items-start gap-3 border-t border-[#C9A96E]/15 pt-4">
+                      <input 
+                        type="checkbox" 
+                        id="agree_terms_2"
+                        required
+                        className="mt-1 w-4 h-4 accent-[#C9A96E] cursor-pointer"
+                      />
+                      <label htmlFor="agree_terms_2" className="text-xs text-[#0D0D0D]/75 leading-relaxed font-light cursor-pointer">
+                        未錄取單位之退款 經審查未獲錄取之單位，主辦單位將於公告錄取名單後之 <span className="text-[#C9A96E] font-semibold border-b border-[#C9A96E]/30 px-1">14</span> 個工作日內，將保證金無息退還至申請單位之原匯款帳戶。退款所產生之銀行跨行匯款手續費，將由退款金額中逕行扣除。
+                      </label>
+                    </div>
                   </div>
                 </div>
               </div>

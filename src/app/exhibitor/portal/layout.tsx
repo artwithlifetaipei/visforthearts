@@ -519,15 +519,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
       {/* Main Content Area */}
       <main className="flex-grow p-6 md:p-12 z-10 relative overflow-x-hidden">
-        {/* Pass Brand Data down to children by copying child elements with extra props */}
-        {children && typeof children === 'object' && 'props' in children
-          ? Object.defineProperty(children, 'props', {
-              value: { ...children.props, brand: brandData },
-              writable: true,
-              configurable: true
-            })
-          : children
-        }
+        {children}
       </main>
 
     </div>
