@@ -215,7 +215,7 @@ export default function ExhibitorApplyPage() {
       </nav>
 
       {/* Multi-step Container */}
-      <main className="relative z-10 max-w-3xl mx-auto px-6 pt-10">
+      <main className={`relative z-10 mx-auto px-6 pt-10 transition-all duration-300 ${currentStep === 2 ? 'max-w-6xl' : 'max-w-4xl'}`}>
         
         {/* Step Indicator Progress Bar */}
         {!submitSuccess && (
@@ -376,6 +376,104 @@ export default function ExhibitorApplyPage() {
                 <h2 className="text-xl md:text-2xl font-serif-garamond font-normal tracking-wider mb-6 text-[#C9A96E] pb-2 border-b border-[#0D0D0D]/5">
                   2. 展區意向選擇 <span className="font-mono text-xs text-neutral-400 font-light ml-2">Exhibition Preference</span>
                 </h2>
+
+                {/* 展區規格與費用資訊 */}
+                <div className="mb-10">
+                  <div className="grid lg:grid-cols-3 gap-6 mb-8">
+                    {ALL_ZONES.map((zone) => (
+                      <div 
+                        key={zone.id}
+                        className="bg-white rounded-none border border-[#C9A96E]/20 overflow-hidden flex flex-col p-1"
+                      >
+                        <div className="border border-[#C9A96E]/10 p-5 flex flex-col h-full bg-white text-left">
+                          {/* Header */}
+                          <div className="text-center pb-4 border-b border-[#0D0D0D]/5 relative">
+                            <div className="text-[#C9A96E] text-[10px] font-semibold tracking-[0.25em] uppercase mb-1">
+                              {zone.sectorLabel}
+                            </div>
+                            <h3 className="font-serif-garamond text-xl font-normal tracking-wide text-[#0D0D0D]">
+                              {zone.nameZh}
+                            </h3>
+                            <p className="text-[9px] text-[#0D0D0D]/40 font-light tracking-widest uppercase mt-0.5">
+                              {zone.nameEn}
+                            </p>
+                            <div className="absolute top-0 right-0 font-serif-garamond text-neutral-200 text-2xl font-bold select-none opacity-40">
+                              {zone.numeral}
+                            </div>
+                          </div>
+
+                          {/* Pricing Table */}
+                          <div className="pt-4 flex-grow">
+                            <h4 className="text-[9px] font-semibold tracking-[0.15em] text-[#C9A96E] uppercase mb-2.5">展位規格與價格 SPEC</h4>
+                            <div className="border border-[#0D0D0D]/10 rounded-none overflow-hidden mb-4">
+                              <table className="w-full text-left border-collapse text-[11px]">
+                                <thead>
+                                  <tr className="bg-[#FAF9F6] border-b border-[#0D0D0D]/10 text-[#0D0D0D]/60 font-mono text-[8px] uppercase tracking-wider">
+                                    <th className="p-2 font-medium">類型 / 規格</th>
+                                    <th className="p-2 font-medium text-right">單價 (NT$)</th>
+                                  </tr>
+                                </thead>
+                                <tbody>
+                                  {zone.booths.map((booth, bIdx) => (
+                                    <tr 
+                                      key={bIdx} 
+                                      className="border-b border-[#0D0D0D]/5 last:border-0 hover:bg-[#FAF9F6]/50 transition-colors"
+                                    >
+                                      <td className="p-2 font-light">
+                                        <span className="font-semibold block text-[#0D0D0D] tracking-wide">{booth.code}</span>
+                                        <span className="text-[8px] text-[#0D0D0D]/40 mt-0.5 block">{booth.dimensions ? `尺寸: ${booth.dimensions}` : booth.note}</span>
+                                      </td>
+                                      <td className="p-2 text-right font-mono font-medium text-[#C9A96E]">
+                                        ${booth.price.toLocaleString()}
+                                      </td>
+                                    </tr>
+                                  ))}
+                                </tbody>
+                              </table>
+                            </div>
+
+                            {/* Includes list */}
+                            <h4 className="text-[9px] font-semibold tracking-[0.15em] text-[#C9A96E] uppercase mb-2.5">展位包含項目 INCLUDES</h4>
+                            <ul className="text-[11px] text-[#0D0D0D]/75 space-y-1.5 mb-6 font-light">
+                              <li className="flex items-start gap-2">
+                                <span className="text-[#C9A96E] text-[10px] mt-0.5">•</span>
+                                <span>3 天展出時間 (1/8 - 1/10) + 1 天佈展安裝</span>
+                              </li>
+                              <li className="flex items-start gap-2">
+                                <span className="text-[#C9A96E] text-[10px] mt-0.5">•</span>
+                                <span>參展商專屬通行證 {zone.includes.exhibitorPasses} 張</span>
+                              </li>
+                              {zone.includes.vipPasses !== null && (
+                                <li className="flex items-start gap-2">
+                                  <span className="text-[#C9A96E] text-[10px] mt-0.5">•</span>
+                                  <span>大會專屬 VIP 貴賓邀請函 {zone.includes.vipPasses} 張</span>
+                                </li>
+                              )}
+                              {zone.includes.storageArea && (
+                                <li className="flex items-start gap-2">
+                                  <span className="text-[#C9A96E] text-[10px] mt-0.5">•</span>
+                                  <span className="font-medium text-[#0D0D0D]">{zone.includes.storageArea}</span>
+                                </li>
+                              )}
+                              {zone.includes.vipLoungeSeating && (
+                                <li className="flex items-start gap-2">
+                                  <span className="text-[#C9A96E] text-[10px] mt-0.5">•</span>
+                                  <span className="font-medium text-[#C9A96E]">{zone.includes.vipLoungeSeating}</span>
+                                </li>
+                              )}
+                            </ul>
+                          </div>
+
+                          {/* Note / Footer */}
+                          <div className="bg-[#FAF9F6] p-3 border border-[#0D0D0D]/5 text-[9px] text-[#0D0D0D]/50 font-light leading-relaxed mt-auto">
+                            <span className="font-semibold text-[#C9A96E] block mb-0.5 text-[8px] uppercase tracking-wider">說明 NOTE</span>
+                            {zone.note}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
 
                 <div className="space-y-6">
                   {/* Select Zone */}
