@@ -42,15 +42,21 @@ export default function ExhibitorApplyPage() {
   // Check auth session
   useEffect(() => {
     const checkAuth = async () => {
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      setSession(currentSession);
-      setAuthChecking(false);
-      if (!currentSession) {
-        router.push('/exhibitor');
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        setSession(currentSession);
+        if (!currentSession) {
+          window.location.href = '/exhibitor';
+        } else {
+          setAuthChecking(false);
+        }
+      } catch (err) {
+        console.error('Failed to get session:', err);
+        window.location.href = '/exhibitor';
       }
     };
     checkAuth();
-  }, [router]);
+  }, []);
 
   // Pre-fill email from session
   useEffect(() => {
