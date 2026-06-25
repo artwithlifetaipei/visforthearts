@@ -23,7 +23,7 @@ export default function LandingPage() {
         );
 
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'SIGNED_IN' && session) {
+            if (event === 'SIGNED_IN' && session && hasCode) {
                 router.push('/vip/onboarding');
             }
         });
@@ -31,9 +31,9 @@ export default function LandingPage() {
         // Check if session is already present or completed in the background
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (!active) return;
-            if (session) {
+            if (session && hasCode) {
                 router.push('/vip/onboarding');
-            } else if (!hasCode) {
+            } else {
                 setIsRedirecting(false);
             }
         });
