@@ -17,18 +17,19 @@ export default function VIPDashboard() {
     const [isWalletOpen, setIsWalletOpen] = useState(false);
 
     useEffect(() => {
+        let isMounted = true;
+        let authTimeout: NodeJS.Timeout | null = null;
+
         const fetchProfile = async (user: any) => {
-            if (!user) {
-                router.push('/vip');
+            if (!isMounted || !user) {
+                if (!user) router.push('/vip');
                 return;
             }
             setUserEmail(user.email ?? '');
 
-            // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
+            // Auto-heal password for scanner staff account
             if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
-                supabase.auth.updateUser({ password: 'Kuo76443173' })
-                    .then(() => console.log('Scanner staff password synchronized in dashboard.'))
-                    .catch((err) => console.log('Omitted auto password update in dashboard:', err));
+                supabase.auth.updateUser({ password: 'Kuo76443173' }).catch(() => {});
             }
 
             const { data } = await supabase
@@ -36,76 +37,64 @@ export default function VIPDashboard() {
                 .select('*')
                 .eq('id', user.id)
                 .single();
-            
+
+            if (!isMounted) return;
+
             if (!data?.birthdate) {
                 router.push('/vip/onboarding');
                 return;
             }
 
-            // Fetch tier from allowlist
             const { data: allowlistData } = await supabase
                 .from('vip_allowlist')
                 .select('tier')
                 .eq('email', user.email)
                 .single();
 
+            if (!isMounted) return;
+
             setProfile({ ...data, tier: allowlistData?.tier || 'VIP' });
             setQrValue(`${data.id}:${Date.now()}`);
             setIsLoading(false);
         };
 
-        let authTimeout: NodeJS.Timeout | null = null;
-
+        // Handle ALL auth state changes — including INITIAL_SESSION (fired when already logged in)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session?.user) {
+            if (!isMounted) return;
+            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
                 if (authTimeout) clearTimeout(authTimeout);
-                fetchProfile(session.user);
+                await fetchProfile(session.user);
             } else if (event === 'SIGNED_OUT') {
+                if (isMounted) router.push('/vip');
+            }
+        });
+
+        // Fallback: if onAuthStateChange doesn't resolve within 5s, check session manually
+        authTimeout = setTimeout(async () => {
+            if (!isMounted) return;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user) {
                 router.push('/vip');
             }
-        });
+            // If session exists, onAuthStateChange will already be handling it
+        }, 5000);
 
-        // Initial check using fast local session first
-        supabase.auth.getSession().then(({ data: { session } }) => {
-            if (session?.user) {
-                if (authTimeout) clearTimeout(authTimeout);
-                fetchProfile(session.user);
-            } else {
-                const hasCode = typeof window !== 'undefined' && (
-                    new URLSearchParams(window.location.search).has('code') ||
-                    window.location.hash.includes('access_token') ||
-                    window.location.hash.includes('type=recovery') ||
-                    window.location.search.includes('type=magiclink')
-                );
-
-                if (!hasCode) {
-                    // No active session and not authenticating -> redirect immediately
-                    router.push('/vip');
-                } else {
-                    // Wait a bit before kicking to login, checking again in 4s (only if auth parameters present)
-                    authTimeout = setTimeout(async () => {
-                        const { data: { session: s2 } } = await supabase.auth.getSession();
-                        if (!s2?.user) {
-                            router.push('/vip');
-                        }
-                    }, 4000);
-                }
-            }
-        });
-
-        // Refresh QR every 30 seconds
-        const interval = setInterval(() => {
-            if (profile) {
-                setQrValue(`${profile.id}:${Date.now()}`);
-            }
+        // Refresh QR code every 30 seconds
+        const qrInterval = setInterval(() => {
+            setQrValue(prev => {
+                if (!prev) return prev;
+                const userId = prev.split(':')[0];
+                return `${userId}:${Date.now()}`;
+            });
         }, 30000);
 
         return () => {
+            isMounted = false;
             subscription.unsubscribe();
-            clearInterval(interval);
+            clearInterval(qrInterval);
             if (authTimeout) clearTimeout(authTimeout);
         };
-    }, [router, profile?.id]);
+    }, [router]); // ← ONLY depend on router. Never re-run when profile changes.
 
     if (isLoading || !profile) {
         return (

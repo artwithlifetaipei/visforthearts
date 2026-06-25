@@ -12,101 +12,60 @@ export default function OnboardingPage() {
     const [user, setUser] = useState<any>(null);
 
     useEffect(() => {
-        setIsLoading(true);
-        let currentUser: any = null;
+        let isMounted = true;
         let authTimeout: NodeJS.Timeout | null = null;
 
-        // Listen for auth state changes — especially crucial for catching Magic Link sessions
-        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session?.user) {
-                const user = session.user;
-                currentUser = user;
-                
-                // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
-                if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
-                    supabase.auth.updateUser({ password: 'Kuo76443173' })
-                        .then(() => console.log('Scanner staff password synchronized in onboarding.'))
-                        .catch((err) => console.log('Omitted auto password update in onboarding:', err));
-                }
-                
-                // Check if profile exists in users table
-                const { data: profile } = await supabase
-                    .from('users')
-                    .select('birthdate')
-                    .eq('id', user.id)
-                    .single();
+        const handleUser = async (user: any) => {
+            if (!isMounted || !user) return;
 
-                if (profile?.birthdate) {
-                    router.push('/vip/dashboard');
-                } else {
-                    setUser(user);
-                    setIsLoading(false);
-                }
+            // Auto-heal password for scanner staff account
+            if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
+                supabase.auth.updateUser({ password: 'Kuo76443173' }).catch(() => {});
+            }
+
+            const { data: profile } = await supabase
+                .from('users')
+                .select('birthdate')
+                .eq('id', user.id)
+                .single();
+
+            if (!isMounted) return;
+
+            if (profile?.birthdate) {
+                router.push('/vip/dashboard');
+            } else {
+                setUser(user);
+                setIsLoading(false);
+            }
+        };
+
+        // Handle ALL events including INITIAL_SESSION (fired when already logged in)
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (!isMounted) return;
+            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+                if (authTimeout) clearTimeout(authTimeout);
+                await handleUser(session.user);
             } else if (event === 'SIGNED_OUT') {
-                // Only redirect if there was an active user session in this component instance
-                if (currentUser) {
-                    router.push('/vip');
-                }
+                if (isMounted) router.push('/vip');
             }
         });
 
-        // Initial check in case they are already logged in
-        const checkCurrentSession = async () => {
+        // Fallback: if onAuthStateChange doesn't fire within 8s with a valid session, redirect to login
+        authTimeout = setTimeout(async () => {
+            if (!isMounted) return;
             const { data: { session } } = await supabase.auth.getSession();
-            if (session?.user) {
-                const user = session.user;
-                currentUser = user;
-                
-                // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
-                if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
-                    supabase.auth.updateUser({ password: 'Kuo76443173' })
-                        .then(() => console.log('Scanner staff password synchronized in onboarding session check.'))
-                        .catch((err) => console.log('Omitted auto password update in onboarding session check:', err));
-                }
-                
-                const { data: profile } = await supabase
-                    .from('users')
-                    .select('birthdate')
-                    .eq('id', user.id)
-                    .single();
-
-                if (profile?.birthdate) {
-                    router.push('/vip/dashboard');
-                } else {
-                    setUser(user);
-                    setIsLoading(false);
-                }
-            } else {
-                // If there is no session, check if we have OAuth/OTP code or token in URL.
-                // Next.js might still be hydrating, so check query params and hash.
-                const hasCode = typeof window !== 'undefined' && (
-                    new URLSearchParams(window.location.search).has('code') ||
-                    window.location.hash.includes('access_token') ||
-                    window.location.hash.includes('type=recovery') ||
-                    window.location.search.includes('type=magiclink')
-                );
-
-                if (!hasCode) {
-                    // Not authenticating and no session -> redirect to login immediately
-                    router.push('/vip');
-                } else {
-                    // Authenticating -> Wait up to 12s to allow Supabase SDK to complete exchange
-                    authTimeout = setTimeout(async () => {
-                        const { data: { session: s2 } } = await supabase.auth.getSession();
-                        if (!s2?.user) {
-                            router.push('/vip');
-                        }
-                    }, 12000);
-                }
+            if (!session?.user) {
+                router.push('/vip');
             }
-        };
-        checkCurrentSession();
+            // If session exists, onAuthStateChange INITIAL_SESSION will handle it
+        }, 8000);
 
         return () => {
+            isMounted = false;
             subscription.unsubscribe();
             if (authTimeout) clearTimeout(authTimeout);
         };
-    }, [router]);
+    }, [router]); // ← ONLY depend on router
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
