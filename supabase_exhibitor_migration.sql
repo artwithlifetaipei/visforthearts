@@ -263,3 +263,10 @@ CREATE POLICY "service_role_all_media"
 -- CREATE POLICY "anon_upload_deposit"
 --   ON storage.objects FOR INSERT TO anon
 --   WITH CHECK (bucket_id = 'exhibitor-deposits');
+
+-- ─── 5. Grant permissions to standard Supabase roles ──────
+GRANT ALL ON TABLE public.exhibitor_applications TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.exhibitor_brands TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.exhibitor_vip_submissions TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.exhibitor_compliance TO anon, authenticated, service_role;
+GRANT ALL ON TABLE public.exhibitor_media_assets TO anon, authenticated, service_role;
