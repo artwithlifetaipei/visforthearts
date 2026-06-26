@@ -13,6 +13,8 @@ export default function ExhibitorApplyPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [agreeTerms1, setAgreeTerms1] = useState(false);
+  const [agreeTerms2, setAgreeTerms2] = useState(false);
 
   // Auth Protection state
   const [session, setSession] = useState<any>(null);
@@ -790,7 +792,11 @@ export default function ExhibitorApplyPage() {
                     </div>
                     <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
                       <span className="text-[#0D0D0D]/40 font-sans tracking-wide">展位意向 Stall Code</span>
-                      <span className="col-span-2 font-medium text-[#C9A96E] font-sans">{formData.booth_type} ({selectedBooth?.label})</span>
+                      <div className="col-span-2 font-medium text-[#C9A96E] font-sans space-y-1">
+                        <div>第一志願：{formData.zone_preference_1}</div>
+                        <div>第二志願：{formData.zone_preference_2}</div>
+                        <div>第三志願：{formData.zone_preference_3}</div>
+                      </div>
                     </div>
                     <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
                       <span className="text-[#0D0D0D]/40 font-sans tracking-wide">預計單價 Stall Price</span>
@@ -814,7 +820,8 @@ export default function ExhibitorApplyPage() {
                       <input 
                         type="checkbox" 
                         id="agree_terms_1"
-                        required
+                        checked={agreeTerms1}
+                        onChange={(e) => setAgreeTerms1(e.target.checked)}
                         className="mt-1 w-4 h-4 accent-[#C9A96E] cursor-pointer"
                       />
                       <label htmlFor="agree_terms_1" className="text-xs text-[#0D0D0D]/75 leading-relaxed font-light cursor-pointer">
@@ -826,7 +833,8 @@ export default function ExhibitorApplyPage() {
                       <input 
                         type="checkbox" 
                         id="agree_terms_2"
-                        required
+                        checked={agreeTerms2}
+                        onChange={(e) => setAgreeTerms2(e.target.checked)}
                         className="mt-1 w-4 h-4 accent-[#C9A96E] cursor-pointer"
                       />
                       <label htmlFor="agree_terms_2" className="text-xs text-[#0D0D0D]/75 leading-relaxed font-light cursor-pointer">
@@ -866,8 +874,8 @@ export default function ExhibitorApplyPage() {
                 <button
                   type="button"
                   onClick={handleSubmit}
-                  disabled={isSubmitting}
-                  className="bg-[#C9A96E] hover:bg-[#B39359] text-white font-semibold text-xs tracking-widest uppercase px-8 py-3 rounded transition-all duration-300 flex items-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={isSubmitting || !agreeTerms1 || !agreeTerms2}
+                  className="bg-[#C9A96E] hover:bg-[#B39359] text-white font-semibold text-xs tracking-widest uppercase px-8 py-3 rounded transition-all duration-300 flex items-center gap-2 shadow-md disabled:opacity-50 disabled:cursor-not-allowed disabled:bg-neutral-200 disabled:text-neutral-400"
                 >
                   {isSubmitting ? (
                     <>

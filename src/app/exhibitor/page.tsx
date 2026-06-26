@@ -295,13 +295,13 @@ export default function ExhibitorLandingPage() {
           initial={{ opacity: 0, y: -20, scale: 0.99 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
           transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-          className="w-full aspect-[2.35/1] md:aspect-[3.2/1] rounded-none overflow-hidden relative shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-[#C9A96E]/25 p-1 bg-white"
+          className="w-full aspect-[3/1] md:aspect-[4.5/1] rounded-none overflow-hidden relative shadow-[0_20px_50px_rgba(0,0,0,0.04)] border border-[#C9A96E]/25 p-1 bg-white"
         >
           <div className="w-full h-full overflow-hidden relative border border-[#C9A96E]/15">
             <div className="absolute inset-0 bg-[#C9A96E]/5 mix-blend-multiply z-10 pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-black/20 z-10" />
             <img 
-              src="/exhibitor_banner_new_v2.png" 
+              src="/exhibitor_banner_new_v3.jpg" 
               alt="Zhongshan Hall Interior" 
               className="w-full h-full object-cover filter brightness-[0.85] contrast-[1.03] transition-transform duration-[12s] ease-out hover:scale-105"
             />
@@ -344,7 +344,7 @@ export default function ExhibitorLandingPage() {
           transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="text-base md:text-lg max-w-3xl text-[#0D0D0D]/85 font-light leading-relaxed tracking-wider mb-10 font-serif-garamond italic"
         >
-          不斷地聚集著品味人士所建構而成的高質量場域，VIS 不只是一個博覽會，而是一個最適合「高客單價品牌」的導客解決方案。
+          不斷地聚集著品味人士所建構而成的高質量場域，VIS 不只是一個博覽會，<br />而是一個最適合「高客單價品牌」的導客解決方案。
         </motion.p>
         
         {/* Countdown Timer & Hero CTA Buttons Side by Side for balanced landscape layout */}

@@ -41,39 +41,48 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
         if (currentBrand) {
           setBrand(currentBrand);
 
-          // 1. Fetch application details (for deposit status)
-          if (currentBrand.application_id) {
-            const { data: app } = await supabase
-              .from('exhibitor_applications')
-              .select('*')
-              .eq('id', currentBrand.application_id)
-              .maybeSingle();
-            setAppData(app);
-          }
+          // Fetch all sub-module data in parallel to resolve waterfall
+          const appPromise = currentBrand.application_id
+            ? supabase
+                .from('exhibitor_applications')
+                .select('*')
+                .eq('id', currentBrand.application_id)
+                .maybeSingle()
+                .then(res => res.data)
+            : Promise.resolve(null);
 
-          // 2. Fetch compliance sign-off
-          const { data: compliance } = await supabase
+          const compliancePromise = supabase
             .from('exhibitor_compliance')
             .select('*')
             .eq('brand_id', currentBrand.id)
-            .maybeSingle();
+            .maybeSingle()
+            .then(res => res.data);
+
+          const vipPromise = supabase
+            .from('exhibitor_vip_submissions')
+            .select('*', { count: 'exact', head: true })
+            .eq('brand_id', currentBrand.id)
+            .then(res => res.count || 0);
+
+          const mediaPromise = supabase
+            .from('exhibitor_media_assets')
+            .select('*', { count: 'exact', head: true })
+            .eq('brand_id', currentBrand.id)
+            .then(res => res.count || 0);
+
+          const [app, compliance, vipC, mediaC] = await Promise.all([
+            appPromise,
+            compliancePromise,
+            vipPromise,
+            mediaPromise
+          ]);
+
+          setAppData(app);
           if (compliance) {
             setComplianceSigned(true);
           }
-
-          // 3. Fetch VIP submissions count
-          const { count: vipC } = await supabase
-            .from('exhibitor_vip_submissions')
-            .select('*', { count: 'exact', head: true })
-            .eq('brand_id', currentBrand.id);
-          setVipCount(vipC || 0);
-
-          // 4. Fetch Media assets count
-          const { count: mediaC } = await supabase
-            .from('exhibitor_media_assets')
-            .select('*', { count: 'exact', head: true })
-            .eq('brand_id', currentBrand.id);
-          setMediaCount(mediaC || 0);
+          setVipCount(vipC);
+          setMediaCount(mediaC);
         }
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
