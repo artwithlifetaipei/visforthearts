@@ -79,10 +79,18 @@ export default function ExhibitorApplyPage() {
     setFormData(prev => {
       const updated = { ...prev, [name]: value };
       
-      // Reset booth_type if zone_id changes
-      if (name === 'zone_id') {
-        const zone = ZONE_MAP[value as 'artsy' | 'premier' | 'atelier'];
-        updated.booth_type = zone.booths[0].code;
+      // If preference 1 changes, update zone_id and booth_type
+      if (name === 'zone_preference_1') {
+        for (const zone of ALL_ZONES) {
+          for (const booth of zone.booths) {
+            const val = `${zone.nameZh} - ${booth.code} ${booth.label} (NT$${booth.price.toLocaleString()})`;
+            if (val === value) {
+              updated.zone_id = zone.id;
+              updated.booth_type = booth.code;
+              break;
+            }
+          }
+        }
       }
       return updated;
     });
@@ -370,7 +378,7 @@ export default function ExhibitorApplyPage() {
                       className="w-full text-sm border border-[#0D0D0D]/10 bg-neutral-100 text-neutral-500 rounded px-4 py-2.5 outline-none cursor-not-allowed font-mono"
                       required
                     />
-                    <span className="text-[10px] text-neutral-400 mt-1.5 block">此欄位已自動填入您的註冊帳號 (不可修改) / Pre-filled with your registered account (read-only)</span>
+                    <span className="text-[10.5px] text-neutral-600 mt-1.5 block font-medium">此欄位已自動填入您的註冊帳號 (不可修改) / Pre-filled with your registered account (read-only)</span>
                   </div>
 
                   <div>
@@ -445,7 +453,7 @@ export default function ExhibitorApplyPage() {
                       className="w-full h-auto object-contain max-h-[450px]"
                     />
                   </div>
-                  <p className="text-[10px] text-[#0D0D0D]/40 font-light mt-2 text-center">
+                  <p className="text-[10px] text-[#0D0D0D]/75 font-normal mt-2 text-center">
                     * 中山堂展位配置圖：包含 KOL A/B 特展區、M01-M15 精鑑品牌展區及 S01-S15 藝蕙品牌展區。中央主走道寬 280cm，安全淨空 50cm，展位新間隔 65cm。
                   </p>
                 </div>
@@ -467,11 +475,11 @@ export default function ExhibitorApplyPage() {
                             <h3 className="font-serif-garamond text-xl font-normal tracking-wide text-[#0D0D0D]">
                               {zone.nameZh}
                             </h3>
-                            <p className="text-[9px] text-[#0D0D0D]/40 font-light tracking-widest uppercase mt-0.5">
+                            <p className="text-[10px] text-[#0D0D0D]/65 font-medium tracking-widest uppercase mt-0.5">
                               {zone.nameEn}
                             </p>
                             {zone.description && (
-                              <p className="text-[10px] text-[#0D0D0D]/70 font-light mt-2 leading-relaxed text-center">
+                              <p className="text-[12.5px] text-[#0D0D0D] font-semibold mt-3.5 leading-relaxed text-center px-3 py-2 bg-[#C9A96E]/5 rounded border border-[#C9A96E]/10">
                                 {zone.description}
                               </p>
                             )}
@@ -486,7 +494,7 @@ export default function ExhibitorApplyPage() {
                             <div className="border border-[#0D0D0D]/10 rounded-none overflow-hidden mb-4">
                               <table className="w-full text-left border-collapse text-[11px]">
                                 <thead>
-                                  <tr className="bg-[#FAF9F6] border-b border-[#0D0D0D]/10 text-[#0D0D0D]/60 font-mono text-[8px] uppercase tracking-wider">
+                                  <tr className="bg-[#FAF9F6] border-b border-[#0D0D0D]/10 text-[#0D0D0D]/80 font-mono text-[9px] font-semibold uppercase tracking-wider">
                                     <th className="p-2 font-medium">類型 / 規格</th>
                                     <th className="p-2 font-medium text-center">數量</th>
                                     <th className="p-2 font-medium text-right">單價 (NT$)</th>
@@ -500,9 +508,9 @@ export default function ExhibitorApplyPage() {
                                     >
                                       <td className="p-2 font-light">
                                         <span className="font-semibold block text-[#0D0D0D] tracking-wide">{booth.code}</span>
-                                        <span className="text-[8px] text-[#0D0D0D]/40 mt-0.5 block">{booth.dimensions ? `尺寸: ${booth.dimensions}` : booth.note}</span>
+                                        <span className="text-[10px] text-[#0D0D0D]/70 mt-0.5 block">{booth.dimensions ? `尺寸: ${booth.dimensions}` : booth.note}</span>
                                       </td>
-                                      <td className="p-2 text-center font-mono font-medium text-[#0D0D0D]/75">
+                                      <td className="p-2 text-center font-mono font-semibold text-[#0D0D0D]/90">
                                         {booth.qty}
                                       </td>
                                       <td className="p-2 text-right font-mono font-medium text-[#C9A96E]">
@@ -516,7 +524,7 @@ export default function ExhibitorApplyPage() {
 
                             {/* Includes list */}
                             <h4 className="text-[9px] font-semibold tracking-[0.15em] text-[#C9A96E] uppercase mb-2.5">展位包含項目 INCLUDES</h4>
-                            <ul className="text-[11px] text-[#0D0D0D]/75 space-y-1.5 mb-6 font-light">
+                            <ul className="text-[12px] text-[#0D0D0D]/90 space-y-1.5 mb-6 font-normal">
                               <li className="flex items-start gap-2">
                                 <span className="text-[#C9A96E] text-[10px] mt-0.5">•</span>
                                 <span>3 天展出時間 (1/8 - 1/10) + 1 天佈展安裝</span>
@@ -534,20 +542,20 @@ export default function ExhibitorApplyPage() {
                               {zone.includes.storageArea && (
                                 <li className="flex items-start gap-2">
                                   <span className="text-[#C9A96E] text-[10px] mt-0.5">•</span>
-                                  <span className="font-medium text-[#0D0D0D]">{zone.includes.storageArea}</span>
+                                  <span className="font-semibold text-[#0D0D0D]">{zone.includes.storageArea}</span>
                                 </li>
                               )}
                               {zone.includes.vipLoungeSeating && (
                                 <li className="flex items-start gap-2">
                                   <span className="text-[#C9A96E] text-[10px] mt-0.5">•</span>
-                                  <span className="font-medium text-[#C9A96E]">{zone.includes.vipLoungeSeating}</span>
+                                  <span className="font-semibold text-[#C9A96E]">{zone.includes.vipLoungeSeating}</span>
                                 </li>
                               )}
                             </ul>
                           </div>
 
                           {/* Note / Footer */}
-                          <div className="bg-[#FAF9F6] p-3 border border-[#0D0D0D]/5 text-[9px] text-[#0D0D0D]/50 font-light leading-relaxed mt-auto whitespace-pre-line">
+                          <div className="bg-[#FAF9F6] p-3 border border-[#0D0D0D]/10 text-[11px] text-[#0D0D0D]/80 font-normal leading-relaxed mt-auto whitespace-pre-line">
                             <span className="font-semibold text-[#C9A96E] block mb-0.5 text-[8px] uppercase tracking-wider">說明 NOTE</span>
                             {zone.note}
                           </div>
@@ -557,147 +565,86 @@ export default function ExhibitorApplyPage() {
                   </div>
                 </div>
 
-                <div className="space-y-6">
-                  {/* Select Zone */}
-                  <div>
-                    <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/70 uppercase mb-3">首選參展展區 *</label>
-                    <div className="grid md:grid-cols-3 gap-4">
-                      {ALL_ZONES.map((zone) => (
-                        <label 
-                          key={zone.id}
-                          className={`border rounded-lg p-4 cursor-pointer flex flex-col justify-between transition-all duration-300 ${
-                            formData.zone_id === zone.id 
-                              ? 'border-[#C9A96E] bg-[#C9A96E]/5 shadow-sm' 
-                              : 'border-[#0D0D0D]/10 bg-white hover:border-[#C9A96E]/40'
-                          }`}
-                        >
-                          <input 
-                            type="radio" 
-                            name="zone_id"
-                            value={zone.id}
-                            checked={formData.zone_id === zone.id}
-                            onChange={handleTextChange}
-                            className="sr-only"
-                          />
-                          <div>
-                            <span className="text-[10px] font-semibold text-[#C9A96E] block mb-1">{zone.sectorLabel}</span>
-                            <span className="font-serif-garamond font-normal text-base block">{zone.nameZh}</span>
-                            <span className="text-[9px] text-[#0D0D0D]/50 uppercase tracking-widest block mt-0.5">{zone.nameEn}</span>
-                          </div>
-                          <span className="text-[10px] text-[#0D0D0D]/60 mt-4 pt-2 border-t border-[#0D0D0D]/5 font-light">
-                            價格區間: ${zone.booths[zone.booths.length - 1].price.toLocaleString()} 起
-                          </span>
-                        </label>
-                      ))}
-                    </div>
-                  </div>
-
-                  {/* Select Booth Type based on selected zone */}
-                  {selectedZone && (
-                    <div className="bg-[#FAF9F6] p-5 rounded-lg border border-[#C9A96E]/20">
-                      <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/70 uppercase mb-3">展位規格/位置選擇 *</label>
-                      <div className="space-y-2">
-                        {selectedZone.booths.map((booth, bIdx) => (
-                          <label 
-                            key={bIdx} 
-                            className={`border rounded p-3.5 flex justify-between items-center cursor-pointer transition-colors ${
-                              formData.booth_type === booth.code 
-                                ? 'border-[#C9A96E] bg-white text-[#C9A96E]' 
-                                : 'border-[#0D0D0D]/5 bg-white text-[#0D0D0D]/80 hover:border-[#C9A96E]/30'
-                            }`}
-                          >
-                            <div className="flex items-center gap-3">
-                              <input 
-                                type="radio" 
-                                name="booth_type"
-                                value={booth.code}
-                                checked={formData.booth_type === booth.code}
-                                onChange={handleTextChange}
-                                className="accent-[#C9A96E]"
-                              />
-                              <div>
-                                <span className="text-xs font-semibold block">{booth.code} {booth.dimensions ? `(${booth.dimensions})` : ''}</span>
-                                <span className="text-[10px] text-[#0D0D0D]/50 font-light">{booth.label} • {booth.note}</span>
-                              </div>
-                            </div>
-                            <span className="font-mono text-sm font-semibold">${booth.price.toLocaleString()}</span>
-                          </label>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-
+                <div className="space-y-8 mt-10">
                   {/* Booth Preferences Order */}
-                  <div className="grid md:grid-cols-3 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/70 uppercase mb-2">第一志願展區 Preference 1</label>
-                      <select 
-                        name="zone_preference_1"
-                        value={formData.zone_preference_1}
-                        onChange={handleTextChange}
-                        className="w-full text-xs border border-[#0D0D0D]/10 rounded px-3 py-2 outline-none bg-white"
-                      >
-                        {ALL_ZONES.flatMap(zone => 
-                          zone.booths.map((booth, idx) => {
-                            const val = `${zone.nameZh} - ${booth.code} ${booth.label} (NT$${booth.price.toLocaleString()})`;
-                            return (
-                              <option key={`${zone.id}-${idx}`} value={val}>
-                                {zone.sectorLabel} {zone.nameZh} — {booth.code} {booth.label} (${booth.price.toLocaleString()})
-                              </option>
-                            );
-                          })
-                        )}
-                      </select>
-                    </div>
+                  <div>
+                    <h3 className="text-sm font-semibold tracking-wider text-[#0D0D0D]/85 uppercase mb-4 border-b border-[#0D0D0D]/5 pb-2">
+                      志願選擇 Preferences
+                    </h3>
+                    <div className="grid md:grid-cols-3 gap-6">
+                      <div>
+                        <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/80 uppercase mb-2">第一志願展區 *</label>
+                        <select 
+                          name="zone_preference_1"
+                          value={formData.zone_preference_1}
+                          onChange={handleTextChange}
+                          className="w-full text-xs border border-[#0D0D0D]/20 focus:border-[#C9A96E] rounded px-3 py-2.5 outline-none bg-white text-[#0D0D0D] transition-colors"
+                          required
+                        >
+                          {ALL_ZONES.flatMap(zone => 
+                            zone.booths.map((booth, idx) => {
+                              const val = `${zone.nameZh} - ${booth.code} ${booth.label} (NT$${booth.price.toLocaleString()})`;
+                              return (
+                                <option key={`${zone.id}-${idx}`} value={val}>
+                                  {zone.sectorLabel} {zone.nameZh} — {booth.code} {booth.label} (${booth.price.toLocaleString()})
+                                </option>
+                              );
+                            })
+                          )}
+                        </select>
+                      </div>
 
-                    <div>
-                      <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/70 uppercase mb-2">第二志願展區 Preference 2</label>
-                      <select 
-                        name="zone_preference_2"
-                        value={formData.zone_preference_2}
-                        onChange={handleTextChange}
-                        className="w-full text-xs border border-[#0D0D0D]/10 rounded px-3 py-2 outline-none bg-white"
-                      >
-                        {ALL_ZONES.flatMap(zone => 
-                          zone.booths.map((booth, idx) => {
-                            const val = `${zone.nameZh} - ${booth.code} ${booth.label} (NT$${booth.price.toLocaleString()})`;
-                            return (
-                              <option key={`${zone.id}-${idx}`} value={val}>
-                                {zone.sectorLabel} {zone.nameZh} — {booth.code} {booth.label} (${booth.price.toLocaleString()})
-                              </option>
-                            );
-                          })
-                        )}
-                      </select>
-                    </div>
+                      <div>
+                        <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/80 uppercase mb-2">第二志願展區 *</label>
+                        <select 
+                          name="zone_preference_2"
+                          value={formData.zone_preference_2}
+                          onChange={handleTextChange}
+                          className="w-full text-xs border border-[#0D0D0D]/20 focus:border-[#C9A96E] rounded px-3 py-2.5 outline-none bg-white text-[#0D0D0D] transition-colors"
+                          required
+                        >
+                          {ALL_ZONES.flatMap(zone => 
+                            zone.booths.map((booth, idx) => {
+                              const val = `${zone.nameZh} - ${booth.code} ${booth.label} (NT$${booth.price.toLocaleString()})`;
+                              return (
+                                <option key={`${zone.id}-${idx}`} value={val}>
+                                  {zone.sectorLabel} {zone.nameZh} — {booth.code} {booth.label} (${booth.price.toLocaleString()})
+                                </option>
+                              );
+                            })
+                          )}
+                        </select>
+                      </div>
 
-                    <div>
-                      <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/70 uppercase mb-2">第三志願展區 Preference 3</label>
-                      <select 
-                        name="zone_preference_3"
-                        value={formData.zone_preference_3}
-                        onChange={handleTextChange}
-                        className="w-full text-xs border border-[#0D0D0D]/10 rounded px-3 py-2 outline-none bg-white"
-                      >
-                        {ALL_ZONES.flatMap(zone => 
-                          zone.booths.map((booth, idx) => {
-                            const val = `${zone.nameZh} - ${booth.code} ${booth.label} (NT$${booth.price.toLocaleString()})`;
-                            return (
-                              <option key={`${zone.id}-${idx}`} value={val}>
-                                {zone.sectorLabel} {zone.nameZh} — {booth.code} {booth.label} (${booth.price.toLocaleString()})
-                              </option>
-                            );
-                          })
-                        )}
-                      </select>
+                      <div>
+                        <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/80 uppercase mb-2">第三志願展區 *</label>
+                        <select 
+                          name="zone_preference_3"
+                          value={formData.zone_preference_3}
+                          onChange={handleTextChange}
+                          className="w-full text-xs border border-[#0D0D0D]/20 focus:border-[#C9A96E] rounded px-3 py-2.5 outline-none bg-white text-[#0D0D0D] transition-colors"
+                          required
+                        >
+                          {ALL_ZONES.flatMap(zone => 
+                            zone.booths.map((booth, idx) => {
+                              const val = `${zone.nameZh} - ${booth.code} ${booth.label} (NT$${booth.price.toLocaleString()})`;
+                              return (
+                                <option key={`${zone.id}-${idx}`} value={val}>
+                                  {zone.sectorLabel} {zone.nameZh} — {booth.code} {booth.label} (${booth.price.toLocaleString()})
+                                </option>
+                              );
+                            })
+                          )}
+                        </select>
+                      </div>
                     </div>
                   </div>
 
                   {/* Concept brief */}
-                  <div>
+                  <div className="pt-2">
                     <div className="flex justify-between items-center mb-2">
-                      <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/70 uppercase">品牌參展核心概念簡述 (250字內) *</label>
-                      <span className={`text-[10px] font-mono ${formData.concept_brief.length > 250 ? 'text-rose-500 font-bold' : 'text-neutral-400'}`}>
+                      <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/80 uppercase">品牌參展核心概念簡述 (250字內) *</label>
+                      <span className={`text-[10.5px] font-mono ${formData.concept_brief.length > 250 ? 'text-rose-500 font-bold' : 'text-neutral-500 font-medium'}`}>
                         {formData.concept_brief.length} / 250
                       </span>
                     </div>
@@ -707,7 +654,7 @@ export default function ExhibitorApplyPage() {
                       onChange={handleTextChange}
                       placeholder="請簡述貴品牌預計展出的核心概念、陳列特色，以及如何結合中山堂古蹟空間底蘊進行美學演繹。"
                       rows={4}
-                      className="w-full text-sm border border-[#0D0D0D]/10 focus:border-[#C9A96E] rounded px-4 py-2.5 outline-none bg-white/50 transition-colors resize-none"
+                      className="w-full text-sm border border-[#0D0D0D]/20 focus:border-[#C9A96E] rounded px-4 py-2.5 outline-none bg-white text-[#0D0D0D] transition-colors resize-none"
                       maxLength={250}
                       required
                     />
@@ -728,55 +675,55 @@ export default function ExhibitorApplyPage() {
                     <h3 className="text-xs font-semibold text-[#C9A96E] tracking-wider uppercase mb-3">大會指定匯款帳戶</h3>
                     <div className="text-xs text-[#0D0D0D]/80 space-y-2.5 font-mono">
                       <div>
-                        <span className="text-[#0D0D0D]/40 block text-[10px] uppercase font-sans tracking-wide">保證金金額 DEPOSIT AMOUNT</span>
+                        <span className="text-[#0D0D0D]/75 block text-[10.5px] uppercase font-sans font-semibold tracking-wide">保證金金額 DEPOSIT AMOUNT</span>
                         <span className="text-[#C9A96E] text-base font-bold">NT$ {DEPOSIT_AMOUNT.toLocaleString()} 元整</span>
                       </div>
-                      <div className="grid md:grid-cols-2 gap-6 border-t border-[#0D0D0D]/5 pt-4">
+                      <div className="grid md:grid-cols-2 gap-6 border-t border-[#0D0D0D]/10 pt-4">
                         <div className="space-y-2">
                           <span className="text-[#C9A96E] text-xs font-semibold block uppercase tracking-wider">國內匯款 (Domestic Remittance)</span>
                           <div className="space-y-1.5 text-[11px]">
                             <div>
-                              <span className="text-[#0D0D0D]/40 block text-[9px] font-sans tracking-wide">銀行/分行 BANK / BRANCH</span>
-                              <span className="font-semibold">808 玉山銀行 / 中崙分行</span>
+                              <span className="text-[#0D0D0D]/70 block text-[10px] font-sans font-medium tracking-wide">銀行/分行 BANK / BRANCH</span>
+                              <span className="font-semibold text-neutral-800">808 玉山銀行 / 中崙分行</span>
                             </div>
                             <div>
-                              <span className="text-[#0D0D0D]/40 block text-[9px] font-sans tracking-wide">帳號 ACCOUNT NUMBER</span>
+                              <span className="text-[#0D0D0D]/70 block text-[10px] font-sans font-medium tracking-wide">帳號 ACCOUNT NUMBER</span>
                               <span className="font-semibold text-[#C9A96E]">0912940021772</span>
                             </div>
                             <div>
-                              <span className="text-[#0D0D0D]/40 block text-[9px] font-sans tracking-wide">戶名 ACCOUNT NAME</span>
+                              <span className="text-[#0D0D0D]/70 block text-[10px] font-sans font-medium tracking-wide">戶名 ACCOUNT NAME</span>
                               <span className="font-semibold text-[#0D0D0D]">
-                                泰德文化創意社 <span className="text-[10px] text-neutral-400 font-light">/ 或</span> <br className="hidden sm:inline" /> 泰德文化創意社郭芝妘 <span className="text-[10px] text-neutral-400 font-light">(視銀行規定而異)</span>
+                                泰德文化創意社 <span className="text-[10.5px] text-neutral-600 font-light">/ 或</span> <br className="hidden sm:inline" /> 泰德文化創意社郭芝妘 <span className="text-[10.5px] text-neutral-600 font-light">(視銀行規定而異)</span>
                               </span>
                             </div>
                           </div>
                         </div>
 
-                        <div className="space-y-2 border-t md:border-t-0 md:border-l border-[#0D0D0D]/5 pt-4 md:pt-0 md:pl-6">
+                        <div className="space-y-2 border-t md:border-t-0 md:border-l border-[#0D0D0D]/10 pt-4 md:pt-0 md:pl-6">
                           <span className="text-[#C9A96E] text-xs font-semibold block uppercase tracking-wider">國外匯款 (International Remittance)</span>
                           <div className="space-y-1.5 text-[11px]">
                             <div>
-                              <span className="text-[#0D0D0D]/40 block text-[9px] font-sans tracking-wide">SWIFT CODE</span>
-                              <span className="font-semibold">ESUNTWTP</span>
+                              <span className="text-[#0D0D0D]/70 block text-[10px] font-sans font-medium tracking-wide">SWIFT CODE</span>
+                              <span className="font-semibold text-neutral-800">ESUNTWTP</span>
                             </div>
                             <div>
-                              <span className="text-[#0D0D0D]/40 block text-[9px] font-sans tracking-wide">BENEFICIARY'S NAME</span>
-                              <span className="font-semibold text-[#0D0D0D]">ART PRESS and Life Co.</span>
+                              <span className="text-[#0D0D0D]/70 block text-[10px] font-sans font-medium tracking-wide">BENEFICIARY'S NAME</span>
+                              <span className="font-semibold text-neutral-800">ART PRESS and Life Co.</span>
                             </div>
                             <div>
-                              <span className="text-[#0D0D0D]/40 block text-[9px] font-sans tracking-wide">BENEFICIARY BRANCH</span>
-                              <span className="font-semibold">E.Sun Bank / Zhonglun Branch</span>
+                              <span className="text-[#0D0D0D]/70 block text-[10px] font-sans font-medium tracking-wide">BENEFICIARY BRANCH</span>
+                              <span className="font-semibold text-neutral-800">E.Sun Bank / Zhonglun Branch</span>
                             </div>
                             <div>
-                              <span className="text-[#0D0D0D]/40 block text-[9px] font-sans tracking-wide">ACCOUNT NUMBER</span>
+                              <span className="text-[#0D0D0D]/70 block text-[10px] font-sans font-medium tracking-wide">ACCOUNT NUMBER</span>
                               <span className="font-semibold text-[#C9A96E]">0912940021772</span>
                             </div>
                           </div>
                         </div>
                       </div>
-                      <div className="text-[10px] text-[#0D0D0D]/50 border-t border-[#0D0D0D]/5 pt-2.5 font-sans leading-relaxed space-y-1">
+                      <div className="text-[11.5px] text-[#0D0D0D]/75 border-t border-[#0D0D0D]/10 pt-2.5 font-sans leading-relaxed space-y-1">
                         <p>* 匯款時請務必在備註欄填寫「<strong className="text-[#0D0D0D] font-semibold">{formData.brand_name_zh || '您的品牌名稱'} VIS保證金</strong>」。匯款完成後請將網銀扣款截圖或ATM交易明細拍照上傳至下方。</p>
-                        <p className="text-rose-500/90 font-semibold">* 所有展位與保證金價格均不含稅 (All prices listed above are exclusive of tax).</p>
+                        <p className="text-rose-600 font-semibold">* 所有展位與保證金價格均不含稅 (All prices listed above are exclusive of tax).</p>
                       </div>
                     </div>
                   </div>
@@ -795,7 +742,7 @@ export default function ExhibitorApplyPage() {
                         />
                         <Upload className="w-10 h-10 text-[#C9A96E]/60 group-hover:scale-105 transition-transform mb-3" />
                         <p className="text-xs font-semibold text-[#C9A96E] tracking-wider uppercase mb-1">點擊或拖曳圖片至此處上傳</p>
-                        <p className="text-[10px] text-[#0D0D0D]/40">支援 JPG, PNG 格式，檔案大小不超過 2MB</p>
+                        <p className="text-[11px] text-[#0D0D0D]/70">支援 JPG, PNG 格式，檔案大小不超過 2MB</p>
                       </div>
                     ) : (
                       <div className="border border-[#C9A96E]/30 rounded-lg p-4 bg-white relative">
@@ -835,65 +782,65 @@ export default function ExhibitorApplyPage() {
 
                 <div className="space-y-6">
                   {/* Info Table */}
-                  <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 rounded-lg p-5 text-xs space-y-3 font-mono">
-                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                      <span className="text-[#0D0D0D]/40 font-sans tracking-wide">品牌名稱 Brand</span>
+                  <div className="bg-[#FAF9F6] border border-[#0D0D0D]/10 rounded-lg p-5 text-xs space-y-3 font-mono">
+                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                      <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">品牌名稱 Brand</span>
                       <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.brand_name_zh} ({formData.brand_name_en})</span>
                     </div>
                     {formData.company_name_zh && (
-                      <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                        <span className="text-[#0D0D0D]/40 font-sans tracking-wide">公司行號 Company</span>
+                      <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                        <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">公司行號 Company</span>
                         <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.company_name_zh}</span>
                       </div>
                     )}
                     {formData.company_tax_id && (
-                      <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                        <span className="text-[#0D0D0D]/40 font-sans tracking-wide">統一編號 Tax ID</span>
+                      <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                        <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">統一編號 Tax ID</span>
                         <span className="col-span-2 font-medium text-[#0D0D0D] font-mono">{formData.company_tax_id}</span>
                       </div>
                     )}
-                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                      <span className="text-[#0D0D0D]/40 font-sans tracking-wide">負責聯絡人 Contact</span>
+                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                      <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">負責聯絡人 Contact</span>
                       <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.contact_name}</span>
                     </div>
-                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                      <span className="text-[#0D0D0D]/40 font-sans tracking-wide">聯繫信箱 Email</span>
+                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                      <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">聯繫信箱 Email</span>
                       <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.contact_email}</span>
                     </div>
                     {formData.contact_phone && (
-                      <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                        <span className="text-[#0D0D0D]/40 font-sans tracking-wide">電話 Phone</span>
+                      <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                        <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">電話 Phone</span>
                         <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.contact_phone}</span>
                       </div>
                     )}
-                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                      <span className="text-[#0D0D0D]/40 font-sans tracking-wide">聯繫地址 Address</span>
+                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                      <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">聯繫地址 Address</span>
                       <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.contact_address}</span>
                     </div>
-                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                      <span className="text-[#0D0D0D]/40 font-sans tracking-wide">擬參展展區 Sector</span>
+                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                      <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">擬參展展區 Sector</span>
                       <span className="col-span-2 font-medium text-[#C9A96E]">{selectedZone?.sectorLabel} — {selectedZone?.nameZh}</span>
                     </div>
-                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                      <span className="text-[#0D0D0D]/40 font-sans tracking-wide">展位意向 Stall Code</span>
+                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                      <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">展位意向 Stall Code</span>
                       <div className="col-span-2 font-medium text-[#C9A96E] font-sans space-y-1">
                         <div>第一志願：{formData.zone_preference_1}</div>
                         <div>第二志願：{formData.zone_preference_2}</div>
                         <div>第三志願：{formData.zone_preference_3}</div>
                       </div>
                     </div>
-                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                      <span className="text-[#0D0D0D]/40 font-sans tracking-wide">預計單價 Stall Price</span>
+                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                      <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">預計單價 Stall Price</span>
                       <span className="col-span-2 font-semibold text-[#0D0D0D]">NT$ {selectedBooth?.price.toLocaleString()} (不含稅 exclusive of tax)</span>
                     </div>
-                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
-                      <span className="text-[#0D0D0D]/40 font-sans tracking-wide">保證金狀態 Deposit</span>
+                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
+                      <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">保證金狀態 Deposit</span>
                       <span className="col-span-2 font-semibold text-emerald-600 flex items-center gap-1">
                         <ShieldCheck className="w-4 h-4" /> NT$ {DEPOSIT_AMOUNT.toLocaleString()} (憑證已上傳)
                       </span>
                     </div>
                     <div className="pt-2">
-                      <span className="text-[#0D0D0D]/40 block font-sans tracking-wide mb-1">參展核心概念 Concept Brief</span>
+                      <span className="text-[#0D0D0D]/75 block font-sans font-semibold tracking-wide mb-1">參展核心概念 Concept Brief</span>
                       <p className="font-sans text-[#0D0D0D]/80 leading-relaxed font-light whitespace-pre-wrap bg-white p-3 rounded border border-[#0D0D0D]/5">{formData.concept_brief}</p>
                     </div>
                   </div>
