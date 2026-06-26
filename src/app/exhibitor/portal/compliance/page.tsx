@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -94,6 +94,45 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
   const [scrolledRefund, setScrolledRefund] = useState(!!signedData);
 
   const [errorMessage, setErrorMessage] = useState('');
+
+  const depositRef = useRef<HTMLDivElement>(null);
+  const damageRef = useRef<HTMLDivElement>(null);
+  const refundRef = useRef<HTMLDivElement>(null);
+
+  // Check scrollability of containers dynamically
+  useEffect(() => {
+    if (signedData || loading) return;
+
+    const checkScrollability = () => {
+      if (depositRef.current) {
+        const { scrollHeight, clientHeight } = depositRef.current;
+        if (scrollHeight <= clientHeight + 10) {
+          setScrolledDeposit(true);
+        }
+      }
+      if (damageRef.current) {
+        const { scrollHeight, clientHeight } = damageRef.current;
+        if (scrollHeight <= clientHeight + 10) {
+          setScrolledDamage(true);
+        }
+      }
+      if (refundRef.current) {
+        const { scrollHeight, clientHeight } = refundRef.current;
+        if (scrollHeight <= clientHeight + 10) {
+          setScrolledRefund(true);
+        }
+      }
+    };
+
+    // Run after layout/render tick
+    const timer = setTimeout(checkScrollability, 300);
+    window.addEventListener('resize', checkScrollability);
+
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('resize', checkScrollability);
+    };
+  }, [signedData, loading, brand, rules, expandedSections]);
 
   useEffect(() => {
     const loadCompliance = async () => {
@@ -805,6 +844,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                 </span>
               </div>
               <div 
+                ref={depositRef}
                 onScroll={(e) => handleScroll('deposit', e)}
                 className="max-h-36 overflow-y-auto bg-black/40 border border-white/5 rounded-lg p-3.5 text-xs text-neutral-400 font-light leading-relaxed space-y-2 custom-scrollbar"
               >
@@ -841,6 +881,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                 </span>
               </div>
               <div 
+                ref={damageRef}
                 onScroll={(e) => handleScroll('damage', e)}
                 className="max-h-36 overflow-y-auto bg-black/40 border border-white/5 rounded-lg p-3.5 text-xs text-neutral-400 font-light leading-relaxed space-y-2 custom-scrollbar"
               >
@@ -877,6 +918,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                 </span>
               </div>
               <div 
+                ref={refundRef}
                 onScroll={(e) => handleScroll('refund', e)}
                 className="max-h-36 overflow-y-auto bg-black/40 border border-white/5 rounded-lg p-3.5 text-xs text-neutral-400 font-light leading-relaxed space-y-3 custom-scrollbar"
               >
