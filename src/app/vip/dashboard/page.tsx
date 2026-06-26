@@ -25,37 +25,65 @@ export default function VIPDashboard() {
                 if (!user) router.push('/vip');
                 return;
             }
-            setUserEmail(user.email ?? '');
+            const email = user.email?.toLowerCase().trim() || '';
+            setUserEmail(email);
 
-            // Auto-heal password for scanner staff account
-            if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
-                supabase.auth.updateUser({ password: 'Kuo76443173' }).catch(() => {});
+            // Verify VIP privilege
+            let isVip = ADMIN_EMAILS.includes(email);
+            if (!isVip) {
+                try {
+                    const { data: allowed } = await supabase
+                        .from('vip_allowlist')
+                        .select('email')
+                        .eq('email', email)
+                        .maybeSingle();
+                    if (allowed) isVip = true;
+                } catch (err) {
+                    console.error('Error verifying VIP status in dashboard:', err);
+                }
             }
 
-            const { data } = await supabase
-                .from('users')
-                .select('*')
-                .eq('id', user.id)
-                .single();
-
-            if (!isMounted) return;
-
-            if (!data?.birthdate) {
-                router.push('/vip/onboarding');
+            if (!isVip) {
+                await supabase.auth.signOut();
+                router.push('/vip');
                 return;
             }
 
-            const { data: allowlistData } = await supabase
-                .from('vip_allowlist')
-                .select('tier')
-                .eq('email', user.email)
-                .single();
+            // Auto-heal password for scanner staff account
+            if (email === 'artwithlifetaipei@gmail.com') {
+                supabase.auth.updateUser({ password: 'Kuo76443173' }).catch(() => {});
+            }
 
-            if (!isMounted) return;
+            try {
+                const { data } = await supabase
+                    .from('users')
+                    .select('*')
+                    .eq('id', user.id)
+                    .maybeSingle();
 
-            setProfile({ ...data, tier: allowlistData?.tier || 'VIP' });
-            setQrValue(`${data.id}:${Date.now()}`);
-            setIsLoading(false);
+                if (!isMounted) return;
+
+                if (!data?.birthdate) {
+                    router.push('/vip/onboarding');
+                    return;
+                }
+
+                const { data: allowlistData } = await supabase
+                    .from('vip_allowlist')
+                    .select('tier')
+                    .eq('email', email)
+                    .maybeSingle();
+
+                if (!isMounted) return;
+
+                setProfile({ ...data, tier: allowlistData?.tier || 'VIP' });
+                setQrValue(`${data.id}:${Date.now()}`);
+                setIsLoading(false);
+            } catch (err) {
+                console.error('Error loading dashboard profile:', err);
+                await supabase.auth.signOut();
+                router.push('/vip');
+            }
         };
 
         // Handle ALL auth state changes — including INITIAL_SESSION (fired when already logged in)

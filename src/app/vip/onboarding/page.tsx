@@ -18,22 +18,52 @@ export default function OnboardingPage() {
         const handleUser = async (user: any) => {
             if (!isMounted || !user) return;
 
+            const email = user.email?.toLowerCase().trim() || '';
+            const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
+            
+            // Verify VIP privilege
+            let isVip = ADMIN_EMAILS.includes(email);
+            if (!isVip) {
+                try {
+                    const { data: allowed } = await supabase
+                        .from('vip_allowlist')
+                        .select('email')
+                        .eq('email', email)
+                        .maybeSingle();
+                    if (allowed) isVip = true;
+                } catch (err) {
+                    console.error('Error verifying VIP status in onboarding:', err);
+                }
+            }
+            
+            if (!isVip) {
+                await supabase.auth.signOut();
+                router.push('/vip');
+                return;
+            }
+
             // Auto-heal password for scanner staff account
-            if (user.email?.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
+            if (email === 'artwithlifetaipei@gmail.com') {
                 supabase.auth.updateUser({ password: 'Kuo76443173' }).catch(() => {});
             }
 
-            const { data: profile } = await supabase
-                .from('users')
-                .select('birthdate')
-                .eq('id', user.id)
-                .single();
+            try {
+                const { data: profile } = await supabase
+                    .from('users')
+                    .select('birthdate')
+                    .eq('id', user.id)
+                    .maybeSingle();
 
-            if (!isMounted) return;
+                if (!isMounted) return;
 
-            if (profile?.birthdate) {
-                router.push('/vip/dashboard');
-            } else {
+                if (profile?.birthdate) {
+                    router.push('/vip/dashboard');
+                } else {
+                    setUser(user);
+                    setIsLoading(false);
+                }
+            } catch (err) {
+                console.error('Error fetching user profile in onboarding:', err);
                 setUser(user);
                 setIsLoading(false);
             }

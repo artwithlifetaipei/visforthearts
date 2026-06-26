@@ -218,6 +218,9 @@ export default function StaffScannerPage() {
                     await handleAuthSuccess(user.email ?? '');
                 } else {
                     setIsAuthorized(false);
+                    if (user) {
+                        await supabase.auth.signOut();
+                    }
                 }
             } catch (err: any) {
                 console.error('V-Check auth check failed:', err);

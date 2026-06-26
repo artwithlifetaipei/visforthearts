@@ -59,6 +59,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
+  const [loginPassword, setLoginPassword] = useState('');
   const [loginLoading, setLoginLoading] = useState(false);
   const [loginSent, setLoginSent] = useState(false);
   const [loginMessage, setLoginMessage] = useState('');
@@ -241,7 +242,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
     }
   };
 
-  // OTP Login Handler
+  // Password Login Handler
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoginLoading(true);
@@ -249,51 +250,54 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
     const formattedEmail = loginEmail.toLowerCase().trim();
 
-    // 1. Check if email is in exhibitor_brands
-    const { data: allowedBrand } = await supabase
-      .from('exhibitor_brands')
-      .select('id')
-      .eq('portal_email', formattedEmail)
-      .maybeSingle();
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: formattedEmail,
+        password: loginPassword,
+      });
 
-    let allowed = !!allowedBrand;
-
-    if (!allowed) {
-      // 2. Also check if email exists as an approved application in exhibitor_applications
-      const { data: allowedApp } = await supabase
-        .from('exhibitor_applications')
-        .select('id')
-        .eq('contact_email', formattedEmail)
-        .eq('status', 'approved')
-        .maybeSingle();
-      
-      if (allowedApp) {
-        allowed = true;
+      if (error) {
+        setLoginMessage(error.message === 'Invalid login credentials' ? '帳號或密碼輸入錯誤，請確認參展商權限。' : `登入失敗: ${error.message}`);
+        setLoginLoading(false);
+        return;
       }
-    }
 
-    if (!allowed && !ADMIN_EMAILS.includes(formattedEmail)) {
-      setLoginMessage('此信箱尚未登錄為 2027 VIS 參展品牌。\n若您的品牌已通過首期評選，請洽大會秘書處確認登錄信箱。');
+      // Check if email is in exhibitor_brands
+      const { data: allowedBrand } = await supabase
+        .from('exhibitor_brands')
+        .select('id')
+        .eq('portal_email', formattedEmail)
+        .maybeSingle();
+
+      let allowed = !!allowedBrand;
+
+      if (!allowed) {
+        // Also check if email exists as an approved application in exhibitor_applications
+        const { data: allowedApp } = await supabase
+          .from('exhibitor_applications')
+          .select('id')
+          .eq('contact_email', formattedEmail)
+          .eq('status', 'approved')
+          .maybeSingle();
+        
+        if (allowedApp) {
+          allowed = true;
+        }
+      }
+
+      if (!allowed && !ADMIN_EMAILS.includes(formattedEmail)) {
+        setLoginMessage('您的帳號尚未被主辦單位核准入選，或查無參展商資料。若已核准，請確認帳號是否與申請時一致。');
+        await supabase.auth.signOut();
+        setLoginLoading(false);
+        return;
+      }
+
+      // Login success: onAuthStateChange will trigger and set session / brandData
+    } catch (err: any) {
+      setLoginMessage(`登入異常: ${err.message || err}`);
+    } finally {
       setLoginLoading(false);
-      return;
     }
-
-    // Send magic link (OTP)
-    const { error } = await supabase.auth.signInWithOtp({
-      email: formattedEmail,
-      options: {
-        emailRedirectTo: `${window.location.origin}/exhibitor/portal`,
-        shouldCreateUser: true,
-      },
-    });
-
-    if (error) {
-      setLoginMessage(`發送失敗: ${error.message}`);
-    } else {
-      setLoginSent(true);
-      setLoginMessage('專屬協作中心登入連結已寄送至您的信箱，請查收。');
-    }
-    setLoginLoading(false);
   };
 
   // Demo Login Handler (Bypasses email for rapid local verification)
@@ -463,78 +467,68 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
           </p>
 
           <AnimatePresence mode="wait">
-            {!loginSent ? (
-              <motion.form 
-                key="login-form"
-                onSubmit={handleLoginSubmit}
-                className="space-y-6"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <div>
-                  <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-2">登錄電子信箱 EMAIL ADDRESS</label>
-                  <input 
-                    type="email" 
-                    value={loginEmail}
-                    onChange={(e) => setLoginEmail(e.target.value)}
-                    placeholder="ENTER YOUR REGISTERED EMAIL"
-                    className="w-full text-center text-xs tracking-wider border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-4 py-3 outline-none text-white transition-all uppercase"
-                    required
-                    disabled={loginLoading}
-                  />
-                </div>
-
-                <button 
-                  type="submit" 
+            <motion.form 
+              key="login-form"
+              onSubmit={handleLoginSubmit}
+              className="space-y-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <div>
+                <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-2">登錄電子信箱 EMAIL ADDRESS</label>
+                <input 
+                  type="email" 
+                  value={loginEmail}
+                  onChange={(e) => setLoginEmail(e.target.value)}
+                  placeholder="ENTER YOUR REGISTERED EMAIL"
+                  className="w-full text-center text-xs tracking-wider border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-4 py-3 outline-none text-white transition-all uppercase"
+                  required
                   disabled={loginLoading}
-                  className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-3 rounded text-xs font-semibold tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  {loginLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : '傳送驗證連結 SEND MAGIC LINK'}
-                </button>
+                />
+              </div>
 
-                <div className="relative flex py-2 items-center">
-                  <div className="flex-grow border-t border-white/5"></div>
-                  <span className="flex-shrink mx-4 text-[9px] text-neutral-500 font-semibold tracking-widest uppercase">或者 OR</span>
-                  <div className="flex-grow border-t border-white/5"></div>
-                </div>
-
-                {/* Quick Local Demo Login Button */}
-                <button 
-                  type="button"
-                  onClick={handleDemoLogin}
+              <div>
+                <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-2">密碼 PASSWORD</label>
+                <input 
+                  type="password" 
+                  value={loginPassword}
+                  onChange={(e) => setLoginPassword(e.target.value)}
+                  placeholder="ENTER YOUR PASSWORD"
+                  className="w-full text-center text-xs tracking-wider border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-4 py-3 outline-none text-white transition-all"
+                  required
                   disabled={loginLoading}
-                  className="w-full border border-dashed border-[#DFBA87]/45 hover:border-[#DFBA87] hover:bg-[#DFBA87]/5 text-[#DFBA87] py-3 rounded text-xs font-semibold tracking-[0.15em] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
-                >
-                  <Sparkles className="w-4 h-4" /> 快速本地測試登入 (DEMO KEY)
-                </button>
+                />
+              </div>
 
-                {loginMessage && (
-                  <p className="text-[11px] text-rose-400 font-light leading-relaxed whitespace-pre-wrap text-center bg-rose-500/10 p-3 rounded border border-rose-500/20">{loginMessage}</p>
-                )}
-              </motion.form>
-            ) : (
-              <motion.div 
-                key="login-success"
-                className="text-center py-6 space-y-6"
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
+              <button 
+                type="submit" 
+                disabled={loginLoading}
+                className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-3 rounded text-xs font-semibold tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
               >
-                <div className="w-12 h-12 rounded-full border border-[#DFBA87] flex items-center justify-center bg-white/5 mx-auto text-[#DFBA87]">
-                  <CheckCircle2 className="w-6 h-6" />
-                </div>
-                <div>
-                  <h3 className="text-sm font-semibold tracking-wider text-white">驗證信已寄出</h3>
-                  <p className="text-xs text-neutral-400 font-light leading-relaxed mt-2">{loginMessage}</p>
-                </div>
-                <button 
-                  onClick={() => setLoginSent(false)}
-                  className="text-[10px] tracking-wider text-neutral-500 hover:text-white uppercase transition-colors"
-                >
-                  重新填寫信箱
-                </button>
-              </motion.div>
-            )}
+                {loginLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : '登入協作平台 LOGIN TO PORTAL'}
+              </button>
+
+              <div className="relative flex py-2 items-center">
+                <div className="flex-grow border-t border-white/5"></div>
+                <span className="flex-shrink mx-4 text-[9px] text-neutral-500 font-semibold tracking-widest uppercase">或者 OR</span>
+                <div className="flex-grow border-t border-white/5"></div>
+              </div>
+
+              {/* Quick Local Demo Login Button */}
+              <button 
+                type="button"
+                onClick={handleDemoLogin}
+                disabled={loginLoading}
+                className="w-full border border-dashed border-[#DFBA87]/45 hover:border-[#DFBA87] hover:bg-[#DFBA87]/5 text-[#DFBA87] py-3 rounded text-xs font-semibold tracking-[0.15em] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+              >
+                <Sparkles className="w-4 h-4" /> 快速本地測試登入 (DEMO KEY)
+              </button>
+
+              {loginMessage && (
+                <p className="text-[11px] text-rose-400 font-light leading-relaxed whitespace-pre-wrap text-center bg-rose-500/10 p-3 rounded border border-rose-500/20">{loginMessage}</p>
+              )}
+            </motion.form>
           </AnimatePresence>
         </div>
       </div>

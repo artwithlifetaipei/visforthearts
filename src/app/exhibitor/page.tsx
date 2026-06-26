@@ -159,16 +159,41 @@ export default function ExhibitorLandingPage() {
       if (error) {
         setModalMessage({ text: `登入失敗: ${error.message}`, type: 'error' });
       } else {
-        // Double check if they are an approved exhibitor (have a record in exhibitor_brands)
+        // Double check if they are an approved exhibitor (have a record in exhibitor_brands or approved application)
         if (data?.user?.email) {
-          const { data: brandData, error: brandErr } = await supabase
-            .from('exhibitor_brands')
-            .select('id')
-            .eq('portal_email', data.user.email.toLowerCase().trim())
-            .maybeSingle();
+          const formattedEmail = data.user.email.toLowerCase().trim();
+          const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
+          
+          let allowed = ADMIN_EMAILS.includes(formattedEmail);
+          
+          if (!allowed) {
+            try {
+              const { data: brandData } = await supabase
+                .from('exhibitor_brands')
+                .select('id')
+                .eq('portal_email', formattedEmail)
+                .maybeSingle();
+              if (brandData) allowed = true;
+            } catch (e) {
+              console.error('Error checking brandData in modal login:', e);
+            }
+          }
 
-          if (brandErr || !brandData) {
-            // Not an approved exhibitor yet, or some error occurred
+          if (!allowed) {
+            try {
+              const { data: appData } = await supabase
+                .from('exhibitor_applications')
+                .select('id')
+                .eq('contact_email', formattedEmail)
+                .eq('status', 'approved')
+                .maybeSingle();
+              if (appData) allowed = true;
+            } catch (e) {
+              console.error('Error checking appData in modal login:', e);
+            }
+          }
+
+          if (!allowed) {
             setModalMessage({ 
               text: '您的帳號尚未被主辦單位核准入選，或查無參展商資料。若已核准，請確認帳號是否與申請時一致。', 
               type: 'error' 
@@ -492,6 +517,24 @@ export default function ExhibitorLandingPage() {
               已獲准入選品牌登入 BRAND LOGIN
             </button>
           </motion.div>
+          {session && (
+            <motion.p
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.6 }}
+              className="text-[10px] text-[#0D0D0D]/50 font-light tracking-widest mt-4 text-center z-10"
+            >
+              目前登入帳號 CURRENT EMAIL: <strong className="text-[#0D0D0D] font-medium">{session.user?.email}</strong> 
+              <button 
+                onClick={handleLogout}
+                className="ml-3 text-[#C9A96E] hover:text-[#B39359] underline bg-transparent border-0 cursor-pointer text-[10px] tracking-widest font-semibold uppercase"
+                onMouseEnter={() => setCursorHovered(true)} 
+                onMouseLeave={() => setCursorHovered(false)}
+              >
+                登出 LOGOUT
+              </button>
+            </motion.p>
+          )}
         </div>
       </header>
 

@@ -14,16 +14,47 @@ export default function VIPLoginPage() {
 
     // Auto-redirect if already logged in or landing with hash
     useEffect(() => {
+        const checkVipSession = async (currentSession: any) => {
+            if (!currentSession?.user?.email) return;
+            const email = currentSession.user.email.toLowerCase().trim();
+            
+            // Allow admin bypass
+            const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
+            if (ADMIN_EMAILS.includes(email)) {
+                router.push('/vip/onboarding');
+                return;
+            }
+            
+            try {
+                // Check if email is in vip_allowlist
+                const { data: allowed, error } = await supabase
+                    .from('vip_allowlist')
+                    .select('email')
+                    .eq('email', email)
+                    .maybeSingle();
+                
+                if (allowed) {
+                    router.push('/vip/onboarding');
+                } else {
+                    // Not in allowlist, sign out to clear session contamination
+                    await supabase.auth.signOut();
+                }
+            } catch (err) {
+                console.error('Error checking VIP session:', err);
+                await supabase.auth.signOut();
+            }
+        };
+
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'SIGNED_IN' && session) {
-                router.push('/vip/onboarding');
+                checkVipSession(session);
             }
         });
 
         // Initial session check
         supabase.auth.getSession().then(({ data: { session } }) => {
             if (session) {
-                router.push('/vip/onboarding');
+                checkVipSession(session);
             }
         });
 
