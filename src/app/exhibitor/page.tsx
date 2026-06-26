@@ -3,12 +3,14 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
-import { ArrowRight, Clock, ShieldCheck, Mail, Calendar, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ArrowRight, Clock, ShieldCheck, Mail, Calendar, Loader2, X } from 'lucide-react';
 import { ALL_ZONES, APPLICATION_DEADLINE, KEY_DATES } from '@/lib/exhibitorConstants';
 import { supabase } from '@/lib/supabase';
 
 export default function ExhibitorLandingPage() {
+  const router = useRouter();
   const [timeLeft, setTimeLeft] = useState({
     days: 0,
     hours: 0,
@@ -25,6 +27,13 @@ export default function ExhibitorLandingPage() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [authLoading, setAuthLoading] = useState(false);
   const [authMessage, setAuthMessage] = useState({ text: '', type: '' });
+
+  // Login Modal states
+  const [isLoginModalOpen, setIsLoginModalOpen] = useState(false);
+  const [modalEmail, setModalEmail] = useState('');
+  const [modalPassword, setModalPassword] = useState('');
+  const [modalLoading, setModalLoading] = useState(false);
+  const [modalMessage, setModalMessage] = useState({ text: '', type: '' });
 
   // Custom Cursor state
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -133,6 +142,55 @@ export default function ExhibitorLandingPage() {
       setAuthMessage({ text: `登入異常: ${err.message || err}`, type: 'error' });
     } finally {
       setAuthLoading(false);
+    }
+  };
+
+  const handleModalLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setModalLoading(true);
+    setModalMessage({ text: '', type: '' });
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: modalEmail,
+        password: modalPassword,
+      });
+
+      if (error) {
+        setModalMessage({ text: `登入失敗: ${error.message}`, type: 'error' });
+      } else {
+        // Double check if they are an approved exhibitor (have a record in exhibitor_brands)
+        if (data?.user?.email) {
+          const { data: brandData, error: brandErr } = await supabase
+            .from('exhibitor_brands')
+            .select('id')
+            .eq('portal_email', data.user.email.toLowerCase().trim())
+            .maybeSingle();
+
+          if (brandErr || !brandData) {
+            // Not an approved exhibitor yet, or some error occurred
+            setModalMessage({ 
+              text: '您的帳號尚未被主辦單位核准入選，或查無參展商資料。若已核准，請確認帳號是否與申請時一致。', 
+              type: 'error' 
+            });
+            // Sign them back out to prevent accessing other parts
+            await supabase.auth.signOut();
+            return;
+          }
+        }
+
+        setModalMessage({ text: '登入成功！跳轉中...', type: 'success' });
+        
+        // Wait a small moment for UX, then redirect
+        setTimeout(() => {
+          setIsLoginModalOpen(false);
+          router.push('/exhibitor/portal');
+        }, 800);
+      }
+    } catch (err: any) {
+      setModalMessage({ text: `登入異常: ${err.message || err}`, type: 'error' });
+    } finally {
+      setModalLoading(false);
     }
   };
 
@@ -387,7 +445,7 @@ export default function ExhibitorLandingPage() {
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.5 }}
-            className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-xl"
+            className="flex flex-col sm:flex-row gap-4 w-full justify-center max-w-3xl"
           >
             {session ? (
               <Link 
@@ -416,6 +474,23 @@ export default function ExhibitorLandingPage() {
             >
               2027年簡章 PROSPECTUS
             </a>
+            <button
+              onClick={() => {
+                if (session) {
+                  router.push('/exhibitor/portal');
+                } else {
+                  setModalEmail('');
+                  setModalPassword('');
+                  setModalMessage({ text: '', type: '' });
+                  setIsLoginModalOpen(true);
+                }
+              }}
+              className="btn-pola-gold flex-1 cursor-pointer"
+              onMouseEnter={() => setCursorHovered(true)} 
+              onMouseLeave={() => setCursorHovered(false)}
+            >
+              已獲准入選品牌登入 BRAND LOGIN
+            </button>
           </motion.div>
         </div>
       </header>
@@ -673,6 +748,115 @@ export default function ExhibitorLandingPage() {
           </div>
         </section>
       )}
+
+      {/* Premium Login Modal for Approved Brands */}
+      <AnimatePresence>
+        {isLoginModalOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-md flex items-center justify-center p-6"
+            onClick={() => setIsLoginModalOpen(false)}
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.4, ease: [0.16, 1, 0.3, 1] }}
+              className="w-full max-w-md bg-[#111111] border border-[#C9A96E]/20 p-1 rounded-none shadow-[0_25px_60px_rgba(0,0,0,0.8)] relative"
+              onClick={(e) => e.stopPropagation()} // Prevent close on clicking inside the card
+            >
+              <div className="border border-[#C9A96E]/10 p-8 md:p-10 flex flex-col bg-[#111111] text-white">
+                {/* Close Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsLoginModalOpen(false)}
+                  className="absolute top-4 right-4 text-neutral-400 hover:text-white bg-transparent border-0 cursor-pointer p-1"
+                  onMouseEnter={() => setCursorHovered(true)} 
+                  onMouseLeave={() => setCursorHovered(false)}
+                >
+                  <X className="w-5 h-5" />
+                </button>
+
+                <div className="w-10 h-10 rounded-full border border-[#C9A96E]/30 flex items-center justify-center bg-[#C9A96E]/5 mx-auto text-[#C9A96E] mb-5">
+                  <ShieldCheck className="w-5 h-5" />
+                </div>
+                
+                <h2 className="text-xl font-serif-garamond text-[#DFBA87] font-normal tracking-[0.1em] text-center mb-1">
+                  已獲准入選品牌登入
+                </h2>
+                <p className="text-[9px] text-neutral-400 font-light tracking-[0.25em] uppercase text-center mb-6">
+                  APPROVED BRAND LOGIN
+                </p>
+                <p className="text-xs text-neutral-400 font-light leading-relaxed text-center mb-8 font-serif-garamond">
+                  請輸入您當初申請時設定的帳號與密碼。<br/>登入成功後，將直接跳轉至參展協作平台。
+                </p>
+
+                <form onSubmit={handleModalLogin} className="space-y-6 text-left">
+                  <div className="relative border-b border-white/10 focus-within:border-[#C9A96E] transition-colors duration-300">
+                    <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">電子信箱 Email Address</label>
+                    <input
+                      type="email"
+                      value={modalEmail}
+                      onChange={(e) => setModalEmail(e.target.value)}
+                      placeholder="email@example.com"
+                      className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-white transition-all placeholder:text-neutral-700"
+                      required
+                      disabled={modalLoading}
+                      onMouseEnter={() => setCursorHovered(true)} 
+                      onMouseLeave={() => setCursorHovered(false)}
+                    />
+                  </div>
+
+                  <div className="relative border-b border-white/10 focus-within:border-[#C9A96E] transition-colors duration-300">
+                    <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">密碼 Password</label>
+                    <input
+                      type="password"
+                      value={modalPassword}
+                      onChange={(e) => setModalPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-white transition-all placeholder:text-neutral-700"
+                      required
+                      disabled={modalLoading}
+                      minLength={6}
+                      onMouseEnter={() => setCursorHovered(true)} 
+                      onMouseLeave={() => setCursorHovered(false)}
+                    />
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={modalLoading}
+                    className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-3.5 rounded-none text-xs font-semibold tracking-[0.25em] uppercase transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 mt-8 cursor-pointer active:scale-[0.99] shadow-md border-0"
+                    onMouseEnter={() => setCursorHovered(true)} 
+                    onMouseLeave={() => setCursorHovered(false)}
+                  >
+                    {modalLoading ? (
+                      <span className="flex items-center gap-2">
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        驗證登入中 VERIFYING...
+                      </span>
+                    ) : (
+                      '驗證並登入 VERIFY & LOGIN'
+                    )}
+                  </button>
+
+                  {modalMessage.text && (
+                    <div className={`text-[11px] font-light leading-relaxed p-3 rounded-none border text-center mt-4 ${
+                      modalMessage.type === 'error' 
+                        ? 'text-rose-400 bg-rose-950/20 border-rose-500/20' 
+                        : 'text-[#DFBA87] bg-[#C9A96E]/5 border-[#C9A96E]/15'
+                    }`}>
+                      {modalMessage.text}
+                    </div>
+                  )}
+                </form>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
