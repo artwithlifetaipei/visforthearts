@@ -203,7 +203,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             歡迎回到 {brand.brand_name_zh} 專屬協作中心
           </h1>
           <p className="text-xs text-neutral-400 font-light tracking-wide mt-1">
-            大會數位白手套服務已為您開啟。此處是您在 2027 VIS 策展與行政事務的中樞。
+            大會數位協作服務平台已為您開啟。此處是您在 2027 VIS 策展與行政事務的中樞。
           </p>
         </div>
         <div className="text-xs bg-white/5 border border-white/10 px-4 py-2.5 rounded font-mono flex items-center gap-2 text-[#DFBA87]">

@@ -409,7 +409,7 @@ export default function ExhibitorLandingPage() {
           transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-3xl md:text-5xl font-serif-garamond tracking-[0.1em] font-light leading-tight mb-3 text-[#0D0D0D]"
         >
-          參展商專屬申請入口
+          參展專屬申請入口
         </motion.h1>
         
         <motion.p 

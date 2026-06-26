@@ -546,7 +546,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
           <div>
             <h2 className="text-lg font-serif-garamond text-[#DFBA87] tracking-wider">信箱授權未核對</h2>
             <p className="text-xs text-neutral-400 font-light leading-relaxed mt-2">
-              您已成功登入系統，但信箱 (<strong className="text-white">{userEmail}</strong>) 尚未被登錄為 2027 VIS 參展品牌。
+              您已成功登入系統，但信箱 (<strong className="text-white">{userEmail}</strong>) 尚未被入選為 2027 VIS 參展品牌。
             </p>
           </div>
           <div className="space-y-3 pt-4">
