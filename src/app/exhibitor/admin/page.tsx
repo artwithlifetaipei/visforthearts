@@ -9,7 +9,60 @@ import {
   Download, Eye, Mail, Phone, Globe, Calendar, ExternalLink, Loader2, RefreshCw, ChevronDown, ChevronUp,
   Signature, FileCheck
 } from 'lucide-react';
-import { ZONE_MAP } from '@/lib/exhibitorConstants';
+import { ZONE_MAP, ALL_ZONES } from '@/lib/exhibitorConstants';
+
+const parsePreference = (prefStr: string) => {
+  if (!prefStr) return null;
+  // 1. Try exact match against current constants
+  for (const zone of ALL_ZONES) {
+    for (const booth of zone.booths) {
+      const val = `${zone.nameZh} - ${booth.code} ${booth.label} (NT$${booth.price.toLocaleString()})`;
+      if (val === prefStr) {
+        return {
+          zone_id: zone.id,
+          booth_type: booth.code,
+          price: booth.price,
+        };
+      }
+    }
+  }
+
+  // 2. Fallback: Parse using heuristics (useful for old database records)
+  try {
+    let zone_id: 'artsy' | 'premier' | 'atelier' = 'artsy';
+    if (prefStr.includes('精鑑')) {
+      zone_id = 'premier';
+    } else if (prefStr.includes('匠心') || prefStr.includes('藝藏') || prefStr.includes('獨立')) {
+      zone_id = 'atelier';
+    }
+
+    // Extract price inside (NT$...)
+    let price = 0;
+    const priceMatch = prefStr.match(/\(NT\$([0-9,]+)\)/);
+    if (priceMatch && priceMatch[1]) {
+      price = parseInt(priceMatch[1].replace(/,/g, ''), 10);
+    }
+
+    // Extract booth code using regex
+    let booth_type = '';
+    const codeMatch = prefStr.match(/-\s*([A-Za-z0-9\-]+)/);
+    if (codeMatch && codeMatch[1]) {
+      booth_type = codeMatch[1];
+    } else {
+      booth_type = zone_id === 'artsy' ? 'S01-03,S06-08' : zone_id === 'premier' ? 'M9-M15' : 'A-ENTRANCE';
+    }
+
+    return {
+      zone_id,
+      booth_type,
+      price: price || (zone_id === 'artsy' ? 42000 : zone_id === 'premier' ? 42000 : 108000),
+    };
+  } catch (err) {
+    console.error('Error parsing preference fallback:', err);
+  }
+
+  return null;
+};
 
 const ADMIN_EMAILS = [
   'artwithlifetaipei@gmail.com',
@@ -53,6 +106,7 @@ export default function ExhibitorAdminPage() {
   const [expandedAppId, setExpandedAppId] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [selectedPrefs, setSelectedPrefs] = useState<Record<string, number>>({});
 
   // Authenticate Admin
   useEffect(() => {
@@ -136,10 +190,31 @@ export default function ExhibitorAdminPage() {
     setActionLoadingId(app.id);
 
     try {
+      const selectedPrefNum = selectedPrefs[app.id] || 1;
+      let chosenZoneId = app.zone_id;
+      let chosenBoothType = app.booth_type;
+
+      const prefStr = selectedPrefNum === 1 ? app.zone_preference_1 :
+                      selectedPrefNum === 2 ? app.zone_preference_2 :
+                      app.zone_preference_3;
+      
+      if (prefStr) {
+        const parsed = parsePreference(prefStr);
+        if (parsed) {
+          chosenZoneId = parsed.zone_id;
+          chosenBoothType = parsed.booth_type;
+        }
+      }
+
       // 1. Update status in exhibitor_applications
       const { error: appErr } = await supabase
         .from('exhibitor_applications')
-        .update({ status: 'approved', deposit_paid: true })
+        .update({ 
+          status: 'approved', 
+          deposit_paid: true,
+          zone_id: chosenZoneId,
+          booth_type: chosenBoothType
+        })
         .eq('id', app.id);
 
       if (appErr) throw appErr;
@@ -153,24 +228,36 @@ export default function ExhibitorAdminPage() {
         .maybeSingle();
 
       if (!existingBrand) {
-        const isMicro = app.booth_type === 'T';
+        const isMicro = chosenBoothType === 'T';
         const { error: brandErr } = await supabase
           .from('exhibitor_brands')
           .insert({
             application_id: app.id,
             brand_name_zh: app.brand_name_zh,
             brand_name_en: app.brand_name_en,
-            zone_id: app.zone_id,
-            booth_type: app.booth_type,
+            zone_id: chosenZoneId,
+            booth_type: chosenBoothType,
             is_micro_exposure: isMicro,
             portal_email: app.contact_email.toLowerCase().trim(),
           });
         
         if (brandErr) throw brandErr;
+      } else {
+        const isMicro = chosenBoothType === 'T';
+        const { error: brandErr } = await supabase
+          .from('exhibitor_brands')
+          .update({
+            zone_id: chosenZoneId,
+            booth_type: chosenBoothType,
+            is_micro_exposure: isMicro
+          })
+          .eq('application_id', app.id);
+
+        if (brandErr) throw brandErr;
       }
 
       await loadAllAdminData();
-      alert(`「${app.brand_name_zh}」申請已審查通過，並已自動建立參展商協作帳號！`);
+      alert(`「${app.brand_name_zh}」申請已審查通過，已分配為您所選取的展位順位，並已自動建立/同步參展商協作帳號！`);
 
     } catch (err: any) {
       alert(`審核操作失敗: ${err.message}`);
@@ -433,11 +520,60 @@ export default function ExhibitorAdminPage() {
                                       </div>
 
                                       <div className="pt-2">
-                                        <h4 className="text-[#DFBA87] font-semibold uppercase tracking-wider mb-2">參展志願順序</h4>
-                                        <div className="flex gap-4 font-mono text-[10px] text-neutral-400">
-                                          <span>志願 1: {app.zone_preference_1}</span>
-                                          <span>志願 2: {app.zone_preference_2 || '無'}</span>
-                                          <span>志願 3: {app.zone_preference_3 || '無'}</span>
+                                        <h4 className="text-[#DFBA87] font-semibold uppercase tracking-wider mb-2">參展志願順序分配 (請勾選一個作為最終分配展位)</h4>
+                                        <div className="grid gap-2 max-w-2xl">
+                                          {[
+                                            { num: 1, pref: app.zone_preference_1, label: '志願 1' },
+                                            { num: 2, pref: app.zone_preference_2, label: '志願 2' },
+                                            { num: 3, pref: app.zone_preference_3, label: '志願 3' }
+                                          ].map(({ num, pref, label }) => {
+                                            if (!pref) return null;
+                                            const parsed = parsePreference(pref);
+                                            
+                                            let isSelected = false;
+                                            if (app.status === 'pending') {
+                                              isSelected = (selectedPrefs[app.id] || 1) === num;
+                                            } else if (app.status === 'approved') {
+                                              isSelected = parsed 
+                                                ? (parsed.zone_id === app.zone_id && parsed.booth_type === app.booth_type)
+                                                : num === 1;
+                                            }
+
+                                            return (
+                                              <div 
+                                                key={num}
+                                                onClick={() => {
+                                                  if (app.status === 'pending') {
+                                                    setSelectedPrefs(prev => ({ ...prev, [app.id]: num }));
+                                                  }
+                                                }}
+                                                className={`flex items-center justify-between p-2.5 border transition-all ${
+                                                  app.status === 'pending' ? 'cursor-pointer' : 'cursor-default opacity-85'
+                                                } ${
+                                                  isSelected 
+                                                    ? 'bg-[#C9A96E]/10 border-[#C9A96E] text-white font-medium' 
+                                                    : 'bg-black/25 border-white/5 text-neutral-400 hover:border-white/10'
+                                                }`}
+                                              >
+                                                <div className="flex items-center gap-3 pr-4">
+                                                  <div className={`w-4.5 h-4.5 rounded-full border flex items-center justify-center flex-shrink-0 ${
+                                                    isSelected ? 'border-[#C9A96E]' : 'border-neutral-700'
+                                                  }`}>
+                                                    {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-[#C9A96E]" />}
+                                                  </div>
+                                                  <div className="text-xs">
+                                                    <span className="font-semibold text-white/90 mr-1.5">{label}:</span>
+                                                    <span>{pref}</span>
+                                                  </div>
+                                                </div>
+                                                {parsed && (
+                                                  <span className="text-[11px] font-mono text-[#DFBA87] font-semibold whitespace-nowrap pl-2">
+                                                    NT$ {parsed.price.toLocaleString()}
+                                                  </span>
+                                                )}
+                                              </div>
+                                            );
+                                          })}
                                         </div>
                                       </div>
                                     </div>

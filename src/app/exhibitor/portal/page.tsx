@@ -317,7 +317,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
               <div className="flex justify-between items-start mb-4">
                 <div>
                   <span className="text-[10px] font-semibold text-neutral-500 tracking-wider uppercase">項目 ITEM</span>
-                  <h3 className="text-base text-white font-medium mt-0.5">展位租賃費 (尾款)</h3>
+                  <h3 className="text-base text-white font-medium mt-0.5">展位費款項 (尾款)</h3>
                 </div>
                 <span className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-1 rounded uppercase font-semibold">
                   待確認 Verifying
