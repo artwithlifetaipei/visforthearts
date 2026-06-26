@@ -95,8 +95,8 @@ export default function ExhibitorApplyPage() {
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      alert('檔案不能超過 10MB');
+    if (file.size > 2 * 1024 * 1024) {
+      alert('檔案不能超過 2MB (為確保連線穩定並防止後台逾時，請將圖片壓縮至 2MB 以下)');
       return;
     }
 
@@ -727,7 +727,7 @@ export default function ExhibitorApplyPage() {
                         />
                         <Upload className="w-10 h-10 text-[#C9A96E]/60 group-hover:scale-105 transition-transform mb-3" />
                         <p className="text-xs font-semibold text-[#C9A96E] tracking-wider uppercase mb-1">點擊或拖曳圖片至此處上傳</p>
-                        <p className="text-[10px] text-[#0D0D0D]/40">支援 JPG, PNG 格式，檔案大小不超過 10MB</p>
+                        <p className="text-[10px] text-[#0D0D0D]/40">支援 JPG, PNG 格式，檔案大小不超過 2MB</p>
                       </div>
                     ) : (
                       <div className="border border-[#C9A96E]/30 rounded-lg p-4 bg-white relative">

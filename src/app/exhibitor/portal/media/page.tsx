@@ -67,8 +67,8 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
       return;
     }
 
-    if (file.size > 10 * 1024 * 1024) {
-      setErrorMessage('單張圖片檔案不能超過 10MB。');
+    if (file.size > 2 * 1024 * 1024) {
+      setErrorMessage('單張圖片檔案不能超過 2MB (線上展示建議尺寸)。');
       return;
     }
 
@@ -273,7 +273,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
                 <span className="text-[10px] font-semibold text-[#DFBA87] tracking-wider uppercase block">
                   {assets.length >= 5 ? '已達數量上限' : '選取圖片檔案'}
                 </span>
-                <span className="text-[9px] text-neutral-600 block mt-1">MAX 10MB (JPG / PNG)</span>
+                <span className="text-[9px] text-neutral-600 block mt-1">MAX 2MB (JPG / PNG)</span>
               </div>
             )}
           </div>

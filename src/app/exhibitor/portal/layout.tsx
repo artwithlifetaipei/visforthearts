@@ -29,18 +29,28 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
   // Check auth on mount
   useEffect(() => {
+    // Fallback timeout: if auth checks take more than 2.5 seconds, force setIsLoading(false) to prevent infinite spinner
+    const fallbackTimeout = setTimeout(() => {
+      setIsLoading(false);
+    }, 2500);
+
     const checkAuth = async () => {
       setIsLoading(true);
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      
-      if (currentSession) {
-        setSession(currentSession);
-        const email = currentSession.user?.email || '';
-        setUserEmail(email);
-        await fetchBrandInfo(email);
-      } else {
-        setSession(null);
-        setBrandData(null);
+      try {
+        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        
+        if (currentSession) {
+          setSession(currentSession);
+          const email = currentSession.user?.email || '';
+          setUserEmail(email);
+          await fetchBrandInfo(email);
+        } else {
+          setSession(null);
+          setBrandData(null);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error('Error during checkAuth:', err);
         setIsLoading(false);
       }
     };
@@ -48,19 +58,27 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, currentSession) => {
-      if (event === 'SIGNED_IN' && currentSession) {
-        setSession(currentSession);
-        const email = currentSession.user?.email || '';
-        setUserEmail(email);
-        await fetchBrandInfo(email);
-      } else if (event === 'SIGNED_OUT') {
-        setSession(null);
-        setBrandData(null);
+      try {
+        if (event === 'SIGNED_IN' && currentSession) {
+          setSession(currentSession);
+          const email = currentSession.user?.email || '';
+          setUserEmail(email);
+          await fetchBrandInfo(email);
+        } else if (event === 'SIGNED_OUT') {
+          setSession(null);
+          setBrandData(null);
+          setIsLoading(false);
+        }
+      } catch (err) {
+        console.error('Error in onAuthStateChange:', err);
         setIsLoading(false);
       }
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      clearTimeout(fallbackTimeout);
+      subscription.unsubscribe();
+    };
   }, []);
 
   const fetchBrandInfo = async (email: string) => {
