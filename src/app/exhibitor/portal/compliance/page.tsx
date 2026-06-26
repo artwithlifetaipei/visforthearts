@@ -967,15 +967,14 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                       若您不便使用線上電子簽章，可下載實體備忘錄，蓋公司大小章與簽署後，上傳掃描檔（PDF或圖片）存查。
                     </p>
                   </div>
-                  <button 
-                    type="button"
-                    onClick={() => {
-                      alert('已下載「2027_VIS_參展規範備忘錄暨行為守則_實體合約範本.pdf」');
-                    }}
+                  <a 
+                    href="https://drive.google.com/file/d/13VpAISbn3EvBSyBgNowZ3WYwWh4YwKA1/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
                     className="flex items-center gap-1 text-[11px] text-[#DFBA87] hover:text-white border border-[#C9A96E]/30 hover:border-[#C9A96E] rounded px-3 py-1.5 bg-[#C9A96E]/5 hover:bg-[#C9A96E]/20 transition-all font-medium whitespace-nowrap"
                   >
-                    <Download className="w-3.5 h-3.5" /> 下載實體合約範本
-                  </button>
+                    <Download className="w-3.5 h-3.5" /> 下載完整合約
+                  </a>
                 </div>
 
                 {physicalContractUrl ? (
