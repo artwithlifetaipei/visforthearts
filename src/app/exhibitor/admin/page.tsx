@@ -6,7 +6,8 @@ import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, FileText, Users, Image as ImageIcon, CheckCircle, XCircle, 
-  Download, Eye, Mail, Phone, Globe, Calendar, ExternalLink, Loader2, RefreshCw, ChevronDown, ChevronUp 
+  Download, Eye, Mail, Phone, Globe, Calendar, ExternalLink, Loader2, RefreshCw, ChevronDown, ChevronUp,
+  Signature, FileCheck
 } from 'lucide-react';
 import { ZONE_MAP } from '@/lib/exhibitorConstants';
 
@@ -511,27 +512,72 @@ export default function ExhibitorAdminPage() {
                     <thead>
                       <tr className="bg-white/[0.02] border-b border-white/5 text-neutral-400">
                         <th className="p-4 font-semibold tracking-wide">參展品牌 (Brand)</th>
-                        <th className="p-4 font-semibold tracking-wide">簽署代表姓名</th>
+                        <th className="p-4 font-semibold tracking-wide">簽署類型 / 代表姓名</th>
+                        <th className="p-4 font-semibold tracking-wide">身分證字號 / 授權聲明</th>
                         <th className="p-4 font-semibold tracking-wide">簽署時間</th>
-                        <th className="p-4 font-semibold tracking-wide">條款勾選狀態</th>
+                        <th className="p-4 font-semibold tracking-wide">特別條款與合約同意狀態</th>
                       </tr>
                     </thead>
                     <tbody>
                       {complianceList.map((comp) => (
                         <tr key={comp.id} className="border-b border-white/5 hover:bg-white/[0.005]">
                           <td className="p-4 font-medium text-[#DFBA87]">{comp.exhibitor_brands?.brand_name_zh || comp.brand_id}</td>
-                          <td className="p-4 font-medium">{comp.signed_name}</td>
-                          <td className="p-4 text-neutral-400 font-mono">
-                            {new Date(comp.signed_at).toLocaleString()}
+                          <td className="p-4">
+                            {comp.physical_contract_url ? (
+                              <span className="text-amber-400 bg-amber-400/10 px-2 py-0.5 rounded text-[10px] font-medium border border-amber-500/20">
+                                實體用印合約
+                              </span>
+                            ) : (
+                              <div className="font-medium text-white flex items-center gap-1.5">
+                                <Signature className="w-3.5 h-3.5 text-[#DFBA87]" /> {comp.signed_name || '無姓名'}
+                              </div>
+                            )}
                           </td>
-                          <td className="p-4 text-neutral-400">
-                            <div className="flex gap-2">
-                              {['裝修', '行為', '責任', '撤場', '合約'].map((k, i) => (
-                                <span key={i} className="bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-1.5 py-0.5 rounded text-[9px] uppercase font-bold font-mono">
-                                  ✓ {k}
-                                </span>
-                              ))}
-                            </div>
+                          <td className="p-4">
+                            {comp.physical_contract_url ? (
+                              <span className="text-neutral-500 font-light">（實體用印合約免填）</span>
+                            ) : (
+                              <div className="space-y-0.5">
+                                <div className="font-mono text-neutral-300">{comp.signer_id_number || '未提供'}</div>
+                                <div className="text-[10px] text-neutral-500">
+                                  {comp.is_legal_representative ? '✓ 法代/授權代表' : '✕ 未勾選法代'}
+                                </div>
+                              </div>
+                            )}
+                          </td>
+                          <td className="p-4 text-neutral-400 font-mono">
+                            {comp.signed_at ? new Date(comp.signed_at).toLocaleString() : '無時間'}
+                          </td>
+                          <td className="p-4">
+                            {comp.physical_contract_url ? (
+                              <a 
+                                href={comp.physical_contract_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer" 
+                                className="inline-flex items-center gap-1 text-[#DFBA87] hover:underline font-mono text-[11px]"
+                              >
+                                <FileText className="w-3.5 h-3.5" /> 下載用印掃描檔
+                              </a>
+                            ) : (
+                              <div className="flex flex-wrap gap-1.5 max-w-xs">
+                                {['基本守則', '保證金沒收', '古蹟賠償'].map((k, i) => {
+                                  let checked = false;
+                                  if (i === 0) checked = comp.rule_booth && comp.rule_conduct && comp.rule_liability && comp.rule_exit && comp.rule_ip;
+                                  if (i === 1) checked = comp.rule_deposit_forfeiture;
+                                  if (i === 2) checked = comp.rule_damage_compensation;
+                                  
+                                  return (
+                                    <span key={i} className={`px-1.5 py-0.5 rounded text-[9px] font-semibold border ${
+                                      checked 
+                                        ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+                                        : 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                                    }`}>
+                                      {checked ? '✓' : '✕'} {k}
+                                    </span>
+                                  );
+                                })}
+                              </div>
+                            )}
                           </td>
                         </tr>
                       ))}
