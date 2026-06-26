@@ -345,9 +345,14 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
           {/* Bottom privacy info */}
           <div className="border-t border-white/5 pt-4 mt-6 flex gap-2 text-[10px] text-neutral-500 font-light">
             <Lock className="w-3.5 h-3.5 flex-shrink-0 text-[#DFBA87]" />
-            <p>
-              大會承諾：您所提交的貴賓資訊將進行加密安全保護，僅供大會公關團隊用於本屆藝術節貴賓引導與後續客戶服務聯繫，絕不用於其他商業推廣。
-            </p>
+            <div className="space-y-1">
+              <p>
+                大會承諾：您所提交的貴賓資訊將進行加密安全保護，僅供大會公關團隊用於本屆藝術節貴賓引導與後續客戶服務聯繫，絕不用於其他商業推廣。
+              </p>
+              <p>
+                品牌需確認上傳之 VIP 聯絡資料，皆已取得當事人同意，授權提供予 VIS 大會作為本次展會票務與行銷聯繫使用。若因名單未經授權引發之法律糾紛，由品牌負擔全責。
+              </p>
+            </div>
           </div>
         </div>
 

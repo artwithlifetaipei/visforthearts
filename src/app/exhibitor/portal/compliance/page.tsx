@@ -52,6 +52,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
     rule_liability: false,
     rule_exit: false,
     rule_ip: false,
+    rule_return_inspection: false,
   });
 
   // Form states
@@ -63,6 +64,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
         rule_liability: signedData.rule_liability,
         rule_exit: signedData.rule_exit,
         rule_ip: signedData.rule_ip,
+        rule_return_inspection: signedData.rule_return_inspection || false,
       };
     }
     return {
@@ -71,6 +73,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
       rule_liability: false,
       rule_exit: false,
       rule_ip: false,
+      rule_return_inspection: false,
     };
   });
 
@@ -127,6 +130,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
               rule_liability: compliance.rule_liability,
               rule_exit: compliance.rule_exit,
               rule_ip: compliance.rule_ip,
+              rule_return_inspection: compliance.rule_return_inspection || false,
             });
             setSpecialDeposit(compliance.rule_deposit_forfeiture || false);
             setSpecialDamage(compliance.rule_damage_compensation || false);
@@ -176,6 +180,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
       rule_liability: true,
       rule_exit: true,
       rule_ip: true,
+      rule_return_inspection: true,
     };
     setRules(allTrue);
   };
@@ -307,6 +312,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
         rule_liability: rules.rule_liability,
         rule_exit: rules.rule_exit,
         rule_ip: rules.rule_ip,
+        rule_return_inspection: rules.rule_return_inspection,
         rule_deposit_forfeiture: specialDeposit,
         rule_damage_compensation: specialDamage,
         rule_refund_policy: specialRefund,
@@ -531,6 +537,33 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
           </div>
         </div>
       )
+    },
+    {
+      id: 'rule_return_inspection' as const,
+      title: '六、展位點交與損害賠償規範 Return & Damage Compensation Regulations',
+      summary: '規範展會結束後標準展台與硬體設備之點交、恢復原狀要求，以及受污損破壞時之損害賠償與保證金扣抵機制。',
+      content: (
+        <div className="space-y-4 text-neutral-300 text-xs font-light leading-relaxed">
+          <div>
+            <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
+              <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
+              展位點交與無損歸還
+            </h4>
+            <p className="text-neutral-400">
+              大會所提供之標準展台、展架、照明設備及附屬硬體，均屬於完整場復之規範範圍。展會結束後，參展單位必須於大會明訂之撤場時限內，將展位及所有大會提供之硬體設施清潔、無損並「恢復原狀」，交由大會營運團隊進行現場點交。
+            </p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
+              <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
+              損害賠償與保證金扣抵
+            </h4>
+            <p className="text-neutral-400">
+              若經撤場點交確認，大會提供之展台或硬體設備有受污、破損、擅自變更結構、遺失，或因未妥善防護導致古蹟場域受損之情事，主辦單位有權要求參展單位「照價賠償」或全額支付修繕整新費用。該筆賠償款項將逕自參展保證金中扣抵；若保證金餘額不足以支付實際損害賠償總額，主辦單位將另行開立請款單據追償差額，參展單位絕無異議。
+            </p>
+          </div>
+        </div>
+      )
     }
   ];
 
@@ -646,7 +679,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5">
             <div className="flex items-center gap-2">
               <CheckSquare className="w-4 h-4 text-[#DFBA87]" />
-              <span className="text-xs text-neutral-300 font-light">為了方便您快速閱讀與確認，您可以展開各段落查閱，或一鍵勾選五項基本規範。</span>
+              <span className="text-xs text-neutral-300 font-light">為了方便您快速閱讀與確認，您可以展開各段落查閱，或一鍵勾選六項基本規範。</span>
             </div>
             <button
               type="button"

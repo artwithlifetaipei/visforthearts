@@ -594,7 +594,7 @@ export default function ExhibitorAdminPage() {
                               <div className="flex flex-wrap gap-1.5 max-w-xs">
                                 {['基本守則', '保證金沒收', '古蹟賠償', '退費取消'].map((k, i) => {
                                   let checked = false;
-                                  if (i === 0) checked = comp.rule_booth && comp.rule_conduct && comp.rule_liability && comp.rule_exit && comp.rule_ip;
+                                  if (i === 0) checked = comp.rule_booth && comp.rule_conduct && comp.rule_liability && comp.rule_exit && comp.rule_ip && comp.rule_return_inspection;
                                   if (i === 1) checked = comp.rule_deposit_forfeiture;
                                   if (i === 2) checked = comp.rule_damage_compensation;
                                   if (i === 3) checked = comp.rule_refund_policy;
