@@ -138,7 +138,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         .maybeSingle();
 
       if (!data) {
-        // 2. Fallback check: check if there is an approved application for this email that hasn't had a brand created yet
+        // 2. Fallback: check if there is an approved application for this email
         const { data: approvedApp } = await supabase
           .from('exhibitor_applications')
           .select('*')
@@ -147,7 +147,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
           .maybeSingle();
 
         if (approvedApp) {
-          // Auto-heal: Insert brand record into exhibitor_brands
+          // Auto-heal: try to insert brand record
           const isMicro = approvedApp.booth_type === 'T';
           const { data: newBrand } = await supabase
             .from('exhibitor_brands')
@@ -165,6 +165,31 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
           if (newBrand) {
             data = newBrand;
+          } else {
+            // Insert may have failed due to RLS or duplicate — try upsert or fetch again
+            const { data: refetch } = await supabase
+              .from('exhibitor_brands')
+              .select('*')
+              .eq('portal_email', formattedEmail)
+              .maybeSingle();
+
+            if (refetch) {
+              data = refetch;
+            } else {
+              // Final fallback: build in-memory brand from approved application so portal renders
+              data = {
+                id: approvedApp.id,
+                application_id: approvedApp.id,
+                brand_name_zh: approvedApp.brand_name_zh,
+                brand_name_en: approvedApp.brand_name_en,
+                zone_id: approvedApp.zone_id,
+                booth_type: approvedApp.booth_type,
+                is_micro_exposure: isMicro,
+                portal_email: formattedEmail,
+                created_at: approvedApp.created_at,
+                _fallback: true,
+              };
+            }
           }
         }
       }
@@ -173,7 +198,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         setBrandData(data);
         sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(data));
       } else {
-        // If user is an admin but brand not found, auto-create a mock brand in DB so they can access and test
+        // Admin bypass: auto-create mock brand in DB
         if (ADMIN_EMAILS.includes(formattedEmail)) {
           const { data: newBrand } = await supabase
             .from('exhibitor_brands')
@@ -181,7 +206,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               brand_name_zh: '大會測試品牌 (管理員)',
               brand_name_en: 'VIS Admin Test Brand',
               zone_id: 'artsy',
-              booth_type: 'S01-S06',
+              booth_type: 'S01-03,S06-08',
               is_micro_exposure: false,
               portal_email: formattedEmail,
             })
@@ -192,13 +217,12 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
             setBrandData(newBrand);
             sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(newBrand));
           } else {
-            // Fallback mockup in-memory so layout doesn't crash or block
             const fallbackBrand = {
               id: '00000000-0000-0000-0000-000000000000',
               brand_name_zh: '大會測試品牌 (管理員)',
               brand_name_en: 'VIS Admin Test Brand',
               zone_id: 'artsy',
-              booth_type: 'S01-S06',
+              booth_type: 'S01-03,S06-08',
               is_micro_exposure: false,
               portal_email: formattedEmail,
             };
@@ -297,7 +321,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
           contact_email: demoEmail,
           contact_phone: '0988-123-456',
           zone_id: 'artsy',
-          booth_type: 'S01-S06',
+          booth_type: 'S01-03,S06-08',
           concept_brief: '融入東方古典意象的琉璃陳設展位。',
           status: 'approved',
           deposit_paid: true,

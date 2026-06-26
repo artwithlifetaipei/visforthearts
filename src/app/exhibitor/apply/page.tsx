@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Upload, CheckCircle2, ShieldCheck, X, FileText, Loader2 } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Upload, CheckCircle2, ShieldCheck, X, FileText, Loader2, Image as ImageIcon } from 'lucide-react';
 import { ALL_ZONES, DEPOSIT_AMOUNT, ZONE_MAP } from '@/lib/exhibitorConstants';
 import { supabase } from '@/lib/supabase';
 
@@ -33,10 +33,10 @@ export default function ExhibitorApplyPage() {
     website_url: '',
     instagram_url: '',
     zone_id: 'artsy', // 'artsy' | 'premier' | 'atelier'
-    booth_type: 'S01-S06', // specific booth code
-    zone_preference_1: '藝蕙品牌展區 - S7-8, S11-13 S 頂級位 (NT$45,000)',
-    zone_preference_2: '精鑑品牌展區 - M9-M15 M 精選位 (NT$42,000)',
-    zone_preference_3: '匠心藝藏品牌展區 - A-ENTRANCE A 入口旗艦位 (500×460cm 入口處兩側) (NT$108,000)',
+    booth_type: 'S01-03,S06-08', // specific booth code
+    zone_preference_1: '藝蕙品牌展區 - S01-03,S06-08 展台式展位 - S01-03,S06-08 (近主入口處) (NT$42,000)',
+    zone_preference_2: '精鑑品牌展區 - M9-M15 展台式展位 - M9 - M15 (離主入口最近) (NT$42,000)',
+    zone_preference_3: '匠心藝藏品牌展區 - A-ENTRANCE 500*460cm 獨立展位 - 入口處兩側 (NT$108,000)',
     concept_brief: '',
     deposit_proof_base64: '',
     deposit_proof_filename: '',
@@ -433,6 +433,23 @@ export default function ExhibitorApplyPage() {
                   2. 展區意向選擇 <span className="font-mono text-xs text-neutral-400 font-light ml-2">Exhibition Preference</span>
                 </h2>
 
+                {/* 展位平面參考圖 Floor Plan Reference */}
+                <div className="mb-8 bg-white border border-[#C9A96E]/20 p-4 rounded-none shadow-sm">
+                  <h3 className="text-xs font-semibold text-[#C9A96E] tracking-wider uppercase mb-3 flex items-center gap-2">
+                    <ImageIcon className="w-4 h-4" /> 展位平面參考圖 Exhibition Floor Plan Reference
+                  </h3>
+                  <div className="aspect-[2/1] w-full overflow-hidden border border-[#0D0D0D]/5 bg-[#FAF9F6] flex items-center justify-center relative">
+                    <img 
+                      src="/floor_plan_2027.png" 
+                      alt="VIS 2027 Exhibition Floor Plan" 
+                      className="w-full h-auto object-contain max-h-[450px]"
+                    />
+                  </div>
+                  <p className="text-[10px] text-[#0D0D0D]/40 font-light mt-2 text-center">
+                    * 中山堂展位配置圖：包含 KOL A/B 特展區、M01-M15 精鑑品牌展區及 S01-S15 藝蕙品牌展區。中央主走道寬 280cm，安全淨空 50cm，展位新間隔 65cm。
+                  </p>
+                </div>
+
                 {/* 展區規格與費用資訊 */}
                 <div className="mb-10">
                   <div className="grid lg:grid-cols-3 gap-6 mb-8">
@@ -453,6 +470,11 @@ export default function ExhibitorApplyPage() {
                             <p className="text-[9px] text-[#0D0D0D]/40 font-light tracking-widest uppercase mt-0.5">
                               {zone.nameEn}
                             </p>
+                            {zone.description && (
+                              <p className="text-[10px] text-[#0D0D0D]/70 font-light mt-2 leading-relaxed text-center">
+                                {zone.description}
+                              </p>
+                            )}
                             <div className="absolute top-0 right-0 font-serif-garamond text-neutral-200 text-2xl font-bold select-none opacity-40">
                               {zone.numeral}
                             </div>
@@ -466,6 +488,7 @@ export default function ExhibitorApplyPage() {
                                 <thead>
                                   <tr className="bg-[#FAF9F6] border-b border-[#0D0D0D]/10 text-[#0D0D0D]/60 font-mono text-[8px] uppercase tracking-wider">
                                     <th className="p-2 font-medium">類型 / 規格</th>
+                                    <th className="p-2 font-medium text-center">數量</th>
                                     <th className="p-2 font-medium text-right">單價 (NT$)</th>
                                   </tr>
                                 </thead>
@@ -478,6 +501,9 @@ export default function ExhibitorApplyPage() {
                                       <td className="p-2 font-light">
                                         <span className="font-semibold block text-[#0D0D0D] tracking-wide">{booth.code}</span>
                                         <span className="text-[8px] text-[#0D0D0D]/40 mt-0.5 block">{booth.dimensions ? `尺寸: ${booth.dimensions}` : booth.note}</span>
+                                      </td>
+                                      <td className="p-2 text-center font-mono font-medium text-[#0D0D0D]/75">
+                                        {booth.qty}
                                       </td>
                                       <td className="p-2 text-right font-mono font-medium text-[#C9A96E]">
                                         ${booth.price.toLocaleString()}
@@ -521,7 +547,7 @@ export default function ExhibitorApplyPage() {
                           </div>
 
                           {/* Note / Footer */}
-                          <div className="bg-[#FAF9F6] p-3 border border-[#0D0D0D]/5 text-[9px] text-[#0D0D0D]/50 font-light leading-relaxed mt-auto">
+                          <div className="bg-[#FAF9F6] p-3 border border-[#0D0D0D]/5 text-[9px] text-[#0D0D0D]/50 font-light leading-relaxed mt-auto whitespace-pre-line">
                             <span className="font-semibold text-[#C9A96E] block mb-0.5 text-[8px] uppercase tracking-wider">說明 NOTE</span>
                             {zone.note}
                           </div>
