@@ -256,7 +256,7 @@ export default function VIPDashboard() {
                     >
                         <span className="w-6 h-[1px] bg-current opacity-30 group-hover:w-8 transition-all duration-300"></span>
                         <span className="text-[8px] tracking-[0.3em] uppercase opacity-50 group-hover:opacity-100 transition-opacity">
-                            Add to Wallet
+                            加入行事曆 Add to calendar
                         </span>
                         <span className="w-6 h-[1px] bg-current opacity-30 group-hover:w-8 transition-all duration-300"></span>
                     </button>
@@ -357,7 +357,7 @@ export default function VIPDashboard() {
                                 ✕
                             </button>
 
-                            <h3 className="text-xs tracking-[0.4em] text-[#DFBA87] uppercase mb-8 font-medium">Add to Wallet / 錢包與提醒</h3>
+                            <h3 className="text-xs tracking-[0.4em] text-[#DFBA87] uppercase mb-8 font-medium">加入行事曆 Add to calendar</h3>
 
                             {/* Wallet Ticket Mockup */}
                             <div className="relative w-full max-w-[280px] bg-gradient-to-b from-[#1E1C18] to-[#0F0E0D] border-[0.5px] border-[#DFBA87]/30 p-6 flex flex-col items-center mb-8 shadow-2xl rounded-lg">
@@ -409,13 +409,7 @@ export default function VIPDashboard() {
                                 <span className="text-[8px] tracking-[0.4em] text-neutral-600 uppercase font-light">VIP Digital Key</span>
                             </div>
 
-                            {/* Wallet Guidelines */}
-                            <div className="w-full text-center space-y-4 mb-8">
-                                <p className="text-[11px] leading-[1.8] text-neutral-400 font-light tracking-wide px-4">
-                                    <strong className="text-white">📱 快速保存說明：</strong><br/>
-                                    請直接對上方卡片進行<strong>「螢幕截圖 (Screenshot)」</strong>，即可將專屬 QR Code 條碼保存在手機相簿中，於展覽現場向工作人員出示即可直接通關。
-                                </p>
-                            </div>
+
 
                             {/* Action Buttons */}
                             <div className="w-full space-y-4 px-4">

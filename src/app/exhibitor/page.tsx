@@ -472,7 +472,7 @@ export default function ExhibitorLandingPage() {
               onMouseEnter={() => setCursorHovered(true)} 
               onMouseLeave={() => setCursorHovered(false)}
             >
-              2027年簡章 PROSPECTUS
+              2027 簡章 2027 Guidelines
             </a>
             <button
               onClick={() => {
