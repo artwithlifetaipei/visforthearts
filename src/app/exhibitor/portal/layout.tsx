@@ -10,6 +10,11 @@ import {
   HelpCircle, ArrowRight, Sparkles, Loader2, CheckCircle2 
 } from 'lucide-react';
 
+const ADMIN_EMAILS = [
+  'artwithlifetaipei@gmail.com',
+  'ameliecykuo@gmail.com',
+];
+
 export default function ExhibitorPortalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -83,16 +88,82 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
   const fetchBrandInfo = async (email: string) => {
     try {
-      const { data, error } = await supabase
+      const formattedEmail = email.toLowerCase().trim();
+      
+      // 1. Check if brand exists in database
+      let { data, error } = await supabase
         .from('exhibitor_brands')
         .select('*')
-        .eq('portal_email', email.toLowerCase().trim())
+        .eq('portal_email', formattedEmail)
         .maybeSingle();
+
+      if (!data) {
+        // 2. Fallback check: check if there is an approved application for this email that hasn't had a brand created yet
+        const { data: approvedApp } = await supabase
+          .from('exhibitor_applications')
+          .select('*')
+          .eq('contact_email', formattedEmail)
+          .eq('status', 'approved')
+          .maybeSingle();
+
+        if (approvedApp) {
+          // Auto-heal: Insert brand record into exhibitor_brands
+          const isMicro = approvedApp.booth_type === 'T';
+          const { data: newBrand } = await supabase
+            .from('exhibitor_brands')
+            .insert({
+              application_id: approvedApp.id,
+              brand_name_zh: approvedApp.brand_name_zh,
+              brand_name_en: approvedApp.brand_name_en,
+              zone_id: approvedApp.zone_id,
+              booth_type: approvedApp.booth_type,
+              is_micro_exposure: isMicro,
+              portal_email: formattedEmail,
+            })
+            .select()
+            .maybeSingle();
+
+          if (newBrand) {
+            data = newBrand;
+          }
+        }
+      }
 
       if (data) {
         setBrandData(data);
       } else {
-        setBrandData(null);
+        // If user is an admin but brand not found, auto-create a mock brand in DB so they can access and test
+        if (ADMIN_EMAILS.includes(formattedEmail)) {
+          const { data: newBrand } = await supabase
+            .from('exhibitor_brands')
+            .insert({
+              brand_name_zh: '大會測試品牌 (管理員)',
+              brand_name_en: 'VIS Admin Test Brand',
+              zone_id: 'artsy',
+              booth_type: 'S01-S06',
+              is_micro_exposure: false,
+              portal_email: formattedEmail,
+            })
+            .select()
+            .maybeSingle();
+          
+          if (newBrand) {
+            setBrandData(newBrand);
+          } else {
+            // Fallback mockup in-memory so layout doesn't crash or block
+            setBrandData({
+              id: '00000000-0000-0000-0000-000000000000',
+              brand_name_zh: '大會測試品牌 (管理員)',
+              brand_name_en: 'VIS Admin Test Brand',
+              zone_id: 'artsy',
+              booth_type: 'S01-S06',
+              is_micro_exposure: false,
+              portal_email: formattedEmail,
+            });
+          }
+        } else {
+          setBrandData(null);
+        }
       }
     } catch (e) {
       console.error('Error fetching brand data:', e);
@@ -109,14 +180,30 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
     const formattedEmail = loginEmail.toLowerCase().trim();
 
-    // Check if email is in exhibitor_brands
-    const { data: allowed, error: checkError } = await supabase
+    // 1. Check if email is in exhibitor_brands
+    const { data: allowedBrand } = await supabase
       .from('exhibitor_brands')
-      .select('brand_name_zh')
+      .select('id')
       .eq('portal_email', formattedEmail)
       .maybeSingle();
 
+    let allowed = !!allowedBrand;
+
     if (!allowed) {
+      // 2. Also check if email exists as an approved application in exhibitor_applications
+      const { data: allowedApp } = await supabase
+        .from('exhibitor_applications')
+        .select('id')
+        .eq('contact_email', formattedEmail)
+        .eq('status', 'approved')
+        .maybeSingle();
+      
+      if (allowedApp) {
+        allowed = true;
+      }
+    }
+
+    if (!allowed && !ADMIN_EMAILS.includes(formattedEmail)) {
       setLoginMessage('此信箱尚未登錄為 2027 VIS 參展品牌。\n若您的品牌已通過首期評選，請洽大會秘書處確認登錄信箱。');
       setLoginLoading(false);
       return;
@@ -199,10 +286,6 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
       }
     }
 
-    // Now sign in with mock email (we use signInWithOtp but since it is local demo, we can just sign in as demo or sign out)
-    // Wait, the easiest way to log in without real email during local tests is to sign in via a dedicated admin credential or use supabase auth signInWithPassword if credentials exist,
-    // OR we can mock the user login by calling supabase.auth.signUp/signIn if password is set.
-    // For local convenience, let's register/login with password 'vis2027exhibitor' for this email.
     try {
       const { error: loginError } = await supabase.auth.signInWithPassword({
         email: demoEmail,
@@ -210,7 +293,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
       });
 
       if (loginError) {
-        // If password login fails (user does not exist or password mismatch), try creating the user
+        // If password login fails, try creating the user
         const { error: signUpError } = await supabase.auth.signUp({
           email: demoEmail,
           password: 'vis2027exhibitor',
@@ -272,31 +355,31 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
     ];
   };
 
-  const navItems = getNavItems();
-
-  // Loading Screen
+  // 1. Full Loading Screen
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-[#DFBA87]">
-        <div className="text-center">
-          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4" />
-          <p className="text-xs font-light tracking-[0.2em] uppercase">載入品牌專屬中心 Loading...</p>
+      <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center font-sans-outfit">
+        <div className="text-center space-y-4">
+          <Loader2 className="w-8 h-8 animate-spin text-[#DFBA87] mx-auto" />
+          <p className="text-xs text-neutral-500 font-light tracking-[0.2em] uppercase">載入品牌專屬中心 Loading...</p>
         </div>
       </div>
     );
   }
 
-  // Not Logged In - Show elegant dark login card
+  // 2. Unauthenticated state - Show Premium login screen
   if (!session) {
     return (
       <div className="min-h-screen bg-[#0D0D0D] flex flex-col p-6 font-sans-outfit text-white relative overflow-hidden justify-center items-center">
-        {/* Background glow */}
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top,#C9A96E1A,transparent_60%)] pointer-events-none" />
+        
+        {/* Decorative elements */}
+        <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#C9A96E]/5 rounded-full blur-3xl" />
+        <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#C9A96E]/5 rounded-full blur-3xl" />
 
-        <div className="w-full max-w-md bg-[#111111] border border-[#C9A96E]/20 p-8 rounded-xl relative z-10 shadow-2xl">
+        <div className="w-full max-w-md bg-[#111111] border border-white/5 p-8 rounded-xl relative z-10">
           <img 
             src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
-            alt="VIS Logo" 
+            alt="VIS" 
             className="h-10 mx-auto mb-8 filter invert brightness-200"
           />
           
@@ -450,50 +533,52 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         transform md:transform-none transition-transform duration-300 ease-in-out flex flex-col justify-between
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="p-6">
-          {/* Logo in desktop sidebar */}
-          <div className="hidden md:block mb-8">
-            <img 
-              src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
-              alt="VIS Logo" 
-              className="h-8 filter invert brightness-200"
-            />
-          </div>
-
-          {/* Brand Info Display Card */}
-          <div className="bg-white/5 border border-[#C9A96E]/10 rounded-lg p-4 mb-8">
-            <span className="text-[9px] uppercase tracking-widest text-[#C9A96E] font-semibold">參展商 BRAND</span>
-            <h3 className="font-serif-garamond text-base font-normal tracking-wide text-white truncate mt-1">
-              {brandData?.brand_name_zh}
-            </h3>
-            <p className="text-[9px] text-neutral-400 font-mono tracking-wider truncate uppercase">
-              {brandData?.booth_type} ({brandData?.zone_id === 'artsy' ? '藝蕙' : brandData?.zone_id === 'premier' ? '精鑑' : '匠心'})
+        <div className="p-6 space-y-8">
+          {/* Logo block */}
+          <div className="hidden md:block">
+            <Link href="/exhibitor/portal">
+              <img 
+                src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                alt="VIS" 
+                className="h-9 filter invert brightness-200"
+              />
+            </Link>
+            <p className="text-[9px] text-[#DFBA87] font-light tracking-[0.2em] uppercase mt-2">
+              Exhibitor Collaboration
             </p>
           </div>
 
-          {/* Nav List */}
-          <nav className="space-y-1.5">
-            {navItems.map((item) => {
-              const Icon = item.icon;
+          {/* Brand Info Display Card */}
+          <div className="bg-white/[0.02] border border-white/5 rounded p-4 space-y-2">
+            <span className="text-[9px] text-neutral-500 uppercase tracking-widest font-mono block">Current Brand</span>
+            <h3 className="text-sm font-semibold text-white tracking-wide">{brandData?.brand_name_zh}</h3>
+            <p className="text-[10px] text-neutral-400 font-light truncate">{brandData?.brand_name_en}</p>
+            <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#C9A96E]/10 border border-[#C9A96E]/20 text-[9px] text-[#DFBA87]">
+              <span>展位規格: {brandData?.booth_type}</span>
+            </div>
+          </div>
+
+          {/* Navigation Links */}
+          <nav className="space-y-2">
+            {getNavItems().map((item) => {
               const isActive = pathname === item.href;
-              
               if (item.disabled) {
                 return (
                   <div 
-                    key={item.href} 
-                    className="flex items-center justify-between p-3 rounded text-neutral-600 text-xs tracking-wider cursor-not-allowed select-none border border-transparent"
+                    key={item.href}
+                    className="flex items-center justify-between p-3 rounded text-xs tracking-wider border border-transparent text-neutral-600 cursor-not-allowed select-none bg-neutral-900/10"
                   >
                     <div className="flex items-center gap-3">
-                      <Icon className="w-4 h-4 opacity-50" />
+                      <item.icon className="w-4 h-4 text-neutral-700" />
                       <span>{item.name}</span>
                     </div>
                     {item.badge && (
-                      <span className="text-[8px] bg-neutral-900 border border-white/5 text-neutral-500 px-1.5 py-0.5 rounded uppercase font-semibold scale-90">{item.badge}</span>
+                      <span className="text-[8px] bg-neutral-800 text-neutral-500 px-1.5 py-0.5 rounded uppercase font-semibold">{item.badge}</span>
                     )}
                   </div>
                 );
               }
-
+              const Icon = item.icon;
               return (
                 <Link
                   key={item.href}
