@@ -184,6 +184,82 @@ export default function ExhibitorAdminPage() {
     }
   };
 
+  const getCurrentPreferenceNum = (app: any) => {
+    for (const num of [1, 2, 3]) {
+      const prefStr = num === 1 ? app.zone_preference_1 :
+                      num === 2 ? app.zone_preference_2 :
+                      app.zone_preference_3;
+      if (prefStr) {
+        const parsed = parsePreference(prefStr);
+        if (parsed && parsed.zone_id === app.zone_id && parsed.booth_type === app.booth_type) {
+          return num;
+        }
+      }
+    }
+    return 1; // Default fallback
+  };
+
+  const handleUpdateBoothAllocation = async (app: any, selectedPrefNum: number) => {
+    if (actionLoadingId) return;
+    setActionLoadingId(app.id);
+
+    try {
+      let chosenZoneId = app.zone_id;
+      let chosenBoothType = app.booth_type;
+
+      const prefStr = selectedPrefNum === 1 ? app.zone_preference_1 :
+                      selectedPrefNum === 2 ? app.zone_preference_2 :
+                      app.zone_preference_3;
+      
+      if (prefStr) {
+        const parsed = parsePreference(prefStr);
+        if (parsed) {
+          chosenZoneId = parsed.zone_id;
+          chosenBoothType = parsed.booth_type;
+        }
+      }
+
+      // 1. Update zone_id and booth_type in exhibitor_applications
+      const { error: appErr } = await supabase
+        .from('exhibitor_applications')
+        .update({ 
+          zone_id: chosenZoneId,
+          booth_type: chosenBoothType
+        })
+        .eq('id', app.id);
+
+      if (appErr) throw appErr;
+
+      // 2. Update zone_id and booth_type in exhibitor_brands
+      const isMicro = chosenBoothType === 'T';
+      const { error: brandErr } = await supabase
+        .from('exhibitor_brands')
+        .update({
+          zone_id: chosenZoneId,
+          booth_type: chosenBoothType,
+          is_micro_exposure: isMicro
+        })
+        .eq('application_id', app.id);
+
+      if (brandErr) throw brandErr;
+
+      // Clear local overrides to re-evaluate from DB data
+      setSelectedPrefs(prev => {
+        const updated = { ...prev };
+        delete updated[app.id];
+        return updated;
+      });
+
+      await loadAllAdminData();
+      alert(`「${app.brand_name_zh}」的展位已成功更新分配為第 ${selectedPrefNum} 志願 (${prefStr})！`);
+
+    } catch (err: any) {
+      alert(`更新展位分配失敗: ${err.message}`);
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
   // Action: Approve Application
   const handleApproveApplication = async (app: any) => {
     if (actionLoadingId) return;
@@ -530,26 +606,29 @@ export default function ExhibitorAdminPage() {
                                             if (!pref) return null;
                                             const parsed = parsePreference(pref);
                                             
-                                            let isSelected = false;
-                                            if (app.status === 'pending') {
-                                              isSelected = (selectedPrefs[app.id] || 1) === num;
-                                            } else if (app.status === 'approved') {
-                                              isSelected = parsed 
-                                                ? (parsed.zone_id === app.zone_id && parsed.booth_type === app.booth_type)
-                                                : num === 1;
-                                            }
+                                            const currentPrefNum = getCurrentPreferenceNum(app);
+                                            const isSelected = (selectedPrefs[app.id] !== undefined)
+                                              ? selectedPrefs[app.id] === num
+                                              : (app.status === 'approved' ? currentPrefNum === num : num === 1);
 
                                             return (
                                               <div 
                                                 key={num}
-                                                onClick={() => {
+                                                onClick={async () => {
                                                   if (app.status === 'pending') {
                                                     setSelectedPrefs(prev => ({ ...prev, [app.id]: num }));
+                                                  } else if (app.status === 'approved' && !isSelected) {
+                                                    const confirmChange = window.confirm(
+                                                      `是否確定要將「${app.brand_name_zh}」的分配展位變更為：\n` +
+                                                      `志願 ${num}: ${pref}？\n\n` +
+                                                      `這將即時更新參展商在前台/後台所看到的展位費（尾款）金額。`
+                                                    );
+                                                    if (confirmChange) {
+                                                      await handleUpdateBoothAllocation(app, num);
+                                                    }
                                                   }
                                                 }}
-                                                className={`flex items-center justify-between p-2.5 border transition-all ${
-                                                  app.status === 'pending' ? 'cursor-pointer' : 'cursor-default opacity-85'
-                                                } ${
+                                                className={`flex items-center justify-between p-2.5 border transition-all cursor-pointer ${
                                                   isSelected 
                                                     ? 'bg-[#C9A96E]/10 border-[#C9A96E] text-white font-medium' 
                                                     : 'bg-black/25 border-white/5 text-neutral-400 hover:border-white/10'

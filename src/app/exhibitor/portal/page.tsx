@@ -43,19 +43,22 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   useEffect(() => {
     const loadDashboardData = async () => {
       try {
-        let currentBrand = brand;
+        let currentBrand = null;
 
-        // If brand not passed down, get it from current session
+        // Fetch brand from current session to ensure we have the absolute latest data from DB
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user?.email) {
+          const { data } = await supabase
+            .from('exhibitor_brands')
+            .select('*')
+            .eq('portal_email', session.user.email.toLowerCase().trim())
+            .maybeSingle();
+          currentBrand = data;
+        }
+
+        // Fallback to cached state if session fetch fails (e.g. offline)
         if (!currentBrand) {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (session?.user?.email) {
-            const { data } = await supabase
-              .from('exhibitor_brands')
-              .select('*')
-              .eq('portal_email', session.user.email.toLowerCase().trim())
-              .maybeSingle();
-            currentBrand = data;
-          }
+          currentBrand = brand;
         }
 
         if (currentBrand) {
