@@ -7,7 +7,9 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 const ADMIN_EMAILS = [
     'artwithlifetaipei@gmail.com',
-    'ameliecykuo@gmail.com'
+    'ameliecykuo@gmail.com',
+    'amelie@theartpressasia.com',
+    'visvipteam@gmail.com'
 ];
 
 type CachedGuest = {
@@ -118,12 +120,19 @@ export default function StaffScannerPage() {
     };
 
     const handleAuthSuccess = async (userEmail: string) => {
+        const formattedEmail = userEmail.toLowerCase().trim();
         try {
             setIsAuthorized(true);
             setIsOnline(typeof navigator !== 'undefined' ? navigator.onLine : true);
             
-            // Auto-heal / configure password 'Kuo76443173' for artwithlifetaipei@gmail.com
-            if (userEmail.toLowerCase().trim() === 'artwithlifetaipei@gmail.com') {
+            // Auto-heal / configure password 'Kuo76443173' for admin & staff accounts
+            const AUTO_HEAL_EMAILS = [
+                'artwithlifetaipei@gmail.com',
+                'amelie@theartpressasia.com',
+                'visvipteam@gmail.com',
+                'ameliecykuo@gmail.com'
+            ];
+            if (AUTO_HEAL_EMAILS.includes(formattedEmail)) {
                 supabase.auth.updateUser({ password: 'Kuo76443173' })
                     .then(() => console.log('Scanner staff password synchronized in auth provider.'))
                     .catch((err) => console.log('Omitted auto password update:', err));
@@ -146,8 +155,8 @@ export default function StaffScannerPage() {
         }
     };
 
-    const handleSendMagicLink = async () => {
-        const email = loginEmail.trim();
+     const handleSendMagicLink = async () => {
+        const email = loginEmail.toLowerCase().trim();
         if (!email) {
             setLoginError('請先輸入大會工作人員帳號信箱。');
             return;
@@ -156,7 +165,7 @@ export default function StaffScannerPage() {
         setLoginError('');
 
         try {
-            if (!ADMIN_EMAILS.includes(email.toLowerCase())) {
+            if (!ADMIN_EMAILS.includes(email)) {
                 setLoginError('權限不足：此信箱非授權的大會現場工作人員。');
                 setIsSendingOtp(false);
                 return;
@@ -166,7 +175,7 @@ export default function StaffScannerPage() {
                 email: email,
                 options: {
                     emailRedirectTo: `${window.location.origin}/vip/scanner`,
-                    shouldCreateUser: false
+                    shouldCreateUser: true
                 }
             });
 
@@ -187,17 +196,20 @@ export default function StaffScannerPage() {
         setIsLoggingIn(true);
         setLoginError('');
 
+        const email = loginEmail.toLowerCase().trim();
+
         try {
             const { data, error } = await supabase.auth.signInWithPassword({
-                email: loginEmail.trim(),
+                email: email,
                 password: loginPassword
             });
 
             if (error) {
                 setLoginError(error.message === 'Invalid login credentials' ? '帳號或密碼輸入錯誤，請確認大會人員權限。' : error.message);
             } else if (data.user) {
-                if (ADMIN_EMAILS.includes(data.user.email ?? '')) {
-                    await handleAuthSuccess(data.user.email ?? '');
+                const userEmail = data.user.email?.toLowerCase().trim() ?? '';
+                if (ADMIN_EMAILS.includes(userEmail)) {
+                    await handleAuthSuccess(userEmail);
                 } else {
                     setLoginError('權限不足：此帳號非授權的大會現場工作人員。');
                     await supabase.auth.signOut();
