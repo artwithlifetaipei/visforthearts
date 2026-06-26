@@ -6,9 +6,32 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Users, UserPlus, Trash2, Mail, ShieldAlert, Lock, Info, Loader2 } from 'lucide-react';
 
 export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }) {
-  const [brand, setBrand] = useState<any>(parentBrand || null);
-  const [loading, setLoading] = useState(true);
-  const [vips, setVips] = useState<any[]>([]);
+  // Stale-While-Revalidate caching pattern for instant tab load (<3s)
+  const [brand, setBrand] = useState<any>(() => {
+    if (parentBrand) return parentBrand;
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('vis_portal_brand_data');
+        return saved ? JSON.parse(saved) : null;
+      } catch { return null; }
+    }
+    return null;
+  });
+
+  const [loading, setLoading] = useState(() => {
+    // If brand is loaded from sessionStorage, don't block the screen
+    return !brand;
+  });
+
+  const [vips, setVips] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem(`vis_portal_vip_list_${brand?.id}`);
+        return saved ? JSON.parse(saved) : [];
+      } catch { return []; }
+    }
+    return [];
+  });
   
   // Form input states
   const [surname, setSurname] = useState('');
@@ -17,11 +40,13 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formError, setFormError] = useState('');
 
+  // 30 or 50 based on zone ID 'atelier' ("III.匠心藝藏品牌展區")
+  const vipLimit = brand?.zone_id === 'atelier' ? 50 : 30;
+
   useEffect(() => {
     const loadBrandAndVips = async () => {
-      setLoading(true);
       try {
-        let currentBrand = parentBrand;
+        let currentBrand = brand;
         if (!currentBrand) {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user?.email) {
@@ -36,6 +61,7 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
 
         if (currentBrand) {
           setBrand(currentBrand);
+          sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(currentBrand));
           
           // Fetch VIP submissions for this brand
           const { data: list } = await supabase
@@ -44,7 +70,9 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
             .eq('brand_id', currentBrand.id)
             .order('created_at', { ascending: false });
           
-          setVips(list || []);
+          const vipList = list || [];
+          setVips(vipList);
+          sessionStorage.setItem(`vis_portal_vip_list_${currentBrand.id}`, JSON.stringify(vipList));
         }
       } catch (err) {
         console.error('Error fetching VIP list:', err);
@@ -59,6 +87,11 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
   const handleAddVip = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!brand || adding) return;
+
+    if (vips.length >= vipLimit) {
+      setFormError(`已達提報名額上限 (${vipLimit}位)。`);
+      return;
+    }
 
     // Validate email
     const trimmedEmail = email.toLowerCase().trim();
@@ -94,7 +127,9 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
           setFormError(`提報失敗: ${error.message}`);
         }
       } else {
-        setVips(prev => [data, ...prev]);
+        const updated = [data, ...vips];
+        setVips(updated);
+        sessionStorage.setItem(`vis_portal_vip_list_${brand.id}`, JSON.stringify(updated));
         setSurname('');
         setEmail('');
       }
@@ -118,7 +153,9 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
       if (error) {
         alert(`刪除失敗: ${error.message}`);
       } else {
-        setVips(prev => prev.filter(v => v.id !== id));
+        const updated = vips.filter(v => v.id !== id);
+        setVips(updated);
+        sessionStorage.setItem(`vis_portal_vip_list_${brand.id}`, JSON.stringify(updated));
       }
     } catch (ex) {
       console.error(ex);
@@ -177,11 +214,11 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
             模組 C — VIP 貴賓名單提報中心
           </h1>
           <p className="text-xs text-neutral-400 font-light mt-1">
-            一般參展品牌可免費提報 <strong className="text-[#DFBA87]">最多 30 位</strong> 貴賓，享有大會優先入場、專屬 VIP Lounge 2F 貴賓商談區及茶點禮遇。
+            一般參展品牌可免費提報 <strong className="text-[#DFBA87]">最多 {vipLimit} 位</strong> 貴賓，享有大會優先入場禮遇。
           </p>
         </div>
         <div className="bg-white/5 border border-white/5 px-4 py-2 rounded text-xs font-mono text-[#DFBA87]">
-          已提報 VIP 總數: {vips.length} / 30
+          已提報 VIP 總數: {vips.length} / {vipLimit}
         </div>
       </div>
 
@@ -207,7 +244,7 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
                 placeholder="例如：林 / Chen (僅限姓氏)"
                 className="w-full text-xs border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-3.5 py-2.5 outline-none text-white transition-colors"
                 required
-                disabled={vips.length >= 30}
+                disabled={vips.length >= vipLimit}
               />
             </div>
 
@@ -220,13 +257,13 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
                 placeholder="vip.contact@email.com"
                 className="w-full text-xs border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-3.5 py-2.5 outline-none text-white transition-colors"
                 required
-                disabled={vips.length >= 30}
+                disabled={vips.length >= vipLimit}
               />
             </div>
 
             <button
               type="submit"
-              disabled={adding || vips.length >= 30}
+              disabled={adding || vips.length >= vipLimit}
               className="w-full bg-[#C9A96E] hover:bg-[#B39359] disabled:bg-neutral-800 disabled:text-neutral-500 text-white py-2.5 rounded text-xs font-semibold tracking-wider transition-colors flex items-center justify-center gap-1.5"
             >
               {adding ? (

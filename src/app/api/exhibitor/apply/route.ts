@@ -7,9 +7,12 @@ export async function POST(request: NextRequest) {
     const {
       brand_name_zh,
       brand_name_en,
+      company_name_zh,
+      company_tax_id,
       contact_name,
       contact_email,
       contact_phone,
+      contact_address,
       website_url,
       instagram_url,
       zone_id,
@@ -23,8 +26,8 @@ export async function POST(request: NextRequest) {
     } = body;
 
     // Validate required fields
-    if (!brand_name_zh || !brand_name_en || !contact_name || !contact_email || !zone_id || !booth_type) {
-      return NextResponse.json({ success: false, error: '缺少必要欄位' }, { status: 400 });
+    if (!brand_name_zh || !brand_name_en || !contact_name || !contact_email || !zone_id || !booth_type || !contact_address) {
+      return NextResponse.json({ success: false, error: '缺少必要欄位（含聯繫地址）' }, { status: 400 });
     }
 
     let deposit_proof_url = '';
@@ -77,9 +80,12 @@ export async function POST(request: NextRequest) {
       .insert({
         brand_name_zh,
         brand_name_en,
+        company_name_zh: company_name_zh || null,
+        company_tax_id: company_tax_id || null,
         contact_name,
         contact_email,
         contact_phone,
+        contact_address,
         website_url,
         instagram_url,
         zone_id,

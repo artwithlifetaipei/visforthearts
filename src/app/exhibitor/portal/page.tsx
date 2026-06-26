@@ -10,9 +10,30 @@ import {
 } from 'lucide-react';
 
 export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?: any }) {
-  const [brand, setBrand] = useState<any>(parentBrand || null);
-  const [appData, setAppData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [brand, setBrand] = useState<any>(() => {
+    if (parentBrand) return parentBrand;
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('vis_portal_brand_data');
+        return saved ? JSON.parse(saved) : null;
+      } catch { return null; }
+    }
+    return null;
+  });
+
+  const [appData, setAppData] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem(`vis_portal_app_data_${brand?.id}`);
+        return saved ? JSON.parse(saved) : null;
+      } catch { return null; }
+    }
+    return null;
+  });
+
+  const [loading, setLoading] = useState(() => {
+    return !brand;
+  });
 
   // Module completion status states
   const [complianceSigned, setComplianceSigned] = useState(false);
@@ -21,9 +42,8 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
 
   useEffect(() => {
     const loadDashboardData = async () => {
-      setLoading(true);
       try {
-        let currentBrand = parentBrand;
+        let currentBrand = brand;
 
         // If brand not passed down, get it from current session
         if (!currentBrand) {
@@ -40,6 +60,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
 
         if (currentBrand) {
           setBrand(currentBrand);
+          sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(currentBrand));
 
           // Fetch all sub-module data in parallel to resolve waterfall
           const appPromise = currentBrand.application_id
@@ -77,10 +98,11 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             mediaPromise
           ]);
 
-          setAppData(app);
-          if (compliance) {
-            setComplianceSigned(true);
+          if (app) {
+            setAppData(app);
+            sessionStorage.setItem(`vis_portal_app_data_${currentBrand.id}`, JSON.stringify(app));
           }
+          setComplianceSigned(!!compliance);
           setVipCount(vipC);
           setMediaCount(mediaC);
         }

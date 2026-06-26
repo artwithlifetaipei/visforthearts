@@ -19,10 +19,31 @@ import {
 } from 'lucide-react';
 
 export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?: any }) {
-  const [brand, setBrand] = useState<any>(parentBrand || null);
-  const [loading, setLoading] = useState(true);
+  const [brand, setBrand] = useState<any>(() => {
+    if (parentBrand) return parentBrand;
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('vis_portal_brand_data');
+        return saved ? JSON.parse(saved) : null;
+      } catch { return null; }
+    }
+    return null;
+  });
+
+  const [loading, setLoading] = useState(() => {
+    return !brand;
+  });
+
   const [submitting, setSubmitting] = useState(false);
-  const [signedData, setSignedData] = useState<any>(null);
+  const [signedData, setSignedData] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem(`vis_portal_compliance_${brand?.id}`);
+        return saved ? JSON.parse(saved) : null;
+      } catch { return null; }
+    }
+    return null;
+  });
 
   // Expanded sections state
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -34,35 +55,47 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
   });
 
   // Form states
-  const [rules, setRules] = useState({
-    rule_booth: false,
-    rule_conduct: false,
-    rule_liability: false,
-    rule_exit: false,
-    rule_ip: false,
+  const [rules, setRules] = useState(() => {
+    if (signedData) {
+      return {
+        rule_booth: signedData.rule_booth,
+        rule_conduct: signedData.rule_conduct,
+        rule_liability: signedData.rule_liability,
+        rule_exit: signedData.rule_exit,
+        rule_ip: signedData.rule_ip,
+      };
+    }
+    return {
+      rule_booth: false,
+      rule_conduct: false,
+      rule_liability: false,
+      rule_exit: false,
+      rule_ip: false,
+    };
   });
 
   // New States for compliance requirements
-  const [specialDeposit, setSpecialDeposit] = useState(false);
-  const [specialDamage, setSpecialDamage] = useState(false);
-  const [signedName, setSignedName] = useState('');
-  const [signerIdNumber, setSignerIdNumber] = useState('');
-  const [isLegalRepresentative, setIsLegalRepresentative] = useState(false);
-  const [privacyConsent, setPrivacyConsent] = useState(false);
-  const [physicalContractUrl, setPhysicalContractUrl] = useState('');
+  const [specialDeposit, setSpecialDeposit] = useState(() => signedData?.rule_deposit_forfeiture || false);
+  const [specialDamage, setSpecialDamage] = useState(() => signedData?.rule_damage_compensation || false);
+  const [specialRefund, setSpecialRefund] = useState(() => signedData?.rule_refund_policy || false);
+  const [signedName, setSignedName] = useState(() => signedData?.signed_name || '');
+  const [signerIdNumber, setSignerIdNumber] = useState(() => signedData?.signer_id_number || '');
+  const [isLegalRepresentative, setIsLegalRepresentative] = useState(() => signedData?.is_legal_representative || false);
+  const [privacyConsent, setPrivacyConsent] = useState(() => signedData?.privacy_consent || false);
+  const [physicalContractUrl, setPhysicalContractUrl] = useState(() => signedData?.physical_contract_url || '');
   const [uploading, setUploading] = useState(false);
   
   // Scroll states for special clauses
-  const [scrolledDeposit, setScrolledDeposit] = useState(false);
-  const [scrolledDamage, setScrolledDamage] = useState(false);
+  const [scrolledDeposit, setScrolledDeposit] = useState(!!signedData);
+  const [scrolledDamage, setScrolledDamage] = useState(!!signedData);
+  const [scrolledRefund, setScrolledRefund] = useState(!!signedData);
 
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const loadCompliance = async () => {
-      setLoading(true);
       try {
-        let currentBrand = parentBrand;
+        let currentBrand = brand;
         if (!currentBrand) {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user?.email) {
@@ -77,6 +110,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
 
         if (currentBrand) {
           setBrand(currentBrand);
+          sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(currentBrand));
 
           const { data: compliance } = await supabase
             .from('exhibitor_compliance')
@@ -86,6 +120,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
           
           if (compliance) {
             setSignedData(compliance);
+            sessionStorage.setItem(`vis_portal_compliance_${currentBrand.id}`, JSON.stringify(compliance));
             setRules({
               rule_booth: compliance.rule_booth,
               rule_conduct: compliance.rule_conduct,
@@ -95,6 +130,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
             });
             setSpecialDeposit(compliance.rule_deposit_forfeiture || false);
             setSpecialDamage(compliance.rule_damage_compensation || false);
+            setSpecialRefund(compliance.rule_refund_policy || false);
             setSignedName(compliance.signed_name || '');
             setSignerIdNumber(compliance.signer_id_number || '');
             setIsLegalRepresentative(compliance.is_legal_representative || false);
@@ -104,6 +140,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
             // Set scrolled states to true since it is already loaded/signed
             setScrolledDeposit(true);
             setScrolledDamage(true);
+            setScrolledRefund(true);
           }
         }
       } catch (err) {
@@ -143,15 +180,17 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
     setRules(allTrue);
   };
 
-  const handleScroll = (type: 'deposit' | 'damage', e: React.UIEvent<HTMLDivElement>) => {
+  const handleScroll = (type: 'deposit' | 'damage' | 'refund', e: React.UIEvent<HTMLDivElement>) => {
     if (signedData) return;
     const target = e.currentTarget;
     // Check if scrolled to bottom (within 10px buffer)
     if (target.scrollHeight - target.scrollTop <= target.clientHeight + 10) {
       if (type === 'deposit') {
         setScrolledDeposit(true);
-      } else {
+      } else if (type === 'damage') {
         setScrolledDamage(true);
+      } else if (type === 'refund') {
+        setScrolledRefund(true);
       }
     }
   };
@@ -231,8 +270,8 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
         return;
       }
 
-      if (!specialDeposit || !specialDamage) {
-        setErrorMessage('請詳閱並勾選同意「保證金沒收機制」與「古蹟場地毀損賠償」兩項特別重大條款。');
+      if (!specialDeposit || !specialDamage || !specialRefund) {
+        setErrorMessage('請詳閱並勾選同意「保證金沒收機制」、「古蹟場地毀損賠償」與「參展費退費與展位取消規範」三項特別重大條款。');
         return;
       }
 
@@ -270,6 +309,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
         rule_ip: rules.rule_ip,
         rule_deposit_forfeiture: specialDeposit,
         rule_damage_compensation: specialDamage,
+        rule_refund_policy: specialRefund,
         signed_name: signedName.trim() || null,
         signer_id_number: signerIdNumber.trim() || null,
         is_legal_representative: isLegalRepresentative,
@@ -592,7 +632,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                 </div>
                 <div>
                   <span className="text-neutral-500 block text-[9px] uppercase tracking-wider mb-1">特別條款簽署 Special Clauses</span>
-                  <span className="text-emerald-400 font-medium">✓ 已同意重大條款 (A & B)</span>
+                  <span className="text-emerald-400 font-medium">✓ 已同意重大條款 (A, B & C)</span>
                 </div>
               </>
             )}
@@ -795,6 +835,57 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
               </div>
             </div>
 
+            {/* Special Clause C: Refund and cancellation policy */}
+            <div className="space-y-2.5">
+              <div className="flex justify-between items-center">
+                <span className="text-xs font-semibold text-neutral-200">特別條款 C：參展費退費與展位取消規範 Refund & Cancellation Policy</span>
+                <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${scrolledRefund ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25' : 'bg-neutral-800 text-neutral-400'}`}>
+                  {scrolledRefund ? '✓ 已解鎖 Unlocked' : '請向下滾動閱讀至底部'}
+                </span>
+              </div>
+              <div 
+                onScroll={(e) => handleScroll('refund', e)}
+                className="max-h-36 overflow-y-auto bg-black/40 border border-white/5 rounded-lg p-3.5 text-xs text-neutral-400 font-light leading-relaxed space-y-3 custom-scrollbar"
+              >
+                <p className="text-[#DFBA87] font-semibold">重要提示：本條款涉及參展費退費比例與展位取消規範，請務必詳閱。</p>
+                <div>
+                  <p className="font-semibold text-white">一、 退出通知之法定要件</p>
+                  <p className="pl-3">參展單位若因故主動要求退出本展會，必須以「書面形式（限雙方確認收訖之電子郵件或實體存證信函）」正式通知主辦單位。退款手續與級距之計算基準，概以主辦單位實際接收該書面通知之日期為準，未經雙方明文確認之口頭或通訊軟體告知皆不具效力。</p>
+                </div>
+                <div>
+                  <p className="font-semibold text-white">二、 參展費退費級距與損害賠償預定</p>
+                  <p className="pl-3">考量大會整體策展品質、二級古蹟場域之特殊規範及行銷資源之排他性，參展費退費標準依據退出時間點計算如下：</p>
+                  <ul className="list-disc pl-8 space-y-1 mt-1 text-neutral-300">
+                    <li>於正式開展日 120 天（含）前提出者： 退還已繳納參展費之 70%。</li>
+                    <li>於正式開展日 89 天至 60 天前提出者： 退還已繳納參展費之 30%。</li>
+                    <li>於正式開展日 59 天內（含）提出者： 鑒於展會之整體行銷公關宣傳、場地硬體規劃、公共安全安檢申報及行政管理資源均已全數投入。為彌補主辦單位之沉沒成本與營運損害，所繳交之參展費全數不予退還，轉作懲罰性違約金與損害賠償預定額。</li>
+                  </ul>
+                </div>
+                <div>
+                  <p className="font-semibold text-white">三、 展位重分配與權益保全</p>
+                  <p className="pl-3">若參展單位確認退出或因違規遭取消資格，主辦單位即刻收回該展位之使用權，並絕對保留該空間之重新分配、變更用途或遞補招商之權利。原參展單位不得對該展位之後續使用方式提出任何異議，亦不得以主辦單位已將展位另行轉售為由，主張扣抵或要求返還違約金。</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-3 pt-1">
+                <div 
+                  onClick={() => {
+                    if (scrolledRefund) {
+                      setSpecialRefund(!specialRefund);
+                    }
+                  }}
+                  className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all ${
+                    !scrolledRefund ? 'bg-neutral-800 border-neutral-700 cursor-not-allowed text-neutral-600' :
+                    specialRefund ? 'bg-rose-500/80 border-rose-500 text-white cursor-pointer' : 'border-white/20 hover:border-rose-500/50 cursor-pointer'
+                  }`}
+                >
+                  {specialRefund && <Check className="w-3.5 h-3.5 stroke-[3px]" />}
+                </div>
+                <label className={`text-xs select-none ${!scrolledRefund ? 'text-neutral-500 cursor-not-allowed' : 'text-neutral-300 cursor-pointer'}`}>
+                  本人已詳閱並同意「特別條款 C：參展費退費與展位取消規範」 *
+                </label>
+              </div>
+            </div>
+
           </div>
 
           {/* Combined Memorandum Signature Section */}
@@ -978,7 +1069,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={submitting || (!physicalContractUrl && (!allChecked || !specialDeposit || !specialDamage || signedName.trim() === '' || signerIdNumber.trim() === '' || !isLegalRepresentative)) || !privacyConsent}
+                  disabled={submitting || (!physicalContractUrl && (!allChecked || !specialDeposit || !specialDamage || !specialRefund || signedName.trim() === '' || signerIdNumber.trim() === '' || !isLegalRepresentative)) || !privacyConsent}
                   className="w-full bg-[#C9A96E] hover:bg-[#B39359] disabled:bg-neutral-800 disabled:text-neutral-500 text-white py-3 rounded-lg text-xs font-semibold tracking-[0.15em] uppercase transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed hover:shadow-lg hover:shadow-[#C9A96E]/10"
                 >
                   {submitting ? (

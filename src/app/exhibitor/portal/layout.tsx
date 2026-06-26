@@ -19,11 +19,42 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
   const pathname = usePathname();
   const router = useRouter();
   
-  // Auth state
-  const [session, setSession] = useState<any>(null);
-  const [userEmail, setUserEmail] = useState<string>('');
-  const [brandData, setBrandData] = useState<any>(null);
-  const [isLoading, setIsLoading] = useState(true);
+  // Auth state with sessionStorage caching for instant loads (<3s)
+  const [session, setSession] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('vis_portal_session');
+        return saved ? JSON.parse(saved) : null;
+      } catch { return null; }
+    }
+    return null;
+  });
+  
+  const [userEmail, setUserEmail] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return sessionStorage.getItem('vis_portal_user_email') || '';
+    }
+    return '';
+  });
+
+  const [brandData, setBrandData] = useState<any>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('vis_portal_brand_data');
+        return saved ? JSON.parse(saved) : null;
+      } catch { return null; }
+    }
+    return null;
+  });
+
+  const [isLoading, setIsLoading] = useState(() => {
+    if (typeof window !== 'undefined') {
+      const cached = sessionStorage.getItem('vis_portal_brand_data');
+      if (cached) return false; // bypass initial load screen if cache exists
+    }
+    return true;
+  });
+
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   // Login form state
@@ -40,18 +71,22 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
     }, 2500);
 
     const checkAuth = async () => {
-      setIsLoading(true);
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         
         if (currentSession) {
           setSession(currentSession);
+          sessionStorage.setItem('vis_portal_session', JSON.stringify(currentSession));
           const email = currentSession.user?.email || '';
           setUserEmail(email);
+          sessionStorage.setItem('vis_portal_user_email', email);
           await fetchBrandInfo(email);
         } else {
           setSession(null);
           setBrandData(null);
+          sessionStorage.removeItem('vis_portal_session');
+          sessionStorage.removeItem('vis_portal_user_email');
+          sessionStorage.removeItem('vis_portal_brand_data');
           setIsLoading(false);
         }
       } catch (err) {
@@ -66,12 +101,17 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
       try {
         if (event === 'SIGNED_IN' && currentSession) {
           setSession(currentSession);
+          sessionStorage.setItem('vis_portal_session', JSON.stringify(currentSession));
           const email = currentSession.user?.email || '';
           setUserEmail(email);
+          sessionStorage.setItem('vis_portal_user_email', email);
           await fetchBrandInfo(email);
         } else if (event === 'SIGNED_OUT') {
           setSession(null);
           setBrandData(null);
+          sessionStorage.removeItem('vis_portal_session');
+          sessionStorage.removeItem('vis_portal_user_email');
+          sessionStorage.removeItem('vis_portal_brand_data');
           setIsLoading(false);
         }
       } catch (err) {
@@ -131,6 +171,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
       if (data) {
         setBrandData(data);
+        sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(data));
       } else {
         // If user is an admin but brand not found, auto-create a mock brand in DB so they can access and test
         if (ADMIN_EMAILS.includes(formattedEmail)) {
@@ -149,9 +190,10 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
           
           if (newBrand) {
             setBrandData(newBrand);
+            sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(newBrand));
           } else {
             // Fallback mockup in-memory so layout doesn't crash or block
-            setBrandData({
+            const fallbackBrand = {
               id: '00000000-0000-0000-0000-000000000000',
               brand_name_zh: '大會測試品牌 (管理員)',
               brand_name_en: 'VIS Admin Test Brand',
@@ -159,10 +201,13 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               booth_type: 'S01-S06',
               is_micro_exposure: false,
               portal_email: formattedEmail,
-            });
+            };
+            setBrandData(fallbackBrand);
+            sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(fallbackBrand));
           }
         } else {
           setBrandData(null);
+          sessionStorage.removeItem('vis_portal_brand_data');
         }
       }
     } catch (e) {
@@ -321,6 +366,9 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    sessionStorage.removeItem('vis_portal_session');
+    sessionStorage.removeItem('vis_portal_user_email');
+    sessionStorage.removeItem('vis_portal_brand_data');
     router.push('/exhibitor');
   };
 

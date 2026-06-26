@@ -22,11 +22,31 @@ export default function ExhibitorAdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'applications' | 'vip' | 'compliance' | 'media'>('applications');
 
-  // Database States
-  const [applications, setApplications] = useState<any[]>([]);
-  const [vipList, setVipList] = useState<any[]>([]);
-  const [complianceList, setComplianceList] = useState<any[]>([]);
-  const [mediaAssets, setMediaAssets] = useState<any[]>([]);
+  // Database States — initialized from sessionStorage cache for instant re-load
+  const [applications, setApplications] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try { const c = sessionStorage.getItem('vis_admin_applications'); return c ? JSON.parse(c) : []; } catch { return []; }
+    }
+    return [];
+  });
+  const [vipList, setVipList] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try { const c = sessionStorage.getItem('vis_admin_viplist'); return c ? JSON.parse(c) : []; } catch { return []; }
+    }
+    return [];
+  });
+  const [complianceList, setComplianceList] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try { const c = sessionStorage.getItem('vis_admin_compliance'); return c ? JSON.parse(c) : []; } catch { return []; }
+    }
+    return [];
+  });
+  const [mediaAssets, setMediaAssets] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try { const c = sessionStorage.getItem('vis_admin_media'); return c ? JSON.parse(c) : []; } catch { return []; }
+    }
+    return [];
+  });
   
   // UI helper states
   const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
@@ -37,61 +57,73 @@ export default function ExhibitorAdminPage() {
   // Authenticate Admin
   useEffect(() => {
     const checkAdmin = async () => {
-      setIsLoading(true);
+      // If we already have cached data, show UI immediately (isLoading=true only on cold start)
+      const hasCachedData = typeof window !== 'undefined' && !!sessionStorage.getItem('vis_admin_applications');
+      if (!hasCachedData) setIsLoading(true);
+
       const { data: { session } } = await supabase.auth.getSession();
       
       if (!session || !ADMIN_EMAILS.includes(session.user?.email || '')) {
-        // Redirect if not logged in as admin
-        // For development/demo, we can add a bypass or simple notice
-        // Let's check if the user is a logged-in dev, but redirecting to /exhibitor/portal is safer if not auth
-        // To allow local inspection, we'll check if email matches.
         setIsAuthorized(false);
         router.push('/exhibitor/portal');
-      } else {
-        setIsAuthorized(true);
-        await loadAllAdminData();
+        setIsLoading(false);
+        return;
       }
+
+      setIsAuthorized(true);
       setIsLoading(false);
+      // Load data in background (non-blocking on revisit)
+      loadAllAdminData();
     };
 
     checkAdmin();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router]);
 
   const loadAllAdminData = async () => {
     try {
-      // 1. Fetch Applications
-      const { data: apps } = await supabase
-        .from('exhibitor_applications')
-        .select('*')
-        .order('created_at', { ascending: false });
-      setApplications(apps || []);
+      // Parallel fetch all 4 data sources simultaneously
+      const [
+        { data: apps },
+        { data: vips },
+        { data: compliances },
+        { data: media },
+      ] = await Promise.all([
+        supabase
+          .from('exhibitor_applications')
+          .select('*')
+          .order('created_at', { ascending: false }),
+        supabase
+          .from('exhibitor_vip_submissions')
+          .select('*')
+          .order('brand_name_zh', { ascending: true }),
+        supabase
+          .from('exhibitor_compliance')
+          .select('*, exhibitor_brands(brand_name_zh, brand_name_en)')
+          .order('signed_at', { ascending: false }),
+        supabase
+          .from('exhibitor_media_assets')
+          .select('*, exhibitor_brands(brand_name_zh, brand_name_en)')
+          .order('created_at', { ascending: false }),
+      ]);
 
-      // 2. Fetch VIP Submissions
-      const { data: vips } = await supabase
-        .from('exhibitor_vip_submissions')
-        .select('*')
-        .order('brand_name_zh', { ascending: true });
-      setVipList(vips || []);
+      const appData = apps || [];
+      const vipData = vips || [];
+      const complianceData = compliances || [];
+      const mediaData = media || [];
 
-      // 3. Fetch Compliance
-      const { data: compliances } = await supabase
-        .from('exhibitor_compliance')
-        .select(`
-          *,
-          exhibitor_brands(brand_name_zh, brand_name_en)
-        `)
-        .order('signed_at', { ascending: false });
-      setComplianceList(compliances || []);
+      setApplications(appData);
+      setVipList(vipData);
+      setComplianceList(complianceData);
+      setMediaAssets(mediaData);
 
-      // 4. Fetch Media Assets
-      const { data: media } = await supabase
-        .from('exhibitor_media_assets')
-        .select(`
-          *,
-          exhibitor_brands(brand_name_zh, brand_name_en)
-        `)
-        .order('created_at', { ascending: false });
-      setMediaAssets(media || []);
+      // Cache results in sessionStorage for instant next-visit load
+      try {
+        sessionStorage.setItem('vis_admin_applications', JSON.stringify(appData));
+        sessionStorage.setItem('vis_admin_viplist', JSON.stringify(vipData));
+        sessionStorage.setItem('vis_admin_compliance', JSON.stringify(complianceData));
+        sessionStorage.setItem('vis_admin_media', JSON.stringify(mediaData));
+      } catch { /* quota exceeded — ignore */ }
 
     } catch (err) {
       console.error('Error loading admin dashboard:', err);
@@ -560,11 +592,12 @@ export default function ExhibitorAdminPage() {
                               </a>
                             ) : (
                               <div className="flex flex-wrap gap-1.5 max-w-xs">
-                                {['基本守則', '保證金沒收', '古蹟賠償'].map((k, i) => {
+                                {['基本守則', '保證金沒收', '古蹟賠償', '退費取消'].map((k, i) => {
                                   let checked = false;
                                   if (i === 0) checked = comp.rule_booth && comp.rule_conduct && comp.rule_liability && comp.rule_exit && comp.rule_ip;
                                   if (i === 1) checked = comp.rule_deposit_forfeiture;
                                   if (i === 2) checked = comp.rule_damage_compensation;
+                                  if (i === 3) checked = comp.rule_refund_policy;
                                   
                                   return (
                                     <span key={i} className={`px-1.5 py-0.5 rounded text-[9px] font-semibold border ${

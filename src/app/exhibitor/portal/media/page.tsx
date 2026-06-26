@@ -6,18 +6,39 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ImageIcon, Upload, Trash2, FileImage, Lock, Info, Loader2, Image as ImageIcon2 } from 'lucide-react';
 
 export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any }) {
-  const [brand, setBrand] = useState<any>(parentBrand || null);
-  const [loading, setLoading] = useState(true);
-  const [assets, setAssets] = useState<any[]>([]);
+  const [brand, setBrand] = useState<any>(() => {
+    if (parentBrand) return parentBrand;
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem('vis_portal_brand_data');
+        return saved ? JSON.parse(saved) : null;
+      } catch { return null; }
+    }
+    return null;
+  });
+
+  const [loading, setLoading] = useState(() => {
+    return !brand;
+  });
+
+  const [assets, setAssets] = useState<any[]>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = sessionStorage.getItem(`vis_portal_media_assets_${brand?.id}`);
+        return saved ? JSON.parse(saved) : [];
+      } catch { return []; }
+    }
+    return [];
+  });
+
   const [uploading, setUploading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
   useEffect(() => {
     const loadBrandAndAssets = async () => {
-      setLoading(true);
       try {
-        let currentBrand = parentBrand;
+        let currentBrand = brand;
         if (!currentBrand) {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user?.email) {
@@ -32,6 +53,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
 
         if (currentBrand) {
           setBrand(currentBrand);
+          sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(currentBrand));
 
           // Fetch media assets for this brand
           const { data: list } = await supabase
@@ -40,10 +62,12 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
             .eq('brand_id', currentBrand.id)
             .order('created_at', { ascending: false });
           
-          setAssets(list || []);
+          const mediaList = list || [];
+          setAssets(mediaList);
+          sessionStorage.setItem(`vis_portal_media_assets_${currentBrand.id}`, JSON.stringify(mediaList));
         }
       } catch (err) {
-        console.error('Error fetching assets:', err);
+        console.error('Error fetching media list:', err);
       } finally {
         setLoading(false);
       }

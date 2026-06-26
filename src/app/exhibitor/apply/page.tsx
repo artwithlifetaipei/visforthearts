@@ -24,9 +24,12 @@ export default function ExhibitorApplyPage() {
   const [formData, setFormData] = useState({
     brand_name_zh: '',
     brand_name_en: '',
+    company_name_zh: '',
+    company_tax_id: '',
     contact_name: '',
     contact_email: '',
     contact_phone: '',
+    contact_address: '',
     website_url: '',
     instagram_url: '',
     zone_id: 'artsy', // 'artsy' | 'premier' | 'atelier'
@@ -120,7 +123,8 @@ export default function ExhibitorApplyPage() {
         formData.brand_name_en.trim() !== '' &&
         formData.contact_name.trim() !== '' &&
         formData.contact_email.trim() !== '' &&
-        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email)
+        /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.contact_email) &&
+        formData.contact_address.trim() !== ''
       );
     }
     if (currentStep === 2) {
@@ -262,7 +266,7 @@ export default function ExhibitorApplyPage() {
               發布第一階段評選結果通知至您的聯繫信箱。
             </p>
             <div className="border-t border-[#0D0D0D]/5 pt-6 flex flex-col items-center gap-2">
-              <p className="text-xs text-[#0D0D0D]/50">大會工作小組將主動與您對接後續行政與古蹟策展事宜</p>
+              <p className="text-xs text-[#0D0D0D]/50">若是成功入選後，大會工作小組將主動與您對接後續行政與古蹟策展事宜</p>
               <Link 
                 href="/"
                 className="mt-4 bg-[#0D0D0D] hover:bg-neutral-800 text-white font-medium text-xs tracking-widest uppercase px-6 py-3 rounded transition-colors"
@@ -315,6 +319,30 @@ export default function ExhibitorApplyPage() {
                       placeholder="e.g. Lan Hui Atelier"
                       className="w-full text-sm border border-[#0D0D0D]/10 focus:border-[#C9A96E] rounded px-4 py-2.5 outline-none bg-white/50 transition-colors"
                       required
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/70 uppercase mb-2">公司行號（中文）</label>
+                    <input 
+                      type="text" 
+                      name="company_name_zh"
+                      value={formData.company_name_zh}
+                      onChange={handleTextChange}
+                      placeholder="例如：台灣藝術文化有限公司"
+                      className="w-full text-sm border border-[#0D0D0D]/10 focus:border-[#C9A96E] rounded px-4 py-2.5 outline-none bg-white/50 transition-colors"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/70 uppercase mb-2">公司統一編號（統編）</label>
+                    <input 
+                      type="text" 
+                      name="company_tax_id"
+                      value={formData.company_tax_id}
+                      onChange={handleTextChange}
+                      placeholder="例如：12345678（興趣於台灣實體公司填寫）"
+                      className="w-full text-sm border border-[#0D0D0D]/10 focus:border-[#C9A96E] rounded px-4 py-2.5 outline-none bg-white/50 transition-colors font-mono"
                     />
                   </div>
 
@@ -380,7 +408,21 @@ export default function ExhibitorApplyPage() {
                       className="w-full text-sm border border-[#0D0D0D]/10 focus:border-[#C9A96E] rounded px-4 py-2.5 outline-none bg-white/50 transition-colors"
                     />
                   </div>
+
+                  <div className="md:col-span-2">
+                    <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/70 uppercase mb-2">聯繫地址 *</label>
+                    <input 
+                      type="text" 
+                      name="contact_address"
+                      value={formData.contact_address}
+                      onChange={handleTextChange}
+                      placeholder="例如：台北市信義區市民大道二段 XX 號 X 樓"
+                      className="w-full text-sm border border-[#0D0D0D]/10 focus:border-[#C9A96E] rounded px-4 py-2.5 outline-none bg-white/50 transition-colors"
+                      required
+                    />
+                  </div>
                 </div>
+
               </div>
             )}
 
@@ -772,6 +814,18 @@ export default function ExhibitorApplyPage() {
                       <span className="text-[#0D0D0D]/40 font-sans tracking-wide">品牌名稱 Brand</span>
                       <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.brand_name_zh} ({formData.brand_name_en})</span>
                     </div>
+                    {formData.company_name_zh && (
+                      <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
+                        <span className="text-[#0D0D0D]/40 font-sans tracking-wide">公司行號 Company</span>
+                        <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.company_name_zh}</span>
+                      </div>
+                    )}
+                    {formData.company_tax_id && (
+                      <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
+                        <span className="text-[#0D0D0D]/40 font-sans tracking-wide">統一編號 Tax ID</span>
+                        <span className="col-span-2 font-medium text-[#0D0D0D] font-mono">{formData.company_tax_id}</span>
+                      </div>
+                    )}
                     <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
                       <span className="text-[#0D0D0D]/40 font-sans tracking-wide">負責聯絡人 Contact</span>
                       <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.contact_name}</span>
@@ -786,6 +840,10 @@ export default function ExhibitorApplyPage() {
                         <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.contact_phone}</span>
                       </div>
                     )}
+                    <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
+                      <span className="text-[#0D0D0D]/40 font-sans tracking-wide">聯繫地址 Address</span>
+                      <span className="col-span-2 font-medium text-[#0D0D0D]">{formData.contact_address}</span>
+                    </div>
                     <div className="grid grid-cols-3 border-b border-[#0D0D0D]/5 pb-2">
                       <span className="text-[#0D0D0D]/40 font-sans tracking-wide">擬參展展區 Sector</span>
                       <span className="col-span-2 font-medium text-[#C9A96E]">{selectedZone?.sectorLabel} — {selectedZone?.nameZh}</span>
