@@ -66,36 +66,56 @@ export default function VIPLoginPage() {
         setIsLoading(true);
         setMessage('');
 
-        // Step 1: Check if email is on the VIP allowlist
-        const { data: allowed, error: checkError } = await supabase
-            .from('vip_allowlist')
-            .select('email')
-            .eq('email', email.toLowerCase().trim())
-            .single();
+        const formattedEmail = email.toLowerCase().trim();
 
-        if (checkError || !allowed) {
-            // Not on the list — show an elegant, on-brand message
-            setMessage('此信箱尚未在 VIS 貴賓名單中。\n如您有任何疑問，歡迎與 visvipteam@gmail.com 聯繫。');
+        try {
+            // Step 1: Check if email is on the VIP allowlist
+            const { data: allowed, error: checkError } = await supabase
+                .from('vip_allowlist')
+                .select('email')
+                .eq('email', formattedEmail)
+                .maybeSingle();
+
+            if (checkError) {
+                console.error('VIP Allowlist check database error:', checkError);
+                setMessage(`資料庫驗證失敗，請稍後再試。Error: ${checkError.message}`);
+                setIsLoading(false);
+                return;
+            }
+
+            if (!allowed) {
+                // Not on the list — show an elegant, on-brand message
+                setMessage('此信箱尚未在 VIS 貴賓名單中。\n如您有任何疑問，歡迎與 visvipteam@gmail.com 聯繫。');
+                setIsLoading(false);
+                return;
+            }
+
+            // Step 2: Email is approved — send the magic link (OTP)
+            const { error } = await supabase.auth.signInWithOtp({
+                email: formattedEmail,
+                options: {
+                    emailRedirectTo: `${window.location.origin}/vip/onboarding`,
+                    shouldCreateUser: true, // This ensures new users are created AND sent the Magic Link template
+                },
+            });
+
+            if (error) {
+                console.error('OTP Send error:', error);
+                if (error.status === 429 || error.message.includes('rate limit') || error.message.includes('once every 60 seconds')) {
+                    setMessage('發送過於頻繁，請於 60 秒後再試。');
+                } else {
+                    setMessage(`發送失敗，請稍後再試。Error: ${error.message}`);
+                }
+            } else {
+                setIsSent(true);
+                setMessage('專屬邀請連結已發送至您的信箱，請查收。');
+            }
+        } catch (err: any) {
+            console.error('Unexpected error during VIP login:', err);
+            setMessage(`發生非預期錯誤：${err.message || err}`);
+        } finally {
             setIsLoading(false);
-            return;
         }
-
-        // Step 2: Email is approved — send the magic link (OTP)
-        const { error } = await supabase.auth.signInWithOtp({
-            email: email,
-            options: {
-                emailRedirectTo: `${window.location.origin}/vip/onboarding`,
-                shouldCreateUser: true, // This ensures new users are created AND sent the Magic Link template
-            },
-        });
-
-        if (error) {
-            setMessage(`Error: ${error.message}`);
-        } else {
-            setIsSent(true);
-            setMessage('專屬邀請連結已發送至您的信箱，請查收。');
-        }
-        setIsLoading(false);
     };
 
     return (

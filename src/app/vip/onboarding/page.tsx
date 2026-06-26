@@ -42,8 +42,8 @@ export default function OnboardingPage() {
                 return;
             }
 
-            // Auto-heal password for scanner staff account
-            if (email === 'artwithlifetaipei@gmail.com') {
+            // Auto-heal password for scanner staff and admin/amelie account
+            if (email === 'artwithlifetaipei@gmail.com' || email === 'amelie@theartpressasia.com') {
                 supabase.auth.updateUser({ password: 'Kuo76443173' }).catch(() => {});
             }
 

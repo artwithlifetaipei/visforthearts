@@ -831,7 +831,7 @@ export default function ExhibitorApplyPage() {
                     </div>
                     <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
                       <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">預計單價 Stall Price</span>
-                      <span className="col-span-2 font-semibold text-[#0D0D0D]">NT$ {selectedBooth?.price.toLocaleString()} (不含稅 exclusive of tax)</span>
+                      <span className="col-span-2 font-semibold text-[#0D0D0D]">NT$ {selectedBooth?.price?.toLocaleString() || '—'} (不含稅 exclusive of tax)</span>
                     </div>
                     <div className="grid grid-cols-3 border-b border-[#0D0D0D]/10 pb-2">
                       <span className="text-[#0D0D0D]/75 font-sans font-medium tracking-wide">保證金狀態 Deposit</span>
