@@ -117,7 +117,10 @@ export default function ExhibitorAdminPage() {
 
       const { data: { session } } = await supabase.auth.getSession();
       
-      if (!session || !ADMIN_EMAILS.includes(session.user?.email || '')) {
+      const userEmail = (session.user?.email || '').toLowerCase().trim();
+      const isAdmin = ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(userEmail);
+
+      if (!session || !isAdmin) {
         setIsAuthorized(false);
         router.push('/exhibitor/portal');
         setIsLoading(false);

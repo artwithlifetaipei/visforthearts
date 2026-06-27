@@ -97,7 +97,7 @@ export default function ExhibitorLandingPage() {
 
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: email.toLowerCase().trim(),
         password,
       });
 
@@ -128,7 +128,7 @@ export default function ExhibitorLandingPage() {
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email,
+        email: email.toLowerCase().trim(),
         password,
       });
 
@@ -152,7 +152,7 @@ export default function ExhibitorLandingPage() {
 
     try {
       const { data, error } = await supabase.auth.signInWithPassword({
-        email: modalEmail,
+        email: modalEmail.toLowerCase().trim(),
         password: modalPassword,
       });
 
