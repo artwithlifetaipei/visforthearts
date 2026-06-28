@@ -427,7 +427,7 @@ export default function ExhibitorLandingPage() {
           transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="text-base md:text-lg max-w-3xl text-[#0D0D0D]/85 font-light leading-relaxed tracking-wider mb-10 font-serif-garamond italic"
         >
-          不斷地聚集著品味人士所建構而成的高質量場域，VIS 不只是一個博覽會，<br />而是一個最適合「高客單價品牌」的導客解決方案。
+          作為持續聚集著品味人士所建構而成的場域，<br />在台灣，VIS 不只是一個博覽會，<br />而是一個最適合「高客單價品牌」的導客解決方案。
         </motion.p>
         
         {/* Countdown Timer & Hero CTA Buttons Side by Side for balanced landscape layout */}

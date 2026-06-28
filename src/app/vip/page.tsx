@@ -30,7 +30,7 @@ export default function VIPLoginPage() {
                 const { data: allowed, error } = await supabase
                     .from('vip_allowlist')
                     .select('email')
-                    .eq('email', email)
+                    .ilike('email', email)
                     .maybeSingle();
                 
                 if (allowed) {
@@ -73,7 +73,7 @@ export default function VIPLoginPage() {
             const { data: allowed, error: checkError } = await supabase
                 .from('vip_allowlist')
                 .select('email')
-                .eq('email', formattedEmail)
+                .ilike('email', formattedEmail)
                 .maybeSingle();
 
             if (checkError) {
