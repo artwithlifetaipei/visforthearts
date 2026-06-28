@@ -456,7 +456,9 @@ export default function LandingPage() {
                     <div className="exhibit-item intro">
                         <h2 className="exhibit-title">EXHIBITION <span>參展</span></h2>
                         <p className="exhibit-intro-zh">
-                            不斷地聚集著品味人士所建構而成的高質量場域，VIS 不只是一個博覽會，<br />而是一個最適合「高客單價品牌」的導客解決方案。
+                            作為持續聚集著品味人士所建構而成的場域，<br />
+                            在台灣，VIS 不只是一個博覽會，<br />
+                            而是一個最適合「高客單價品牌」的<span className="whitespace-nowrap">導客解決方案。</span>
                         </p>
                         <p className="exhibit-intro-en">
                             More than a fair, but a purposefully architected space for intellectual and aesthetic elevation.
