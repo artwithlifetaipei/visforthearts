@@ -47,6 +47,23 @@ export default function ExhibitorApplyPage() {
   // Check auth session
   useEffect(() => {
     const checkAuth = async () => {
+      // Optimistic Check: If auth token exists in localStorage, skip loading overlay immediately
+      if (typeof window !== 'undefined') {
+        try {
+          let hasToken = false;
+          for (let i = 0; i < localStorage.length; i++) {
+            const key = localStorage.key(i);
+            if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+              hasToken = true;
+              break;
+            }
+          }
+          if (hasToken) {
+            setAuthChecking(false);
+          }
+        } catch (e) {}
+      }
+
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
@@ -191,9 +208,7 @@ export default function ExhibitorApplyPage() {
     );
   }
 
-  if (!session) {
-    return null; // Will redirect
-  }
+
 
   return (
     <div className="min-h-screen relative bg-[#FAF9F6] text-[#0D0D0D] font-sans-outfit selection:bg-[#C9A96E] selection:text-white pb-20">
