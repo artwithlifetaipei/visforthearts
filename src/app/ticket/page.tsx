@@ -345,9 +345,12 @@ export default function TicketRegistrationPage() {
                                             return (
                                                 <div
                                                     key={s.id}
-                                                    className={`border rounded-none p-4 transition-all ${
+                                                    onClick={() => {
+                                                        if (!isFull) setSelectedSlotId(s.id);
+                                                    }}
+                                                    className={`border rounded-none p-4 transition-all cursor-pointer ${
                                                         isFull
-                                                            ? 'border-neutral-100 bg-neutral-50/40 text-neutral-400'
+                                                            ? 'border-neutral-100 bg-neutral-50/40 text-neutral-400 cursor-not-allowed'
                                                             : isSelected
                                                             ? 'border-[#C9A96E] bg-[#C9A96E]/5'
                                                             : 'border-neutral-200 bg-white/60 hover:border-[#C9A96E]/40'
