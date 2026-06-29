@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 
+export const dynamic = 'force-dynamic';
+
 type BrandEntry = {
     id: string;
     name_zh: string;
@@ -184,6 +186,32 @@ export default function TicketRegistrationPage() {
             setIsSubmittingWaitlist(false);
         }
     };
+
+    if (isLoading) {
+        return (
+            <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center text-[#C9A96E] relative overflow-hidden">
+                {/* Full-bleed architectural background overlay */}
+                <div className="fixed inset-0 z-0 pointer-events-none">
+                    <img
+                        src="/vip_lobby_bg.jpg"
+                        alt=""
+                        className="w-full h-full object-cover object-center"
+                        style={{ filter: 'brightness(0.38) saturate(0.75)' }}
+                    />
+                    <div
+                        className="absolute inset-0"
+                        style={{
+                            background: 'linear-gradient(180deg, rgba(245,242,235,0.82) 0%, rgba(240,235,225,0.6) 40%, rgba(245,242,235,0.88) 100%)'
+                        }}
+                    />
+                </div>
+                <div className="text-center font-sans relative z-10">
+                    <div className="w-8 h-8 border-t-2 border-[#C9A96E] rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-xs font-light tracking-[0.2em] uppercase text-[#1A1A1A]">票務系統載入中 Loading Ticket System...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#FAF9F6] text-[#1A1A1A] flex flex-col items-center justify-center relative overflow-hidden font-sans selection:bg-[#C9A96E] selection:text-white">

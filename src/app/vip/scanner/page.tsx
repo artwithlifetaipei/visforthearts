@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 
+export const dynamic = 'force-dynamic';
+
 const ADMIN_EMAILS = [
     'artwithlifetaipei@gmail.com',
     'ameliecykuo@gmail.com',
