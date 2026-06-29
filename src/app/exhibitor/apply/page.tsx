@@ -48,11 +48,30 @@ export default function ExhibitorApplyPage() {
   useEffect(() => {
     let isMounted = true;
 
+    // 0. Synchronously check sessionStorage for instant zero-latency login validation
+    if (typeof window !== 'undefined') {
+      try {
+        const tempSessionStr = sessionStorage.getItem('vis_temp_session');
+        if (tempSessionStr) {
+          const s = JSON.parse(tempSessionStr);
+          if (s) {
+            setSession(s);
+            setAuthChecking(false);
+          }
+        }
+      } catch (e) {
+        console.warn('sessionStorage check error:', e);
+      }
+    }
+
     // 1. Initial manual load as fallback
     supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
       if (isMounted && initialSession) {
         setSession(initialSession);
         setAuthChecking(false);
+        try {
+          sessionStorage.setItem('vis_temp_session', JSON.stringify(initialSession));
+        } catch (e) {}
       }
     }).catch(err => {
       console.warn('Initial session load check omitted:', err);
@@ -64,9 +83,15 @@ export default function ExhibitorApplyPage() {
       if (currentSession) {
         setSession(currentSession);
         setAuthChecking(false);
+        try {
+          sessionStorage.setItem('vis_temp_session', JSON.stringify(currentSession));
+        } catch (e) {}
       } else {
         setSession(null);
         setAuthChecking(false);
+        try {
+          sessionStorage.removeItem('vis_temp_session');
+        } catch (e) {}
       }
     });
 

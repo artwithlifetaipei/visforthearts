@@ -106,7 +106,13 @@ export default function ExhibitorLandingPage() {
       } else {
         if (data?.session) {
           setSession(data.session);
+          try {
+            sessionStorage.setItem('vis_temp_session', JSON.stringify(data.session));
+          } catch (e) {}
           setAuthMessage({ text: '註冊成功！已自動登入並解鎖完整資訊。', type: 'success' });
+          setTimeout(() => {
+            router.push('/exhibitor/apply');
+          }, 800);
         } else {
           setAuthMessage({ 
             text: '註冊成功！驗證信件已寄出，請至您的信箱點擊連結驗證以解鎖展位與價格資訊。 (若未收到請檢查垃圾信箱)', 
@@ -136,7 +142,13 @@ export default function ExhibitorLandingPage() {
         setAuthMessage({ text: `登入失敗: ${error.message}`, type: 'error' });
       } else {
         setSession(data.session);
-        setAuthMessage({ text: '登入成功！已解鎖參展商資訊。', type: 'success' });
+        try {
+          sessionStorage.setItem('vis_temp_session', JSON.stringify(data.session));
+        } catch (e) {}
+        setAuthMessage({ text: '登入成功！已解鎖參展商資訊。跳轉中...', type: 'success' });
+        setTimeout(() => {
+          router.push('/exhibitor/apply');
+        }, 800);
       }
     } catch (err: any) {
       setAuthMessage({ text: `登入異常: ${err.message || err}`, type: 'error' });
