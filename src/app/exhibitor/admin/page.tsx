@@ -117,7 +117,7 @@ export default function ExhibitorAdminPage() {
 
       const { data: { session } } = await supabase.auth.getSession();
       
-      const userEmail = (session.user?.email || '').toLowerCase().trim();
+      const userEmail = (session?.user?.email || '').toLowerCase().trim();
       const isAdmin = ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(userEmail);
 
       if (!session || !isAdmin) {
