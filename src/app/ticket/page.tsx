@@ -27,7 +27,7 @@ export default function TicketRegistrationPage() {
     // Database data
     const [brands, setBrands] = useState<BrandEntry[]>([]);
     const [slots, setSlots] = useState<SlotEntry[]>([]);
-    const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     // Form inputs
     const [selectedBrandId, setSelectedBrandId] = useState('');
