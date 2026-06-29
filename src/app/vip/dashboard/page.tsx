@@ -89,9 +89,23 @@ export default function VIPDashboard() {
         // Handle ALL auth state changes — including INITIAL_SESSION (fired when already logged in)
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!isMounted) return;
-            if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && session?.user) {
+
+            const hasCode = typeof window !== 'undefined' && (
+                new URLSearchParams(window.location.search).has('code') ||
+                window.location.hash.includes('access_token') ||
+                window.location.hash.includes('type=recovery') ||
+                window.location.search.includes('type=magiclink')
+            );
+
+            if (event === 'SIGNED_IN' && session?.user) {
                 if (authTimeout) clearTimeout(authTimeout);
                 await fetchProfile(session.user);
+            } else if (event === 'INITIAL_SESSION' && session?.user) {
+                // If we are currently exchanging an OTP code/magiclink, DO NOT load the cached session user
+                if (!hasCode) {
+                    if (authTimeout) clearTimeout(authTimeout);
+                    await fetchProfile(session.user);
+                }
             } else if (event === 'SIGNED_OUT') {
                 if (isMounted) router.push('/vip');
             }

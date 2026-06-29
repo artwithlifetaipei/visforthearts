@@ -91,6 +91,23 @@ export default function VIPLoginPage() {
             }
 
             // Step 2: Email is approved — send the magic link (OTP)
+            // Clear any lingering local session state first to prevent cache/session contamination
+            try {
+                // Fire-and-forget signOut and directly purge local tokens to avoid network blocking
+                supabase.auth.signOut().catch(() => {});
+                if (typeof window !== 'undefined') {
+                    sessionStorage.clear();
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+                            localStorage.removeItem(key);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn('Error clearing session:', e);
+            }
+
             const { error } = await supabase.auth.signInWithOtp({
                 email: formattedEmail,
                 options: {
