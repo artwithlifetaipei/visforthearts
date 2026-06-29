@@ -44,36 +44,36 @@ export default function ExhibitorApplyPage() {
 
   const [previewImage, setPreviewImage] = useState<string | null>(null);
 
-  // Check auth session
+  // Check auth session via active listener subscription (highly reliable & avoids race conditions)
   useEffect(() => {
-    const checkAuth = async () => {
-      // Optimistic Check: If auth token exists in localStorage, skip loading overlay immediately
-      if (typeof window !== 'undefined') {
-        try {
-          let hasToken = false;
-          for (let i = 0; i < localStorage.length; i++) {
-            const key = localStorage.key(i);
-            if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
-              hasToken = true;
-              break;
-            }
-          }
-          if (hasToken) {
-            setAuthChecking(false);
-          }
-        } catch (e) {}
-      }
+    let isMounted = true;
 
-      try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+    // 1. Initial manual load as fallback
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      if (isMounted && initialSession) {
+        setSession(initialSession);
+        setAuthChecking(false);
+      }
+    }).catch(err => {
+      console.warn('Initial session load check omitted:', err);
+    });
+
+    // 2. Active event listener subscription
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, currentSession) => {
+      if (!isMounted) return;
+      if (currentSession) {
         setSession(currentSession);
         setAuthChecking(false);
-      } catch (err) {
-        console.error('Failed to get session:', err);
+      } else {
+        setSession(null);
         setAuthChecking(false);
       }
+    });
+
+    return () => {
+      isMounted = false;
+      subscription.unsubscribe();
     };
-    checkAuth();
   }, []);
 
   // Pre-fill email from session
