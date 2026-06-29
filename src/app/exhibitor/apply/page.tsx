@@ -67,14 +67,10 @@ export default function ExhibitorApplyPage() {
       try {
         const { data: { session: currentSession } } = await supabase.auth.getSession();
         setSession(currentSession);
-        if (!currentSession) {
-          window.location.href = '/exhibitor';
-        } else {
-          setAuthChecking(false);
-        }
+        setAuthChecking(false);
       } catch (err) {
         console.error('Failed to get session:', err);
-        window.location.href = '/exhibitor';
+        setAuthChecking(false);
       }
     };
     checkAuth();
@@ -208,7 +204,54 @@ export default function ExhibitorApplyPage() {
     );
   }
 
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+        {/* Full-bleed architectural background overlay */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <img
+            src="/vip_lobby_bg.jpg"
+            alt=""
+            className="w-full h-full object-cover object-center"
+            style={{ filter: 'brightness(0.38) saturate(0.75)' }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(180deg, rgba(245,242,235,0.85) 0%, rgba(240,235,225,0.65) 40%, rgba(245,242,235,0.9) 100%)'
+            }}
+          />
+        </div>
 
+        <div className="max-w-md w-full bg-white/95 border border-[#C9A96E]/20 p-10 shadow-2xl relative z-10">
+          <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-neutral-400 opacity-30"></div>
+          <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-neutral-400 opacity-30"></div>
+          <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-neutral-400 opacity-30"></div>
+          <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-neutral-400 opacity-30"></div>
+          
+          <img 
+            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+            alt="VIS Logo" 
+            className="h-10 mx-auto mb-8 object-contain"
+          />
+
+          <h2 className="font-serif-garamond text-xl font-light tracking-wide text-[#0D0D0D] mb-4">
+            請先登入以開始參展申請
+          </h2>
+          <p className="text-xs text-[#0D0D0D]/65 leading-relaxed tracking-wider mb-8">
+            大會線上申請系統需要驗證您的參展品牌身份。<br />
+            點擊下方按鈕即可返回登入或註冊新帳號。
+          </p>
+          <Link
+            href="/exhibitor"
+            className="bg-[#0D0D0D] hover:bg-neutral-800 text-white font-medium text-[10px] tracking-widest uppercase transition-colors rounded py-3.5 px-6 block text-center"
+          >
+            前往登入 / 註冊 GO TO LOGIN
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen relative bg-[#FAF9F6] text-[#0D0D0D] font-sans-outfit selection:bg-[#C9A96E] selection:text-white pb-20">
