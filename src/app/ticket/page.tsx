@@ -28,6 +28,7 @@ export default function TicketRegistrationPage() {
     const [brands, setBrands] = useState<BrandEntry[]>([]);
     const [slots, setSlots] = useState<SlotEntry[]>([]);
     const [isLoading, setIsLoading] = useState(false);
+    const [dbError, setDbError] = useState('');
 
     // Form inputs
     const [selectedBrandId, setSelectedBrandId] = useState('');
@@ -60,11 +61,19 @@ export default function TicketRegistrationPage() {
                     .select('*')
                     .order('name_zh', { ascending: true });
 
+                if (brandsErr) {
+                    throw new Error(`ticket_brands: ${brandsErr.message}`);
+                }
+
                 // Fetch slots
                 const { data: slotsData, error: slotsErr } = await supabase
                     .from('ticket_slots')
                     .select('*')
                     .order('id', { ascending: true });
+
+                if (slotsErr) {
+                    throw new Error(`ticket_slots: ${slotsErr.message}`);
+                }
 
                 if (brandsData) setBrands(brandsData);
                 if (slotsData) setSlots(slotsData);
@@ -73,8 +82,9 @@ export default function TicketRegistrationPage() {
                 if (brandsData && brandsData.length > 0) {
                     setSelectedBrandId(brandsData[0].id);
                 }
-            } catch (err) {
+            } catch (err: any) {
                 console.error('Failed to load database values:', err);
+                setDbError(err.message || String(err));
             } finally {
                 setIsLoading(false);
             }
@@ -262,6 +272,13 @@ export default function TicketRegistrationPage() {
                             <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
                             <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
                             <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
+
+                            {dbError && (
+                                <div className="mb-8 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-none font-light">
+                                    <strong>⚠️ 資料庫載入失敗 / Database Load Error:</strong>
+                                    <p className="mt-1 font-mono text-[10px]">{dbError}</p>
+                                </div>
+                            )}
 
                             {/* Brand dropdown */}
                             <div className="mb-8">
