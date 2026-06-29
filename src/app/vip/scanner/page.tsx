@@ -224,6 +224,8 @@ export default function StaffScannerPage() {
 
     // Initialize Page
     useEffect(() => {
+        let isMounted = true;
+
         const checkUser = async (user: any) => {
             try {
                 if (user && ADMIN_EMAILS.includes(user.email?.toLowerCase() ?? '')) {
@@ -231,7 +233,7 @@ export default function StaffScannerPage() {
                 } else {
                     setIsAuthorized(false);
                     if (user) {
-                        await supabase.auth.signOut();
+                        supabase.auth.signOut().catch(() => {});
                     }
                 }
             } catch (err: any) {
@@ -239,92 +241,64 @@ export default function StaffScannerPage() {
                 setInitError(`驗證初始設定失敗: ${err.message || err}`);
                 setIsAuthorized(false);
             } finally {
-                setIsLoading(false);
+                if (isMounted) setIsLoading(false);
             }
         };
 
-        let subscription: any = null;
-        try {
-            const { data } = supabase.auth.onAuthStateChange(async (event, session) => {
-                try {
-                    if (session?.user) {
-                        await checkUser(session.user);
-                    } else {
-                        setIsAuthorized(false);
-                        setIsLoading(false);
-                    }
-                } catch (e: any) {
-                    console.error('onAuthStateChange callback error:', e);
-                    setInitError(`認證狀態變更異常: ${e.message || e}`);
-                    setIsLoading(false);
-                }
-            });
-            subscription = data?.subscription;
-        } catch (err: any) {
-            console.error('onAuthStateChange subscription failed:', err);
-            setInitError(`訂閱登入狀態監聽失敗: ${err.message || err}`);
-            setIsLoading(false);
-        }
-
-        // Initial check
-        try {
-            supabase.auth.getSession().then(({ data: { session } }) => {
+        // 1. Subscribe to Auth changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (!isMounted) return;
+            try {
                 if (session?.user) {
-                    checkUser(session.user);
+                    await checkUser(session.user);
                 } else {
-                    // Fallback to getUser to verify token integrity
-                    supabase.auth.getUser().then(({ data: { user } }) => {
-                        if (user) {
-                            checkUser(user);
-                        } else {
-                            setIsAuthorized(false);
-                            setIsLoading(false);
-                        }
-                    }).catch(err => {
-                        console.warn('getUser check omitted:', err);
-                        setIsAuthorized(false);
-                        setIsLoading(false);
-                    });
-                }
-            }).catch(err => {
-                console.warn('getSession check failed, falling back to getUser:', err);
-                supabase.auth.getUser().then(({ data: { user } }) => {
-                    if (user) checkUser(user);
-                    else {
-                        setIsAuthorized(false);
-                        setIsLoading(false);
-                    }
-                }).catch(e => {
                     setIsAuthorized(false);
                     setIsLoading(false);
-                });
-            });
-        } catch (err: any) {
-            console.error('getSession try block failed:', err);
-            setInitError(`啟動使用者驗證異常: ${err.message || err}`);
-            setIsAuthorized(false);
-            setIsLoading(false);
-        }
+                }
+            } catch (e: any) {
+                console.error('onAuthStateChange callback error:', e);
+                setInitError(`認證狀態變更異常: ${e.message || e}`);
+                setIsLoading(false);
+            }
+        });
 
-        // Listen for online/offline events
+        // 2. Perform initial fallback check
+        supabase.auth.getSession().then(({ data: { session } }) => {
+            if (!isMounted) return;
+            if (session?.user) {
+                checkUser(session.user);
+            } else {
+                setIsAuthorized(false);
+                setIsLoading(false);
+            }
+        }).catch(err => {
+            console.warn('getSession check failed, falling back:', err);
+            if (isMounted) {
+                setIsAuthorized(false);
+                setIsLoading(false);
+            }
+        });
+
+        // 3. Listen for online/offline events
         const handleOnline = () => {
-            setIsOnline(true);
-            triggerDatabaseSync();
+            if (isMounted) {
+                setIsOnline(true);
+                triggerDatabaseSync();
+            }
         };
         const handleOffline = () => {
-            setIsOnline(false);
+            if (isMounted) setIsOnline(false);
         };
         window.addEventListener('online', handleOnline);
         window.addEventListener('offline', handleOffline);
 
         return () => {
-            if (subscription) {
-                subscription.unsubscribe();
-            }
+            isMounted = false;
+            subscription.unsubscribe();
             window.removeEventListener('online', handleOnline);
             window.removeEventListener('offline', handleOffline);
         };
-    }, [router]);
+    }, []);
 
     // Active Camera Scanner Setup
     useEffect(() => {
