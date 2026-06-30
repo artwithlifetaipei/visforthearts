@@ -28,7 +28,7 @@ export default function OnboardingPage() {
                     const { data: allowed } = await supabase
                         .from('vip_allowlist')
                         .select('email')
-                        .eq('email', email)
+                        .ilike('email', email)
                         .maybeSingle();
                     if (allowed) isVip = true;
                 } catch (err) {
@@ -37,7 +37,6 @@ export default function OnboardingPage() {
             }
             
             if (!isVip) {
-                await supabase.auth.signOut();
                 router.push('/vip');
                 return;
             }

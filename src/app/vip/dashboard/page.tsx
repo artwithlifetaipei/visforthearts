@@ -35,7 +35,7 @@ export default function VIPDashboard() {
                     const { data: allowed } = await supabase
                         .from('vip_allowlist')
                         .select('email')
-                        .eq('email', email)
+                        .ilike('email', email)
                         .maybeSingle();
                     if (allowed) isVip = true;
                 } catch (err) {
@@ -44,7 +44,6 @@ export default function VIPDashboard() {
             }
 
             if (!isVip) {
-                await supabase.auth.signOut();
                 router.push('/vip');
                 return;
             }
@@ -71,7 +70,7 @@ export default function VIPDashboard() {
                 const { data: allowlistData } = await supabase
                     .from('vip_allowlist')
                     .select('tier')
-                    .eq('email', email)
+                    .ilike('email', email)
                     .maybeSingle();
 
                 if (!isMounted) return;
@@ -81,7 +80,6 @@ export default function VIPDashboard() {
                 setIsLoading(false);
             } catch (err) {
                 console.error('Error loading dashboard profile:', err);
-                await supabase.auth.signOut();
                 router.push('/vip');
             }
         };
@@ -90,36 +88,29 @@ export default function VIPDashboard() {
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!isMounted) return;
 
-            const hasCode = typeof window !== 'undefined' && (
-                new URLSearchParams(window.location.search).has('code') ||
-                window.location.hash.includes('access_token') ||
-                window.location.hash.includes('type=recovery') ||
-                window.location.search.includes('type=magiclink')
-            );
-
             if (event === 'SIGNED_IN' && session?.user) {
                 if (authTimeout) clearTimeout(authTimeout);
                 await fetchProfile(session.user);
-            } else if (event === 'INITIAL_SESSION' && session?.user) {
-                // If we are currently exchanging an OTP code/magiclink, DO NOT load the cached session user
-                if (!hasCode) {
-                    if (authTimeout) clearTimeout(authTimeout);
-                    await fetchProfile(session.user);
-                }
             } else if (event === 'SIGNED_OUT') {
                 if (isMounted) router.push('/vip');
             }
         });
 
-        // Fallback: if onAuthStateChange doesn't resolve within 5s, check session manually
-        authTimeout = setTimeout(async () => {
+        // Instant session retrieval for client-side routing transitions
+        supabase.auth.getSession().then(({ data: { session } }) => {
             if (!isMounted) return;
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.user) {
-                router.push('/vip');
+            if (session?.user) {
+                if (authTimeout) clearTimeout(authTimeout);
+                fetchProfile(session.user);
+            } else {
+                // Wait 3.5s for async auth state resolution before redirecting
+                authTimeout = setTimeout(() => {
+                    if (isMounted) router.push('/vip');
+                }, 3500);
             }
-            // If session exists, onAuthStateChange will already be handling it
-        }, 5000);
+        }).catch(() => {
+            if (isMounted) router.push('/vip');
+        });
 
         // Refresh QR code every 30 seconds
         const qrInterval = setInterval(() => {

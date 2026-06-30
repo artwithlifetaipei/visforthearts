@@ -210,8 +210,6 @@ export default function ExhibitorLandingPage() {
               text: '您的帳號尚未被主辦單位核准入選，或查無參展商資料。若已核准，請確認帳號是否與申請時一致。', 
               type: 'error' 
             });
-            // Sign them back out to prevent accessing other parts
-            await supabase.auth.signOut();
             return;
           }
         }

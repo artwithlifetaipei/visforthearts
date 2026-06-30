@@ -128,11 +128,7 @@ export default function VIPAdminPage() {
 
     useEffect(() => {
         const init = async () => {
-            const { data: { user } } = await supabase.auth.getUser();
             if (!user || !ADMIN_EMAILS.includes(user.email ?? '')) {
-                if (user) {
-                    await supabase.auth.signOut();
-                }
                 router.push('/vip');
                 return;
             }

@@ -20,7 +20,7 @@ export default function VIPLoginPage() {
             
             // Allow admin bypass
             const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
-            if (ADMIN_EMAILS.includes(email)) {
+            if (ADMIN_EMAILS.includes(email.toLowerCase().trim())) {
                 router.push('/vip/onboarding');
                 return;
             }
@@ -36,12 +36,11 @@ export default function VIPLoginPage() {
                 if (allowed) {
                     router.push('/vip/onboarding');
                 } else {
-                    // Not in allowlist, sign out to clear session contamination
-                    await supabase.auth.signOut();
+                    // Not in allowlist - ONLY show alert, NEVER sign out to avoid dropping active exhibitor sessions
+                    setMessage('此信箱目前不在 VIS 貴賓名單中。如需申請，請聯繫主辦單位。');
                 }
             } catch (err) {
                 console.error('Error checking VIP session:', err);
-                await supabase.auth.signOut();
             }
         };
 
@@ -69,25 +68,30 @@ export default function VIPLoginPage() {
         const formattedEmail = email.toLowerCase().trim();
 
         try {
-            // Step 1: Check if email is on the VIP allowlist
-            const { data: allowed, error: checkError } = await supabase
-                .from('vip_allowlist')
-                .select('email')
-                .ilike('email', formattedEmail)
-                .maybeSingle();
+            const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
+            const isAdminBypass = ADMIN_EMAILS.includes(formattedEmail);
 
-            if (checkError) {
-                console.error('VIP Allowlist check database error:', checkError);
-                setMessage(`資料庫驗證失敗，請稍後再試。Error: ${checkError.message}`);
-                setIsLoading(false);
-                return;
-            }
+            if (!isAdminBypass) {
+                // Step 1: Check if email is on the VIP allowlist
+                const { data: allowed, error: checkError } = await supabase
+                    .from('vip_allowlist')
+                    .select('email')
+                    .ilike('email', formattedEmail)
+                    .maybeSingle();
 
-            if (!allowed) {
-                // Not on the list — show an elegant, on-brand message
-                setMessage('此信箱尚未在 VIS 貴賓名單中。\n如您有任何疑問，歡迎與 visvipteam@gmail.com 聯繫。');
-                setIsLoading(false);
-                return;
+                if (checkError) {
+                    console.error('VIP Allowlist check database error:', checkError);
+                    setMessage(`資料庫驗證失敗，請稍後再試。Error: ${checkError.message}`);
+                    setIsLoading(false);
+                    return;
+                }
+
+                if (!allowed) {
+                    // Not on the list — show an elegant, on-brand message
+                    setMessage('此信箱尚未在 VIS 貴賓名單中。\n如您有任何疑問，歡迎與 visvipteam@gmail.com 聯繫。');
+                    setIsLoading(false);
+                    return;
+                }
             }
 
             // Step 2: Email is approved — send the magic link (OTP)
