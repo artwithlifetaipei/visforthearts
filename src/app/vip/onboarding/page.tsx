@@ -14,6 +14,7 @@ export default function OnboardingPage() {
     useEffect(() => {
         let isMounted = true;
         let authTimeout: NodeJS.Timeout | null = null;
+        let checkInterval: NodeJS.Timeout | null = null;
 
         const handleUser = async (user: any) => {
             if (!isMounted || !user) return;
@@ -97,16 +98,27 @@ export default function OnboardingPage() {
                 if (!hasCode) {
                     router.push('/vip');
                 } else {
-                    // Auth code present -> Wait up to 10 seconds for SIGNED_IN event to resolve
-                    authTimeout = setTimeout(async () => {
-                        if (!isMounted) return;
+                    // Auth code present -> Fast-poll session check every 300ms
+                    // This allows loading page in ~300-600ms once code is resolved in background,
+                    // rather than hanging on a static 10 second timeout screen.
+                    let checkCount = 0;
+                    checkInterval = setInterval(async () => {
+                        if (!isMounted) {
+                            if (checkInterval) clearInterval(checkInterval);
+                            return;
+                        }
+                        checkCount++;
                         const { data: { session: s2 } } = await supabase.auth.getSession();
                         if (s2?.user) {
+                            if (checkInterval) clearInterval(checkInterval);
+                            if (authTimeout) clearTimeout(authTimeout);
                             handleUser(s2.user);
-                        } else {
+                        } else if (checkCount >= 15) {
+                            // Max 4.5 seconds fallback redirect
+                            if (checkInterval) clearInterval(checkInterval);
                             router.push('/vip');
                         }
-                    }, 10000);
+                    }, 300);
                 }
             }
         }).catch(() => {
@@ -117,6 +129,7 @@ export default function OnboardingPage() {
             isMounted = false;
             subscription.unsubscribe();
             if (authTimeout) clearTimeout(authTimeout);
+            if (checkInterval) clearInterval(checkInterval);
         };
     }, [router]);
 
