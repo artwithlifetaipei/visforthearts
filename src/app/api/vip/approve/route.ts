@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
 const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
@@ -37,29 +38,32 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
-        const supabase = await createSupabaseServerClient();
-
         // 1. Authenticate that the actor is indeed an admin
         const authHeader = req.headers.get('Authorization');
         const token = authHeader?.split(' ')[1];
         
-        let user;
+        let supabase;
         if (token) {
-            const { data: { user: u }, error: authError } = await supabase.auth.getUser(token);
-            if (!authError && u) {
-                user = u;
-                // Bind admin JWT session to server client instance to allow RLS policies to pass
-                await supabase.auth.setSession({ access_token: token, refresh_token: '' }).catch(() => {});
-            }
-        }
-        
-        // Fallback to cookies if token isn't provided
-        if (!user) {
-            const { data: { user: u } } = await supabase.auth.getUser();
-            user = u;
+            // Build a client hardcoded with the Bearer token in global headers.
+            // This guarantees the database sees the JWT and executes RLS policies correctly.
+            supabase = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+                {
+                    global: {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                }
+            );
+        } else {
+            supabase = await createSupabaseServerClient();
         }
 
-        if (!user || !ADMIN_EMAILS.includes(user.email?.toLowerCase().trim() ?? '')) {
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+        if (authError || !user || !ADMIN_EMAILS.includes(user.email?.toLowerCase().trim() ?? '')) {
             return NextResponse.json({ error: 'Unauthorized. Admin access required.' }, { status: 403 });
         }
 
