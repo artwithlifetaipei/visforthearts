@@ -335,7 +335,7 @@ export default function LandingPage() {
                 
                 .btn-pola {
                     display: inline-block; background: var(--text); color: white;
-                    padding: 1.25rem 2.8rem; font-size: 14px; text-transform: uppercase;
+                    padding: 1.25rem 2.8rem; font-size: 13px; text-transform: uppercase;
                     letter-spacing: 0.35em; font-weight: 700; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                     text-decoration: none;
                 }
@@ -343,7 +343,7 @@ export default function LandingPage() {
 
                 .btn-pola-gold {
                     display: inline-block; background: var(--gold); color: white;
-                    padding: 1.25rem 2.8rem; font-size: 14px; text-transform: uppercase;
+                    padding: 1.25rem 2.8rem; font-size: 13px; text-transform: uppercase;
                     letter-spacing: 0.35em; font-weight: 700; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                     text-decoration: none;
                 }
@@ -481,7 +481,7 @@ export default function LandingPage() {
                             More than a fair, but a purposefully architected space for intellectual and aesthetic elevation.
                         </p>
                         <div className="exhibit-buttons-container">
-                            <Link href="/exhibitor" className="btn-pola">2027 簡章 2027 Guidelines</Link>
+                            <Link href="/exhibitor" className="btn-pola">2027 簡章 Guidelines</Link>
                             <Link href="/exhibitor/apply" className="btn-pola btn-pola-gold">線上申請 Apply Online</Link>
                         </div>
                     </div>
