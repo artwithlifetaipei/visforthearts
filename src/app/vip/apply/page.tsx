@@ -38,13 +38,25 @@ export default function VIPApplyPage() {
             return;
         }
 
+        // Setup a 8-second safety timeout guard to prevent infinite loading screens on network dropouts
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('伺服器回應逾時，請檢查網路連線或稍後再試。')), 8000)
+        );
+
         try {
             // 1. Check if email already exists in vip_allowlist (both approved or pending)
-            const { data: existing, error: checkError } = await supabase
+            const checkPromise = supabase
                 .from('vip_allowlist')
                 .select('email, status')
                 .ilike('email', formattedEmail)
                 .maybeSingle();
+
+            // Race query against safety timeout
+            const { data: existing, error: checkError } = await Promise.race([checkPromise, timeoutPromise]) as any;
+
+            if (checkError) {
+                throw new Error(`查詢失敗: ${checkError.message}`);
+            }
 
             if (existing) {
                 if (existing.status === 'Approved') {
@@ -62,7 +74,7 @@ export default function VIPApplyPage() {
             }
 
             // 2. Insert as pending self-registration
-            const { error: insertError } = await supabase
+            const insertPromise = supabase
                 .from('vip_allowlist')
                 .insert({
                     email: formattedEmail,
@@ -73,8 +85,11 @@ export default function VIPApplyPage() {
                     rsvp_status: 'Unconfirmed'
                 });
 
+            // Race insert against safety timeout
+            const { error: insertError } = await Promise.race([insertPromise, timeoutPromise]) as any;
+
             if (insertError) {
-                throw insertError;
+                throw new Error(`提交登記失敗: ${insertError.message}`);
             }
 
             setMessage('✓ 申請提交成功！大會審核通過後，專屬邀請連結將會自動發送至您的信箱。');
@@ -83,7 +98,7 @@ export default function VIPApplyPage() {
             setEmail('');
         } catch (err: any) {
             console.error('VIP Application failed:', err);
-            setMessage(`申請提交失敗，請稍後再試。Error: ${err.message || err}`);
+            setMessage(err.message || String(err));
             setStatusType('error');
         } finally {
             setIsLoading(false);
