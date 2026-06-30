@@ -240,15 +240,32 @@ export default function LandingPage() {
                     backdrop-filter: blur(20px); padding: 2rem 8vw;
                 }
                 .nav-logo { height: 80px; transition: height 0.5s ease; }
-                .nav-links { display: flex; gap: 2.5rem; }
+                .nav-links { display: flex; gap: 2.8rem; align-items: center; }
                 .nav-link {
-                    font-size: 10px; font-weight: 500;
-                    text-transform: uppercase; letter-spacing: 0.25em;
+                    font-size: 14px; font-weight: 500;
+                    text-transform: uppercase; letter-spacing: 0.22em;
                     text-decoration: none; color: inherit;
                     position: relative;
+                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .nav-link::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -4px;
+                    left: 0;
+                    width: 0;
+                    height: 1px;
+                    background: var(--gold);
+                    transition: width 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .nav-link:hover {
+                    color: var(--gold);
+                }
+                .nav-link:hover::after {
+                    width: 100%;
                 }
                 nav.scrolled .nav-logo { height: 56px; }
-                nav.scrolled .nav-link { font-size: 10px; }
+                nav.scrolled .nav-link { font-size: 14px; }
 
                 .btn-access {
                     font-size: 8px; letter-spacing: 0.2em; text-transform: uppercase;
@@ -318,19 +335,19 @@ export default function LandingPage() {
                 
                 .btn-pola {
                     display: inline-block; background: var(--text); color: white;
-                    padding: 1.25rem 3rem; font-size: 10px; text-transform: uppercase;
-                    letter-spacing: 0.4em; font-weight: 700; transition: all 0.5s ease;
+                    padding: 1.25rem 2.8rem; font-size: 14px; text-transform: uppercase;
+                    letter-spacing: 0.35em; font-weight: 700; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                     text-decoration: none;
                 }
-                .btn-pola:hover { background: var(--gold); }
+                .btn-pola:hover { background: var(--gold); transform: scale(0.98); }
 
                 .btn-pola-gold {
                     display: inline-block; background: var(--gold); color: white;
-                    padding: 1.25rem 3rem; font-size: 10px; text-transform: uppercase;
-                    letter-spacing: 0.4em; font-weight: 700; transition: all 0.5s ease;
+                    padding: 1.25rem 2.8rem; font-size: 14px; text-transform: uppercase;
+                    letter-spacing: 0.35em; font-weight: 700; transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                     text-decoration: none;
                 }
-                .btn-pola-gold:hover { background: var(--text); }
+                .btn-pola-gold:hover { background: var(--text); transform: scale(0.98); }
 
                 .exhibit-buttons-container {
                     display: flex;
