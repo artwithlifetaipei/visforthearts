@@ -48,6 +48,8 @@ export async function POST(req: Request) {
             const { data: { user: u }, error: authError } = await supabase.auth.getUser(token);
             if (!authError && u) {
                 user = u;
+                // Bind admin JWT session to server client instance to allow RLS policies to pass
+                await supabase.auth.setSession({ access_token: token, refresh_token: '' }).catch(() => {});
             }
         }
         
@@ -64,15 +66,18 @@ export async function POST(req: Request) {
         const targetEmail = applicationEmail.toLowerCase().trim();
 
         if (action === 'approve') {
-            // 2. Set status to Approved
-            const { error: updateError } = await supabase
+            // 2. Set status to Approved (and fetch returned data to confirm row change)
+            const { data: updateData, error: updateError } = await supabase
                 .from('vip_allowlist')
                 .update({ status: 'Approved' })
-                .ilike('email', targetEmail);
+                .ilike('email', targetEmail)
+                .select();
 
-            if (updateError) {
+            if (updateError || !updateData || updateData.length === 0) {
                 console.error('Database update error:', updateError);
-                return NextResponse.json({ error: `Update failed: ${updateError.message}` }, { status: 500 });
+                return NextResponse.json({ 
+                    error: `Update failed: ${updateError?.message || 'No rows updated. Make sure RLS policy allows this action.'}` 
+                }, { status: 500 });
             }
 
             // 3. Dispatch the Magic Link (OTP) directly
@@ -99,14 +104,17 @@ export async function POST(req: Request) {
 
         } else if (action === 'reject') {
             // Set status to Rejected
-            const { error: updateError } = await supabase
+            const { data: updateData, error: updateError } = await supabase
                 .from('vip_allowlist')
                 .update({ status: 'Rejected' })
-                .ilike('email', targetEmail);
+                .ilike('email', targetEmail)
+                .select();
 
-            if (updateError) {
+            if (updateError || !updateData || updateData.length === 0) {
                 console.error('Database update error during rejection:', updateError);
-                return NextResponse.json({ error: `Rejection failed: ${updateError.message}` }, { status: 500 });
+                return NextResponse.json({ 
+                    error: `Rejection failed: ${updateError?.message || 'No rows updated. Make sure RLS policy allows this action.'}` 
+                }, { status: 500 });
             }
 
             return NextResponse.json({ 
