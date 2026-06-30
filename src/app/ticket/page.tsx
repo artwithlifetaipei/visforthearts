@@ -51,8 +51,11 @@ export default function TicketRegistrationPage() {
     const [submitError, setSubmitError] = useState('');
     const [mintedTicket, setMintedTicket] = useState<{ id: string; qrUrl: string } | null>(null);
 
+    const [isMounted, setIsMounted] = useState(false);
+
     // Load initial data
     useEffect(() => {
+        setIsMounted(true);
         const loadData = async () => {
             try {
                 // Fetch brands
@@ -197,7 +200,7 @@ export default function TicketRegistrationPage() {
         }
     };
 
-    if (isLoading) {
+    if (isLoading || !isMounted) {
         return (
             <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center text-[#C9A96E] relative overflow-hidden">
                 {/* Full-bleed architectural background overlay */}

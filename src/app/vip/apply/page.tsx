@@ -98,7 +98,7 @@ export default function VIPApplyPage() {
             setEmail('');
         } catch (err: any) {
             console.error('VIP Application failed:', err);
-            setMessage(err.message || String(err));
+            setMessage(`提交失敗 (詳細錯誤): ${err.message || String(err)}`);
             setStatusType('error');
         } finally {
             setIsLoading(false);

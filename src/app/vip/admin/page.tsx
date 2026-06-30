@@ -119,9 +119,15 @@ export default function VIPAdminPage() {
     const handleApproveStatus = async (email: string, action: 'approve' | 'reject') => {
         setApprovingEmail(email);
         try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token || '';
+
             const res = await fetch('/api/vip/approve', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
                 body: JSON.stringify({ applicationEmail: email, action })
             });
             const data = await res.json();

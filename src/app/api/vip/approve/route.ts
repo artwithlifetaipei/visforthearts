@@ -40,8 +40,24 @@ export async function POST(req: Request) {
         const supabase = await createSupabaseServerClient();
 
         // 1. Authenticate that the actor is indeed an admin
-        const { data: { user }, error: authError } = await supabase.auth.getUser();
-        if (authError || !user || !ADMIN_EMAILS.includes(user.email?.toLowerCase().trim() ?? '')) {
+        const authHeader = req.headers.get('Authorization');
+        const token = authHeader?.split(' ')[1];
+        
+        let user;
+        if (token) {
+            const { data: { user: u }, error: authError } = await supabase.auth.getUser(token);
+            if (!authError && u) {
+                user = u;
+            }
+        }
+        
+        // Fallback to cookies if token isn't provided
+        if (!user) {
+            const { data: { user: u } } = await supabase.auth.getUser();
+            user = u;
+        }
+
+        if (!user || !ADMIN_EMAILS.includes(user.email?.toLowerCase().trim() ?? '')) {
             return NextResponse.json({ error: 'Unauthorized. Admin access required.' }, { status: 403 });
         }
 
