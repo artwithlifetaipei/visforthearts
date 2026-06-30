@@ -68,68 +68,50 @@ export default function OnboardingPage() {
             }
         };
 
-        // Primary mechanism: listen for ALL auth events including INITIAL_SESSION
-        // (INITIAL_SESSION fires when already logged in; SIGNED_IN fires after magic link code exchange)
+        // Primary mechanism: listen for ALL auth events including SIGNED_IN
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
             if (!isMounted) return;
             
-            const hasCode = typeof window !== 'undefined' && (
-                new URLSearchParams(window.location.search).has('code') ||
-                window.location.hash.includes('access_token') ||
-                window.location.hash.includes('type=recovery') ||
-                window.location.search.includes('type=magiclink')
-            );
-
             if (event === 'SIGNED_IN' && session?.user) {
                 if (authTimeout) clearTimeout(authTimeout);
                 await handleUser(session.user);
-            } else if (event === 'INITIAL_SESSION' && session?.user) {
-                // If we are currently exchanging an OTP code/magiclink, DO NOT load the cached session user
-                if (!hasCode) {
-                    if (authTimeout) clearTimeout(authTimeout);
-                    await handleUser(session.user);
-                }
             } else if (event === 'SIGNED_OUT') {
                 if (isMounted) router.push('/vip');
             }
         });
 
-        // Secondary mechanism: manual session check + hasCode detection
-        // Critical for magic link flow: ?code= in URL means code exchange is in progress
-        const checkSession = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+        // Instant session retrieval for client-side routing and magic link code exchange transitions
+        supabase.auth.getSession().then(({ data: { session } }) => {
             if (!isMounted) return;
-
             if (session?.user) {
-                // Already have a session — handleUser via onAuthStateChange INITIAL_SESSION
-                // (which fires synchronously when subscribed). This is a no-op duplicate guard.
-                return;
-            }
-
-            // No session yet — check if we're in the middle of a magic link code exchange
-            const hasCode = typeof window !== 'undefined' && (
-                new URLSearchParams(window.location.search).has('code') ||
-                window.location.hash.includes('access_token') ||
-                window.location.hash.includes('type=recovery') ||
-                window.location.search.includes('type=magiclink')
-            );
-
-            if (!hasCode) {
-                // No session AND no auth code → not authenticating → send to login
-                router.push('/vip');
+                if (authTimeout) clearTimeout(authTimeout);
+                handleUser(session.user);
             } else {
-                // Auth code present → SDK is exchanging it → wait up to 15s for SIGNED_IN
-                authTimeout = setTimeout(async () => {
-                    if (!isMounted) return;
-                    const { data: { session: s2 } } = await supabase.auth.getSession();
-                    if (!s2?.user) {
-                        router.push('/vip');
-                    }
-                    // If session exists by now, SIGNED_IN already fired and handled it
-                }, 15000);
+                const hasCode = typeof window !== 'undefined' && (
+                    new URLSearchParams(window.location.search).has('code') ||
+                    window.location.hash.includes('access_token') ||
+                    window.location.hash.includes('type=recovery') ||
+                    window.location.search.includes('type=magiclink')
+                );
+                
+                if (!hasCode) {
+                    router.push('/vip');
+                } else {
+                    // Auth code present -> Wait up to 10 seconds for SIGNED_IN event to resolve
+                    authTimeout = setTimeout(async () => {
+                        if (!isMounted) return;
+                        const { data: { session: s2 } } = await supabase.auth.getSession();
+                        if (s2?.user) {
+                            handleUser(s2.user);
+                        } else {
+                            router.push('/vip');
+                        }
+                    }, 10000);
+                }
             }
-        };
-        checkSession();
+        }).catch(() => {
+            if (isMounted) router.push('/vip');
+        });
 
         return () => {
             isMounted = false;
