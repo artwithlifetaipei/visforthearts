@@ -19,6 +19,7 @@ type VIPEntry = {
     role: string;
     rsvp_status: string;
     created_at: string;
+    status?: string;
 };
 
 type CampaignEntry = {
@@ -113,6 +114,29 @@ export default function VIPAdminPage() {
     const [isAdding, setIsAdding] = useState(false);
     const [audienceFeedback, setAudienceFeedback] = useState('');
     const [deletingId, setDeletingId] = useState<string | null>(null);
+    const [approvingEmail, setApprovingEmail] = useState('');
+
+    const handleApproveStatus = async (email: string, action: 'approve' | 'reject') => {
+        setApprovingEmail(email);
+        try {
+            const res = await fetch('/api/vip/approve', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ applicationEmail: email, action })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || '操作審核失敗');
+            } else {
+                alert(action === 'approve' ? '✓ 已核准並成功寄出 Magic Link 邀請信！' : '✓ 已拒絕該貴賓申請。');
+                await fetchList();
+            }
+        } catch (err: any) {
+            alert(`伺服器連線異常，請稍後再試。Error: ${err.message || err}`);
+        } finally {
+            setApprovingEmail('');
+        }
+    };
 
     // Campaign States
     const [campaigns, setCampaigns] = useState<CampaignEntry[]>([]);
@@ -128,6 +152,7 @@ export default function VIPAdminPage() {
 
     useEffect(() => {
         const init = async () => {
+            const { data: { user } } = await supabase.auth.getUser();
             if (!user || !ADMIN_EMAILS.includes(user.email ?? '')) {
                 router.push('/vip');
                 return;
@@ -750,16 +775,75 @@ export default function VIPAdminPage() {
                                 </form>
                             </div>
 
+                            {/* Pending VIP Requests List */}
+                            <div className="mb-12">
+                                <div className="flex items-baseline justify-between mb-6">
+                                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-[#DFBA87] font-semibold">待審核貴賓席位申請名單</h2>
+                                    <span className="text-[10px] tracking-widest text-neutral-600">
+                                        {vipList.filter(vip => vip.status === 'Pending').length} 筆待審核
+                                    </span>
+                                </div>
+
+                                <div className="space-y-3">
+                                    <AnimatePresence>
+                                        {vipList.filter(vip => vip.status === 'Pending').map((vip, i) => (
+                                            <motion.div
+                                                key={vip.id}
+                                                initial={{ opacity: 0, y: 5 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                exit={{ opacity: 0, y: -5 }}
+                                                transition={{ duration: 0.3 }}
+                                                className="flex items-center justify-between bg-amber-950/5 border border-amber-900/20 px-6 py-4 hover:border-amber-700/30 transition-colors duration-300"
+                                            >
+                                                <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
+                                                    <span className="text-[8px] px-2 py-0.5 bg-amber-500/10 text-[#DFBA87] uppercase tracking-widest font-mono border border-amber-500/20">
+                                                        Pending 待審核
+                                                    </span>
+                                                    <div className="ml-2">
+                                                        <p className="text-xs tracking-wider text-white font-mono">{vip.email}</p>
+                                                        <p className="text-[10px] tracking-widest text-neutral-400 mt-1">
+                                                            申請姓名：{vip.name || '未提供'}
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                                <div className="flex items-center gap-3">
+                                                    <button
+                                                        onClick={() => handleApproveStatus(vip.email, 'approve')}
+                                                        disabled={approvingEmail === vip.email}
+                                                        className="px-4 py-2 bg-[#DFBA87] hover:bg-white text-black font-semibold text-[9px] tracking-widest uppercase transition-colors cursor-pointer"
+                                                    >
+                                                        {approvingEmail === vip.email ? '處理中...' : '核准並寄信'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleApproveStatus(vip.email, 'reject')}
+                                                        disabled={approvingEmail === vip.email}
+                                                        className="px-4 py-2 border border-neutral-800 hover:border-rose-900 text-neutral-400 hover:text-rose-400 text-[9px] tracking-widest uppercase transition-colors cursor-pointer"
+                                                    >
+                                                        拒絕
+                                                    </button>
+                                                </div>
+                                            </motion.div>
+                                        ))}
+                                    </AnimatePresence>
+
+                                    {vipList.filter(vip => vip.status === 'Pending').length === 0 && (
+                                        <p className="text-center text-neutral-600 text-xs tracking-widest py-8 border border-dashed border-neutral-900/60 font-light">
+                                            目前無任何待核准的貴賓申請。
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+
                             {/* Audience List */}
                             <div>
                                 <div className="flex items-baseline justify-between mb-6">
-                                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400">現有貴賓與專業買家名單</h2>
-                                    <span className="text-[10px] tracking-widest text-neutral-600">{vipList.length} 位受眾成員</span>
+                                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400 font-semibold">已核准貴賓與專業買家名單</h2>
+                                    <span className="text-[10px] tracking-widest text-neutral-600">{vipList.filter(vip => vip.status !== 'Pending').length} 位受眾成員</span>
                                 </div>
 
                                 <div className="space-y-2">
                                     <AnimatePresence>
-                                        {vipList.map((vip, i) => (
+                                        {vipList.filter(vip => vip.status !== 'Pending').map((vip, i) => (
                                             <motion.div
                                                 key={vip.id}
                                                 initial={{ opacity: 0, x: -10 }}
@@ -801,7 +885,7 @@ export default function VIPAdminPage() {
                                         ))}
                                     </AnimatePresence>
 
-                                    {vipList.length === 0 && (
+                                    {vipList.filter(vip => vip.status !== 'Pending').length === 0 && (
                                         <p className="text-center text-neutral-600 text-xs tracking-widest py-12">
                                             受眾名單中尚無任何成員。
                                         </p>

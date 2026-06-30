@@ -1,0 +1,108 @@
+import { NextResponse } from 'next/server';
+import { createServerClient } from '@supabase/ssr';
+import { cookies } from 'next/headers';
+
+const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
+
+async function createSupabaseServerClient() {
+    const cookieStore = await cookies();
+    return createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        {
+            cookies: {
+                getAll() {
+                    return cookieStore.getAll();
+                },
+                setAll(cookiesToSet) {
+                    try {
+                        cookiesToSet.forEach(({ name, value, options }) =>
+                            cookieStore.set(name, value, options)
+                        );
+                    } catch {
+                        // Safe to ignore in route handlers
+                    }
+                },
+            },
+        }
+    );
+}
+
+export async function POST(req: Request) {
+    try {
+        const body = await req.json();
+        const { applicationEmail, action } = body; // action can be 'approve' or 'reject'
+
+        if (!applicationEmail || !action) {
+            return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
+        }
+
+        const supabase = await createSupabaseServerClient();
+
+        // 1. Authenticate that the actor is indeed an admin
+        const { data: { user }, error: authError } = await supabase.auth.getUser();
+        if (authError || !user || !ADMIN_EMAILS.includes(user.email?.toLowerCase().trim() ?? '')) {
+            return NextResponse.json({ error: 'Unauthorized. Admin access required.' }, { status: 403 });
+        }
+
+        const targetEmail = applicationEmail.toLowerCase().trim();
+
+        if (action === 'approve') {
+            // 2. Set status to Approved
+            const { error: updateError } = await supabase
+                .from('vip_allowlist')
+                .update({ status: 'Approved' })
+                .ilike('email', targetEmail);
+
+            if (updateError) {
+                console.error('Database update error:', updateError);
+                return NextResponse.json({ error: `Update failed: ${updateError.message}` }, { status: 500 });
+            }
+
+            // 3. Dispatch the Magic Link (OTP) directly
+            const { error: otpError } = await supabase.auth.signInWithOtp({
+                email: targetEmail,
+                options: {
+                    emailRedirectTo: `${new URL(req.url).origin}/vip/onboarding`,
+                    shouldCreateUser: true
+                }
+            });
+
+            if (otpError) {
+                console.warn('Magic link send warning (User status is Approved but email might have failed):', otpError);
+                return NextResponse.json({ 
+                    success: true, 
+                    message: 'VIP status approved, but failed to auto-send magic link. User can now login manually.' 
+                });
+            }
+
+            return NextResponse.json({ 
+                success: true, 
+                message: 'VIP status approved and magic link sent successfully.' 
+            });
+
+        } else if (action === 'reject') {
+            // Set status to Rejected
+            const { error: updateError } = await supabase
+                .from('vip_allowlist')
+                .update({ status: 'Rejected' })
+                .ilike('email', targetEmail);
+
+            if (updateError) {
+                console.error('Database update error during rejection:', updateError);
+                return NextResponse.json({ error: `Rejection failed: ${updateError.message}` }, { status: 500 });
+            }
+
+            return NextResponse.json({ 
+                success: true, 
+                message: 'VIP status rejected successfully.' 
+            });
+        }
+
+        return NextResponse.json({ error: 'Invalid action specified' }, { status: 400 });
+
+    } catch (err: any) {
+        console.error('VIP approval error:', err);
+        return NextResponse.json({ error: err.message || String(err) }, { status: 500 });
+    }
+}
