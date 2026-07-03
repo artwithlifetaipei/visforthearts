@@ -278,6 +278,7 @@ export default function V2LandingPage() {
                     .v2-nav-links { display: none; }
                     .v2-hero { flex-direction: column; padding-bottom: 10vh; }
                     .v2-hero-img-box { width: 85vw; height: 45vh; position: relative; top: 0; left: 0; margin-bottom: 5vh; }
+                    .v2-hero-text { text-align: left; }
                     .v2-hero-zh { font-size: 1.15rem; }
                     .v2-hero-en { font-size: 0.85rem; white-space: nowrap; }
                     .v2-exhibition-scroller { gap: 15vw; padding: 0 6vw; }
