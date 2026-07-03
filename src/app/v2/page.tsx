@@ -210,11 +210,12 @@ export default function V2LandingPage() {
                 .v2-hero-content {
                     width: 100%; display: flex; justify-content: flex-end; align-items: flex-end;
                 }
-                .v2-hero-text { max-width: 500px; text-align: right; }
+                .v2-hero-text { max-width: 680px; text-align: right; }
                 .v2-hero-zh { font-size: 1.45rem; font-weight: 300; line-height: 2; margin-bottom: 2rem; color: #444; }
                 .v2-hero-en { 
                     font-family: var(--v2-font-serif); font-style: italic;
-                    font-size: 2.875rem; line-height: 1.1; color: var(--v2-text);
+                    font-size: 2.2rem; line-height: 1.1; color: var(--v2-text);
+                    white-space: nowrap;
                 }
 
                 .v2-section-title {
@@ -277,9 +278,8 @@ export default function V2LandingPage() {
                     .v2-nav-links { display: none; }
                     .v2-hero { flex-direction: column; padding-bottom: 10vh; }
                     .v2-hero-img-box { width: 85vw; height: 45vh; position: relative; top: 0; left: 0; margin-bottom: 5vh; }
-                    .v2-hero-text { text-align: left; }
                     .v2-hero-zh { font-size: 1.15rem; }
-                    .v2-hero-en { font-size: 2rem; }
+                    .v2-hero-en { font-size: 0.85rem; white-space: nowrap; }
                     .v2-exhibition-scroller { gap: 15vw; padding: 0 6vw; }
                     .v2-exhibit-intro { width: 80vw; }
                     .v2-card { width: 80vw; }
