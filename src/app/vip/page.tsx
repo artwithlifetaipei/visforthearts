@@ -10,10 +10,12 @@ export default function VIPLoginPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [isSent, setIsSent] = useState(false);
     const [message, setMessage] = useState('');
+    const [isMounted, setIsMounted] = useState(false);
     const router = useRouter();
 
     // Auto-redirect if already logged in or landing with hash
     useEffect(() => {
+        setIsMounted(true);
         const checkVipSession = async (currentSession: any) => {
             if (!currentSession?.user?.email) return;
             const email = currentSession.user.email.toLowerCase().trim();
@@ -121,6 +123,17 @@ export default function VIPLoginPage() {
             setIsLoading(false);
         }
     };
+
+    if (!isMounted) {
+        return (
+            <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center text-[#C9A96E]">
+                <div className="text-center font-sans">
+                    <div className="w-8 h-8 border-t-2 border-[#C9A96E] rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-xs font-light tracking-[0.2em] uppercase text-[#1A1A1A]">載入中 Loading...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="min-h-screen bg-[#FAF9F6] flex flex-col p-6 font-sans relative overflow-x-hidden">
