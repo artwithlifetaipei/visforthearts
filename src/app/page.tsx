@@ -296,10 +296,10 @@ export default function LandingPage() {
                     box-shadow: 0 45px 80px -20px rgba(201, 169, 110, 0.15), 0 15px 40px -15px rgba(0, 0, 0, 0.08);
                 }
                 .hero-text-container { max-width: 450px; text-align: right; }
-                .hero-zh { font-size: 1rem; font-weight: 300; line-height: 2; margin-bottom: 1.5rem; }
+                .hero-zh { font-size: 1.3rem; font-weight: 300; line-height: 2; margin-bottom: 1.5rem; }
                 .hero-en {
                     font-family: var(--font-serif);
-                    font-size: 1.1rem;
+                    font-size: 1.4rem;
                     font-style: italic;
                     letter-spacing: 0.05em;
                     color: #777;
@@ -380,8 +380,8 @@ export default function LandingPage() {
                     .hero-layout { flex-direction: column; align-items: center; padding-top: 15vh; height: auto; }
                     .hero-img-container { width: 100%; height: 45vh; justify-content: center; }
                     .hero-text-container { text-align: center; margin-top: 4vh; }
-                    .hero-zh { font-size: 0.95rem; line-height: 1.8; margin-bottom: 1rem; }
-                    .hero-en { font-family: var(--font-serif); font-size: 1rem; font-style: italic; white-space: normal; line-height: 1.5; }
+                    .hero-zh { font-size: 1.25rem; line-height: 1.8; margin-bottom: 1rem; }
+                    .hero-en { font-family: var(--font-serif); font-size: 1.3rem; font-style: italic; white-space: normal; line-height: 1.5; }
                     .desktop-br { display: none; }
                     .mobile-br { display: block; }
                     .exhibition-scroller { padding: 0 10vw; gap: 10vw; }
