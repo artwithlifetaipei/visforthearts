@@ -211,10 +211,10 @@ export default function V2LandingPage() {
                     width: 100%; display: flex; justify-content: flex-end; align-items: flex-end;
                 }
                 .v2-hero-text { max-width: 500px; text-align: right; }
-                .v2-hero-zh { font-size: 1.625rem; font-weight: 300; line-height: 2; margin-bottom: 2rem; color: #444; }
+                .v2-hero-zh { font-size: 1.45rem; font-weight: 300; line-height: 2; margin-bottom: 2rem; color: #444; }
                 .v2-hero-en { 
                     font-family: var(--v2-font-serif); font-style: italic;
-                    font-size: 3.25rem; line-height: 1.1; color: var(--v2-text);
+                    font-size: 2.875rem; line-height: 1.1; color: var(--v2-text);
                 }
 
                 .v2-section-title {
@@ -278,8 +278,8 @@ export default function V2LandingPage() {
                     .v2-hero { flex-direction: column; padding-bottom: 10vh; }
                     .v2-hero-img-box { width: 85vw; height: 45vh; position: relative; top: 0; left: 0; margin-bottom: 5vh; }
                     .v2-hero-text { text-align: left; }
-                    .v2-hero-zh { font-size: 1.3rem; }
-                    .v2-hero-en { font-size: 2.25rem; }
+                    .v2-hero-zh { font-size: 1.15rem; }
+                    .v2-hero-en { font-size: 2rem; }
                     .v2-exhibition-scroller { gap: 15vw; padding: 0 6vw; }
                     .v2-exhibit-intro { width: 80vw; }
                     .v2-card { width: 80vw; }
@@ -312,11 +312,10 @@ export default function V2LandingPage() {
                 <div className="v2-hero-content">
                     <div className="v2-hero-text">
                         <p className="v2-hero-zh v2-reveal">
-                            VIS 始於2022年，至今已與無數的品味質富人士們，實踐著人文與美感如何展現於美好的生活中。
+                            VIS 始於2022年，至今已與無數的品味質富人士們，<br />實踐著人文與美感如何展現於美好的生活中。
                         </p>
                         <h1 className="v2-hero-en v2-reveal">
-                            Established in 2024.<br />
-                            Curating Aesthetic Dialogues with Spirit.
+                            Established in 2024. Curating Aesthetic Dialogues with Spirit.
                         </h1>
                     </div>
                 </div>
