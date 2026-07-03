@@ -299,11 +299,12 @@ export default function LandingPage() {
                 .hero-zh { font-size: 1.15rem; font-weight: 300; line-height: 2; margin-bottom: 1.5rem; }
                 .hero-en {
                     font-family: var(--font-serif);
-                    font-size: 1.25rem;
+                    font-size: 1.2rem;
                     font-style: italic;
                     letter-spacing: 0.05em;
                     color: #777;
                     margin-top: 0.5rem;
+                    white-space: nowrap;
                 }
 
                 .exhibition-section { 
@@ -381,7 +382,7 @@ export default function LandingPage() {
                     .hero-img-container { width: 100%; height: 45vh; justify-content: center; }
                     .hero-text-container { text-align: center; margin-top: 4vh; }
                     .hero-zh { font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem; }
-                    .hero-en { font-family: var(--font-serif); font-size: 1.15rem; font-style: italic; white-space: normal; line-height: 1.5; }
+                    .hero-en { font-family: var(--font-serif); font-size: 0.82rem; font-style: italic; white-space: nowrap; line-height: 1.5; }
                     .desktop-br { display: none; }
                     .mobile-br { display: block; }
                     .exhibition-scroller { padding: 0 10vw; gap: 10vw; }
