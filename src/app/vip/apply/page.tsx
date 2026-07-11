@@ -14,6 +14,49 @@ export default function VIPApplyPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [statusType, setStatusType] = useState<'success' | 'error' | ''>('');
+    const [lang, setLang] = useState<'zh' | 'en'>('zh');
+
+    // Bilingual Dictionary
+    const dict = {
+        zh: {
+            title: "貴賓席位申請登記",
+            nameLabel: "您的完整姓名 (Full Name)",
+            namePlaceholder: "請輸入中文或英文姓名",
+            emailLabel: "電子信箱 (Email Address)",
+            emailPlaceholder: "attendant@example.com",
+            submitBtn: "提交貴賓席申請",
+            submittingBtn: "提交中...",
+            backBtn: "← 返回貴賓登入",
+            nameRequired: "請輸入您的完整姓名。",
+            emailRequired: "請輸入正確的電子信箱。",
+            timeoutErr: "伺服器回應逾時，請檢查網路連線或稍後再試。",
+            queryFailed: "查詢失敗: ",
+            existingApproved: "此信箱已是 VIS 貴賓，點選下方返回登入即可進入。",
+            existingPending: "此信箱已在申請審核中，大會核准後將會發送通知信，請耐心等候。",
+            existingRejected: "此信箱已被審核退回，如有疑問請洽 visvipteam@gmail.com。",
+            insertFailed: "提交登記失敗: ",
+            submitSuccess: "✓ 申請提交成功！大會審核通過後，專屬邀請連結將會自動發送至您的信箱。"
+        },
+        en: {
+            title: "VIP Seat Request",
+            nameLabel: "Your Full Name",
+            namePlaceholder: "Enter your first and last name",
+            emailLabel: "Email Address",
+            emailPlaceholder: "attendant@example.com",
+            submitBtn: "Submit VIP Request",
+            submittingBtn: "Submitting...",
+            backBtn: "← Back to VIP Login",
+            nameRequired: "Please enter your full name.",
+            emailRequired: "Please enter a valid email address.",
+            timeoutErr: "Server timeout. Please check your connection or try again later.",
+            queryFailed: "Query failed: ",
+            existingApproved: "This email is already an approved VIP. Click back to login to enter.",
+            existingPending: "This email is already pending review. An invite will be sent once approved.",
+            existingRejected: "This request has been declined. Please contact visvipteam@gmail.com.",
+            insertFailed: "Submission failed: ",
+            submitSuccess: "✓ Request submitted successfully! A magic link will be emailed once approved."
+        }
+    };
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -25,14 +68,14 @@ export default function VIPApplyPage() {
         const formattedName = name.trim();
 
         if (!formattedName) {
-            setMessage('請輸入您的完整姓名。');
+            setMessage(dict[lang].nameRequired);
             setStatusType('error');
             setIsLoading(false);
             return;
         }
 
         if (!formattedEmail || !formattedEmail.includes('@')) {
-            setMessage('請輸入正確的電子信箱。');
+            setMessage(dict[lang].emailRequired);
             setStatusType('error');
             setIsLoading(false);
             return;
@@ -40,7 +83,7 @@ export default function VIPApplyPage() {
 
         // Setup a 8-second safety timeout guard to prevent infinite loading screens on network dropouts
         const timeoutPromise = new Promise((_, reject) =>
-            setTimeout(() => reject(new Error('伺服器回應逾時，請檢查網路連線或稍後再試。')), 8000)
+            setTimeout(() => reject(new Error(dict[lang].timeoutErr)), 8000)
         );
 
         try {
@@ -55,18 +98,18 @@ export default function VIPApplyPage() {
             const { data: existing, error: checkError } = await Promise.race([checkPromise, timeoutPromise]) as any;
 
             if (checkError) {
-                throw new Error(`查詢失敗: ${checkError.message}`);
+                throw new Error(`${dict[lang].queryFailed}${checkError.message}`);
             }
 
             if (existing) {
                 if (existing.status === 'Approved') {
-                    setMessage('此信箱已是 VIS 貴賓，點選下方返回登入即可進入。');
+                    setMessage(dict[lang].existingApproved);
                     setStatusType('success');
                 } else if (existing.status === 'Pending') {
-                    setMessage('此信箱已在申請審核中，大會核准後將會發送通知信，請耐心等候。');
+                    setMessage(dict[lang].existingPending);
                     setStatusType('success');
                 } else {
-                    setMessage('此信箱已被審核退回，如有疑問請洽 visvipteam@gmail.com。');
+                    setMessage(dict[lang].existingRejected);
                     setStatusType('error');
                 }
                 setIsLoading(false);
@@ -89,16 +132,16 @@ export default function VIPApplyPage() {
             const { error: insertError } = await Promise.race([insertPromise, timeoutPromise]) as any;
 
             if (insertError) {
-                throw new Error(`提交登記失敗: ${insertError.message}`);
+                throw new Error(`${dict[lang].insertFailed}${insertError.message}`);
             }
 
-            setMessage('✓ 申請提交成功！大會審核通過後，專屬邀請連結將會自動發送至您的信箱。');
+            setMessage(dict[lang].submitSuccess);
             setStatusType('success');
             setName('');
             setEmail('');
         } catch (err: any) {
             console.error('VIP Application failed:', err);
-            setMessage(`提交失敗 (詳細錯誤): ${err.message || String(err)}`);
+            setMessage(`${lang === 'zh' ? '提交失敗 (詳細錯誤): ' : 'Submission failed: '}${err.message || String(err)}`);
             setStatusType('error');
         } finally {
             setIsLoading(false);
@@ -116,6 +159,17 @@ export default function VIPApplyPage() {
                 transition={{ duration: 0.8 }}
                 className="w-full max-w-sm border border-neutral-200/60 bg-white/80 p-8 py-10 relative backdrop-blur-xl shadow-2xl flex flex-col gap-8"
             >
+                {/* Language Switch Button */}
+                <div className="absolute top-4 right-10 flex gap-1 z-20">
+                    <button 
+                        type="button"
+                        onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
+                        className="text-[9px] tracking-widest font-light border border-[#C9A96E]/30 px-2 py-0.5 text-[#C9A96E] hover:bg-[#C9A96E]/10 transition-colors uppercase cursor-pointer"
+                    >
+                        {lang === 'zh' ? 'EN' : '繁中'}
+                    </button>
+                </div>
+
                 {/* Corner accents */}
                 <div className="absolute top-4 left-4 w-2.5 h-2.5 border-t-[0.5px] border-l-[0.5px] border-[#DFBA87]"></div>
                 <div className="absolute top-4 right-4 w-2.5 h-2.5 border-t-[0.5px] border-r-[0.5px] border-[#DFBA87]"></div>
@@ -129,16 +183,16 @@ export default function VIPApplyPage() {
                         className="h-10 mx-auto brightness-95 opacity-90"
                     />
                     <p className="text-[7.5px] tracking-[0.5em] text-[#DFBA87] uppercase font-mono mt-4 font-medium">VIP Request Portal</p>
-                    <h2 className="text-sm tracking-[0.25em] font-serif uppercase font-light text-neutral-800">貴賓席位申請登記</h2>
+                    <h2 className="text-sm tracking-[0.25em] font-serif uppercase font-light text-neutral-800">{dict[lang].title}</h2>
                 </div>
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="space-y-4">
                         <div className="border-b border-neutral-200 focus-within:border-[#DFBA87] transition-all py-1">
-                            <label className="block text-[7px] tracking-widest text-neutral-500 uppercase mb-1">您的完整姓名 (Full Name)</label>
+                            <label className="block text-[7px] tracking-widest text-neutral-500 uppercase mb-1">{dict[lang].nameLabel}</label>
                             <input 
                                 type="text"
-                                placeholder="請輸入中文或英文姓名"
+                                placeholder={dict[lang].namePlaceholder}
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
                                 required
@@ -147,10 +201,10 @@ export default function VIPApplyPage() {
                             />
                         </div>
                         <div className="border-b border-neutral-200 focus-within:border-[#DFBA87] transition-all py-1">
-                            <label className="block text-[7px] tracking-widest text-neutral-500 uppercase mb-1">電子信箱 (Email Address)</label>
+                            <label className="block text-[7px] tracking-widest text-neutral-500 uppercase mb-1">{dict[lang].emailLabel}</label>
                             <input 
                                 type="email"
-                                placeholder="attendant@example.com"
+                                placeholder={dict[lang].emailPlaceholder}
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -176,7 +230,7 @@ export default function VIPApplyPage() {
                             disabled={isLoading}
                             className="w-full py-3.5 bg-[#DFBA87] hover:bg-neutral-800 hover:text-white text-black font-semibold text-[10px] tracking-[0.4em] uppercase disabled:opacity-50 transition-all duration-300 cursor-pointer font-sans"
                         >
-                            {isLoading ? '提交中...' : '提交貴賓席申請'}
+                            {isLoading ? dict[lang].submittingBtn : dict[lang].submitBtn}
                         </button>
                         
                         <button 
@@ -184,7 +238,7 @@ export default function VIPApplyPage() {
                             onClick={() => router.push('/vip')}
                             className="w-full py-3 text-neutral-500 hover:text-black text-[9px] tracking-[0.3em] uppercase transition-colors cursor-pointer"
                         >
-                            ← 返回貴賓登入
+                            {dict[lang].backBtn}
                         </button>
                     </div>
                 </form>
