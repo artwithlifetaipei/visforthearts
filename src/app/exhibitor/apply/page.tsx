@@ -511,8 +511,12 @@ export default function ExhibitorApplyPage() {
         <div className="flex items-center gap-6">
           <button 
             onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
-            className="text-[10px] tracking-widest font-light border border-[#C9A96E]/40 px-3 py-1 text-[#C9A96E] hover:bg-[#C9A96E]/10 transition-colors uppercase cursor-pointer"
+            className="flex items-center gap-1.5 text-[10px] tracking-widest font-semibold bg-[#C9A96E] text-white px-3.5 py-1.5 hover:bg-[#B39359] active:scale-95 transition-all duration-200 uppercase cursor-pointer shadow-sm"
+            title={lang === 'zh' ? 'Switch to English' : '切換為繁體中文'}
           >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 opacity-90">
+              <path d="M7.75 2.75a.75.75 0 0 0-1.5 0v1.258a32.987 32.987 0 0 0-3.599.278.75.75 0 1 0 .198 1.487A31.545 31.545 0 0 1 8.7 5.545 19.381 19.381 0 0 1 7 9.56a19.418 19.418 0 0 1-1.002-1.05.75.75 0 0 0-1.144.97c.4.473.845.91 1.33 1.305A19.441 19.441 0 0 1 4 12.5H2.75a.75.75 0 0 0 0 1.5h9.5a.75.75 0 0 0 0-1.5H11a19.5 19.5 0 0 1-2.184-2.195 19.38 19.38 0 0 0 1.683-3.77A31.456 31.456 0 0 1 14.25 6.8v1.45a.75.75 0 0 0 1.5 0V4a.75.75 0 0 0-.75-.75h-7.25ZM6 17.25a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1-.75-.75Z" />
+            </svg>
             {lang === 'zh' ? 'EN' : '繁中'}
           </button>
           

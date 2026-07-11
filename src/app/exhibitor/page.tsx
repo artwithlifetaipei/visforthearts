@@ -39,6 +39,96 @@ export default function ExhibitorLandingPage() {
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
   const [cursorHovered, setCursorHovered] = useState(false);
 
+  // Language toggle
+  const [lang, setLang] = useState<'zh' | 'en'>('zh');
+
+  const dict = {
+    zh: {
+      navBack: '返回官網 BACK TO HOME',
+      loggedIn: '已登入 LOGGED IN',
+      logout: '登出 LOGOUT',
+      heroTag: '2027 VIS Lifestyle and Art Festival',
+      heroTitle: '參展專屬申請入口',
+      heroSub: 'Exhibitor Application Portal',
+      heroCopy: '作為持續聚集著品味人士所建構而成的場域，\n在台灣，VIS 不只是一個博覽會，\n而是一個最適合「高客單價品牌」的導客解決方案。',
+      countdownLabel: '申請截止倒數 COUNTDOWN TO DEADLINE',
+      ctaApply: '立即線上申請 APPLY ONLINE',
+      ctaGuidelines: '2027 簡章 2027 Guidelines',
+      ctaBrandLogin: '已獲准入選品牌登入 BRAND LOGIN',
+      currentEmail: '目前登入帳號 CURRENT EMAIL',
+      step1Title: '階段一：線上申請與審查',
+      step1Body: '填寫參展品牌基本資料、提報產品照片與陳列規劃概念，並於線上完成意向保證金支付。',
+      step1Note: '*若評選未通過，大會將於公告後將意向保證金全額原路退還。',
+      step2Title: '階段二：協作平台與合約簽署',
+      step2Body: '評選通過後，獲選品牌將收到數位邀請函，登入協作儀表板 (Brand Portal) 線上簽署展位規範、繳納尾款並提報媒體素材。',
+      step2Note: '*需經評選委員會評選通過，針對正式入選品牌使用',
+      processTitle: '申請流程',
+      processSub: 'Application Procedure',
+      timelineTitle: '關鍵日程',
+      timelineSub: 'Key Dates & Timeline',
+      contactBody: '如對參展規範、費用或古蹟陳列規定有任何疑問，歡迎來信諮詢執行委員會秘書處。',
+      contactLabel: '大會聯絡信箱：',
+      authTitle: '申請參展入口',
+      authSub: 'EXHIBITOR APPLICATION ENTRANCE',
+      authDesc: '展區規劃、展位費用及大會關鍵日程僅供註冊品牌查閱。\n請先登入或註冊您的帳號以解鎖瀏覽。',
+      tabSignup: '註冊 SIGN UP',
+      tabLogin: '登入 LOG IN',
+      labelEmail: '電子信箱 Email Address',
+      labelPassword: '密碼 Password',
+      labelConfirmPassword: '確認密碼 Confirm Password',
+      btnSignup: '註冊並解鎖 SIGN UP & UNLOCK',
+      btnLogin: '登入並解鎖 LOG IN & UNLOCK',
+      btnProcessing: '處理中 PROCESSING...',
+      modalTitle: '已獲准入選品牌登入',
+      modalSub: 'APPROVED BRAND LOGIN',
+      modalDesc: '請輸入您當初申請時設定的帳號與密碼。\n登入成功後，將直接跳轉至參展協作平台。',
+      modalVerify: '驗證並登入 VERIFY & LOGIN',
+      modalVerifying: '驗證登入中 VERIFYING...',
+    },
+    en: {
+      navBack: 'BACK TO HOME',
+      loggedIn: 'LOGGED IN',
+      logout: 'LOGOUT',
+      heroTag: '2027 VIS Lifestyle and Art Festival',
+      heroTitle: 'Exhibitor Application Portal',
+      heroSub: 'Exclusive Exhibitor Entrance',
+      heroCopy: 'As a curated gathering place for discerning individuals,\nVIS is more than a trade fair in Taiwan —\nit is the premier customer-acquisition platform for high-end brands.',
+      countdownLabel: 'COUNTDOWN TO DEADLINE',
+      ctaApply: 'APPLY ONLINE',
+      ctaGuidelines: '2027 Guidelines',
+      ctaBrandLogin: 'APPROVED BRAND LOGIN',
+      currentEmail: 'CURRENT EMAIL',
+      step1Title: 'Phase 1: Online Application & Review',
+      step1Body: 'Complete your brand profile, submit product photos and display concept, then pay the intent deposit online.',
+      step1Note: '*If not selected, the full deposit will be refunded after the announcement.',
+      step2Title: 'Phase 2: Brand Portal & Contract Signing',
+      step2Body: 'Approved brands will receive a digital invitation to log in to the Brand Portal for contract signing, balance payment, and media asset submission.',
+      step2Note: '*For approved brands only, subject to selection committee review.',
+      processTitle: 'Application Process',
+      processSub: 'Application Procedure',
+      timelineTitle: 'Key Dates',
+      timelineSub: 'Key Dates & Timeline',
+      contactBody: 'For questions regarding exhibition regulations, fees, or historic venue display rules, please contact the Secretariat of the Executive Committee.',
+      contactLabel: 'Contact Email:',
+      authTitle: 'Exhibitor Application Portal',
+      authSub: 'EXHIBITOR APPLICATION ENTRANCE',
+      authDesc: 'Zone layouts, booth pricing, and key dates are visible to registered brands only.\nPlease sign in or register to unlock full details.',
+      tabSignup: 'SIGN UP',
+      tabLogin: 'LOG IN',
+      labelEmail: 'Email Address',
+      labelPassword: 'Password',
+      labelConfirmPassword: 'Confirm Password',
+      btnSignup: 'SIGN UP & UNLOCK',
+      btnLogin: 'LOG IN & UNLOCK',
+      btnProcessing: 'PROCESSING...',
+      modalTitle: 'Approved Brand Login',
+      modalSub: 'APPROVED BRAND LOGIN',
+      modalDesc: 'Enter the email and password you used during your application.\nYou will be redirected to the Brand Portal upon successful login.',
+      modalVerify: 'VERIFY & LOGIN',
+      modalVerifying: 'VERIFYING...',
+    },
+  };
+
   useEffect(() => {
     setMounted(true);
     
@@ -360,24 +450,39 @@ export default function ExhibitorLandingPage() {
         <div className="flex items-center gap-6">
           {session && (
             <div className="hidden sm:flex items-center gap-2 text-[10px] text-[#0D0D0D]/50 font-light font-sans-outfit tracking-wider uppercase">
-              <span>已登入 LOGGED IN：{session.user?.email}</span>
+              <span>{dict[lang].loggedIn}：{session.user?.email}</span>
               <button 
                 onClick={handleLogout} 
                 className="text-[#C9A96E] hover:text-[#B39359] hover:underline ml-1.5 cursor-pointer font-medium uppercase border-0 bg-transparent"
                 onMouseEnter={() => setCursorHovered(true)} 
                 onMouseLeave={() => setCursorHovered(false)}
               >
-                登出 LOGOUT
+                {dict[lang].logout}
               </button>
             </div>
           )}
+
+          {/* Language Toggle Button */}
+          <button
+            onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
+            className="flex items-center gap-1.5 text-[10px] tracking-widest font-semibold bg-[#C9A96E] text-white px-3.5 py-1.5 hover:bg-[#B39359] active:scale-95 transition-all duration-200 uppercase cursor-pointer shadow-sm"
+            title={lang === 'zh' ? 'Switch to English' : '切換為繁體中文'}
+            onMouseEnter={() => setCursorHovered(true)}
+            onMouseLeave={() => setCursorHovered(false)}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3 h-3 opacity-90">
+              <path d="M7.75 2.75a.75.75 0 0 0-1.5 0v1.258a32.987 32.987 0 0 0-3.599.278.75.75 0 1 0 .198 1.487A31.545 31.545 0 0 1 8.7 5.545 19.381 19.381 0 0 1 7 9.56a19.418 19.418 0 0 1-1.002-1.05.75.75 0 0 0-1.144.97c.4.473.845.91 1.33 1.305A19.441 19.441 0 0 1 4 12.5H2.75a.75.75 0 0 0 0 1.5h9.5a.75.75 0 0 0 0-1.5H11a19.5 19.5 0 0 1-2.184-2.195 19.38 19.38 0 0 0 1.683-3.77A31.456 31.456 0 0 1 14.25 6.8v1.45a.75.75 0 0 0 1.5 0V4a.75.75 0 0 0-.75-.75h-7.25ZM6 17.25a.75.75 0 0 1 .75-.75h6.5a.75.75 0 0 1 0 1.5h-6.5a.75.75 0 0 1-.75-.75Z" />
+            </svg>
+            {lang === 'zh' ? 'EN' : '繁中'}
+          </button>
+
           <Link 
             href="/" 
             className="text-[10px] tracking-[0.25em] font-light hover:text-[#C9A96E] transition-colors duration-300 flex items-center gap-2 border-b border-transparent hover:border-[#C9A96E] pb-0.5 uppercase"
             onMouseEnter={() => setCursorHovered(true)} 
             onMouseLeave={() => setCursorHovered(false)}
           >
-            返回官網 BACK TO HOME
+            {dict[lang].navBack}
           </Link>
         </div>
       </nav>
@@ -410,7 +515,7 @@ export default function ExhibitorLandingPage() {
           transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
           className="text-xs md:text-sm tracking-[0.4em] text-[#C9A96E] font-semibold uppercase mb-4"
         >
-          2027 VIS Lifestyle and Art Festival
+          {dict[lang].heroTag}
         </motion.p>
         
         <motion.h1 
@@ -419,7 +524,7 @@ export default function ExhibitorLandingPage() {
           transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
           className="text-3xl md:text-5xl font-serif-garamond tracking-[0.1em] font-light leading-tight mb-3 text-[#0D0D0D]"
         >
-          參展專屬申請入口
+          {dict[lang].heroTitle}
         </motion.h1>
         
         <motion.p 
@@ -428,7 +533,7 @@ export default function ExhibitorLandingPage() {
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="text-xs md:text-sm font-serif-garamond tracking-[0.3em] text-[#0D0D0D]/40 uppercase mb-10"
         >
-          Exhibitor Application Portal
+          {dict[lang].heroSub}
         </motion.p>
 
         <motion.p 
@@ -437,7 +542,9 @@ export default function ExhibitorLandingPage() {
           transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
           className="text-base md:text-lg max-w-3xl text-[#0D0D0D]/85 font-light leading-relaxed tracking-wider mb-10 font-serif-garamond italic"
         >
-          作為持續聚集著品味人士所建構而成的場域，<br />在台灣，VIS 不只是一個博覽會，<br />而是一個最適合「高客單價品牌」的<span className="whitespace-nowrap">導客解決方案。</span>
+          {dict[lang].heroCopy.split('\n').map((line, i, arr) => (
+            <span key={i}>{line}{i < arr.length - 1 && <br />}</span>
+          ))}
         </motion.p>
         
         {/* Countdown Timer & Hero CTA Buttons Side by Side for balanced landscape layout */}
@@ -452,7 +559,7 @@ export default function ExhibitorLandingPage() {
               <div className="absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/30 to-transparent" />
               <div className="flex items-center justify-center gap-2 mb-4 text-[#C9A96E]">
                 <Clock className="w-4 h-4" />
-                <span className="text-[10px] tracking-[0.3em] font-semibold uppercase">申請截止倒數 COUNTDOWN TO DEADLINE</span>
+                <span className="text-[10px] tracking-[0.3em] font-semibold uppercase">{dict[lang].countdownLabel}</span>
               </div>
               <div className="grid grid-cols-4 gap-3 md:gap-5">
                 <div className="border border-[#C9A96E]/15 p-2 bg-white/40">
@@ -489,7 +596,7 @@ export default function ExhibitorLandingPage() {
                 onMouseEnter={() => setCursorHovered(true)} 
                 onMouseLeave={() => setCursorHovered(false)}
               >
-                立即線上申請 APPLY ONLINE
+                {dict[lang].ctaApply}
               </Link>
             ) : (
               <button 
@@ -498,7 +605,7 @@ export default function ExhibitorLandingPage() {
                 onMouseEnter={() => setCursorHovered(true)} 
                 onMouseLeave={() => setCursorHovered(false)}
               >
-                立即線上申請 APPLY ONLINE
+                {dict[lang].ctaApply}
               </button>
             )}
             <a 
@@ -507,7 +614,7 @@ export default function ExhibitorLandingPage() {
               onMouseEnter={() => setCursorHovered(true)} 
               onMouseLeave={() => setCursorHovered(false)}
             >
-              2027 簡章 2027 Guidelines
+              {dict[lang].ctaGuidelines}
             </a>
             <button
               onClick={() => {
@@ -524,7 +631,7 @@ export default function ExhibitorLandingPage() {
               onMouseEnter={() => setCursorHovered(true)} 
               onMouseLeave={() => setCursorHovered(false)}
             >
-              已獲准入選品牌登入 BRAND LOGIN
+              {dict[lang].ctaBrandLogin}
             </button>
           </motion.div>
           {session && (
@@ -534,14 +641,14 @@ export default function ExhibitorLandingPage() {
               transition={{ delay: 0.6 }}
               className="text-[10px] text-[#0D0D0D]/50 font-light tracking-widest mt-4 text-center z-10"
             >
-              目前登入帳號 CURRENT EMAIL: <strong className="text-[#0D0D0D] font-medium">{session.user?.email}</strong> 
+              {dict[lang].currentEmail}: <strong className="text-[#0D0D0D] font-medium">{session.user?.email}</strong> 
               <button 
                 onClick={handleLogout}
                 className="ml-3 text-[#C9A96E] hover:text-[#B39359] underline bg-transparent border-0 cursor-pointer text-[10px] tracking-widest font-semibold uppercase"
                 onMouseEnter={() => setCursorHovered(true)} 
                 onMouseLeave={() => setCursorHovered(false)}
               >
-                登出 LOGOUT
+                {dict[lang].logout}
               </button>
             </motion.p>
           )}
@@ -559,10 +666,10 @@ export default function ExhibitorLandingPage() {
           <section className="bg-white/70 border-y border-[#0D0D0D]/5 py-24 px-6 md:px-12 relative z-10">
             <div className="max-w-5xl mx-auto">
               <h2 className="text-2xl md:text-3xl font-serif-garamond text-center font-light tracking-[0.1em] mb-2 text-[#0D0D0D]">
-                申請流程
+                {dict[lang].processTitle}
               </h2>
               <p className="text-[10px] text-center text-[#0D0D0D]/40 font-light tracking-[0.25em] uppercase mb-16">
-                Application Procedure
+                {dict[lang].processSub}
               </p>
               
               <div className="grid md:grid-cols-2 gap-8 relative">
@@ -574,13 +681,13 @@ export default function ExhibitorLandingPage() {
                     </div>
                     <div className="flex items-center gap-2 mb-4">
                       <Clock className="w-5 h-5 text-[#C9A96E]" />
-                      <h3 className="text-sm font-semibold text-[#0D0D0D]/85 tracking-[0.2em] uppercase">階段一：線上申請與審查</h3>
+                      <h3 className="text-sm font-semibold text-[#0D0D0D]/85 tracking-[0.2em] uppercase">{dict[lang].step1Title}</h3>
                     </div>
                     <p className="text-xs text-[#0D0D0D]/75 font-light leading-relaxed">
-                      填寫參展品牌基本資料、提報產品照片與陳列規劃概念，並於線上完成意向保證金支付。
+                      {dict[lang].step1Body}
                     </p>
                     <div className="mt-6 pt-4 border-t border-[#0D0D0D]/5 text-[10px] text-[#C9A96E] font-medium tracking-wider">
-                      *若評選未通過，大會將於公告後將意向保證金全額原路退還。
+                      {dict[lang].step1Note}
                     </div>
                   </div>
                 </div>
@@ -593,13 +700,13 @@ export default function ExhibitorLandingPage() {
                     </div>
                     <div className="flex items-center gap-2 mb-4">
                       <ShieldCheck className="w-5 h-5 text-[#C9A96E]" />
-                      <h3 className="text-sm font-semibold text-[#0D0D0D]/85 tracking-[0.2em] uppercase">階段二：協作平台與合約簽署</h3>
+                      <h3 className="text-sm font-semibold text-[#0D0D0D]/85 tracking-[0.2em] uppercase">{dict[lang].step2Title}</h3>
                     </div>
                     <p className="text-xs text-[#0D0D0D]/75 font-light leading-relaxed">
-                      評選通過後，獲選品牌將收到數位邀請函，登入協作儀表板 (Brand Portal) 線上簽署展位規範、繳納尾款並提報媒體素材。
+                      {dict[lang].step2Body}
                     </p>
                     <div className="mt-6 pt-4 border-t border-[#0D0D0D]/5 text-[10px] text-[#C9A96E] font-medium tracking-wider">
-                      *需經評選委員會評選通過，針對正式入選品牌使用
+                      {dict[lang].step2Note}
                     </div>
                   </div>
                 </div>
@@ -613,10 +720,10 @@ export default function ExhibitorLandingPage() {
           <section className="bg-white/80 border-y border-[#0D0D0D]/5 py-24 px-6 md:px-12 relative z-10">
             <div className="max-w-5xl mx-auto">
               <h2 className="text-2xl md:text-3xl font-serif-garamond text-center font-light tracking-[0.1em] mb-2 text-[#0D0D0D]">
-                關鍵日程
+                {dict[lang].timelineTitle}
               </h2>
               <p className="text-[10px] text-center text-[#0D0D0D]/40 font-light tracking-[0.25em] uppercase mb-16">
-                Key Dates & Timeline
+                {dict[lang].timelineSub}
               </p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative">
                 {KEY_DATES.map((item, idx) => (
@@ -640,7 +747,7 @@ export default function ExhibitorLandingPage() {
           {/* Contact & Final CTA */}
           <section className="max-w-3xl mx-auto px-6 py-28 text-center relative z-10">
             <p className="text-sm text-[#0D0D0D]/60 font-light leading-relaxed tracking-wider mb-10 font-serif-garamond">
-              如對參展規範、費用或古蹟陳列規定有任何疑問，歡迎來信諮詢執行委員會秘書處。
+              {dict[lang].contactBody}
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-5 mb-10">
@@ -650,13 +757,13 @@ export default function ExhibitorLandingPage() {
                 onMouseEnter={() => setCursorHovered(true)} 
                 onMouseLeave={() => setCursorHovered(false)}
               >
-                立即線上申請 APPLY ONLINE
+                {dict[lang].ctaApply}
               </Link>
             </div>
 
             <div className="flex justify-center items-center gap-2 text-xs text-[#0D0D0D]/50 font-mono">
               <Mail className="w-4 h-4 text-[#C9A96E]" />
-              <span>大會聯絡信箱：</span>
+              <span>{dict[lang].contactLabel}</span>
               <a 
                 href="mailto:artwithlifetaipei@gmail.com" 
                 className="text-[#C9A96E] hover:text-[#B39359] hover:underline font-medium"
@@ -677,13 +784,15 @@ export default function ExhibitorLandingPage() {
                 <ShieldCheck className="w-5 h-5" />
               </div>
               <h2 className="text-xl font-serif-garamond text-[#0D0D0D] font-normal tracking-[0.1em] text-center mb-1">
-                申請參展入口
+                {dict[lang].authTitle}
               </h2>
               <p className="text-[9px] text-[#0D0D0D]/40 font-light tracking-[0.25em] uppercase text-center mb-6">
-                EXHIBITOR APPLICATION ENTRANCE
+                {dict[lang].authSub}
               </p>
               <p className="text-xs text-[#0D0D0D]/60 font-light leading-relaxed text-center mb-8 font-serif-garamond">
-                展區規劃、展位費用及大會關鍵日程僅供註冊品牌查閱。<br/>請先登入或註冊您的帳號以解鎖瀏覽。
+                {dict[lang].authDesc.split('\n').map((line, i, arr) => (
+                  <span key={i}>{line}{i < arr.length - 1 && <br/>}</span>
+                ))}
               </p>
 
               {/* Form Tabs */}
@@ -700,7 +809,7 @@ export default function ExhibitorLandingPage() {
                   onMouseEnter={() => setCursorHovered(true)} 
                   onMouseLeave={() => setCursorHovered(false)}
                 >
-                  註冊 SIGN UP
+                  {dict[lang].tabSignup}
                 </button>
                 <button
                   type="button"
@@ -714,13 +823,13 @@ export default function ExhibitorLandingPage() {
                   onMouseEnter={() => setCursorHovered(true)} 
                   onMouseLeave={() => setCursorHovered(false)}
                 >
-                  登入 LOG IN
+                  {dict[lang].tabLogin}
                 </button>
               </div>
 
               <form onSubmit={authMode === 'register' ? handleSignUp : handleLogIn} className="space-y-6 text-left">
                 <div className="relative border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
-                  <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">電子信箱 Email Address</label>
+                  <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">{dict[lang].labelEmail}</label>
                   <input
                     type="email"
                     value={email}
@@ -735,7 +844,7 @@ export default function ExhibitorLandingPage() {
                 </div>
 
                 <div className="relative border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
-                  <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">密碼 Password</label>
+                  <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">{dict[lang].labelPassword}</label>
                   <input
                     type="password"
                     value={password}
@@ -752,7 +861,7 @@ export default function ExhibitorLandingPage() {
 
                 {authMode === 'register' && (
                   <div className="relative border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
-                    <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">確認密碼 Confirm Password</label>
+                    <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">{dict[lang].labelConfirmPassword}</label>
                     <input
                       type="password"
                       value={confirmPassword}
@@ -778,12 +887,12 @@ export default function ExhibitorLandingPage() {
                   {authLoading ? (
                     <span className="flex items-center gap-2">
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                      處理中 PROCESSING...
+                      {dict[lang].btnProcessing}
                     </span>
                   ) : authMode === 'register' ? (
-                    '註冊並解鎖 SIGN UP & UNLOCK'
+                    dict[lang].btnSignup
                   ) : (
-                    '登入並解鎖 LOG IN & UNLOCK'
+                    dict[lang].btnLogin
                   )}
                 </button>
 
@@ -837,18 +946,20 @@ export default function ExhibitorLandingPage() {
                 </div>
                 
                 <h2 className="text-xl font-serif-garamond text-[#DFBA87] font-normal tracking-[0.1em] text-center mb-1">
-                  已獲准入選品牌登入
+                  {dict[lang].modalTitle}
                 </h2>
                 <p className="text-[9px] text-neutral-400 font-light tracking-[0.25em] uppercase text-center mb-6">
-                  APPROVED BRAND LOGIN
+                  {dict[lang].modalSub}
                 </p>
                 <p className="text-xs text-neutral-400 font-light leading-relaxed text-center mb-8 font-serif-garamond">
-                  請輸入您當初申請時設定的帳號與密碼。<br/>登入成功後，將直接跳轉至參展協作平台。
+                  {dict[lang].modalDesc.split('\n').map((line, i, arr) => (
+                    <span key={i}>{line}{i < arr.length - 1 && <br/>}</span>
+                  ))}
                 </p>
 
                 <form onSubmit={handleModalLogin} className="space-y-6 text-left">
                   <div className="relative border-b border-white/10 focus-within:border-[#C9A96E] transition-colors duration-300">
-                    <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">電子信箱 Email Address</label>
+                    <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">{dict[lang].labelEmail}</label>
                     <input
                       type="email"
                       value={modalEmail}
@@ -863,7 +974,7 @@ export default function ExhibitorLandingPage() {
                   </div>
 
                   <div className="relative border-b border-white/10 focus-within:border-[#C9A96E] transition-colors duration-300">
-                    <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">密碼 Password</label>
+                    <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">{dict[lang].labelPassword}</label>
                     <input
                       type="password"
                       value={modalPassword}
@@ -888,10 +999,10 @@ export default function ExhibitorLandingPage() {
                     {modalLoading ? (
                       <span className="flex items-center gap-2">
                         <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                        驗證登入中 VERIFYING...
+                        {dict[lang].modalVerifying}
                       </span>
                     ) : (
-                      '驗證並登入 VERIFY & LOGIN'
+                      dict[lang].modalVerify
                     )}
                   </button>
 
