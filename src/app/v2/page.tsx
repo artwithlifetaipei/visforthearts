@@ -2,9 +2,45 @@
 
 import { useEffect, useRef, useState } from 'react';
 
+const quotes = [
+    {
+        text: "當美感與人文價值能以更快的速度在社會中產生影響，那將是十分值得俱樂部貴賓投入支持的方向。因為這樣的支持，影響的不只是藝術領域，而是整體文化環境的累積與深化。",
+        author: "Looom Club 共同創辦人 Bonny Liu",
+        image: "/quote_1.jpg"
+    },
+    {
+        text: "當美感與人文美學能在社會中更快地被傳遞與感受，其所帶來的影響，往往超乎我們的想像。若能找到一種方式，讓這樣的擴散持續發酵，對俱樂部的貴賓而言，所支持的不只是藝術，而是一種讓世界更柔軟的選擇。",
+        author: "Looom Club Official Partner Connie Chang",
+        image: "/quote_2.jpg"
+    },
+    {
+        text: "我們一直相信，身體是靈魂的載具。你如何照顧身體，不只是冰冷的健康管理，而是決定你能否更細緻地感受、體驗世界的每一個瞬間。當身體被好好安放、感官重新打開，我們就能更享受當下，也更願意把維持健康變成日常的生活方式，而不是短期自律或焦慮式補救。VIS 正好是能落實這份品牌哲學的完美存在，「健康」不再被簡化為成分、功效，而是一種更完整、更有質感的生活體驗。",
+        author: "elaceite 有好研製",
+        image: "/quote_3.jpg"
+    },
+    {
+        text: "讓 葭 CHIA 的鏡花水月得以真實，讓都會生活在 VIS 展區方寸裡得以夢幻。",
+        author: "葭 CHIA",
+        image: "/quote_4.jpg"
+    },
+    {
+        text: "對 Everijoy 而言，這次參與 VIS Lifestyle and Art Festival，是一次能更具體、也更立體地向更多人傳遞品牌理念的珍貴經驗。我們一直希望透過花，帶來溫柔、浪漫且具有療癒力量的感受，而 VIS 提供了一個高度策展、且能被真正理解的場域，讓花藝不只是被觀看，而是成為一種被感受、被回應的藝術體驗。",
+        author: "Everijoy Floral Boutique",
+        image: "/quote_5.png"
+    }
+];
+
 export default function V2LandingPage() {
     const navRef = useRef<HTMLElement>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [quoteIndex, setQuoteIndex] = useState(0);
+
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setQuoteIndex((prev) => (prev + 1) % 5);
+        }, 8000);
+        return () => clearInterval(timer);
+    }, []);
 
     useEffect(() => {
         const scripts = [
@@ -273,7 +309,153 @@ export default function V2LandingPage() {
                 .v2-footer-links { display: flex; justify-content: center; gap: 3rem; margin: 3rem 0; font-size: 11px; text-transform: uppercase; letter-spacing: 0.2em; opacity: 0.4; }
                 .v2-footer-link { text-decoration: none; color: inherit; }
 
+                /* Quote Carousel Section */
+                .quote-section {
+                    position: relative;
+                    padding: 12vh 10vw;
+                    background: #FAF9F6;
+                    border-top: 1px solid var(--v2-border);
+                    border-bottom: 1px solid var(--v2-border);
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                }
+                .quote-container {
+                    width: 100%;
+                    max-width: 1100px;
+                    margin: 0 auto;
+                    display: flex;
+                    align-items: center;
+                    gap: 6rem;
+                    min-height: 480px;
+                }
+                .quote-image-side {
+                    width: 45%;
+                    aspect-ratio: 1/1;
+                    overflow: hidden;
+                    position: relative;
+                    border: 1px solid rgba(201, 169, 110, 0.25);
+                    box-shadow: 0 20px 50px rgba(0,0,0,0.03);
+                    background: #FFF;
+                    flex-shrink: 0;
+                }
+                .quote-image-wrapper {
+                    position: relative;
+                    width: 100%;
+                    height: 100%;
+                    overflow: hidden;
+                }
+                .quote-image-wrapper img {
+                    position: absolute;
+                    width: 122%;
+                    height: 145%;
+                    top: -12.5%;
+                    left: -11%;
+                    object-fit: cover;
+                    transition: opacity 0.8s ease-in-out, transform 12s ease-out;
+                }
+                .quote-text-side {
+                    width: 55%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                    position: relative;
+                    min-height: 380px;
+                }
+                .quote-slide {
+                    position: absolute;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    opacity: 0;
+                    pointer-events: none;
+                    transition: opacity 0.6s ease-in-out;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                }
+                .quote-slide.active {
+                    opacity: 1;
+                    pointer-events: auto;
+                    position: relative;
+                }
+                .quote-icon {
+                    font-size: 3.5rem;
+                    font-family: var(--v2-font-serif);
+                    color: var(--v2-gold);
+                    line-height: 1;
+                    margin-bottom: 1.25rem;
+                    opacity: 0.35;
+                }
+                .quote-body {
+                    font-family: var(--v2-font-serif);
+                    font-size: 1.35rem;
+                    line-height: 1.85;
+                    color: var(--v2-text);
+                    font-style: italic;
+                    font-weight: 300;
+                    margin-bottom: 2.5rem;
+                    letter-spacing: 0.02em;
+                }
+                .quote-author {
+                    font-size: 0.82rem;
+                    letter-spacing: 0.22em;
+                    text-transform: uppercase;
+                    color: var(--v2-gold);
+                    align-self: flex-end;
+                    font-weight: 500;
+                    border-bottom: 1px solid rgba(201,169,110,0.25);
+                    padding-bottom: 0.4rem;
+                }
+                .quote-nav {
+                    display: flex;
+                    justify-content: center;
+                    gap: 1.25rem;
+                    margin-top: 3.5rem;
+                }
+                .quote-dot {
+                    width: 7px;
+                    height: 7px;
+                    border-radius: 50%;
+                    background: #E0DFDB;
+                    border: none;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    padding: 0;
+                }
+                .quote-dot.active {
+                    background: var(--v2-gold);
+                    transform: scale(1.35);
+                }
+
                 @media (max-width: 768px) {
+                    .quote-section {
+                        padding: 8vh 6vw;
+                    }
+                    .quote-container {
+                        flex-direction: column;
+                        gap: 2.5rem;
+                        min-height: auto;
+                    }
+                    .quote-image-side {
+                        width: 90%;
+                        max-width: 320px;
+                        aspect-ratio: 1/1;
+                    }
+                    .quote-text-side {
+                        width: 100%;
+                        min-height: auto;
+                    }
+                    .quote-body {
+                        font-size: 1.12rem;
+                        line-height: 1.75;
+                        margin-bottom: 2rem;
+                        text-align: justify;
+                    }
+                    .quote-nav {
+                        margin-top: 2rem;
+                    }
                     nav { padding: 1.5rem 6vw; }
                     .v2-nav-links { display: none; }
                     .v2-hero { flex-direction: column; padding-bottom: 10vh; }
@@ -319,6 +501,51 @@ export default function V2LandingPage() {
                             Established in 2024. Curating Aesthetic Dialogues with Spirit.
                         </h1>
                     </div>
+                </div>
+            </section>
+
+            {/* Quote Carousel Section */}
+            <section className="quote-section">
+                <div className="quote-container">
+                    <div className="quote-image-side">
+                        <div className="quote-image-wrapper">
+                            {quotes.map((quote, idx) => (
+                                <img
+                                    key={idx}
+                                    src={quote.image}
+                                    alt={`Quote from ${quote.author}`}
+                                    style={{
+                                        opacity: quoteIndex === idx ? 1 : 0,
+                                        transform: quoteIndex === idx ? 'scale(1.05)' : 'scale(1.0)',
+                                        zIndex: quoteIndex === idx ? 1 : 0
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                    <div className="quote-text-side">
+                        {quotes.map((quote, idx) => (
+                            <div key={idx} className={`quote-slide ${quoteIndex === idx ? 'active' : ''}`}>
+                                <div className="quote-icon">“</div>
+                                <blockquote className="quote-body">
+                                    {quote.text}
+                                </blockquote>
+                                <div className="quote-author">
+                                    —— {quote.author}
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+                <div className="quote-nav">
+                    {quotes.map((_, idx) => (
+                        <button
+                            key={idx}
+                            onClick={() => setQuoteIndex(idx)}
+                            className={`quote-dot ${quoteIndex === idx ? 'active' : ''}`}
+                            aria-label={`Go to slide ${idx + 1}`}
+                        />
+                    ))}
                 </div>
             </section>
 
