@@ -34,10 +34,10 @@ export default function ExhibitorApplyPage() {
     website_url: '',
     instagram_url: '',
     zone_id: 'artsy', // 'artsy' | 'premier' | 'atelier'
-    booth_type: 'S01-03,S06-08', // specific booth code
-    zone_preference_1: '藝蕙品牌展區 - S01-03,S06-08 展台式展位 - S01-03,S06-08 (近主入口處) (NT$42,000)',
-    zone_preference_2: '精鑑品牌展區 - M9-M15 展台式展位 - M9 - M15 (離主入口最近) (NT$42,000)',
-    zone_preference_3: '匠心藝藏品牌展區 - A-ENTRANCE 500*460cm 獨立展位 - 入口處兩側 (NT$108,000)',
+    booth_type: 'A01', // specific booth code
+    zone_preference_1: '明日經典展區 - A01 展台式展位 - A01 (近主入口處) (NT$42,000)',
+    zone_preference_2: '文化實體展區 - A4 展台式展位 - A4 (離主入口最近) (NT$42,000)',
+    zone_preference_3: '匠心藝藏展區 - B1 500*460cm 獨立展位 B1 - 入口處兩側 (NT$108,000)',
     concept_brief: '',
     deposit_proof_base64: '',
     deposit_proof_filename: '',
@@ -51,7 +51,7 @@ export default function ExhibitorApplyPage() {
       title: "參展意向申請登記",
       backBtn: "返回申請說明 BACK",
       step1: "1. 品牌基本資料",
-      step2: "2. 展區意向選擇",
+      step2: "2. 展位意向選擇",
       step3: "3. 保證金繳交",
       step4: "4. 確認送出",
       brandZhLabel: "品牌中文名稱 *",
@@ -80,7 +80,7 @@ export default function ExhibitorApplyPage() {
       successSubText: "若是成功入選後，大會工作小組將主動與您對接後續行政與古蹟策展事宜",
       backHome: "返回官網首頁",
       floorPlanTitle: "展位平面參考圖 Floor Plan Reference",
-      floorPlanNote: "* 中山堂展位配置圖：包含 KOL A/B 特展區、M01-M15 精鑑品牌展區及 S01-S15 藝蕙品牌展區。中央主走道寬 280cm，安全淨空 50cm，展位新間隔 65cm。",
+      floorPlanNote: "* 展位配置說明：展區將會分別為 DISPLAY STAND 展台式展位 (A1-A5) 與 INDEPENDENT BOOTH 獨立展位 (B1-B3) 兩種，此展位價格將因位置而異。例如：大展出入口兩側展位價格最高。",
       specTitle: "展位規格與價格 SPEC",
       includeTitle: "展位包含項目 INCLUDES",
       noteTitle: "說明 NOTE",
@@ -124,7 +124,7 @@ export default function ExhibitorApplyPage() {
       title: "Exhibitor Application Portal",
       backBtn: "BACK TO INFO",
       step1: "1. Brand Profile",
-      step2: "2. Zone Preference",
+      step2: "2. Booth Preference",
       step3: "3. Deposit Proof",
       step4: "4. Confirmation",
       brandZhLabel: "Brand Name (Chinese) *",
@@ -153,7 +153,7 @@ export default function ExhibitorApplyPage() {
       successSubText: "Upon selection, our working group will contact you for subsequent administrative and historic site curation details.",
       backHome: "Back to Home",
       floorPlanTitle: "Exhibition Floor Plan Reference",
-      floorPlanNote: "* Zhongshan Hall Layout: Includes special curated zones KOL A/B, Premier Brand Sector (M01-M15), and Artsy Brand Sector (S01-S15). The main walkway is 280cm wide, with 50cm clearance and 65cm booth gaps.",
+      floorPlanNote: "* Booth layout: Stalls are divided into DISPLAY STAND (A1-A5) and INDEPENDENT BOOTH (B1-B3). Booth pricing varies by location, with booths on both sides of main entrances having the highest fee.",
       specTitle: "Booth Dimensions & Price",
       includeTitle: "Booth Inclusions",
       noteTitle: "Note",
@@ -729,6 +729,29 @@ export default function ExhibitorApplyPage() {
                 <h2 className="text-xl md:text-2xl font-serif-garamond font-normal tracking-wider mb-6 text-[#C9A96E] pb-2 border-b border-[#0D0D0D]/5">
                   {dict[lang].step2} <span className="font-mono text-xs text-neutral-400 font-light ml-2">Exhibition Preference</span>
                 </h2>
+
+                {/* Visual Layout Info Callout */}
+                <div className="mb-8 p-6 bg-[#FAF9F6] border border-[#C9A96E]/20 text-[#0D0D0D]/90 text-sm leading-relaxed rounded-none shadow-sm flex flex-col md:flex-row gap-6 items-start">
+                  <div className="flex-1">
+                    <p className="font-serif-garamond text-base text-[#C9A96E] font-medium tracking-wide mb-3 uppercase">
+                      展位與展區規劃說明 / Booth & Zone Guide
+                    </p>
+                    <p className="mb-3 font-normal leading-relaxed text-[#0D0D0D]">
+                      展位規劃分為 <strong>DISPLAY STAND 展台式展位 (A1-A5)</strong> 與 <strong>INDEPENDENT BOOTH 獨立展位 (B1-B3)</strong> 兩種，其價格依展位位置有所區分。例如：大展出入口兩側展位價格最高。
+                    </p>
+                  </div>
+                  <div className="w-full md:w-px md:h-20 bg-[#C9A96E]/25 self-stretch"></div>
+                  <div className="flex-1">
+                    <p className="font-serif-garamond text-xs text-[#0D0D0D]/65 font-medium tracking-wider uppercase mb-2">
+                      三大核心規劃展區 / Three Core Sectors
+                    </p>
+                    <ul className="text-xs space-y-1 text-[#0D0D0D]/80 font-normal leading-relaxed">
+                      <li><strong>I. 明日經典展區</strong> Future Classics Sector</li>
+                      <li><strong>II. 文化實體展區</strong> Cultural Entities Sector</li>
+                      <li><strong>III. 匠心藝藏展區</strong> Designer & Atelier Brand Sector</li>
+                    </ul>
+                  </div>
+                </div>
 
                 {/* Floor Plan Image Reference */}
                 <div className="mb-8 bg-white border border-[#C9A96E]/20 p-4 rounded-none shadow-sm">
