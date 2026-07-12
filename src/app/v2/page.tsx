@@ -4,29 +4,32 @@ import { useEffect, useRef, useState } from 'react';
 
 const quotes = [
     {
-        text: "當美感與人文價值能以更快的速度在社會中產生影響，那將是十分值得俱樂部貴賓投入支持的方向。因為這樣的支持，影響的不只是藝術領域，而是整體文化環境的累積與深化。",
-        author: "Looom Club 共同創辦人 Bonny Liu",
-        image: "/quote_1.jpg"
+        text: "我們一直相信，身體是靈魂的載具。你如何照顧身體，不只是冰冷的健康管理，而是決定你能不能更細緻地感受、體驗世界的每一個瞬間。當身體被好好安放、感官重新打開，我們就更能享受當下，也更願意把維持健康變成日常的生活方式，而不是短期自律或焦慮式補救。VIS 正好是能落實這份品牌哲學的完美存在，「健康」不再被簡化為成分、功效，而是一種更完整、更有質感的生活體驗。",
+        author: "elaceite有好研製"
     },
     {
-        text: "當美感與人文美學能在社會中更快地被傳遞與感受，其所帶來的影響，往往超乎我們的想像。若能找到一種方式，讓這樣的擴散持續發酵，對俱樂部的貴賓而言，所支持的不只是藝術，而是一種讓世界更柔軟的選擇。",
-        author: "Looom Club Official Partner Connie Chang",
-        image: "/quote_2.jpg"
+        text: "對 Everijoy ⽽⾔，這次參與 VIS Lifestyle and Art Festival，是⼀次能更具體、也更⽴體地向更多人傳遞品牌理念的珍貴經驗。我們⼀直希望透過花，帶來溫柔、浪漫且具有療癒力量的感受，⽽ VIS 提供了⼀個⾼度策展、且能被真正理解的場域，讓花藝不只是被觀看，⽽是成為⼀種被感受、被回應的藝術體驗。",
+        author: "Everijoy Floral Boutique"
     },
     {
-        text: "我們一直相信，身體是靈魂的載具。你如何照顧身體，不只是冰冷的健康管理，而是決定你能否更細緻地感受、體驗世界的每一個瞬間。當身體被好好安放、感官重新打開，我們就能更享受當下，也更願意把維持健康變成日常的生活方式，而不是短期自律或焦慮式補救。VIS 正好是能落實這份品牌哲學的完美存在，「健康」不再被簡化為成分、功效，而是一種更完整、更有質感的生活體驗。",
-        author: "elaceite 有好研製",
-        image: "/quote_3.jpg"
+        text: "ayaᵃ 與 tins.ground 長期參與歐洲設計展，本次首度回台展售作品，並透過 VIS 與更多元的藏家及跨領域創作者交流，開始 founctional art 被新生代收藏家看見的可能。",
+        author: "ayaᵃ"
     },
     {
-        text: "讓 葭 CHIA 的鏡花水月得以真實，讓都會生活在 VIS 展區方寸裡得以夢幻。",
-        author: "葭 CHIA",
-        image: "/quote_4.jpg"
+        text: "透過此次展覽與來訪嘉賓的實際交流，深刻感受到實體互動所帶來的溫度與深度。在共享空間與時間的狀態下，氣味成為一種對話的起點，也讓品牌理念得以被更完整地理解與感受。",
+        author: "K度十光"
     },
     {
-        text: "對 Everijoy 而言，這次參與 VIS Lifestyle and Art Festival，是一次能更具體、也更立體地向更多人傳遞品牌理念的珍貴經驗。我們一直希望透過花，帶來溫柔、浪漫且具有療癒力量的感受，而 VIS 提供了一個高度策展、且能被真正理解的場域，讓花藝不只是被觀看，而是成為一種被感受、被回應的藝術體驗。",
-        author: "Everijoy Floral Boutique",
-        image: "/quote_5.png"
+        text: "當美感與人文價值能以更快的速度在社會中產生影響，那將是十分值得俱樂部貴賓投入支持的方向。因為這樣的支持，影響的不記是藝術領域，而是整體文化環境的累積與深化。",
+        author: "Looom Club 共同創辦人 Bonny Liu"
+    },
+    {
+        text: "當美感與人文美學能在社會中更快地被傳遞與感受，其所帶來的影響，往往超乎我們的想像。若能找到一種方式，讓這樣的擴散持續發酵，對俱樂部的貴賓而言，所支持的不限制是藝術，而是一種讓世界更柔軟的選擇。",
+        author: "Looom Club Official Partner Connie Chang"
+    },
+    {
+        text: "我一直相信，做品牌就像創作，不是為了快，而是為了走得久。比起短暫的熱度，那些值得被長久經營、反覆相遇的關係，才是奠基一個又一個偉大品牌與藝術家的根本。",
+        author: "VIS 創辦人 Amelie KUO"
     }
 ];
 
@@ -37,7 +40,7 @@ export default function V2LandingPage() {
 
     useEffect(() => {
         const timer = setInterval(() => {
-            setQuoteIndex((prev) => (prev + 1) % 5);
+            setQuoteIndex((prev) => (prev + 1) % quotes.length);
         }, 8000);
         return () => clearInterval(timer);
     }, []);
