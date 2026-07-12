@@ -555,7 +555,127 @@ export default function LandingPage() {
                         mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
                     }
                 }
-            `}</style>
+            
+                /* Metrics & About Section Styling */
+                .about-metrics-section {
+                    background: #FAF9F6;
+                    padding: 12vh 10vw;
+                    border-top: 1px solid var(--border);
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                }
+                .metrics-container {
+                    width: 100%;
+                    max-width: 1100px;
+                    display: flex;
+                    gap: 6rem;
+                    align-items: center;
+                }
+                .metrics-grid {
+                    width: 50%;
+                    display: grid;
+                    grid-template-columns: repeat(2, 1fr);
+                    gap: 2rem;
+                }
+                .metric-card {
+                    background: #FFFFFF;
+                    border: 1px solid rgba(201, 169, 110, 0.15);
+                    padding: 2rem 1.5rem;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    justify-content: center;
+                    text-align: center;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .metric-card:hover {
+                    transform: translateY(-5px);
+                    border-color: var(--gold);
+                    box-shadow: 0 15px 40px rgba(201, 169, 110, 0.08);
+                }
+                .metric-card.full-width {
+                    grid-column: span 2;
+                    padding: 2rem 3rem;
+                }
+                .metric-number {
+                    font-family: var(--font-serif);
+                    font-size: 3rem;
+                    color: var(--gold);
+                    font-weight: 300;
+                    line-height: 1;
+                    margin-bottom: 0.5rem;
+                }
+                .metric-label {
+                    font-size: 0.75rem;
+                    letter-spacing: 0.15em;
+                    color: #666666;
+                    text-transform: uppercase;
+                }
+                .metrics-divider {
+                    width: 1px;
+                    height: 350px;
+                    background: rgba(201, 169, 110, 0.25);
+                    flex-shrink: 0;
+                }
+                .metrics-text-content {
+                    width: 50%;
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: center;
+                }
+                .metrics-heading {
+                    font-family: var(--font-serif);
+                    font-size: 1.8rem;
+                    font-weight: 300;
+                    letter-spacing: 0.1em;
+                    color: var(--text);
+                    margin-bottom: 2rem;
+                }
+                .metrics-p {
+                    font-size: 0.95rem;
+                    line-height: 1.85;
+                    color: #555555;
+                    margin-bottom: 2rem;
+                    text-align: justify;
+                }
+                .metrics-highlight {
+                    font-family: var(--font-serif);
+                    font-size: 1.15rem;
+                    line-height: 1.7;
+                    font-style: italic;
+                    color: var(--gold);
+                    border-left: 2px solid var(--gold);
+                    padding-left: 1.5rem;
+                    margin-top: 1rem;
+                }
+
+                @media (max-width: 991px) {
+                    .metrics-container {
+                        flex-direction: column;
+                        gap: 4rem;
+                    }
+                    .metrics-grid {
+                        width: 100%;
+                    }
+                    .metrics-divider {
+                        width: 100%;
+                        height: 1px;
+                    }
+                    .metrics-text-content {
+                        width: 100%;
+                    }
+                }
+                @media (max-width: 480px) {
+                    .metrics-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .metric-card.full-width {
+                        grid-column: span 1;
+                    }
+                }
+`}</style>
 
             <div className="noise-overlay"></div>
             <div className="cursor-follower"><div className="cursor-dot"></div></div>
@@ -609,7 +729,7 @@ export default function LandingPage() {
                 </div>
             </div>
 
-            <section className="hero" id="about">
+            <section className="hero" id="hero">
                 <div className="hero-layout">
                     <div className="hero-img-container">
                         <img src="/hero_main_new.jpg" alt="Hero" />
@@ -624,6 +744,47 @@ export default function LandingPage() {
                     </div>
                 </div>
             </section>
+
+            {/* New Metrics & About Section */}
+            <section className="about-metrics-section" id="about">
+                <div className="metrics-container">
+                    <div className="metrics-grid">
+                        <div className="metric-card">
+                            <span className="metric-number">620+</span>
+                            <span className="metric-label">品味貴賓</span>
+                        </div>
+                        <div className="metric-card">
+                            <span className="metric-number">70+</span>
+                            <span className="metric-label">收藏人士</span>
+                        </div>
+                        <div className="metric-card">
+                            <span className="metric-number">80+</span>
+                            <span className="metric-label">企業主</span>
+                        </div>
+                        <div className="metric-card">
+                            <span className="metric-number">20+</span>
+                            <span className="metric-label">媒體人士</span>
+                        </div>
+                        <div className="metric-card full-width">
+                            <span className="metric-number">63%</span>
+                            <span className="metric-label">年度收藏預算逾新台幣50萬元</span>
+                        </div>
+                    </div>
+                    
+                    <div className="metrics-divider"></div>
+                    
+                    <div className="metrics-text-content">
+                        <h3 className="metrics-heading">精準客群 ‧ 關係延續</h3>
+                        <p className="metrics-p font-zh">
+                            不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，篩選出適合品牌深度交流與展後延續的客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。
+                        </p>
+                        <p className="metrics-highlight font-zh">
+                            VIS 提供的不只是一個展位，而是一套從客群導入到關係延續的品牌成長機制。
+                        </p>
+                    </div>
+                </div>
+            </section>
+
 
             {/* Quote Carousel Section */}
             <section className="quote-section">
