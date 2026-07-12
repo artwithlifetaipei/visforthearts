@@ -1,0 +1,734 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VIS FOR THE ARTS | Brand Pitch</title>
+    <!-- Google Fonts: Premium Typography Pairing -->
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Outfit:wght@200;300;400;500&family=Noto+Serif+TC:wght@300;500;700&family=Noto+Sans+TC:wght@200;300;400;500&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg-color: #0A0A0B;
+            --text-main: #E5E5E7;
+            --text-muted: #8E8E93;
+            --pola-gold: #C9A96E;
+            --pola-gold-dim: rgba(201, 169, 110, 0.2);
+            --pola-gold-glow: rgba(201, 169, 110, 0.06);
+            --glass-bg: rgba(255, 255, 255, 0.02);
+            --glass-border: rgba(255, 255, 255, 0.05);
+            --font-serif: 'Cormorant Garamond', 'Noto Serif TC', serif;
+            --font-sans: 'Outfit', 'Noto Sans TC', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: #111;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            font-family: var(--font-sans);
+            color: var(--text-main);
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Standard A4 Aspect Ratio Container */
+        #a4-canvas {
+            width: 1200px;
+            height: 1697px;
+            background-color: var(--bg-color);
+            position: relative;
+            padding: 50px 80px 45px 80px; /* Reduced top/bottom padding to prevent cutoff */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+        }
+
+        /* Elegant Abstract Background Blurs for Depth */
+        .bg-glow-1 {
+            position: absolute;
+            top: -100px;
+            right: -100px;
+            width: 500px;
+            height: 500px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(201, 169, 110, 0.08) 0%, rgba(201, 169, 110, 0) 70%);
+            filter: blur(60px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .bg-glow-2 {
+            position: absolute;
+            bottom: 200px;
+            left: -200px;
+            width: 600px;
+            height: 600px;
+            border-radius: 50%;
+            background: radial-gradient(circle, rgba(201, 169, 110, 0.05) 0%, rgba(201, 169, 110, 0) 70%);
+            filter: blur(80px);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* --- Header Section --- */
+        header {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            border-bottom: 1px solid var(--glass-border);
+            padding-bottom: 20px;
+            margin-bottom: 25px; /* Reduced margin */
+        }
+
+        .logo-area {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .logo-text {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 32px;
+            font-weight: 300;
+            letter-spacing: 0.25em;
+            color: #FFFFFF;
+            line-height: 1;
+            text-transform: uppercase;
+        }
+
+        .logo-sub {
+            font-size: 10px;
+            letter-spacing: 0.4em;
+            color: var(--pola-gold);
+            margin-top: 8px;
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+
+        .header-tag {
+            font-family: var(--font-sans);
+            font-size: 11px;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        /* --- Global Grid Layout --- */
+        main {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            gap: 28px; /* Reduced gap from 40px to prevent cutoff */
+            flex-grow: 1;
+        }
+
+        section {
+            display: flex;
+            flex-direction: column;
+            gap: 14px; /* Reduced gap from 20px */
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .section-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 16px;
+            color: var(--pola-gold);
+            font-style: italic;
+            font-weight: 600;
+            letter-spacing: 0.1em;
+        }
+
+        .section-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 18px;
+            font-weight: 500;
+            letter-spacing: 0.15em;
+            color: #FFFFFF;
+        }
+
+        .section-divider {
+            flex-grow: 1;
+            height: 1px;
+            background: linear-gradient(90deg, rgba(201, 169, 110, 0.3) 0%, rgba(255, 255, 255, 0.02) 100%);
+        }
+
+        /* --- Section 1: Massive Stats Layout --- */
+        .stats-grid-row {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 20px;
+        }
+
+        .stat-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 24px 20px; /* Reduced padding from 30px */
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: all 0.4s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 100%; height: 3px;
+            background: linear-gradient(90deg, transparent, var(--pola-gold), transparent);
+            opacity: 0.5;
+        }
+
+        .stat-number {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 64px;
+            font-weight: 300;
+            color: var(--pola-gold);
+            line-height: 1;
+            margin-bottom: 8px;
+            font-style: italic;
+            letter-spacing: -0.02em;
+        }
+
+        .stat-label {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 0.15em;
+            color: var(--text-main);
+        }
+
+        /* Spotlight High-Budget Banner */
+        .spotlight-banner {
+            background: radial-gradient(circle at 10% 50%, var(--pola-gold-glow) 0%, var(--glass-bg) 100%);
+            border: 1px solid var(--pola-gold-dim);
+            border-radius: 12px;
+            padding: 22px 40px; /* Reduced padding from 35px 50px */
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .spotlight-banner::after {
+            content: '';
+            position: absolute;
+            right: 0; bottom: 0;
+            width: 150px; height: 150px;
+            background: radial-gradient(circle, rgba(201, 169, 110, 0.05) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .spotlight-left {
+            display: flex;
+            align-items: center;
+            gap: 30px;
+        }
+
+        .spotlight-huge-pct {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 96px;
+            font-weight: 300;
+            color: var(--pola-gold);
+            line-height: 1;
+            font-style: italic;
+        }
+
+        .spotlight-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .spotlight-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 24px;
+            font-weight: 500;
+            color: #FFFFFF;
+            letter-spacing: 0.15em;
+        }
+
+        .spotlight-desc {
+            font-family: 'Noto Sans TC', sans-serif;
+            font-size: 14px;
+            color: var(--text-muted);
+            letter-spacing: 0.1em;
+        }
+
+        .spotlight-right-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            letter-spacing: 0.3em;
+            color: var(--pola-gold);
+            text-transform: uppercase;
+            border: 1px solid var(--pola-gold-dim);
+            padding: 8px 20px;
+            border-radius: 20px;
+        }
+
+        /* --- Section 2: Values & Comparisons --- */
+        .double-grid {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 20px;
+        }
+
+        .premium-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 26px 30px; /* Reduced padding from 35px */
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .card-inner-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 16px;
+            font-weight: 500;
+            color: var(--pola-gold);
+            letter-spacing: 0.15em;
+            margin-bottom: 20px; /* Reduced margin */
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .card-inner-title svg {
+            stroke: var(--pola-gold);
+            stroke-width: 1.5;
+            width: 18px;
+            height: 18px;
+        }
+
+        /* positioning Comparison Visuals */
+        .compare-container {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .compare-row {
+            display: grid;
+            grid-template-columns: 100px 1fr;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .compare-badge {
+            font-size: 12px;
+            font-weight: 500;
+            padding: 4px 10px;
+            border-radius: 4px;
+            text-align: center;
+            letter-spacing: 0.1em;
+        }
+
+        .compare-badge.market {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: var(--text-muted);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .compare-badge.vis {
+            background-color: rgba(201, 169, 110, 0.15);
+            color: var(--pola-gold);
+            border: 1px solid var(--pola-gold-dim);
+        }
+
+        .compare-content {
+            font-size: 14px;
+            line-height: 1.7;
+            letter-spacing: 0.08em;
+        }
+
+        .compare-content.muted {
+            color: var(--text-muted);
+        }
+
+        .compare-content strong {
+            color: #FFFFFF;
+            font-weight: 500;
+        }
+
+        /* Pill tags for booth value */
+        .pill-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .value-pill {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--glass-border);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .value-pill::before {
+            content: '';
+            width: 4px;
+            height: 4px;
+            border-radius: 50%;
+            background-color: var(--pola-gold);
+        }
+
+        .card-quote {
+            font-size: 13px;
+            line-height: 1.8;
+            color: var(--text-muted);
+            border-left: 2px solid var(--pola-gold);
+            padding-left: 15px;
+            font-style: italic;
+            letter-spacing: 0.05em;
+        }
+
+        .card-quote strong {
+            color: var(--pola-gold);
+            font-style: normal;
+        }
+
+        /* --- Section 3: Benefit Timeline & Match --- */
+        .timeline-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            position: relative;
+            margin-top: 5px;
+        }
+
+        .timeline-card {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 24px 22px; /* Reduced padding from 30px */
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .timeline-step {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 14px;
+            color: var(--pola-gold);
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+
+        .timeline-header {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 16px;
+            font-weight: 500;
+            color: #FFFFFF;
+            letter-spacing: 0.1em;
+        }
+
+        .timeline-body {
+            font-size: 13px;
+            color: var(--text-muted);
+            line-height: 1.7;
+            letter-spacing: 0.05em;
+        }
+
+        .timeline-body strong {
+            color: #FFFFFF;
+            font-weight: 400;
+        }
+
+        /* Horizontal connection line */
+        .timeline-container::after {
+            content: '';
+            position: absolute;
+            top: 38px; /* Adjusted position */
+            left: 10%;
+            width: 80%;
+            height: 1px;
+            background: linear-gradient(90deg, transparent, var(--pola-gold-dim), transparent);
+            z-index: -1;
+        }
+
+        /* Brand Suitability Match Box */
+        .match-box {
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px 30px; /* Reduced padding from 25px 35px */
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            position: relative;
+        }
+
+        .match-column {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .match-title {
+            font-family: 'Noto Serif TC', serif;
+            font-size: 24px;
+            font-weight: 500;
+            letter-spacing: 0.1em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .match-title svg {
+            width: 22px;
+            height: 22px;
+        }
+
+        .match-title.yes { color: var(--pola-gold); }
+        .match-title.no { color: var(--text-muted); }
+
+        .match-text {
+            font-size: 18px;
+            color: var(--text-main);
+            line-height: 1.7;
+            letter-spacing: 0.05em;
+        }
+
+        .match-text.muted {
+            color: var(--text-muted);
+        }
+
+        /* Divider in the middle of match box */
+        .match-box::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 20%;
+            height: 60%;
+            width: 1px;
+            background-color: var(--glass-border);
+        }
+
+        /* --- Footer Section --- */
+        footer {
+            border-top: 1px solid var(--glass-border);
+            padding-top: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            letter-spacing: 0.2em;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+
+        .footer-logo {
+            font-family: 'Cormorant Garamond', serif;
+            color: #FFFFFF;
+            font-weight: 300;
+            letter-spacing: 0.4em;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="a4-canvas">
+        <!-- Blurred elements -->
+        <div class="bg-glow-1"></div>
+        <div class="bg-glow-2"></div>
+
+        <!-- Header -->
+        <header>
+            <div class="logo-area">
+                <span class="logo-sub" style="margin-top: 0;">2026/27 Brand positioning & Value Pitch</span>
+            </div>
+            <div class="header-tag">
+                VIP COMMUNITY INSIGHT
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main>
+            
+            <!-- Section 1: Demographic and Budget Metrics (Top 40%) -->
+            <section style="gap: 12px;">
+                <div class="section-header">
+                    <span class="section-number">01 /</span>
+                    <h2 class="section-title">高精準客群與收藏影響力</h2>
+                    <div class="section-divider"></div>
+                </div>
+                
+                <!-- 4 Demographics Card Grid -->
+                <div class="stats-grid-row">
+                    <div class="stat-card">
+                        <span class="stat-number">620+</span>
+                        <span class="stat-label">品味貴賓</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">70+</span>
+                        <span class="stat-label">收藏人士</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">80+</span>
+                        <span class="stat-label">企業主</span>
+                    </div>
+                    <div class="stat-card">
+                        <span class="stat-number">20+</span>
+                        <span class="stat-label">媒體人士</span>
+                    </div>
+                </div>
+                
+                <!-- Budget Spotlight Banner -->
+                <div class="spotlight-banner">
+                    <div class="spotlight-left">
+                        <span class="spotlight-huge-pct">63%</span>
+                        <div class="spotlight-meta">
+                            <h3 class="spotlight-title">年度收藏預算逾 50 萬元</h3>
+                            <p class="spotlight-desc">展現極強的單客消費實力與美學投資意願</p>
+                        </div>
+                    </div>
+                    <span class="spotlight-right-label">Core Target</span>
+                </div>
+            </section>
+
+            <!-- Section 2: positioning Comparison & Booth Fee Value (Middle) -->
+            <section style="gap: 12px;">
+                <div class="section-header">
+                    <span class="section-number">02 /</span>
+                    <h2 class="section-title">定位與參展費價值重塑</h2>
+                    <div class="section-divider"></div>
+                </div>
+                
+                <div class="double-grid">
+                    <!-- positioning Comparison -->
+                    <div class="premium-card">
+                        <div>
+
+                            <div class="compare-container">
+                                <div class="compare-row">
+                                    <span class="compare-badge market">市集模式</span>
+                                    <span class="compare-content muted">以大量人流、即時銷售與價格吸引為主要效益。</span>
+                                </div>
+                                <div class="compare-row">
+                                    <span class="compare-badge vis">VIS 模式</span>
+                                    <span class="compare-content">
+                                        透過<strong>品牌甄選、整體策展、VIP 社群導入與深度交流</strong>，精準匯聚 <strong>34–55 歲</strong>、具鑑賞力、購買力與跨領域影響力的品味客群。
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Booth Fee Value -->
+                    <div class="premium-card">
+                        <div>
+                            <div class="card-inner-title">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                                    <circle cx="12" cy="12" r="10"/>
+                                    <path d="M12 8v8M8 12h8"/>
+                                </svg>
+                                <span>參展費的真實價值</span>
+                            </div>
+                            <div class="pill-grid">
+                                <div class="value-pill">場域策展</div>
+                                <div class="value-pill">品牌組合規劃</div>
+                                <div class="value-pill">貴賓專屬邀請</div>
+                                <div class="value-pill">客群精緻經營</div>
+                                <div class="value-pill">專業媒體溝通</div>
+                                <div class="value-pill">商務對接連結</div>
+                            </div>
+                        </div>
+                        <div class="card-quote">
+                            品牌不必依賴折扣或人海吸引注意，而能在適合的場域中，<strong>完整傳達設計理念、材質工藝與品牌價值</strong>。
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Section 3: Benefit Cycle & Match (Bottom) -->
+            <section style="gap: 12px;">
+                <div class="section-header">
+                    <span class="section-number">03 /</span>
+                    <h2 class="section-title">全週期效益延續與篩選</h2>
+                    <div class="section-divider"></div>
+                </div>
+                
+                <!-- Horizontal Timeline -->
+                <div class="timeline-container">
+                    <div class="timeline-card">
+                        <span class="timeline-step">Phase 01</span>
+                        <h4 class="timeline-header">精準導入與展期交流</h4>
+                        <p class="timeline-body">打破傳統現場銷售侷限，透過<strong>展期深度交流</strong>與沉浸體驗，在潛在客戶心中建立強大的品牌心智。</p>
+                    </div>
+                    <div class="timeline-card">
+                        <span class="timeline-step">Phase 02</span>
+                        <h4 class="timeline-header">展後延伸與商業對接</h4>
+                        <p class="timeline-body">參展效益延伸至<strong>展後到店、收藏與選購諮詢、媒體關係</strong>，以及品牌跨界聯名與商務合作。</p>
+                    </div>
+                    <div class="timeline-card">
+                        <span class="timeline-step">Phase 03</span>
+                        <h4 class="timeline-header">高資產客群長期累積</h4>
+                        <p class="timeline-body">將展期的觸及轉化為<strong>長期的 VIP 關係經營</strong>與選品累積，實現高生命週期的商務與藝術產值。</p>
+                    </div>
+                </div>
+
+                <!-- Match Criteria -->
+                <div class="match-box">
+                    <div class="match-column">
+                        <h4 class="match-title yes">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <polyline points="20 6 9 17 4 12"/>
+                            </svg>
+                            <span>適合這樣的品牌</span>
+                        </h4>
+                        <p class="match-text">重視<strong>品牌定位、客群品質</strong>與<strong>長期VIP關係經營</strong>，尋求精緻呈現空間與高端商務連結的品牌。</p>
+                    </div>
+                    <div class="match-column">
+                        <h4 class="match-title no">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="18" y1="6" x2="6" y2="18"/>
+                                <line x1="6" y1="6" x2="18" y2="18"/>
+                            </svg>
+                            <span>非為此設計</span>
+                        </h4>
+                        <p class="match-text muted">以短期價格促銷、折扣戰或單純追求現場大量成交為唯一目標的銷售型活動。</p>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Footer -->
+        <footer>
+            <span>© 2026/27 VIS FOR THE ARTS. All rights reserved.</span>
+            <span class="footer-logo">VIS</span>
+        </footer>
+    </div>
+
+</body>
+</html>
