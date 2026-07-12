@@ -776,11 +776,11 @@ export default function ExhibitorApplyPage() {
                   <h3 className="text-xs font-semibold text-[#C9A96E] tracking-wider uppercase mb-3 flex items-center gap-2">
                     <ImageIcon className="w-4 h-4" /> {dict[lang].floorPlanTitle}
                   </h3>
-                  <div className="aspect-[2/1] w-full overflow-hidden border border-[#0D0D0D]/5 bg-[#FAF9F6] flex items-center justify-center relative">
+                  <div className="w-full border border-[#0D0D0D]/5 bg-[#FAF9F6] relative">
                     <img 
                       src="/floor_plan_2027.png" 
                       alt="VIS 2027 Exhibition Floor Plan" 
-                      className="w-full h-auto object-contain max-h-[450px]"
+                      className="w-full h-auto block"
                     />
                   </div>
                   <p className="text-[10px] text-[#0D0D0D]/75 font-normal mt-2 text-center">
