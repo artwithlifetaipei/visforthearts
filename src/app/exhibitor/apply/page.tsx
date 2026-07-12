@@ -36,8 +36,8 @@ export default function ExhibitorApplyPage() {
     zone_id: 'artsy', // 'artsy' | 'premier' | 'atelier'
     booth_type: 'A01', // specific booth code
     zone_preference_1: '明日經典展區 - A01 展台式展位 - A01 (近主入口處) (NT$42,000)',
-    zone_preference_2: '文化實體展區 - A4 展台式展位 - A4 (離主入口最近) (NT$42,000)',
-    zone_preference_3: '匠心藝藏展區 - B1 500*460cm 獨立展位 B1 - 入口處兩側 (NT$108,000)',
+    zone_preference_2: '文化實體展區 - A04 展台式展位 - A04 (離主入口最近) (NT$42,000)',
+    zone_preference_3: '匠心藝藏展區 - B01 500*460cm 獨立展位 B01 - 入口處兩側 (NT$108,000)',
     concept_brief: '',
     deposit_proof_base64: '',
     deposit_proof_filename: '',
@@ -209,45 +209,63 @@ export default function ExhibitorApplyPage() {
 
   const getZoneNote = (zoneId: string, l: 'zh' | 'en') => {
     if (l === 'zh') {
-      if (zoneId === 'artsy') return '大會提供各展位 1展台，尺寸為 H90.5 * W60.5 * 60.5cm，下方可置物。\n參展品牌人員皆可於現場進行銷售，不抽成。\n額外需求：倉儲區收費為每平方米 1000元/四日。';
-      if (zoneId === 'premier') return '參展品牌人員皆可於現場進行銷售，不抽成。\n大會提供各展位 1展台，尺寸為 H90.5 * W60.5 * 60.5cm，下方可置物。\nM1-M8展台數2，分別為：H90.5 * W97.3 * 47.5與H90.5 * W60.5 * 60.5cm。\n額外需求：倉儲區收費為每平方米 1000元/四日。';
-      return '*備註：該展區，全展位挑高皆為460cm。';
+      if (zoneId === 'artsy') {
+        return 'A01-A04大會提供各展位1展台。\n展台周圍30公分皆屬品牌可使用範圍。\n參展品牌人員皆可於現場進行銷售，不抽成。\n額外需求：倉儲區收費為每平方米1000元/四日。';
+      }
+      if (zoneId === 'premier') {
+        return 'A01-A04大會提供各展位1展台，唯獨A05提供兩個展台。\n展台周圍30公分皆屬品牌可使用範圍。\n參展品牌人員皆可於現場進行銷售，不抽成。\n額外需求：倉儲區收費為每平方米1000元/四日。';
+      }
+      return '該展區，全展位挑高皆為460cm。\n參展品牌人員皆可於現場進行銷售，不抽成。';
     } else {
-      if (zoneId === 'artsy') return 'Includes 1 counter (H90.5 * W60.5 * 60.5cm) with lower storage.\nOn-site sales allowed, 0% commission.\nExtra storage: NT$ 1,000 per sqm / 4 days.';
-      if (zoneId === 'premier') return 'On-site sales allowed, 0% commission.\nIncludes 1 counter (H90.5 * W60.5 * 60.5cm) with lower storage.\nM1-M8 provides 2 counters: H90.5*W97.3*47.5 & H90.5*W60.5*60.5cm.\nExtra storage: NT$ 1,000 per sqm / 4 days.';
-      return '*Note: Ceiling height is 460cm for all booths in this sector.';
+      if (zoneId === 'artsy') {
+        return 'A01-A04 Organizers provide 1 display stand for each booth.\nA 30cm perimeter around the stand is designated for brand use.\nOn-site sales are permitted and are 0% commission.\nExtra storage: NT$1,000 per sqm / 4 days.';
+      }
+      if (zoneId === 'premier') {
+        return 'A01-A04 Organizers provide 1 stand for each booth (A05 provides 2 stands).\nA 30cm perimeter around the stand is designated for brand use.\nOn-site sales are permitted and are 0% commission.\nExtra storage: NT$1,000 per sqm / 4 days.';
+      }
+      return 'Ceiling height for all booths in this zone is 460cm.\nOn-site sales are permitted and are 0% commission.';
     }
   };
 
   const getZoneIncludes = (zone: any, l: 'zh' | 'en') => {
     if (l === 'zh') {
-      const list = [
-        `3 天展出時間 (1/8 - 1/10) + 1 天佈展安裝`,
-        `參展商專屬通行證 ${zone.includes.exhibitorPasses} 張`
+      if (zone.id === 'artsy') {
+        return [
+          '3 Days Exhibit 參展3日',
+          '1 Days Install 場佈1日',
+          '30 VIP Passes 貴賓卡',
+          '4 Exhibitor Pass 展商證',
+          'VIP Portal 品牌頁'
+        ];
+      }
+      return [
+        '3 Days Exhibit 參展3日',
+        '1 Days Install 場佈1日',
+        '50 VIP Passes 貴賓卡',
+        '4 Exhibitor Pass 展商證',
+        'VIP Portal 品牌頁',
+        '另享 倉儲區300*300cm',
+        '另享 2F貴賓商談區2桌4椅'
       ];
-      if (zone.includes.vipPasses !== null) {
-        list.push(`大會專屬 VIP 貴賓邀請函 ${zone.includes.vipPasses} 張`);
-      }
-      if (zone.includes.storageArea) {
-        list.push(zone.includes.storageArea);
-      }
-      if (zone.includes.vipLoungeSeating) {
-        list.push(zone.includes.vipLoungeSeating);
-      }
-      return list;
     } else {
-      const list = [
-        `3 Days Exhibition (Jan 8-10) + 1 Day Installation`,
-        `${zone.includes.exhibitorPasses} Exhibitor Passes`
+      if (zone.id === 'artsy') {
+        return [
+          '3 Days Exhibit',
+          '1 Days Install',
+          '30 VIP Passes',
+          '4 Exhibitor Passes',
+          'VIP Portal'
+        ];
+      }
+      return [
+        '3 Days Exhibit',
+        '1 Days Install',
+        '50 VIP Passes',
+        '4 Exhibitor Passes',
+        'VIP Portal',
+        'Storage Area 300*300cm',
+        '2F VIP Lounge (2 tables, 4 chairs)'
       ];
-      if (zone.includes.vipPasses !== null) {
-        list.push(`${zone.includes.vipPasses} VIP Invitation Passes`);
-      }
-      if (zone.id === 'atelier') {
-        list.push('Includes Storage Area 300*300cm');
-        list.push('Includes 2F VIP Lounge (2 tables, 4 chairs)');
-      }
-      return list;
     }
   };
 
@@ -737,7 +755,7 @@ export default function ExhibitorApplyPage() {
                       展位與展區規劃說明 / Booth & Zone Guide
                     </p>
                     <p className="mb-3 font-normal leading-relaxed text-[#0D0D0D]">
-                      展位規劃分為 <strong>DISPLAY STAND 展台式展位 (A1-A5)</strong> 與 <strong>INDEPENDENT BOOTH 獨立展位 (B1-B3)</strong> 兩種，其價格依展位位置有所區分。例如：大展出入口兩側展位價格最高。
+                      展位規劃分為 <strong>DISPLAY STAND 展台式展位 (A01-A05)</strong> 與 <strong>INDEPENDENT BOOTH 獨立展位 (B01-B03)</strong> 兩種，其價格依展位位置有所區分。例如：大展出入口兩側展位價格最高。
                     </p>
                   </div>
                   <div className="w-full md:w-px md:h-20 bg-[#C9A96E]/25 self-stretch"></div>

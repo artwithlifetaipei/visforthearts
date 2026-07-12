@@ -103,16 +103,16 @@ export const ZONE_II: Zone = {
   description: '文化實體展區 Cultural Entities Sector。成熟品牌首選：加大展位與主入口高曝光。',
   booths: [
     {
-      label: '展台式展位 - A4 (離主入口最近)',
-      code: 'A4',
+      label: '展台式展位 - A04 (離主入口最近)',
+      code: 'A04',
       price: 42000,
       qty: 7,
       hasStorage: false,
       note: '離主入口最近',
     },
     {
-      label: '展台式展位 - A5 (兩倍面寬展台)',
-      code: 'A5',
+      label: '展台式展位 - A05 (兩倍面寬展台)',
+      code: 'A05',
       price: 45000,
       qty: 8,
       hasStorage: false,
@@ -139,8 +139,8 @@ export const ZONE_III: Zone = {
   description: '匠心藝藏展區 Designer & Atelier Brand Sector。適合需要專屬獨立空間，來聚焦表現品牌工藝美學者，同時，亦有全大展唯二的雙倍大器格局展位，完整構築沈浸式體驗。',
   booths: [
     {
-      label: '500*460cm 獨立展位 B1 - 入口處兩側',
-      code: 'B1',
+      label: '500*460cm 獨立展位 B01 - 入口處兩側',
+      code: 'B01',
       dimensions: '500*460cm',
       price: 108000,
       qty: 2,
@@ -148,8 +148,8 @@ export const ZONE_III: Zone = {
       note: '入口處兩側',
     },
     {
-      label: '500*460cm 獨立展位 B2 - 中間區域',
-      code: 'B2',
+      label: '500*460cm 獨立展位 B02 - 中間區域',
+      code: 'B02',
       dimensions: '500*460cm',
       price: 88000,
       qty: 4,
@@ -157,8 +157,8 @@ export const ZONE_III: Zone = {
       note: '中間區域',
     },
     {
-      label: '1000*920cm 最大獨立展位 B3 - 兩展位打通',
-      code: 'B3',
+      label: '1000*920cm 最大獨立展位 B03 - 兩展位打通',
+      code: 'B03',
       dimensions: '1000*920cm',
       price: 158000,
       qty: 2,
