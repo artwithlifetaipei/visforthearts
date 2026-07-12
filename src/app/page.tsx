@@ -422,45 +422,11 @@ export default function LandingPage() {
                 }
                 .quote-container {
                     width: 100%;
-                    max-width: 1100px;
+                    max-width: 820px;
                     margin: 0 auto;
-                    display: flex;
-                    align-items: center;
-                    gap: 6rem;
-                    min-height: 480px;
-                }
-                .quote-image-side {
-                    width: 45%;
-                    aspect-ratio: 1/1;
-                    overflow: hidden;
+                    display: block;
+                    min-height: 300px;
                     position: relative;
-                    border: 1px solid rgba(201, 169, 110, 0.25);
-                    box-shadow: 0 20px 50px rgba(0,0,0,0.03);
-                    background: #FFF;
-                    flex-shrink: 0;
-                }
-                .quote-image-wrapper {
-                    position: relative;
-                    width: 100%;
-                    height: 100%;
-                    overflow: hidden;
-                }
-                .quote-image-wrapper img {
-                    position: absolute;
-                    width: 122%;
-                    height: 145%;
-                    top: -12.5%;
-                    left: -11%;
-                    object-fit: cover;
-                    transition: opacity 0.8s ease-in-out, transform 12s ease-out;
-                }
-                .quote-text-side {
-                    width: 55%;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: center;
-                    position: relative;
-                    min-height: 380px;
                 }
                 .quote-slide {
                     position: absolute;
@@ -473,7 +439,9 @@ export default function LandingPage() {
                     transition: opacity 0.6s ease-in-out;
                     display: flex;
                     flex-direction: column;
+                    align-items: center;
                     justify-content: center;
+                    text-align: center;
                 }
                 .quote-slide.active {
                     opacity: 1;
@@ -481,32 +449,34 @@ export default function LandingPage() {
                     position: relative;
                 }
                 .quote-icon {
-                    font-size: 3.5rem;
+                    font-size: 4rem;
                     font-family: var(--font-serif);
                     color: var(--gold);
                     line-height: 1;
-                    margin-bottom: 1.25rem;
+                    margin-bottom: 1.5rem;
                     opacity: 0.35;
+                    text-align: center;
                 }
                 .quote-body {
                     font-family: var(--font-serif);
-                    font-size: 1.35rem;
-                    line-height: 1.85;
+                    font-size: 1.45rem;
+                    line-height: 1.9;
                     color: var(--text);
                     font-style: italic;
                     font-weight: 300;
                     margin-bottom: 2.5rem;
                     letter-spacing: 0.02em;
+                    text-align: center;
                 }
                 .quote-author {
-                    font-size: 0.82rem;
+                    font-size: 0.85rem;
                     letter-spacing: 0.22em;
                     text-transform: uppercase;
                     color: var(--gold);
-                    align-self: flex-end;
                     font-weight: 500;
                     border-bottom: 1px solid rgba(201,169,110,0.25);
                     padding-bottom: 0.4rem;
+                    display: inline-block;
                 }
                 .quote-nav {
                     display: flex;
@@ -521,7 +491,7 @@ export default function LandingPage() {
                     background: #E0DFDB;
                     border: none;
                     cursor: pointer;
-                    transition: all 0.3s ease;
+                    transition: all 0.30s ease;
                     padding: 0;
                 }
                 .quote-dot.active {
@@ -654,35 +624,17 @@ export default function LandingPage() {
             {/* Quote Carousel Section */}
             <section className="quote-section">
                 <div className="quote-container">
-                    <div className="quote-image-side">
-                        <div className="quote-image-wrapper">
-                            {quotes.map((quote, idx) => (
-                                <img
-                                    key={idx}
-                                    src={quote.image}
-                                    alt={`Quote from ${quote.author}`}
-                                    style={{
-                                        opacity: quoteIndex === idx ? 1 : 0,
-                                        transform: quoteIndex === idx ? 'scale(1.05)' : 'scale(1.0)',
-                                        zIndex: quoteIndex === idx ? 1 : 0
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    </div>
-                    <div className="quote-text-side">
-                        {quotes.map((quote, idx) => (
-                            <div key={idx} className={`quote-slide ${quoteIndex === idx ? 'active' : ''}`}>
-                                <div className="quote-icon">“</div>
-                                <blockquote className="quote-body">
-                                    {quote.text}
-                                </blockquote>
-                                <div className="quote-author">
-                                    —— {quote.author}
-                                </div>
+                    {quotes.map((quote, idx) => (
+                        <div key={idx} className={`quote-slide ${quoteIndex === idx ? 'active' : ''}`}>
+                            <div className="quote-icon">“</div>
+                            <blockquote className="quote-body">
+                                {quote.text}
+                            </blockquote>
+                            <div className="quote-author">
+                                —— {quote.author}
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
                 </div>
                 <div className="quote-nav">
                     {quotes.map((_, idx) => (
