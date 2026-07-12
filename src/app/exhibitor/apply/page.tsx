@@ -229,7 +229,7 @@ export default function ExhibitorApplyPage() {
 
   const getZoneIncludes = (zone: any, l: 'zh' | 'en') => {
     if (l === 'zh') {
-      if (zone.id === 'artsy') {
+      if (zone.id === 'artsy' || zone.id === 'premier') {
         return [
           '3 Days Exhibit 參展3日',
           '1 Days Install 場佈1日',
@@ -248,7 +248,7 @@ export default function ExhibitorApplyPage() {
         '另享 2F貴賓商談區2桌4椅'
       ];
     } else {
-      if (zone.id === 'artsy') {
+      if (zone.id === 'artsy' || zone.id === 'premier') {
         return [
           '3 Days Exhibit',
           '1 Days Install',
