@@ -750,24 +750,24 @@ export default function LandingPage() {
                 <div className="metrics-container">
                     <div className="metrics-grid">
                         <div className="metric-card">
-                            <span className="metric-number">620+</span>
-                            <span className="metric-label">品味貴賓</span>
+                            <span className="metric-number">71%</span>
+                            <span className="metric-label">共超過品味貴賓</span>
                         </div>
                         <div className="metric-card">
-                            <span className="metric-number">70+</span>
+                            <span className="metric-number">21%</span>
                             <span className="metric-label">收藏人士</span>
                         </div>
                         <div className="metric-card">
-                            <span className="metric-number">80+</span>
+                            <span className="metric-number">34%</span>
                             <span className="metric-label">企業主</span>
                         </div>
                         <div className="metric-card">
-                            <span className="metric-number">20+</span>
-                            <span className="metric-label">媒體人士</span>
+                            <span className="metric-number">13%</span>
+                            <span className="metric-label">媒體/意見領袖</span>
                         </div>
                         <div className="metric-card full-width">
                             <span className="metric-number">63%</span>
-                            <span className="metric-label">年度收藏預算逾新台幣50萬元</span>
+                            <span className="metric-label">一年收藏預算50萬以上</span>
                         </div>
                     </div>
                     
