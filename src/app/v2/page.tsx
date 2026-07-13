@@ -580,7 +580,7 @@ export default function V2LandingPage() {
                             VIS 始於2022年，至今已與無數的品味質富人士們，<br />實踐著人文與美感如何展現於美好的生活中。
                         </p>
                         <h1 className="v2-hero-en v2-reveal">
-                            Established in 2024. Curating Aesthetic Dialogues with Spirit.
+                            Established in 2022. Culture shapes Living. Taste defines Lifestyle.
                         </h1>
                     </div>
                 </div>
