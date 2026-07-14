@@ -692,7 +692,7 @@ export default function VIPAdminPage() {
                     className="mb-12 flex justify-between items-end border-b border-neutral-800 pb-8"
                 >
                     <div>
-                        <p className="text-[9px] tracking-[0.5em] text-[#DFBA87] uppercase mb-3">VIS FOR THE ARTS</p>
+                        <p className="text-[9px] tracking-[0.3em] text-[#DFBA87] uppercase mb-3">VIS Contemporary Culture Fair</p>
                         <h1 className="text-2xl font-serif font-light tracking-wide mb-1">VIP & 專業買家 CRM 後台</h1>
                         <p className="text-[10px] tracking-widest text-neutral-500 uppercase">Customer Relationship Management</p>
                     </div>
