@@ -257,7 +257,7 @@ export default function VIPDashboard() {
                             VIS Contemporary Culture Fair
                             <span className="text-[10.5px] tracking-[0.3em] font-light block mt-1.5 font-sans normal-case">當代文化博覽會</span>
                         </h2>
-                        <p className="text-[10px] tracking-[0.2em] font-mono opacity-80">2027/1/7 - 1/10</p>
+                        <p className="text-[10px] tracking-[0.2em] font-mono opacity-80">2027/1/6 - 1/9</p>
                         <p className="text-[9.5px] tracking-widest opacity-60">台北市中正區延平南路98號</p>
                         <p className="text-[8.5px] tracking-wider opacity-60 mt-3 border-t border-current/10 pt-3 px-2 leading-relaxed">
                             如需貴賓服務，請聯絡VIP辦公室<br/>
