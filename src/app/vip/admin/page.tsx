@@ -39,7 +39,7 @@ export default function VIPAdminPage() {
     const [isLoading, setIsLoading] = useState(true);
     
     // Tab switching: 'audience' or 'campaigns' or 'vcheck' or 'blindbox' or 'tickets'
-    const [activeTab, setActiveTab] = useState<'audience' | 'campaigns' | 'vcheck' | 'blindbox' | 'tickets'>('audience');
+    const [activeTab, setActiveTab] = useState<'audience' | 'profiles' | 'campaigns' | 'vcheck' | 'blindbox' | 'tickets'>('audience');
 
     // Blind Box Brands States
     const [brands, setBrands] = useState<any[]>([]);
@@ -116,6 +116,10 @@ export default function VIPAdminPage() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [approvingEmail, setApprovingEmail] = useState('');
 
+    // Guest Profile States
+    const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
+    const [profilesSearch, setProfilesSearch] = useState('');
+
     const handleApproveStatus = async (email: string, action: 'approve' | 'reject') => {
         setApprovingEmail(email);
         try {
@@ -172,7 +176,8 @@ export default function VIPAdminPage() {
                 fetchTicketSlots(),
                 fetchTicketBrands(),
                 fetchTickets(),
-                fetchTicketWaitlist()
+                fetchTicketWaitlist(),
+                fetchRegisteredUsers()
             ]);
             setIsLoading(false);
         };
@@ -197,6 +202,60 @@ export default function VIPAdminPage() {
             .order('created_at', { ascending: false });
         if (data) setVipList(data);
     };
+
+    const fetchRegisteredUsers = async () => {
+        const { data } = await supabase
+            .from('users')
+            .select('*')
+            .order('created_at', { ascending: false });
+        if (data) setRegisteredUsers(data);
+    };
+
+    const handleExportCSV = () => {
+        const allowlistMap = new Map(vipList.map(item => [item.email?.toLowerCase().trim(), item]));
+        const mergedGuests = registeredUsers.map((u: any) => {
+            const emailKey = u.email?.toLowerCase().trim();
+            const allowlistInfo = allowlistMap.get(emailKey) || {};
+            return {
+                name: allowlistInfo.name || '未填寫',
+                email: u.email,
+                tier: allowlistInfo.tier || 'VIP',
+                crm_role: allowlistInfo.crm_role || 'VIP 貴賓',
+                birthdate: u.birthdate,
+                identity_type: u.identity_type,
+                created_at: u.created_at
+            };
+        });
+
+        const headers = ['姓名', 'Email', '邀請層級 (Tier)', 'CRM 角色', '生日', '身份類別', '註冊時間'];
+        const rows = mergedGuests.map(g => [
+            g.name,
+            g.email,
+            g.tier,
+            g.crm_role,
+            g.birthdate,
+            g.identity_type,
+            g.created_at ? new Date(g.created_at).toLocaleString() : ''
+        ]);
+        
+        const csvContent = "\uFEFF" + [headers.join(','), ...rows.map(e => e.map(val => `"${String(val).replace(/"/g, '""')}"`).join(','))].join('\n');
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.setAttribute("href", url);
+        link.setAttribute("download", `vis_guest_profiles_${new Date().toISOString().slice(0,10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+    };
+
+    useEffect(() => {
+        if (!isAuthorized) return;
+        if (activeTab === 'profiles') {
+            fetchRegisteredUsers();
+            fetchList();
+        }
+    }, [isAuthorized, activeTab]);
 
     const fetchCampaigns = async () => {
         const { data } = await supabase
@@ -659,6 +718,15 @@ export default function VIPAdminPage() {
                         )}
                     </button>
                     <button
+                        onClick={() => setActiveTab('profiles')}
+                        className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'profiles' ? 'text-[#DFBA87]' : 'text-neutral-500 hover:text-neutral-300'}`}
+                    >
+                        貴賓身分別與統計 (Profiles)
+                        {activeTab === 'profiles' && (
+                            <motion.div layoutId="activeTabUnderline" className="absolute bottom-0 left-0 w-full h-[1px] bg-[#DFBA87]" />
+                        )}
+                    </button>
+                    <button
                         onClick={() => setActiveTab('campaigns')}
                         className={`pb-4 text-[11px] tracking-[0.4em] uppercase font-light transition-all duration-300 relative ${activeTab === 'campaigns' ? 'text-[#DFBA87]' : 'text-neutral-500 hover:text-neutral-300'}`}
                     >
@@ -894,6 +962,153 @@ export default function VIPAdminPage() {
                                     {vipList.filter(vip => vip.status !== 'Pending').length === 0 && (
                                         <p className="text-center text-neutral-600 text-xs tracking-widest py-12">
                                             受眾名單中尚無任何成員。
+                                        </p>
+                                    )}
+                                </div>
+                            </div>
+                        </motion.div>
+                    ) : activeTab === 'profiles' ? (
+                        <motion.div
+                            key="profiles"
+                            initial={{ opacity: 0, y: 15 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -15 }}
+                            transition={{ duration: 0.5 }}
+                            className="space-y-12"
+                        >
+                            {/* Summary Statistics */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                <div className="border border-neutral-800 p-6 bg-neutral-950/30">
+                                    <h3 className="text-[10px] tracking-[0.4em] uppercase text-neutral-500 mb-2">已登入貴賓人數</h3>
+                                    <p className="text-3xl font-light text-[#DFBA87]">{registeredUsers.length} <span className="text-xs text-neutral-400">人</span></p>
+                                </div>
+                                <div className="border border-neutral-800 p-6 bg-neutral-950/30">
+                                    <h3 className="text-[10px] tracking-[0.4em] uppercase text-neutral-500 mb-2">已完成身份填寫</h3>
+                                    <p className="text-3xl font-light text-[#DFBA87]">{registeredUsers.filter(u => u.identity_type).length} <span className="text-xs text-neutral-400">人</span></p>
+                                </div>
+                                <div className="border border-neutral-800 p-6 bg-neutral-950/30">
+                                    <h3 className="text-[10px] tracking-[0.4em] uppercase text-neutral-500 mb-2">平均填寫率</h3>
+                                    <p className="text-3xl font-light text-[#DFBA87]">{registeredUsers.length ? Math.round((registeredUsers.filter(u => u.identity_type).length / registeredUsers.length) * 100) : 0}%</p>
+                                </div>
+                            </div>
+
+                            {/* Identity Analytics Charts/Progress Bars */}
+                            <div className="border border-neutral-800 p-8 bg-neutral-950/30">
+                                <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400 mb-6">貴賓身分別比例統計</h2>
+                                <div className="space-y-4 max-w-2xl">
+                                    {(() => {
+                                        const counts: { [key: string]: number } = {};
+                                        registeredUsers.forEach(u => {
+                                            const type = u.identity_type || '未填寫';
+                                            counts[type] = (counts[type] || 0) + 1;
+                                        });
+                                        const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+                                        const total = registeredUsers.length || 1;
+
+                                        return sorted.map(([identity, count]) => {
+                                            const pct = Math.round((count / total) * 100);
+                                            return (
+                                                <div key={identity} className="space-y-2">
+                                                    <div className="flex justify-between text-xs tracking-wider">
+                                                        <span className="text-neutral-300 font-light">{identity}</span>
+                                                        <span className="text-[#DFBA87]">{count} 人 ({pct}%)</span>
+                                                    </div>
+                                                    <div className="w-full h-1 bg-neutral-900 rounded-full overflow-hidden">
+                                                        <div 
+                                                            className="h-full bg-[#DFBA87]" 
+                                                            style={{ width: `${pct}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            );
+                                        });
+                                    })()}
+                                    {registeredUsers.length === 0 && (
+                                        <p className="text-xs text-neutral-600 tracking-widest py-4 text-center">暫無數據</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Complete Guest Profile List */}
+                            <div className="border border-neutral-800 p-8 bg-neutral-950/30">
+                                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
+                                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400">已登入貴賓完整資訊</h2>
+                                    <div className="flex items-center gap-4">
+                                        <div className="border-b border-neutral-800 focus-within:border-[#DFBA87] transition-colors duration-300">
+                                            <input
+                                                type="text"
+                                                placeholder="搜尋姓名 / EMAIL / 身份..."
+                                                value={profilesSearch}
+                                                onChange={(e) => setProfilesSearch(e.target.value)}
+                                                className="py-1 bg-transparent outline-none text-xs tracking-widest placeholder:text-neutral-600 text-white w-48 animate-none"
+                                            />
+                                        </div>
+                                        <button
+                                            onClick={handleExportCSV}
+                                            className="px-4 py-2 border border-[#DFBA87] text-[#DFBA87] hover:bg-[#DFBA87] hover:text-black transition-all duration-300 text-[9px] tracking-widest uppercase cursor-pointer"
+                                        >
+                                            匯出 CSV
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left border-collapse">
+                                        <thead>
+                                            <tr className="border-b border-neutral-900 text-neutral-500 text-[10px] tracking-[0.2em] uppercase font-light">
+                                                <th className="py-4 font-light">姓名</th>
+                                                <th className="py-4 font-light">Email</th>
+                                                <th className="py-4 font-light">等級 / CRM</th>
+                                                <th className="py-4 font-light">生日</th>
+                                                <th className="py-4 font-light">身分別</th>
+                                                <th className="py-4 font-light">註冊時間</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-neutral-900/40 text-xs tracking-wider">
+                                            {(() => {
+                                                const allowlistMap = new Map(vipList.map(item => [item.email?.toLowerCase().trim(), item]));
+                                                const filtered = registeredUsers
+                                                    .map(u => {
+                                                        const emailKey = u.email?.toLowerCase().trim();
+                                                        const info = allowlistMap.get(emailKey) || {};
+                                                        return {
+                                                            ...u,
+                                                            name: info.name || '未填寫',
+                                                            tier: info.tier || 'VIP',
+                                                            crm_role: info.crm_role || 'VIP 貴賓'
+                                                        };
+                                                    })
+                                                    .filter(u => {
+                                                        const search = profilesSearch.toLowerCase();
+                                                        return (
+                                                            u.email?.toLowerCase().includes(search) ||
+                                                            u.name?.toLowerCase().includes(search) ||
+                                                            (u.identity_type && u.identity_type.toLowerCase().includes(search))
+                                                        );
+                                                    });
+
+                                                return filtered.map((u) => (
+                                                    <tr key={u.id} className="hover:bg-neutral-950/20 transition-colors">
+                                                        <td className="py-4 text-[#DFBA87] font-light">{u.name}</td>
+                                                        <td className="py-4 text-neutral-300">{u.email}</td>
+                                                        <td className="py-4">
+                                                            <span className="text-[10px] px-2 py-0.5 border border-neutral-800 text-neutral-400 uppercase">
+                                                                {u.tier} | {u.crm_role}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-4 text-neutral-400 font-mono">{u.birthdate || '-'}</td>
+                                                        <td className="py-4 text-neutral-300">{u.identity_type || '-'}</td>
+                                                        <td className="py-4 text-neutral-500 text-[10px] font-mono">
+                                                            {u.created_at ? new Date(u.created_at).toLocaleString() : '-'}
+                                                        </td>
+                                                    </tr>
+                                                ));
+                                            })()}
+                                        </tbody>
+                                    </table>
+                                    {registeredUsers.length === 0 && (
+                                        <p className="text-center text-neutral-600 text-xs tracking-widest py-12">
+                                            尚無貴賓完成登入與資料填寫。
                                         </p>
                                     )}
                                 </div>
