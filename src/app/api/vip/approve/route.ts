@@ -32,7 +32,7 @@ async function createSupabaseServerClient() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { applicationEmail, action } = body; // action can be 'approve' or 'reject'
+        const { applicationEmail, action, tier } = body; // action can be 'approve' or 'reject', tier can be 'VIP' or 'SVIP'
 
         if (!applicationEmail || !action) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -70,10 +70,15 @@ export async function POST(req: Request) {
         const targetEmail = applicationEmail.toLowerCase().trim();
 
         if (action === 'approve') {
-            // 2. Set status to Approved (and fetch returned data to confirm row change)
+            // 2. Set status to Approved (and optionally set tier)
+            const updateFields: any = { status: 'Approved' };
+            if (tier === 'VIP' || tier === 'SVIP') {
+                updateFields.tier = tier;
+            }
+
             const { data: updateData, error: updateError } = await supabase
                 .from('vip_allowlist')
-                .update({ status: 'Approved' })
+                .update(updateFields)
                 .ilike('email', targetEmail)
                 .select();
 

@@ -120,7 +120,7 @@ export default function VIPAdminPage() {
     const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
     const [profilesSearch, setProfilesSearch] = useState('');
 
-    const handleApproveStatus = async (email: string, action: 'approve' | 'reject') => {
+    const handleApproveStatus = async (email: string, action: 'approve' | 'reject', tier?: 'VIP' | 'SVIP') => {
         setApprovingEmail(email);
         try {
             const { data: { session } } = await supabase.auth.getSession();
@@ -132,13 +132,13 @@ export default function VIPAdminPage() {
                     'Content-Type': 'application/json',
                     'Authorization': `Bearer ${token}`
                 },
-                body: JSON.stringify({ applicationEmail: email, action })
+                body: JSON.stringify({ applicationEmail: email, action, tier })
             });
             const data = await res.json();
             if (!res.ok) {
                 alert(data.error || '操作審核失敗');
             } else {
-                alert(action === 'approve' ? '✓ 已核准並成功寄出 Magic Link 邀請信！' : '✓ 已拒絕該貴賓申請。');
+                alert(action === 'approve' ? `✓ 已核准為 ${tier || 'VIP'} 並成功寄出 Magic Link 邀請信！` : '✓ 已拒絕該貴賓申請。');
                 await fetchList();
             }
         } catch (err: any) {
@@ -880,18 +880,25 @@ export default function VIPAdminPage() {
                                                         </p>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
                                                     <button
-                                                        onClick={() => handleApproveStatus(vip.email, 'approve')}
+                                                        onClick={() => handleApproveStatus(vip.email, 'approve', 'VIP')}
                                                         disabled={approvingEmail === vip.email}
-                                                        className="px-4 py-2 bg-[#DFBA87] hover:bg-white text-black font-semibold text-[9px] tracking-widest uppercase transition-colors cursor-pointer"
+                                                        className="px-3 py-2 bg-transparent hover:bg-[#DFBA87] text-[#DFBA87] hover:text-black border border-[#DFBA87] font-semibold text-[9px] tracking-widest uppercase transition-all duration-300 cursor-pointer"
                                                     >
-                                                        {approvingEmail === vip.email ? '處理中...' : '核准並寄信'}
+                                                        {approvingEmail === vip.email ? '處理中...' : '核准為 VIP'}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleApproveStatus(vip.email, 'approve', 'SVIP')}
+                                                        disabled={approvingEmail === vip.email}
+                                                        className="px-3 py-2 bg-[#DFBA87] hover:bg-white text-black font-semibold text-[9px] tracking-widest uppercase transition-all duration-300 cursor-pointer"
+                                                    >
+                                                        {approvingEmail === vip.email ? '處理中...' : '核准為 SVIP'}
                                                     </button>
                                                     <button
                                                         onClick={() => handleApproveStatus(vip.email, 'reject')}
                                                         disabled={approvingEmail === vip.email}
-                                                        className="px-4 py-2 border border-neutral-800 hover:border-rose-900 text-neutral-400 hover:text-rose-400 text-[9px] tracking-widest uppercase transition-colors cursor-pointer"
+                                                        className="px-3 py-2 border border-neutral-800 hover:border-rose-900 text-neutral-400 hover:text-rose-400 text-[9px] tracking-widest uppercase transition-all duration-300 cursor-pointer"
                                                     >
                                                         拒絕
                                                     </button>
