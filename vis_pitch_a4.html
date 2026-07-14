@@ -14,7 +14,7 @@
             --text-muted: #8E8E93;
             --pola-gold: #C9A96E;
             --pola-gold-dim: rgba(201, 169, 110, 0.2);
-            --pola-gold-glow: rgba(201, 169, 110, 0.06);
+            --pola-gold-glow: rgba(201, 169, 110, 0.08);
             --glass-bg: rgba(255, 255, 255, 0.02);
             --glass-border: rgba(255, 255, 255, 0.05);
             --font-serif: 'Cormorant Garamond', 'Noto Serif TC', serif;
@@ -44,7 +44,7 @@
             height: 1697px;
             background-color: var(--bg-color);
             position: relative;
-            padding: 50px 80px 45px 80px; /* Reduced top/bottom padding to prevent cutoff */
+            padding: 45px 70px 40px 70px; /* Compact padding to prevent mobile-scale cut-off */
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -87,8 +87,8 @@
             justify-content: space-between;
             align-items: flex-end;
             border-bottom: 1px solid var(--glass-border);
-            padding-bottom: 20px;
-            margin-bottom: 25px; /* Reduced margin */
+            padding-bottom: 16px;
+            margin-bottom: 20px;
         }
 
         .logo-area {
@@ -96,28 +96,17 @@
             flex-direction: column;
         }
 
-        .logo-text {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 32px;
-            font-weight: 300;
-            letter-spacing: 0.25em;
-            color: #FFFFFF;
-            line-height: 1;
-            text-transform: uppercase;
-        }
-
         .logo-sub {
-            font-size: 10px;
-            letter-spacing: 0.4em;
+            font-size: 18px; /* Increased from 10px */
+            letter-spacing: 0.25em;
             color: var(--pola-gold);
-            margin-top: 8px;
             text-transform: uppercase;
             font-weight: 500;
         }
 
         .header-tag {
             font-family: var(--font-sans);
-            font-size: 11px;
+            font-size: 18px; /* Increased from 11px */
             letter-spacing: 0.2em;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -129,14 +118,14 @@
             z-index: 10;
             display: flex;
             flex-direction: column;
-            gap: 28px; /* Reduced gap from 40px to prevent cutoff */
+            gap: 22px; /* Balanced spacing */
             flex-grow: 1;
         }
 
         section {
             display: flex;
             flex-direction: column;
-            gap: 14px; /* Reduced gap from 20px */
+            gap: 12px;
         }
 
         .section-header {
@@ -147,7 +136,7 @@
 
         .section-number {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 16px;
+            font-size: 22px; /* Increased from 16px */
             color: var(--pola-gold);
             font-style: italic;
             font-weight: 600;
@@ -156,7 +145,7 @@
 
         .section-title {
             font-family: 'Noto Serif TC', serif;
-            font-size: 18px;
+            font-size: 26px; /* Increased from 18px */
             font-weight: 500;
             letter-spacing: 0.15em;
             color: #FFFFFF;
@@ -172,14 +161,14 @@
         .stats-grid-row {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
+            gap: 18px;
         }
 
         .stat-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 24px 20px; /* Reduced padding from 30px */
+            border-radius: 10px;
+            padding: 20px 14px; /* Optimized padding */
             text-align: center;
             display: flex;
             flex-direction: column;
@@ -200,18 +189,18 @@
 
         .stat-number {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 64px;
+            font-size: 76px; /* Increased from 64px */
             font-weight: 300;
             color: var(--pola-gold);
             line-height: 1;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             font-style: italic;
             letter-spacing: -0.02em;
         }
 
         .stat-label {
             font-family: 'Noto Sans TC', sans-serif;
-            font-size: 15px;
+            font-size: 22px; /* Increased from 15px */
             font-weight: 400;
             letter-spacing: 0.15em;
             color: var(--text-main);
@@ -221,8 +210,8 @@
         .spotlight-banner {
             background: radial-gradient(circle at 10% 50%, var(--pola-gold-glow) 0%, var(--glass-bg) 100%);
             border: 1px solid var(--pola-gold-dim);
-            border-radius: 12px;
-            padding: 22px 40px; /* Reduced padding from 35px 50px */
+            border-radius: 10px;
+            padding: 20px 35px;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -262,7 +251,7 @@
 
         .spotlight-title {
             font-family: 'Noto Serif TC', serif;
-            font-size: 24px;
+            font-size: 30px; /* Increased from 24px */
             font-weight: 500;
             color: #FFFFFF;
             letter-spacing: 0.15em;
@@ -270,14 +259,14 @@
 
         .spotlight-desc {
             font-family: 'Noto Sans TC', sans-serif;
-            font-size: 14px;
+            font-size: 21px; /* Increased from 14px */
             color: var(--text-muted);
             letter-spacing: 0.1em;
         }
 
         .spotlight-right-label {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 14px;
+            font-size: 18px; /* Increased from 14px */
             letter-spacing: 0.3em;
             color: var(--pola-gold);
             text-transform: uppercase;
@@ -289,15 +278,15 @@
         /* --- Section 2: Values & Comparisons --- */
         .double-grid {
             display: grid;
-            grid-template-columns: 1.1fr 0.9fr;
+            grid-template-columns: 1.15fr 0.85fr;
             gap: 20px;
         }
 
         .premium-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 26px 30px; /* Reduced padding from 35px */
+            border-radius: 10px;
+            padding: 22px 25px;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
@@ -305,11 +294,11 @@
 
         .card-inner-title {
             font-family: 'Noto Serif TC', serif;
-            font-size: 16px;
+            font-size: 22px; /* Increased from 16px */
             font-weight: 500;
             color: var(--pola-gold);
             letter-spacing: 0.15em;
-            margin-bottom: 20px; /* Reduced margin */
+            margin-bottom: 18px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -318,8 +307,8 @@
         .card-inner-title svg {
             stroke: var(--pola-gold);
             stroke-width: 1.5;
-            width: 18px;
-            height: 18px;
+            width: 22px;
+            height: 22px;
         }
 
         /* positioning Comparison Visuals */
@@ -331,13 +320,13 @@
 
         .compare-row {
             display: grid;
-            grid-template-columns: 100px 1fr;
+            grid-template-columns: 110px 1fr;
             align-items: flex-start;
             gap: 15px;
         }
 
         .compare-badge {
-            font-size: 12px;
+            font-size: 16px; /* Increased from 12px */
             font-weight: 500;
             padding: 4px 10px;
             border-radius: 4px;
@@ -358,7 +347,7 @@
         }
 
         .compare-content {
-            font-size: 14px;
+            font-size: 21px; /* Increased from 14px */
             line-height: 1.7;
             letter-spacing: 0.08em;
         }
@@ -377,15 +366,15 @@
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 10px;
-            margin-bottom: 20px;
+            margin-bottom: 18px;
         }
 
         .value-pill {
             background: rgba(255, 255, 255, 0.02);
             border: 1px solid var(--glass-border);
-            padding: 8px 12px;
+            padding: 10px 14px;
             border-radius: 6px;
-            font-size: 13px;
+            font-size: 18px; /* Increased from 13px */
             letter-spacing: 0.1em;
             display: flex;
             align-items: center;
@@ -394,15 +383,15 @@
 
         .value-pill::before {
             content: '';
-            width: 4px;
-            height: 4px;
+            width: 5px;
+            height: 5px;
             border-radius: 50%;
             background-color: var(--pola-gold);
         }
 
         .card-quote {
-            font-size: 13px;
-            line-height: 1.8;
+            font-size: 20px; /* Increased from 13px */
+            line-height: 1.7;
             color: var(--text-muted);
             border-left: 2px solid var(--pola-gold);
             padding-left: 15px;
@@ -419,7 +408,7 @@
         .timeline-container {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 20px;
+            gap: 16px;
             position: relative;
             margin-top: 5px;
         }
@@ -427,17 +416,17 @@
         .timeline-card {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 24px 22px; /* Reduced padding from 30px */
+            border-radius: 10px;
+            padding: 20px 22px;
             position: relative;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
         }
 
         .timeline-step {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 14px;
+            font-size: 18px; /* Increased from 14px */
             color: var(--pola-gold);
             font-weight: 500;
             letter-spacing: 0.1em;
@@ -446,14 +435,14 @@
 
         .timeline-header {
             font-family: 'Noto Serif TC', serif;
-            font-size: 16px;
+            font-size: 22px; /* Increased from 16px */
             font-weight: 500;
             color: #FFFFFF;
             letter-spacing: 0.1em;
         }
 
         .timeline-body {
-            font-size: 13px;
+            font-size: 20px; /* Increased from 13px */
             color: var(--text-muted);
             line-height: 1.7;
             letter-spacing: 0.05em;
@@ -468,7 +457,7 @@
         .timeline-container::after {
             content: '';
             position: absolute;
-            top: 38px; /* Adjusted position */
+            top: 36px;
             left: 10%;
             width: 80%;
             height: 1px;
@@ -480,8 +469,8 @@
         .match-box {
             background: var(--glass-bg);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 20px 30px; /* Reduced padding from 25px 35px */
+            border-radius: 10px;
+            padding: 22px 30px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 30px;
@@ -491,12 +480,12 @@
         .match-column {
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 10px;
         }
 
         .match-title {
             font-family: 'Noto Serif TC', serif;
-            font-size: 24px;
+            font-size: 24px; /* Keep large size */
             font-weight: 500;
             letter-spacing: 0.1em;
             display: flex;
@@ -513,7 +502,7 @@
         .match-title.no { color: var(--text-muted); }
 
         .match-text {
-            font-size: 18px;
+            font-size: 20px; /* Keep large size */
             color: var(--text-main);
             line-height: 1.7;
             letter-spacing: 0.05em;
@@ -528,8 +517,8 @@
             content: '';
             position: absolute;
             left: 50%;
-            top: 20%;
-            height: 60%;
+            top: 15%;
+            height: 70%;
             width: 1px;
             background-color: var(--glass-border);
         }
@@ -537,11 +526,11 @@
         /* --- Footer Section --- */
         footer {
             border-top: 1px solid var(--glass-border);
-            padding-top: 20px;
+            padding-top: 15px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 10px;
+            font-size: 16px; /* Increased from 10px */
             letter-spacing: 0.2em;
             color: var(--text-muted);
             text-transform: uppercase;
@@ -552,6 +541,7 @@
             color: #FFFFFF;
             font-weight: 300;
             letter-spacing: 0.4em;
+            font-size: 24px;
         }
     </style>
 </head>

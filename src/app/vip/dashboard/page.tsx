@@ -62,7 +62,7 @@ export default function VIPDashboard() {
 
                 if (!isMounted) return;
 
-                if (!data?.birthdate) {
+                if (!data?.birthdate || !data?.identity_type) {
                     router.push('/vip/onboarding');
                     return;
                 }
