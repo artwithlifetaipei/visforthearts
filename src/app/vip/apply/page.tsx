@@ -35,7 +35,7 @@ export default function VIPApplyPage() {
             existingPending: "此信箱已在申請審核中，大會核准後將會發送通知信，請耐心等候。",
             existingRejected: "此信箱已被審核退回，如有疑問請洽 visvipteam@gmail.com。",
             insertFailed: "提交登記失敗: ",
-            submitSuccess: "✓ 申請提交成功！大會審核通過後，專屬邀請連結將會自動發送至您的信箱。"
+            submitSuccess: "✓ 申請提交成功！\n\n您的申請已送出，現正進入審核程序。若需進一步確認您的身份或相關資訊，我們將以電子郵件與您聯繫。審核完成後，專屬邀請連結將自動寄送至您的信箱。"
         },
         en: {
             title: "VIP Seat Request",
@@ -215,7 +215,7 @@ export default function VIPApplyPage() {
                     </div>
 
                     {message && (
-                        <p className={`text-[10px] tracking-widest leading-relaxed font-light p-3 border ${
+                        <p className={`text-[10px] tracking-widest leading-relaxed font-light p-3 border whitespace-pre-line ${
                             statusType === 'success' 
                                 ? 'text-emerald-600 bg-emerald-50/50 border-emerald-200' 
                                 : 'text-rose-500 bg-rose-50/50 border-rose-200'
