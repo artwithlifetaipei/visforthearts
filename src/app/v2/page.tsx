@@ -281,7 +281,13 @@ export default function V2LandingPage() {
                 .v2-hero-content {
                     width: 100%; display: flex; justify-content: flex-end; align-items: flex-end;
                 }
-                .v2-hero-text { max-width: 680px; text-align: right; }
+                .v2-hero-text {
+                    max-width: 680px;
+                    text-align: right;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                }
                 .lang-toggle-wrapper {
                     display: flex;
                     justify-content: flex-end;
@@ -317,11 +323,12 @@ export default function V2LandingPage() {
                     font-size: 9px;
                     opacity: 0.4;
                 }
-                .v2-hero-zh { font-size: 1.45rem; font-weight: 300; line-height: 2; margin-bottom: 2rem; color: #444; }
+                .v2-hero-zh { width: 100%; font-size: 1.45rem; font-weight: 300; line-height: 2; margin-bottom: 2rem; color: #444; }
                 .v2-hero-en { 
                     font-family: var(--v2-font-serif); font-style: italic;
                     font-size: 2.2rem; line-height: 1.1; color: var(--v2-text);
                     white-space: nowrap;
+                    width: max-content;
                 }
 
                 .v2-section-title {
@@ -489,10 +496,10 @@ export default function V2LandingPage() {
                     .v2-nav-links { display: none; }
                     .v2-hero { flex-direction: column; padding-bottom: 10vh; }
                     .v2-hero-img-box { width: 85vw; height: 45vh; position: relative; top: 0; left: 0; margin-bottom: 5vh; }
-                    .v2-hero-text { text-align: left; }
+                    .v2-hero-text { text-align: left; display: flex; flex-direction: column; align-items: flex-start; }
                     .lang-toggle-wrapper { justify-content: flex-start; }
-                    .v2-hero-zh { font-size: 1.15rem; }
-                    .v2-hero-en { font-size: 0.85rem; white-space: nowrap; }
+                    .v2-hero-zh { font-size: 1.15rem; width: 100%; }
+                    .v2-hero-en { font-size: 0.85rem; white-space: nowrap; width: max-content; }
                     .v2-exhibition-scroller { gap: 15vw; padding: 0 6vw; }
                     .v2-exhibit-intro { width: 80vw; }
                     .v2-card { width: 80vw; }
@@ -668,7 +675,7 @@ export default function V2LandingPage() {
                                 VIS 始於2022年，至今已與無數的品味質富人士們，<br />實踐著人文與美感如何展現於美好的生活中。
                             </p>
                         ) : (
-                            <p className="v2-hero-zh v2-reveal font-sans" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '1.2rem', lineHeight: '1.8', letterSpacing: '0.04em', color: '#444', fontWeight: 3, textTransform: 'none', margin: '0 0 1.5rem 0' }}>
+                            <p className="v2-hero-zh v2-reveal font-sans" style={{ width: '100%', fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '1.2rem', lineHeight: '1.8', letterSpacing: '0.04em', color: '#444', fontWeight: 3, textTransform: 'none', margin: '0 0 1.5rem 0' }}>
                                 VIS was founded in 2022. Since its inception, it has collaborated with numerous individuals of discerning taste and wealth to explore how humanity and aesthetics manifest in a beautiful life.
                             </p>
                         )}

@@ -367,7 +367,13 @@ export default function LandingPage() {
                     transform: translateY(-8px) rotateY(-2deg) scale(1.01);
                     box-shadow: 0 45px 80px -20px rgba(201, 169, 110, 0.15), 0 15px 40px -15px rgba(0, 0, 0, 0.08);
                 }
-                .hero-text-container { max-width: 450px; text-align: right; }
+                .hero-text-container {
+                    max-width: 450px;
+                    text-align: right;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: flex-end;
+                }
                 .lang-toggle-wrapper {
                     display: flex;
                     justify-content: flex-end;
@@ -403,7 +409,7 @@ export default function LandingPage() {
                     font-size: 9px;
                     opacity: 0.4;
                 }
-                .hero-zh { font-size: 1.15rem; font-weight: 300; line-height: 2; margin-bottom: 1.5rem; }
+                .hero-zh { width: 100%; font-size: 1.15rem; font-weight: 300; line-height: 2; margin-bottom: 1.5rem; }
                 .hero-en {
                     font-family: var(--font-serif);
                     font-size: 1.2rem;
@@ -412,6 +418,7 @@ export default function LandingPage() {
                     color: #777;
                     margin-top: 0.5rem;
                     white-space: nowrap;
+                    width: max-content;
                 }
 
                 .exhibition-section { 
@@ -603,10 +610,10 @@ export default function LandingPage() {
                     }
                     .hero-layout { flex-direction: column; align-items: center; padding-top: 15vh; height: auto; }
                     .hero-img-container { width: 100%; height: 45vh; justify-content: center; }
-                    .hero-text-container { text-align: center; margin-top: 4vh; }
+                    .hero-text-container { text-align: center; margin-top: 4vh; display: flex; flex-direction: column; align-items: center; }
                     .lang-toggle-wrapper { justify-content: center; }
-                    .hero-zh { font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem; }
-                    .hero-en { font-family: var(--font-serif); font-size: 0.82rem; font-style: italic; white-space: nowrap; line-height: 1.5; }
+                    .hero-zh { font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem; width: 100%; }
+                    .hero-en { font-family: var(--font-serif); font-size: 0.82rem; font-style: italic; white-space: nowrap; line-height: 1.5; width: max-content; }
                     .desktop-br { display: none; }
                     .mobile-br { display: block; }
                     .exhibition-scroller { padding: 0 10vw; gap: 10vw; }
@@ -827,7 +834,7 @@ export default function LandingPage() {
                                 VIS 始於2022年，至今已與無數的品味質富人士們，<br className="desktop-br" />實踐著人文與美感如何展現於美好的生活中。
                             </p>
                         ) : (
-                            <p className="hero-zh font-sans" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '1.02rem', lineHeight: '1.8', letterSpacing: '0.04em', color: '#1a1a1a', fontWeight: 3, textTransform: 'none', margin: '0 0 1.25rem 0' }}>
+                            <p className="hero-zh font-sans" style={{ width: '100%', fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '1.02rem', lineHeight: '1.8', letterSpacing: '0.04em', color: '#1a1a1a', fontWeight: 3, textTransform: 'none', margin: '0 0 1.25rem 0' }}>
                                 VIS was founded in 2022. Since its inception, it has collaborated with numerous individuals of discerning taste and wealth to explore how humanity and aesthetics manifest in a beautiful life.
                             </p>
                         )}
