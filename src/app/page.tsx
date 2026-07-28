@@ -436,7 +436,23 @@ export default function LandingPage() {
                 .exhibit-title { font-size: 1rem; letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 4rem; }
                 .exhibit-title span { font-family: var(--font-serif); font-style: italic; font-size: 1.2rem; }
                 .exhibit-intro-zh { font-size: 1.3rem; line-height: 1.8; font-weight: 300; margin-bottom: 1.5rem; }
-                .exhibit-intro-en { font-size: 0.9rem; line-height: 1.6; color: #888; font-family: var(--font-serif); font-style: italic; }
+                .exhibit-intro-en {
+                    font-family: var(--font-serif);
+                    font-style: italic;
+                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+                .exhibit-intro-en.primary-text {
+                    font-size: 1.5rem;
+                    line-height: 1.8;
+                    color: #2c2c2c;
+                    margin-bottom: 0;
+                }
+                .exhibit-intro-en.secondary-text {
+                    font-size: 0.9rem;
+                    line-height: 1.6;
+                    color: #888;
+                    margin-bottom: 0;
+                }
                 
                 .img-card { width: 100%; aspect-ratio: 2/3; overflow: hidden; transition: transform 1s ease; }
                 .img-card:hover { transform: scale(1.02); }
@@ -619,6 +635,8 @@ export default function LandingPage() {
                     .exhibition-scroller { padding: 0 10vw; gap: 10vw; }
                     .exhibit-item { width: 65vw !important; margin-right: 0 !important; padding-right: 0 !important; justify-content: flex-start; padding-top: 15vh; }
                     .exhibit-item.intro { width: 80vw !important; }
+                    .exhibit-intro-en.primary-text { font-size: 1.15rem; line-height: 1.7; }
+                    .exhibit-intro-en.secondary-text { font-size: 0.8rem; line-height: 1.5; }
                     .exhibit-item .img-card { max-height: 42vh; }
                     .exhibit-item .card-text-zh { font-size: 1.1rem; margin-top: 1.25rem; }
                     .exhibit-item .card-text-en { font-size: 0.55rem; margin-top: 0.25rem; }
@@ -932,7 +950,7 @@ export default function LandingPage() {
                                 而是一個最適合「高客單價品牌」的<span className="whitespace-nowrap">導客解決方案。</span>
                             </p>
                         )}
-                        <p className="exhibit-intro-en">
+                        <p className={`exhibit-intro-en ${lang === 'zh' ? 'secondary-text' : 'primary-text'}`}>
                             More than a fair, but a purposefully architected space for intellectual and aesthetic elevation.
                         </p>
                         <div className="exhibit-buttons-container">
