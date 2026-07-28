@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VIS Contemporary Culture Fair - VIP Pass</title>
+    <title>VIS Contemporary Culture Fair</title>
     <style>
         body {
             margin: 0;
@@ -26,75 +26,83 @@
             width: 100%;
             table-layout: fixed;
             background-color: #000000;
-            padding-bottom: 60px;
-            padding-top: 60px;
+            padding-bottom: 80px;
+            padding-top: 80px;
         }
         .main-table {
             background-color: #0A0A0A;
             margin: 0 auto;
             width: 100%;
-            max-width: 480px;
-            border: 1px solid #141414;
+            max-width: 460px;
+            border: 1px solid #1A1A1A;
             font-family: inherit;
         }
         .content-cell {
-            padding: 48px 32px;
+            padding: 56px 40px;
             text-align: center;
         }
         .logo-img {
-            height: 28px;
+            height: 32px;
             width: auto;
-            margin-bottom: 40px;
+            margin-bottom: 44px;
         }
         .title {
             color: #DFBA87;
-            font-size: 16px;
+            font-size: 17px;
             font-weight: 300;
-            letter-spacing: 0.3em;
+            letter-spacing: 0.35em;
             margin-top: 0;
             margin-bottom: 24px;
             line-height: 1.5;
+            text-align: center;
         }
         .divider {
-            width: 32px;
+            width: 40px;
             height: 1px;
             background-color: #DFBA87;
-            margin: 0 auto 28px auto;
-            opacity: 0.3;
+            margin: 0 auto 32px auto;
+            opacity: 0.25;
         }
         .message {
             color: #CCCCCC;
             font-size: 13px;
             font-weight: 300;
             letter-spacing: 0.18em;
-            line-height: 2.0;
-            margin: 0 0 40px 0;
+            line-height: 2.2;
+            margin: 0 0 44px 0;
+            text-align: center;
         }
         .button-container {
-            margin-bottom: 48px;
+            margin-bottom: 56px;
         }
         .btn {
             background-color: #DFBA87;
             color: #000000 !important;
             display: inline-block;
-            font-size: 10.5px;
+            font-size: 11px;
             font-weight: 600;
-            letter-spacing: 0.4em;
-            padding: 15px 40px;
+            letter-spacing: 0.45em;
+            padding: 16px 48px;
             text-decoration: none;
             text-transform: uppercase;
             text-align: center;
-            /* Ensure Outlook and other clients respect display blocks */
             line-height: 1.0;
+            border-radius: 0px;
+            transition: background-color 0.3s ease;
+        }
+        .footer-divider {
+            width: 100%;
+            height: 1px;
+            background-color: #1A1A1A;
+            margin-bottom: 28px;
         }
         .footer {
-            color: #555555;
-            font-size: 9px;
-            letter-spacing: 0.22em;
-            line-height: 1.8;
-            margin-top: 24px;
-            border-t: 1px solid #141414;
-            padding-top: 24px;
+            color: #666666;
+            font-size: 9.5px;
+            letter-spacing: 0.18em;
+            line-height: 2.0;
+            margin: 0;
+            text-align: center;
         }
     </style>
 </head>
@@ -104,12 +112,12 @@
             <tr>
                 <td class="content-cell">
                     <!-- LOGO -->
-                    <a href="https://www.visforthearts.com" target="_blank" style="text-decoration: none;">
+                    <a href="https://www.visforthearts.com" target="_blank" style="text-decoration: none; display: inline-block;">
                         <img class="logo-img" src="https://www.visforthearts.com/vis_logo.png" alt="VIS Logo" />
                     </a>
                     
                     <!-- TITLE -->
-                    <h1 class="title">您的貴賓通行證已備妥</h1>
+                    <h1 class="title">您的貴賓通行證已備妥。</h1>
                     
                     <!-- DIVIDER -->
                     <div class="divider"></div>
@@ -117,19 +125,18 @@
                     <!-- MESSAGE -->
                     <p class="message">
                         感謝您蒞臨 VIS Contemporary Culture Fair。<br/>
-                        請輕觸下方按鈕即可開啟您的貴賓面板。
+                        輕觸下方按鈕即可開啟。
                     </p>
                     
                     <!-- BUTTON -->
                     <div class="button-container">
-                        <a class="btn" href="{{ .ConfirmationURL }}">LOG IN</a>
+                        <a class="btn" href="{{ .ConfirmationURL }}">log in</a>
                     </div>
                     
                     <!-- FOOTER -->
-                    <div style="width: 100%; height: 1px; background-color: #141414; margin-bottom: 24px;"></div>
+                    <div class="footer-divider"></div>
                     <p class="footer">
-                        © 2026/2027 VIS Contemporary Culture Fair<br/>
-                        VIS 當代文化博覽會
+                        © 2026/2027 VIS Contemporary Culture Fair VIS 當代文化博覽會
                     </p>
                 </td>
             </tr>

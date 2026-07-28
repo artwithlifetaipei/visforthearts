@@ -292,43 +292,32 @@ export default function V2LandingPage() {
                     display: flex;
                     justify-content: flex-end;
                     align-items: center;
-                    gap: 8px;
                     margin-bottom: 24px;
                 }
-                .lang-toggle-btn {
+                .lang-toggle-btn-single {
                     font-size: 10px;
                     letter-spacing: 0.25em;
-                    font-weight: 400;
-                    color: #888888;
-                    opacity: 0.6;
+                    font-weight: 500;
+                    color: var(--v2-text);
                     background: transparent;
-                    border: none;
+                    border: 1px solid var(--v2-text);
+                    border-radius: 20px;
                     cursor: pointer;
-                    padding: 4px 6px;
+                    padding: 6px 18px;
                     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                     text-transform: uppercase;
                 }
-                .lang-toggle-btn:hover {
-                    opacity: 1;
-                    color: var(--v2-gold);
-                }
-                .lang-toggle-btn.active {
-                    color: var(--v2-gold);
-                    opacity: 1;
-                    font-weight: 600;
-                    border-bottom: 0.5px solid var(--v2-gold);
-                }
-                .lang-toggle-slash {
-                    color: #BBBBBB;
-                    font-size: 9px;
-                    opacity: 0.4;
+                .lang-toggle-btn-single:hover {
+                    background: var(--v2-text);
+                    color: #FAF9F6;
+                    transform: scale(0.97);
                 }
                 .v2-hero-zh { width: 100%; font-size: 1.45rem; font-weight: 300; line-height: 2; margin-bottom: 2rem; color: #444; }
                 .v2-hero-en { 
                     font-family: var(--v2-font-serif); font-style: italic;
                     font-size: 2.2rem; line-height: 1.1; color: var(--v2-text);
-                    white-space: nowrap;
-                    width: max-content;
+                    width: 100%;
+                    text-align: inherit;
                 }
 
                 .v2-section-title {
@@ -499,7 +488,7 @@ export default function V2LandingPage() {
                     .v2-hero-text { text-align: left; display: flex; flex-direction: column; align-items: flex-start; }
                     .lang-toggle-wrapper { justify-content: flex-start; }
                     .v2-hero-zh { font-size: 1.15rem; width: 100%; }
-                    .v2-hero-en { font-size: 0.85rem; white-space: nowrap; width: max-content; }
+                    .v2-hero-en { font-size: 0.85rem; width: 100%; text-align: inherit; }
                     .v2-exhibition-scroller { gap: 15vw; padding: 0 6vw; }
                     .v2-exhibit-intro { width: 80vw; }
                     .v2-card { width: 80vw; }
@@ -655,18 +644,10 @@ export default function V2LandingPage() {
                         <div className="lang-toggle-wrapper">
                             <button
                                 type="button"
-                                onClick={() => setLang('en')}
-                                className={`lang-toggle-btn ${lang === 'en' ? 'active' : ''}`}
+                                onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
+                                className="lang-toggle-btn-single"
                             >
-                                EN
-                            </button>
-                            <span className="lang-toggle-slash">/</span>
-                            <button
-                                type="button"
-                                onClick={() => setLang('zh')}
-                                className={`lang-toggle-btn ${lang === 'zh' ? 'active' : ''}`}
-                            >
-                                CH
+                                EN/CH
                             </button>
                         </div>
 
@@ -727,7 +708,7 @@ export default function V2LandingPage() {
                             {lang === 'zh' ? (
                                 'VIS 提供的不只是一個展位，而是一套從客群導入到關係延續的品牌成長機制。'
                             ) : (
-                                'VIS provides more than just a booth; it offers a comprehensive brand growth mechanism from client acquisition to lasting relationships.'
+                                'By connecting the worlds of art, media, collecting, fashion, design, entrepreneurship and business leadership, VIS offers more than exhibition space, it\'s an access to a carefully cultivated network that can lead to collecting, editorial exposure, cross-disciplinary collaboration and international opportunities.'
                             )}
                         </p>
                     </div>

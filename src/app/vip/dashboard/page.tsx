@@ -161,8 +161,8 @@ export default function VIPDashboard() {
             'BEGIN:VEVENT',
             `UID:vis-vip-${profile.id}`,
             'DTSTAMP:20260530T000000Z',
-            'DTSTART:20270107T030000Z',
-            'DTEND:20270110T100000Z',
+            'DTSTART:20270106T100000Z',
+            'DTEND:20270109T100000Z',
             'SUMMARY:VIS FOR THE ARTS 2027 藝術博覽會 (VIP)',
             'DESCRIPTION:您專屬的 VIS 貴賓尊榮通行證提醒。請於入場時出示您的數位禮賓卡通關。\\n\\n聯絡信箱：visvipteam@gmail.com',
             'LOCATION:台北市中正區延平南路98號',
@@ -182,7 +182,7 @@ export default function VIPDashboard() {
 
     const googleCalendarUrl = () => {
         const text = encodeURIComponent("VIS FOR THE ARTS 2027 藝術博覽會 (VIP)");
-        const dates = "20270107T030000Z/20270110T100000Z"; // Jan 7, 11:00 AM to Jan 10, 6:00 PM Taipei time (UTC+8)
+        const dates = "20270106T100000Z/20270109T100000Z"; // Jan 6, 6:00 PM to Jan 9, 6:00 PM Taipei time (UTC+8)
         const details = encodeURIComponent("您專屬的 VIS 貴賓尊榮通行證提醒。請於入場時出示您的數位禮賓卡通關。\n\n聯絡信箱：visvipteam@gmail.com");
         const location = encodeURIComponent("台北市中正區延平南路98號");
         return `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${dates}&details=${details}&location=${location}&sf=true&output=xml`;
@@ -424,7 +424,7 @@ export default function VIPDashboard() {
                                         </div>
                                         <div>
                                             <p className="text-[7px] tracking-[0.3em] uppercase text-neutral-500">DATE</p>
-                                            <p className="text-[9px] tracking-[0.1em] font-mono text-neutral-300 mt-0.5">2027.01.07 - 10</p>
+                                            <p className="text-[9px] tracking-[0.1em] font-mono text-neutral-300 mt-0.5">2027.01.06 - 09</p>
                                         </div>
                                     </div>
                                     <div>

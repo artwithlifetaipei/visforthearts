@@ -378,36 +378,25 @@ export default function LandingPage() {
                     display: flex;
                     justify-content: flex-end;
                     align-items: center;
-                    gap: 8px;
                     margin-bottom: 24px;
                 }
-                .lang-toggle-btn {
+                .lang-toggle-btn-single {
                     font-size: 10px;
                     letter-spacing: 0.25em;
-                    font-weight: 400;
-                    color: #888888;
-                    opacity: 0.6;
+                    font-weight: 500;
+                    color: var(--text);
                     background: transparent;
-                    border: none;
+                    border: 1px solid var(--text);
+                    border-radius: 20px;
                     cursor: pointer;
-                    padding: 4px 6px;
+                    padding: 6px 18px;
                     transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
                     text-transform: uppercase;
                 }
-                .lang-toggle-btn:hover {
-                    opacity: 1;
-                    color: var(--gold);
-                }
-                .lang-toggle-btn.active {
-                    color: var(--gold);
-                    opacity: 1;
-                    font-weight: 600;
-                    border-bottom: 0.5px solid var(--gold);
-                }
-                .lang-toggle-slash {
-                    color: #BBBBBB;
-                    font-size: 9px;
-                    opacity: 0.4;
+                .lang-toggle-btn-single:hover {
+                    background: var(--text);
+                    color: #FAF9F6;
+                    transform: scale(0.97);
                 }
                 .hero-zh { width: 100%; font-size: 1.15rem; font-weight: 300; line-height: 2; margin-bottom: 1.5rem; }
                 .hero-en {
@@ -417,8 +406,8 @@ export default function LandingPage() {
                     letter-spacing: 0.05em;
                     color: #777;
                     margin-top: 0.5rem;
-                    white-space: nowrap;
-                    width: max-content;
+                    width: 100%;
+                    text-align: inherit;
                 }
 
                 .exhibition-section { 
@@ -448,10 +437,11 @@ export default function LandingPage() {
                     margin-bottom: 0;
                 }
                 .exhibit-intro-en.secondary-text {
-                    font-size: 0.9rem;
-                    line-height: 1.6;
+                    font-size: 1.15rem;
+                    line-height: 1.7;
                     color: #888;
                     margin-bottom: 0;
+                    margin-top: 0.5rem;
                 }
                 
                 .img-card { width: 100%; aspect-ratio: 2/3; overflow: hidden; transition: transform 1s ease; }
@@ -629,14 +619,14 @@ export default function LandingPage() {
                     .hero-text-container { text-align: center; margin-top: 4vh; display: flex; flex-direction: column; align-items: center; }
                     .lang-toggle-wrapper { justify-content: center; }
                     .hero-zh { font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem; width: 100%; }
-                    .hero-en { font-family: var(--font-serif); font-size: 0.82rem; font-style: italic; white-space: nowrap; line-height: 1.5; width: max-content; }
+                    .hero-en { font-family: var(--font-serif); font-size: 0.82rem; font-style: italic; line-height: 1.5; width: 100%; text-align: inherit; }
                     .desktop-br { display: none; }
                     .mobile-br { display: block; }
                     .exhibition-scroller { padding: 0 10vw; gap: 10vw; }
                     .exhibit-item { width: 65vw !important; margin-right: 0 !important; padding-right: 0 !important; justify-content: flex-start; padding-top: 15vh; }
                     .exhibit-item.intro { width: 80vw !important; }
                     .exhibit-intro-en.primary-text { font-size: 1.15rem; line-height: 1.7; }
-                    .exhibit-intro-en.secondary-text { font-size: 0.8rem; line-height: 1.5; }
+                    .exhibit-intro-en.secondary-text { font-size: 0.95rem; line-height: 1.5; }
                     .exhibit-item .img-card { max-height: 42vh; }
                     .exhibit-item .card-text-zh { font-size: 1.1rem; margin-top: 1.25rem; }
                     .exhibit-item .card-text-en { font-size: 0.55rem; margin-top: 0.25rem; }
@@ -832,18 +822,10 @@ export default function LandingPage() {
                         <div className="lang-toggle-wrapper">
                             <button
                                 type="button"
-                                onClick={() => setLang('en')}
-                                className={`lang-toggle-btn ${lang === 'en' ? 'active' : ''}`}
+                                onClick={() => setLang(lang === 'zh' ? 'en' : 'zh')}
+                                className="lang-toggle-btn-single"
                             >
-                                EN
-                            </button>
-                            <span className="lang-toggle-slash">/</span>
-                            <button
-                                type="button"
-                                onClick={() => setLang('zh')}
-                                className={`lang-toggle-btn ${lang === 'zh' ? 'active' : ''}`}
-                            >
-                                CH
+                                EN/CH
                             </button>
                         </div>
 
@@ -904,7 +886,7 @@ export default function LandingPage() {
                             {lang === 'zh' ? (
                                 'VIS 提供的不只是一個展位，而是一套從客群導入到關係延續的品牌成長機制。'
                             ) : (
-                                'VIS provides more than just a booth; it offers a comprehensive brand growth mechanism from client acquisition to lasting relationships.'
+                                'By connecting the worlds of art, media, collecting, fashion, design, entrepreneurship and business leadership, VIS offers more than exhibition space, it\'s an access to a carefully cultivated network that can lead to collecting, editorial exposure, cross-disciplinary collaboration and international opportunities.'
                             )}
                         </p>
                     </div>
@@ -1064,7 +1046,7 @@ export default function LandingPage() {
                     </div>
                     <div className="press-item">
                         <div style={{ overflow: 'hidden' }}><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/02104210-0-1_cover_1600x1201.jpeg" className="press-img" alt="Press 7" /></div>
-                        <h3 className="press-media">聯合報 - 500輯</h3>
+                        <h3 className="press-media">{lang === 'zh' ? '聯合報 - 500輯' : 'UDN GROUP'}</h3>
                         <p className="press-title">
                             {lang === 'zh' 
                                 ? '首屆 vis-gratia 藝術與生活風格博覽會：匯集20個台灣設計師品牌、3組當代藝術' 
@@ -1073,7 +1055,7 @@ export default function LandingPage() {
                     </div>
                     <div className="press-item">
                         <div style={{ overflow: 'hidden' }}><img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/d8ca1a39-6bfb-40a3-8fa6-1ae3fba45157-172465816.jpg" className="press-img" alt="Press 8" /></div>
-                        <h3 className="press-media">聯合報 - 500輯</h3>
+                        <h3 className="press-media">{lang === 'zh' ? '聯合報 - 500輯' : 'UDN GROUP'}</h3>
                         <p className="press-title">
                             {lang === 'zh' 
                                 ? '2023vis™-wild藝術與潮流文化祭！限期三天，酉5PM TWCAUDE攜10組設計品牌、藝術家亮相' 
