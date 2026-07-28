@@ -33,9 +33,41 @@ const quotes = [
     }
 ];
 
+const quotesEn = [
+    {
+        text: "We have always believed that the body is the vehicle of the soul. How you care for your body is not just cold health management, but determines whether you can feel and experience every moment of the world more delicately. When the body is well settled and the senses are reopened, we can enjoy the present moment more. VIS is the perfect showcase to implement this brand philosophy: 'health' is no longer simplified into ingredients or efficacy, but a complete, high-quality lifestyle experience.",
+        author: "elaceite"
+    },
+    {
+        text: "For Everijoy, participating in the VIS Lifestyle and Art Festival was a precious experience to convey our brand philosophy to more people. We have always hoped to bring a gentle, romantic, and healing feeling through flowers. VIS provided a highly curated space that can be truly understood, letting floral art not just be viewed, but become an artistic experience felt and responded to.",
+        author: "Everijoy Floral Boutique"
+    },
+    {
+        text: "ayaᵃ and tins.ground have long participated in European design exhibitions. This is our first time showcasing works back in Taiwan. Through VIS, we exchange with diverse collectors and cross-disciplinary creators, opening the possibility for functional art to be seen by the new generation of collectors.",
+        author: "ayaᵃ"
+    },
+    {
+        text: "Through the actual exchange with visiting guests, we deeply felt the warmth and depth brought by physical interaction. Sharing space and time, scent becomes a starting point for dialogue, allowing the brand philosophy to be understood more completely.",
+        author: "K's Time"
+    },
+    {
+        text: "When aesthetics and humanistic values can influence society at a faster pace, that is a direction worthy of the support of our club guests. Because this support accumulates and deepens the entire cultural environment, not just art.",
+        author: "Looom Club Co-founder Bonny Liu"
+    },
+    {
+        text: "When aesthetic values and design are faster transmitted and felt in society, their impact often exceeds our imagination. Finding a way to sustain this diffusion is not just supporting art, but supporting a choice that makes the world gentler.",
+        author: "Looom Club Official Partner Connie Chang"
+    },
+    {
+        text: "I always believe that building a brand is like creating art; it's not about speed, but longevity. Rather than fleeting trends, those relationships that are worth nurturing and meeting repeatedly are the foundation of great brands and artists.",
+        author: "VIS Founder Amelie KUO"
+    }
+];
+
 export default function V2LandingPage() {
     const navRef = useRef<HTMLElement>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [lang, setLang] = useState<'zh' | 'en'>('zh');
     const [quoteIndex, setQuoteIndex] = useState(0);
 
     useEffect(() => {
@@ -250,6 +282,41 @@ export default function V2LandingPage() {
                     width: 100%; display: flex; justify-content: flex-end; align-items: flex-end;
                 }
                 .v2-hero-text { max-width: 680px; text-align: right; }
+                .lang-toggle-wrapper {
+                    display: flex;
+                    justify-content: flex-end;
+                    align-items: center;
+                    gap: 8px;
+                    margin-bottom: 24px;
+                }
+                .lang-toggle-btn {
+                    font-size: 10px;
+                    letter-spacing: 0.25em;
+                    font-weight: 400;
+                    color: #888888;
+                    opacity: 0.6;
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    padding: 4px 6px;
+                    transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                    text-transform: uppercase;
+                }
+                .lang-toggle-btn:hover {
+                    opacity: 1;
+                    color: var(--v2-gold);
+                }
+                .lang-toggle-btn.active {
+                    color: var(--v2-gold);
+                    opacity: 1;
+                    font-weight: 600;
+                    border-bottom: 0.5px solid var(--v2-gold);
+                }
+                .lang-toggle-slash {
+                    color: #BBBBBB;
+                    font-size: 9px;
+                    opacity: 0.4;
+                }
                 .v2-hero-zh { font-size: 1.45rem; font-weight: 300; line-height: 2; margin-bottom: 2rem; color: #444; }
                 .v2-hero-en { 
                     font-family: var(--v2-font-serif); font-style: italic;
@@ -423,6 +490,7 @@ export default function V2LandingPage() {
                     .v2-hero { flex-direction: column; padding-bottom: 10vh; }
                     .v2-hero-img-box { width: 85vw; height: 45vh; position: relative; top: 0; left: 0; margin-bottom: 5vh; }
                     .v2-hero-text { text-align: left; }
+                    .lang-toggle-wrapper { justify-content: flex-start; }
                     .v2-hero-zh { font-size: 1.15rem; }
                     .v2-hero-en { font-size: 0.85rem; white-space: nowrap; }
                     .v2-exhibition-scroller { gap: 15vw; padding: 0 6vw; }
@@ -562,12 +630,12 @@ export default function V2LandingPage() {
                     <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" className="v2-logo" alt="VIS" />
                 </a>
                 <div className="v2-nav-links">
-                    <a href="#about" className="v2-nav-link">About</a>
-                    <a href="#exhibition" className="v2-nav-link">Exhibition</a>
-                    <a href="#vip" className="v2-nav-link">VIP Club</a>
-                    <a href="#press" className="v2-nav-link">Press</a>
+                    <a href="#about" className="v2-nav-link">{lang === 'zh' ? 'About 關於' : 'About'}</a>
+                    <a href="#exhibition" className="v2-nav-link">{lang === 'zh' ? 'Exhibition 參展' : 'Exhibition'}</a>
+                    <a href="#vip" className="v2-nav-link">{lang === 'zh' ? 'VIP Club 禮賓入口' : 'VIP Club'}</a>
+                    <a href="#press" className="v2-nav-link">{lang === 'zh' ? 'Press 媒體' : 'Press'}</a>
                 </div>
-                <a href="/vip" className="v2-btn-magnetic" style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textDecoration: 'none', color: 'inherit', border: '1px solid #000', padding: '0.6rem 1.2rem' }}>Access</a>
+                <a href="/vip" className="v2-btn-magnetic" style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textDecoration: 'none', color: 'inherit', border: '1px solid #000', padding: '0.6rem 1.2rem' }}>{lang === 'zh' ? 'Access 登入' : 'Access'}</a>
             </nav>
 
             <section className="v2-hero" id="hero">
@@ -576,9 +644,34 @@ export default function V2LandingPage() {
                 </div>
                 <div className="v2-hero-content">
                     <div className="v2-hero-text">
-                        <p className="v2-hero-zh v2-reveal">
-                            VIS 始於2022年，至今已與無數的品味質富人士們，<br />實踐著人文與美感如何展現於美好的生活中。
-                        </p>
+                        {/* EN/CH Language Switcher */}
+                        <div className="lang-toggle-wrapper">
+                            <button
+                                type="button"
+                                onClick={() => setLang('en')}
+                                className={`lang-toggle-btn ${lang === 'en' ? 'active' : ''}`}
+                            >
+                                EN
+                            </button>
+                            <span className="lang-toggle-slash">/</span>
+                            <button
+                                type="button"
+                                onClick={() => setLang('zh')}
+                                className={`lang-toggle-btn ${lang === 'zh' ? 'active' : ''}`}
+                            >
+                                CH
+                            </button>
+                        </div>
+
+                        {lang === 'zh' ? (
+                            <p className="v2-hero-zh v2-reveal">
+                                VIS 始於2022年，至今已與無數的品味質富人士們，<br />實踐著人文與美感如何展現於美好的生活中。
+                            </p>
+                        ) : (
+                            <p className="v2-hero-zh v2-reveal font-sans" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '1.2rem', lineHeight: '1.8', letterSpacing: '0.04em', color: '#444', fontWeight: 3, textTransform: 'none', margin: '0 0 1.5rem 0' }}>
+                                VIS was founded in 2022. Since its inception, it has collaborated with numerous individuals of discerning taste and wealth to explore how humanity and aesthetics manifest in a beautiful life.
+                            </p>
+                        )}
                         <h1 className="v2-hero-en v2-reveal">
                             Established in 2022. Culture shapes Living. Taste defines Lifestyle.
                         </h1>
@@ -592,35 +685,43 @@ export default function V2LandingPage() {
                     <div className="metrics-grid">
                         <div className="metric-card">
                             <span className="metric-number">71%</span>
-                            <span className="metric-label">共超過品味貴賓</span>
+                            <span className="metric-label">{lang === 'zh' ? '共超過品味貴賓' : 'Taste VIPs & Affluent Guests'}</span>
                         </div>
                         <div className="metric-card">
                             <span className="metric-number">21%</span>
-                            <span className="metric-label">收藏人士</span>
+                            <span className="metric-label">{lang === 'zh' ? '收藏人士' : 'Art Collectors'}</span>
                         </div>
                         <div className="metric-card">
                             <span className="metric-number">34%</span>
-                            <span className="metric-label">企業主</span>
+                            <span className="metric-label">{lang === 'zh' ? '企業主' : 'Business Owners'}</span>
                         </div>
                         <div className="metric-card">
                             <span className="metric-number">13%</span>
-                            <span className="metric-label">媒體/意見領袖</span>
+                            <span className="metric-label">{lang === 'zh' ? '媒體/意見領袖' : 'Press & KOLs'}</span>
                         </div>
                         <div className="metric-card full-width">
                             <span className="metric-number">63%</span>
-                            <span className="metric-label">一年收藏預算50萬以上</span>
+                            <span className="metric-label">{lang === 'zh' ? '一年收藏預算50萬以上' : 'Annual Art Acquisition Budget > 500k TWD'}</span>
                         </div>
                     </div>
                     
                     <div className="metrics-divider"></div>
                     
                     <div className="metrics-text-content">
-                        <h3 className="metrics-heading">精準客群 ‧ 關係延續</h3>
-                        <p className="metrics-p font-zh">
-                            不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，篩選出適合品牌深度交流與展後延續的客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。
+                        <h3 className="metrics-heading">{lang === 'zh' ? '精準客群 ‧ 關係延續' : 'Discerning Audience · Deep Connection'}</h3>
+                        <p className={`metrics-p ${lang === 'zh' ? 'font-zh' : 'font-sans'}`} style={lang === 'en' ? { fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '0.85rem', lineHeight: '1.8', letterSpacing: '0.04em', color: '#666', fontWeight: 3, textTransform: 'none' } : {}}>
+                            {lang === 'zh' ? (
+                                '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，篩選出適合品牌深度交流與展後延續的客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。'
+                            ) : (
+                                'Unlike conventional art fairs focusing on high foot traffic and transactional sales, VIS curates an elite group of attendees, fostering genuine brand engagement that extends far beyond the exhibition floor. This targeted ecosystem is ideal for high-ticket brands seeking premium client acquisition, strategic partnerships, and long-term brand loyalty.'
+                            )}
                         </p>
-                        <p className="metrics-highlight font-zh">
-                            VIS 提供的不只是一個展位，而是一套從客群導入到關係延續的品牌成長機制。
+                        <p className={`metrics-highlight ${lang === 'zh' ? 'font-zh' : 'font-sans'}`} style={lang === 'en' ? { fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '0.9rem', lineHeight: '1.7', letterSpacing: '0.04em', color: '#1a1a1a', fontWeight: 4, textTransform: 'none' } : {}}>
+                            {lang === 'zh' ? (
+                                'VIS 提供的不只是一個展位，而是一套從客群導入到關係延續的品牌成長機制。'
+                            ) : (
+                                'VIS provides more than just a booth; it offers a comprehensive brand growth mechanism from client acquisition to lasting relationships.'
+                            )}
                         </p>
                     </div>
                 </div>
@@ -630,13 +731,13 @@ export default function V2LandingPage() {
             {/* Quote Carousel Section */}
             <section className="quote-section">
                 <div className="quote-container">
-                    {quotes.map((quote, idx) => (
+                    {(lang === 'zh' ? quotes : quotesEn).map((quote, idx) => (
                         <div key={idx} className={`quote-slide ${quoteIndex === idx ? 'active' : ''}`}>
                             <div className="quote-icon">“</div>
-                            <blockquote className="quote-body">
+                            <blockquote className={`quote-body ${lang === 'zh' ? 'font-zh' : 'font-sans'}`} style={lang === 'en' ? { fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontWeight: 3, letterSpacing: '0.04em', fontSize: '0.95rem', lineHeight: '1.75' } : {}}>
                                 {quote.text}
                             </blockquote>
-                            <div className="quote-author">
+                            <div className={`quote-author ${lang === 'zh' ? 'font-zh' : 'font-sans'}`} style={lang === 'en' ? { fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontWeight: 4, letterSpacing: '0.05em', fontSize: '0.85rem' } : {}}>
                                 —— {quote.author}
                             </div>
                         </div>
@@ -659,8 +760,8 @@ export default function V2LandingPage() {
                     <div className="v2-exhibit-intro">
                         <span className="v2-section-subtitle">Exhibition</span>
                         <h2 className="v2-section-title">Beyond The Frames.</h2>
-                        <p>不只是一個博覽會，而是一個聚集品味人士所建構而成的高質量場域。</p>
-                        <a href="mailto:artwithlifetaipei@gmail.com" className="v2-btn-gold v2-btn-magnetic">Apply for 2027</a>
+                        <p>{lang === 'zh' ? '不只是一個博覽會，而是一個聚集品味人士所建構而成的高質量場域。' : 'More than an art fair, but a Curated space designed for discerning minds.'}</p>
+                        <a href="mailto:artwithlifetaipei@gmail.com" className="v2-btn-gold v2-btn-magnetic">{lang === 'zh' ? 'Apply for 2027 申請參展' : 'Apply for 2027'}</a>
                     </div>
 
                     <div className="v2-card">
@@ -669,7 +770,7 @@ export default function V2LandingPage() {
                         </div>
                         <div className="v2-card-info">
                             <h3 className="v2-card-title">Blue Island</h3>
-                            <span className="v2-card-tag">Branding / Strategy</span>
+                            <span className="v2-card-tag">{lang === 'zh' ? '告別獨立品牌行銷的商業孤島' : 'Strategy / Branding'}</span>
                         </div>
                     </div>
 
@@ -679,7 +780,7 @@ export default function V2LandingPage() {
                         </div>
                         <div className="v2-card-info">
                             <h3 className="v2-card-title">Traditional Formats</h3>
-                            <span className="v2-card-tag">Exhibition / Design</span>
+                            <span className="v2-card-tag">{lang === 'zh' ? '精緻環境展現平易近人的優雅設計' : 'Exhibition / Design'}</span>
                         </div>
                     </div>
 
@@ -689,7 +790,7 @@ export default function V2LandingPage() {
                         </div>
                         <div className="v2-card-info">
                             <h3 className="v2-card-title">Curated Gallery</h3>
-                            <span className="v2-card-tag">Space / Lifestyle</span>
+                            <span className="v2-card-tag">{lang === 'zh' ? '精準觸及兼具高消費力與生活美學的場域' : 'Space / Curated Gallery'}</span>
                         </div>
                     </div>
                 </div>
@@ -698,14 +799,22 @@ export default function V2LandingPage() {
             <section className="v2-vip-section" id="vip">
                 <div className="v2-vip-box v2-reveal">
                     <span className="v2-section-subtitle">Exclusive</span>
-                    <h2 className="v2-vip-desc">專屬於美感、影響力交會的私密網絡。</h2>
+                    {lang === 'zh' && <h2 className="v2-vip-desc">專屬於美感、影響力交會的私密網絡。</h2>}
                     <p style={{ opacity: 0.4, fontSize: '0.8rem', textTransform: 'uppercase', letterSpacing: '0.1em' }}>An intimate nexus of aesthetics and influence.</p>
-                    <a href="/vip" className="v2-btn-gold v2-btn-magnetic">VIP ACCESS 貴賓禮賓入口</a>
+                    <a href="/vip" className="v2-btn-gold v2-btn-magnetic">{lang === 'zh' ? 'VIP ACCESS 貴賓禮賓入口' : 'VIP ACCESS PORTAL'}</a>
                     <div style={{ marginTop: '3.5rem', fontSize: '0.75rem', letterSpacing: '0.08em', color: '#666666', lineHeight: '1.8' }}>
-                        如有貴賓服務相關等任何垂詢，請聯絡VIP辦公室 <a href="mailto:visvipteam@gmail.com" style={{ color: '#C9A96E', textDecoration: 'underline' }}>visvipteam@gmail.com</a>。<br/>
-                        <span style={{ fontSize: '0.65rem', color: '#999999', display: 'block', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                            For any inquiries regarding VIP services, please contact the VIP Office at <a href="mailto:visvipteam@gmail.com" style={{ color: '#C9A96E', textDecoration: 'underline' }}>visvipteam@gmail.com</a>.
-                        </span>
+                        {lang === 'zh' ? (
+                            <>如有貴賓服務相關等任何垂詢，請聯絡VIP辦公室 <a href="mailto:visvipteam@gmail.com" style={{ color: '#C9A96E', textDecoration: 'underline' }}>visvipteam@gmail.com</a>。<br/></>
+                        ) : (
+                            <span style={{ fontSize: '0.65rem', color: '#999999', display: 'block', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>
+                                For any inquiries regarding VIP services, please contact the VIP Office at <a href="mailto:visvipteam@gmail.com" style={{ color: '#C9A96E', textDecoration: 'underline' }}>visvipteam@gmail.com</a>.
+                            </span>
+                        )}
+                        {lang === 'zh' && (
+                            <span style={{ fontSize: '0.65rem', color: '#999999', display: 'block', marginTop: '0.5rem', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                                For any inquiries regarding VIP services, please contact the VIP Office at <a href="mailto:visvipteam@gmail.com" style={{ color: '#C9A96E', textDecoration: 'underline' }}>visvipteam@gmail.com</a>.
+                            </span>
+                        )}
                     </div>
                 </div>
             </section>
@@ -723,12 +832,20 @@ export default function V2LandingPage() {
                     <div className="v2-press-item v2-reveal">
                         <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/hong-kong4-1.jpg" className="v2-press-img" alt="Press" />
                         <h3 className="v2-press-media">Prestige</h3>
-                        <p className="v2-press-title">週末逛街好去處！從時尚、藝術與居家設計感受來自日本、台灣以及香港品牌魅力</p>
+                        <p className="v2-press-title">
+                            {lang === 'zh' 
+                                ? '週末逛街好去處！從時尚、藝術與居家設計感受來自日本、台灣以及香港品牌魅力' 
+                                : 'Weekend destination: experience the unique charm of design, fashion, and home design brands from Japan, Taiwan, and Hong Kong.'}
+                        </p>
                     </div>
                     <div className="v2-press-item v2-reveal">
                         <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/172535144791714_P22278065.jpg" className="v2-press-img" alt="Press" />
                         <h3 className="v2-press-media">Tatler</h3>
-                        <p className="v2-press-title">跳脫代工思維的質感品牌，若僅透過網路其質地如何能傳遞？這次獨立品牌不單打獨鬥</p>
+                        <p className="v2-press-title">
+                            {lang === 'zh' 
+                                ? '跳脫代工思維的質感品牌，若僅透過網路其質地如何能傳遞？這次獨立品牌不單打獨鬥' 
+                                : 'Beyond the OEM mindset: how independent design brands unite to convey physical craftsmanship and material textures in a physical space.'}
+                        </p>
                     </div>
                 </div>
             </section>
