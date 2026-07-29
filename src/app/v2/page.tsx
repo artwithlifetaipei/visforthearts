@@ -688,8 +688,8 @@ export default function V2LandingPage() {
                             <span className="metric-label">{lang === 'zh' ? '媒體/意見領袖' : 'Press & KOLs'}</span>
                         </div>
                         <div className="metric-card full-width">
-                            <span className="metric-number">63%</span>
-                            <span className="metric-label">{lang === 'zh' ? '一年收藏預算50萬以上' : 'Annual Art Acquisition Budget > 500k TWD'}</span>
+                            <span className="metric-number">67%</span>
+                            <span className="metric-label">{lang === 'zh' ? '一年購買預算60萬以上' : 'Annual Purchase Budget > 600k TWD'}</span>
                         </div>
                     </div>
                     
