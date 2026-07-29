@@ -839,7 +839,7 @@ export default function LandingPage() {
                             </p>
                         )}
                         <p className="hero-en">
-                            Established in 2022. Culture shapes Living. Taste defines Lifestyle.
+                            Culture shapes Living. Taste defines Lifestyle.
                         </p>
                     </div>
                 </div>

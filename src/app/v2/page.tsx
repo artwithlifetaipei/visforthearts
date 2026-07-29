@@ -661,7 +661,7 @@ export default function V2LandingPage() {
                             </p>
                         )}
                         <h1 className="v2-hero-en v2-reveal">
-                            Established in 2022. Culture shapes Living. Taste defines Lifestyle.
+                            Culture shapes Living. Taste defines Lifestyle.
                         </h1>
                     </div>
                 </div>
