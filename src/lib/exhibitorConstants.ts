@@ -59,20 +59,20 @@ export const ZONE_I: Zone = {
   description: '明日經典展區 Future Classics Sector。最適合新銳品牌：適合產品較小、或產品較少之微型精緻展出的潛力舞台。',
   booths: [
     {
-      label: '展台式展位 - A01 (近主入口處)',
+      label: '展台式展位 - A01 (主入口隔壁)',
       code: 'A01',
       price: 42000,
       qty: 5,
       hasStorage: false,
-      note: '近主入口處',
+      note: '主入口隔壁',
     },
     {
-      label: '展台式展位 - A02 (非入口處)',
+      label: '展台式展位 - A02 (中央展區周圍)',
       code: 'A02',
       price: 38000,
       qty: 5,
       hasStorage: false,
-      note: '非入口處',
+      note: '中央展區周圍',
     },
     {
       label: '展台式展位 - A03 (距主入口處較遠)',
@@ -111,12 +111,12 @@ export const ZONE_II: Zone = {
       note: '離主入口最近',
     },
     {
-      label: '展台式展位 - A05 (兩倍面寬展台)',
+      label: '展台式展位 - A05 (雙展台展位)',
       code: 'A05',
       price: 45000,
       qty: 8,
       hasStorage: false,
-      note: '兩倍面寬展台',
+      note: '雙展台展位',
     },
   ],
   includes: {
@@ -139,8 +139,8 @@ export const ZONE_III: Zone = {
   description: '匠心藝藏展區 Designer & Atelier Brand Sector。適合需要專屬獨立空間，來聚焦表現品牌工藝美學者，同時，亦有全大展唯二的雙倍大器格局展位，完整構築沈浸式體驗。',
   booths: [
     {
-      label: '500*460cm 獨立展位 B01 - 入口處兩側',
-      code: 'B01',
+      label: '500*460cm 獨立展位 L2 & L4 - 入口處兩側',
+      code: 'L2&L4',
       dimensions: '500*460cm',
       price: 108000,
       qty: 2,
@@ -148,8 +148,8 @@ export const ZONE_III: Zone = {
       note: '入口處兩側',
     },
     {
-      label: '500*460cm 獨立展位 B02 - 中間區域',
-      code: 'B02',
+      label: '500*460cm 獨立展位 L7-L9 & L11-L12 - 中間區域',
+      code: 'L7-L9 & L11-L12',
       dimensions: '500*460cm',
       price: 88000,
       qty: 4,
@@ -157,8 +157,8 @@ export const ZONE_III: Zone = {
       note: '中間區域',
     },
     {
-      label: '1000*920cm 最大獨立展位 B03 - 兩展位打通',
-      code: 'B03',
+      label: '1000*920cm 最大獨立展位 L1 & L3 - 兩展位打通',
+      code: 'L1 & L3',
       dimensions: '1000*920cm',
       price: 158000,
       qty: 2,

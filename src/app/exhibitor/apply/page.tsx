@@ -35,9 +35,9 @@ export default function ExhibitorApplyPage() {
     instagram_url: '',
     zone_id: 'artsy', // 'artsy' | 'premier' | 'atelier'
     booth_type: 'A01', // specific booth code
-    zone_preference_1: '明日經典展區 - A01 展台式展位 - A01 (近主入口處) (NT$42,000)',
+    zone_preference_1: '明日經典展區 - A01 展台式展位 - A01 (主入口隔壁) (NT$42,000)',
     zone_preference_2: '文化實體展區 - A04 展台式展位 - A04 (離主入口最近) (NT$42,000)',
-    zone_preference_3: '匠心藝藏展區 - B01 500*460cm 獨立展位 B01 - 入口處兩側 (NT$108,000)',
+    zone_preference_3: '匠心藝藏展區 - L2&L4 500*460cm 獨立展位 L2 & L4 - 入口處兩側 (NT$108,000)',
     concept_brief: '',
     deposit_proof_base64: '',
     deposit_proof_filename: '',
@@ -80,7 +80,7 @@ export default function ExhibitorApplyPage() {
       successSubText: "若是成功入選後，大會工作小組將主動與您對接後續行政與古蹟策展事宜",
       backHome: "返回官網首頁",
       floorPlanTitle: "展位平面參考圖 Floor Plan Reference",
-      floorPlanNote: "* 展位配置說明：展區將會分別為 DISPLAY STAND 展台式展位 (A01-A05) 與 INDEPENDENT BOOTH 獨立展位 (B01-B03) 兩種，此展位價格將因位置而異。例如：大展出入口兩側展位價格最高。",
+      floorPlanNote: "* 展位配置說明：展區將會分別為 DISPLAY STAND 展台式展位 (A01-A05) 與 INDEPENDENT BOOTH 獨立展位 (L2-) 兩種，此展位價格將因位置而異。例如：大展出入口兩側展位價格最高。\n展台尺寸為：面寬介於40*40cm至50*50cm之間，座高落在90-100cm之間。",
       specTitle: "展位規格與價格 SPEC",
       includeTitle: "展位包含項目 INCLUDES",
       noteTitle: "說明 NOTE",
@@ -153,7 +153,7 @@ export default function ExhibitorApplyPage() {
       successSubText: "Upon selection, our working group will contact you for subsequent administrative and historic site curation details.",
       backHome: "Back to Home",
       floorPlanTitle: "Exhibition Floor Plan Reference",
-      floorPlanNote: "* Booth layout: Stalls are divided into DISPLAY STAND (A01-A05) and INDEPENDENT BOOTH (B01-B03). Booth pricing varies by location, with booths on both sides of main entrances having the highest fee.",
+      floorPlanNote: "* Booth layout: Stalls are divided into DISPLAY STAND (A01-A05) and INDEPENDENT BOOTH (L2-). Booth pricing varies by location, with booths on both sides of main entrances having the highest fee.\nDisplay stand dimensions: Width between 40*40cm to 50*50cm, height between 90-100cm.",
       specTitle: "Booth Dimensions & Price",
       includeTitle: "Booth Inclusions",
       noteTitle: "Note",
@@ -755,7 +755,17 @@ export default function ExhibitorApplyPage() {
                       展位與展區規劃說明 / Booth & Zone Guide
                     </p>
                     <p className="mb-3 font-normal leading-relaxed text-[#0D0D0D]">
-                      展位規劃分為 <strong>DISPLAY STAND 展台式展位 (A01-A05)</strong> 與 <strong>INDEPENDENT BOOTH 獨立展位 (B01-B03)</strong> 兩種，其價格依展位位置有所區分。例如：大展出入口兩側展位價格最高。
+                      {lang === 'zh' ? (
+                        <>
+                          展位規劃分為 <strong>DISPLAY STAND 展台式展位 (A01-A05)</strong> 與 <strong>INDEPENDENT BOOTH 獨立展位 (L2-)</strong> 兩種，其價格依展位位置有所區分。例如：大展出入口兩側展位價格最高。
+                          <span className="block mt-2 text-xs text-neutral-500">展台尺寸為：面寬介於40*40cm至50*50cm之間，座高落在90-100cm之間。</span>
+                        </>
+                      ) : (
+                        <>
+                          Booth layout is divided into <strong>DISPLAY STAND (A01-A05)</strong> and <strong>INDEPENDENT BOOTH (L2-)</strong>. Pricing varies by location (e.g., booths adjacent to the main entrance have the highest fee).
+                          <span className="block mt-2 text-[11px] text-neutral-400">Display stand dimensions: Width between 40*40cm to 50*50cm, height between 90-100cm.</span>
+                        </>
+                      )}
                     </p>
                   </div>
                   <div className="w-full md:w-px md:h-20 bg-[#C9A96E]/25 self-stretch"></div>
@@ -783,9 +793,7 @@ export default function ExhibitorApplyPage() {
                       className="w-full h-auto block"
                     />
                   </div>
-                  <p className="text-[10px] text-[#0D0D0D]/75 font-normal mt-2 text-center">
-                    {dict[lang].floorPlanNote}
-                  </p>
+
                 </div>
 
                 {/* Specifications & Inclusions */}
