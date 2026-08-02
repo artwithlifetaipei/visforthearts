@@ -9,6 +9,14 @@ import { ArrowRight, Clock, ShieldCheck, Mail, Calendar, Loader2, X } from 'luci
 import { ALL_ZONES, APPLICATION_DEADLINE, KEY_DATES } from '@/lib/exhibitorConstants';
 import { supabase } from '@/lib/supabase';
 
+const formatAuthError = (msg: string): string => {
+  if (!msg) return '';
+  if (msg.includes('Failed to fetch')) {
+    return 'Failed to fetch (此錯誤通常是因為您的瀏覽器廣告封鎖外掛 [例如 Brave 阻擋、uBlock Origin]、防毒軟體、VPN 或公司網路防火牆阻擋了 Supabase 連線。請嘗試關閉阻擋程式、切換至一般網頁瀏覽、使用手機熱點網路，或使用無痕視窗重試。)';
+  }
+  return msg;
+};
+
 export default function ExhibitorLandingPage() {
   const router = useRouter();
   const [timeLeft, setTimeLeft] = useState({
@@ -192,7 +200,7 @@ export default function ExhibitorLandingPage() {
       });
 
       if (error) {
-        setAuthMessage({ text: `註冊失敗: ${error.message}`, type: 'error' });
+        setAuthMessage({ text: `註冊失敗: ${formatAuthError(error.message)}`, type: 'error' });
       } else {
         if (data?.session) {
           setSession(data.session);
@@ -211,7 +219,7 @@ export default function ExhibitorLandingPage() {
         }
       }
     } catch (err: any) {
-      setAuthMessage({ text: `註冊異常: ${err.message || err}`, type: 'error' });
+      setAuthMessage({ text: `註冊異常: ${formatAuthError(err.message || err)}`, type: 'error' });
     } finally {
       setAuthLoading(false);
     }
@@ -229,7 +237,7 @@ export default function ExhibitorLandingPage() {
       });
 
       if (error) {
-        setAuthMessage({ text: `登入失敗: ${error.message}`, type: 'error' });
+        setAuthMessage({ text: `登入失敗: ${formatAuthError(error.message)}`, type: 'error' });
       } else {
         setSession(data.session);
         try {
@@ -241,7 +249,7 @@ export default function ExhibitorLandingPage() {
         }, 800);
       }
     } catch (err: any) {
-      setAuthMessage({ text: `登入異常: ${err.message || err}`, type: 'error' });
+      setAuthMessage({ text: `登入異常: ${formatAuthError(err.message || err)}`, type: 'error' });
     } finally {
       setAuthLoading(false);
     }
@@ -259,7 +267,7 @@ export default function ExhibitorLandingPage() {
       });
 
       if (error) {
-        setModalMessage({ text: `登入失敗: ${error.message}`, type: 'error' });
+        setModalMessage({ text: `登入失敗: ${formatAuthError(error.message)}`, type: 'error' });
       } else {
         // Double check if they are an approved exhibitor (have a record in exhibitor_brands or approved application)
         if (data?.user?.email) {
@@ -313,7 +321,7 @@ export default function ExhibitorLandingPage() {
         }, 800);
       }
     } catch (err: any) {
-      setModalMessage({ text: `登入異常: ${err.message || err}`, type: 'error' });
+      setModalMessage({ text: `登入異常: ${formatAuthError(err.message || err)}`, type: 'error' });
     } finally {
       setModalLoading(false);
     }

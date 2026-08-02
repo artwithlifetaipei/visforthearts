@@ -7,6 +7,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export const dynamic = 'force-dynamic';
 
+const formatVipError = (msg: string, lang: 'zh' | 'en'): string => {
+  if (!msg) return '';
+  if (msg.includes('Failed to fetch')) {
+    return lang === 'zh'
+      ? 'Failed to fetch (此錯誤通常是因為您的瀏覽器廣告封鎖外掛 [例如 Brave 阻擋、uBlock Origin]、防毒軟體、VPN 或公司網路防火牆阻擋了 Supabase 連線。請嘗試關閉阻擋程式、切換至一般網頁瀏覽、使用手機熱點網路，或使用無痕視窗重試。)'
+      : 'Failed to fetch (This error is usually caused by browser extensions [e.g. Brave Shield, ad blockers], VPN, or firewalls blocking connection to Supabase database. Please try disabling them, using private browsing, switching networks, or retrying on a mobile hotspot.)';
+  }
+  return msg;
+};
+
 export default function VIPApplyPage() {
     const router = useRouter();
     const [name, setName] = useState('');
@@ -141,7 +151,8 @@ export default function VIPApplyPage() {
             setEmail('');
         } catch (err: any) {
             console.error('VIP Application failed:', err);
-            setMessage(`${lang === 'zh' ? '提交失敗 (詳細錯誤): ' : 'Submission failed: '}${err.message || String(err)}`);
+            const errMsg = err.message || String(err);
+            setMessage(`${lang === 'zh' ? '提交失敗 (詳細錯誤): ' : 'Submission failed: '}${formatVipError(errMsg, lang)}`);
             setStatusType('error');
         } finally {
             setIsLoading(false);

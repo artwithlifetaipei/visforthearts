@@ -5,6 +5,16 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 
+const formatVipError = (msg: string, lang: 'zh' | 'en'): string => {
+  if (!msg) return '';
+  if (msg.includes('Failed to fetch')) {
+    return lang === 'zh'
+      ? 'Failed to fetch (此錯誤通常是因為您的瀏覽器廣告封鎖外掛 [例如 Brave 阻擋、uBlock Origin]、防毒軟體、VPN 或公司網路防火牆阻擋了 Supabase 連線。請嘗試關閉阻擋程式、切換至一般網頁瀏覽、使用手機熱點網路，或使用無痕視窗重試。)'
+      : 'Failed to fetch (This error is usually caused by browser extensions [e.g. Brave Shield, ad blockers], VPN, or firewalls blocking connection to Supabase database. Please try disabling them, using private browsing, switching networks, or retrying on a mobile hotspot.)';
+  }
+  return msg;
+};
+
 export default function VIPLoginPage() {
     const [email, setEmail] = useState('');
     const [isLoading, setIsLoading] = useState(false);
@@ -110,7 +120,7 @@ export default function VIPLoginPage() {
                 if (error.status === 429 || error.message.includes('rate limit') || error.message.includes('once every 60 seconds')) {
                     setMessage('發送過於頻繁，請於 60 秒後再試。');
                 } else {
-                    setMessage(`發送失敗，請稍後再試。Error: ${error.message}`);
+                    setMessage(`發送失敗，請稍後再試。Error: ${formatVipError(error.message, 'zh')}`);
                 }
             } else {
                 setIsSent(true);
@@ -118,7 +128,7 @@ export default function VIPLoginPage() {
             }
         } catch (err: any) {
             console.error('Unexpected error during VIP login:', err);
-            setMessage(`發生非預期錯誤：${err.message || err}`);
+            setMessage(`發生非預期錯誤：${formatVipError(err.message || String(err), 'zh')}`);
         } finally {
             setIsLoading(false);
         }
