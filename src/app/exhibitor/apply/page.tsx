@@ -7,6 +7,20 @@ import { ArrowLeft, ArrowRight, Upload, CheckCircle2, ShieldCheck, X, FileText, 
 import { ALL_ZONES, DEPOSIT_AMOUNT, ZONE_MAP } from '@/lib/exhibitorConstants';
 import { supabase } from '@/lib/supabase';
 
+const getBoothNoteEn = (boothCode: string, note: string): string => {
+  switch (boothCode) {
+    case 'A01': return 'Next to Main Entrance';
+    case 'A02': return 'Around Central Area';
+    case 'A03': return 'Farther from entrance';
+    case 'A04': return 'Closest to the Main Entrance';
+    case 'A05': return 'Double Display Booth';
+    case 'L2&L4': return 'Both sides of Entrance';
+    case 'L7-L9 & L11-L12': return 'Middle Area';
+    case 'L1 & L3': return 'Two booths merged';
+    default: return note || '';
+  }
+};
+
 export default function ExhibitorApplyPage() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(1);
@@ -35,7 +49,7 @@ export default function ExhibitorApplyPage() {
     instagram_url: '',
     zone_id: 'artsy', // 'artsy' | 'premier' | 'atelier'
     booth_type: 'A01', // specific booth code
-    zone_preference_1: '明日經典展區 - A01 展台式展位 - A01 (主入口隔壁) (NT$42,000)',
+    zone_preference_1: '明日經典展區 - A01 展台式展位 - A01 (主入口隔壁) (NT$40,000)',
     zone_preference_2: '文化實體展區 - A04 展台式展位 - A04 (離主入口最近) (NT$42,000)',
     zone_preference_3: '匠心藝藏展區 - L2&L4 500*460cm 獨立展位 L2 & L4 - 入口處兩側 (NT$108,000)',
     concept_brief: '',
@@ -793,7 +807,9 @@ export default function ExhibitorApplyPage() {
                       className="w-full h-auto block"
                     />
                   </div>
-
+                  <p className="text-[10px] text-[#0D0D0D]/75 font-normal mt-2.5 text-center">
+                    {lang === 'zh' ? '備註：所有金額皆為未稅價格。' : 'Notice: All prices are exclusive of tax.'}
+                  </p>
                 </div>
 
                 {/* Specifications & Inclusions */}
@@ -847,7 +863,7 @@ export default function ExhibitorApplyPage() {
                                         <span className="text-[10px] text-[#0D0D0D]/70 mt-0.5 block">
                                           {lang === 'zh' 
                                             ? (booth.dimensions ? `尺寸: ${booth.dimensions}` : booth.note)
-                                            : (booth.dimensions ? `Size: ${booth.dimensions}` : (booth.note === '近主入口處' ? 'Near main entrance' : (booth.note === '中段區域' ? 'Middle zone' : (booth.note === '距主入口處較遠' ? 'Farther zone' : booth.note))))
+                                            : (booth.dimensions ? `Size: ${booth.dimensions}` : getBoothNoteEn(booth.code, booth.note || ''))
                                           }
                                         </span>
                                       </td>

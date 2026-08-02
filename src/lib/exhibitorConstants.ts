@@ -61,7 +61,7 @@ export const ZONE_I: Zone = {
     {
       label: '展台式展位 - A01 (主入口隔壁)',
       code: 'A01',
-      price: 42000,
+      price: 40000,
       qty: 5,
       hasStorage: false,
       note: '主入口隔壁',
