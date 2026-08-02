@@ -689,7 +689,7 @@ export default function V2LandingPage() {
                         </div>
                         <div className="metric-card full-width">
                             <span className="metric-number">67%</span>
-                            <span className="metric-label">{lang === 'zh' ? '一年購買預算60萬以上' : 'Annual Purchase Budget > 600k TWD'}</span>
+                            <span className="metric-label">{lang === 'zh' ? '一年購買預算80萬以上' : 'Annual Purchase Budget > 800k TWD'}</span>
                         </div>
                     </div>
                     
