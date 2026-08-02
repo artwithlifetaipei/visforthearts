@@ -14,6 +14,12 @@ const formatAuthError = (msg: string): string => {
   if (msg.includes('Failed to fetch')) {
     return 'Failed to fetch (此錯誤通常是因為您的瀏覽器廣告封鎖外掛 [例如 Brave 阻擋、uBlock Origin]、防毒軟體、VPN 或公司網路防火牆阻擋了 Supabase 連線。請嘗試關閉阻擋程式、切換至一般網頁瀏覽、使用手機熱點網路，或使用無痕視窗重試。)';
   }
+  if (msg.includes('Invalid login credentials')) {
+    return '帳號或密碼錯誤 (Invalid login credentials)。如果您尚未註冊，請切換至「註冊 SIGN UP」分頁建立帳號；若您忘記密碼，可以點擊下方「忘記密碼」連結以重設密碼。';
+  }
+  if (msg.includes('User already registered')) {
+    return '此電子信箱已註冊過 (User already registered)。如果您忘記密碼，請點擊下方「忘記密碼」重設密碼；若要直接登入，請切換至「登入 LOG IN」分頁。';
+  }
   return msg;
 };
 
@@ -29,7 +35,7 @@ export default function ExhibitorLandingPage() {
 
   // Auth states
   const [session, setSession] = useState<any>(null);
-  const [authMode, setAuthMode] = useState<'login' | 'register'>('register');
+  const [authMode, setAuthMode] = useState<'login' | 'register' | 'forgot'>('register');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -250,6 +256,33 @@ export default function ExhibitorLandingPage() {
       }
     } catch (err: any) {
       setAuthMessage({ text: `登入異常: ${formatAuthError(err.message || err)}`, type: 'error' });
+    } finally {
+      setAuthLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAuthLoading(true);
+    setAuthMessage({ text: '', type: '' });
+
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email.toLowerCase().trim(), {
+        redirectTo: `${window.location.origin}/exhibitor/reset-password`,
+      });
+
+      if (error) {
+        setAuthMessage({ text: `發送重設信件失敗: ${formatAuthError(error.message)}`, type: 'error' });
+      } else {
+        setAuthMessage({ 
+          text: lang === 'zh' 
+            ? '已發送重設密碼信件！請檢查您的電子信箱，點擊信中的連結以重新設定密碼。 (若未收到請檢查垃圾信箱)' 
+            : 'Password reset email sent! Please check your inbox and click the link to reset your password.', 
+          type: 'success' 
+        });
+      }
+    } catch (err: any) {
+      setAuthMessage({ text: `發送異常: ${formatAuthError(err.message || err)}`, type: 'error' });
     } finally {
       setAuthLoading(false);
     }
@@ -826,7 +859,7 @@ export default function ExhibitorLandingPage() {
                     setAuthMessage({ text: '', type: '' });
                   }}
                   className={`flex-1 pb-3 text-xs tracking-[0.2em] font-medium uppercase border-b transition-all duration-300 cursor-pointer border-0 bg-transparent ${
-                    authMode === 'login' ? 'border-b-2 border-b-[#C9A96E] text-[#C9A96E]' : 'border-transparent text-[#0D0D0D]/40 hover:text-[#0D0D0D]/75'
+                    (authMode === 'login' || authMode === 'forgot') ? 'border-b-2 border-b-[#C9A96E] text-[#C9A96E]' : 'border-transparent text-[#0D0D0D]/40 hover:text-[#0D0D0D]/75'
                   }`}
                   onMouseEnter={() => setCursorHovered(true)} 
                   onMouseLeave={() => setCursorHovered(false)}
@@ -835,7 +868,7 @@ export default function ExhibitorLandingPage() {
                 </button>
               </div>
 
-              <form onSubmit={authMode === 'register' ? handleSignUp : handleLogIn} className="space-y-6 text-left">
+              <form onSubmit={authMode === 'register' ? handleSignUp : authMode === 'login' ? handleLogIn : handleForgotPassword} className="space-y-6 text-left">
                 <div className="relative border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
                   <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">{dict[lang].labelEmail}</label>
                   <input
@@ -851,21 +884,57 @@ export default function ExhibitorLandingPage() {
                   />
                 </div>
 
-                <div className="relative border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
-                  <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">{dict[lang].labelPassword}</label>
-                  <input
-                    type="password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-[#0D0D0D] transition-all placeholder:text-neutral-300"
-                    required
-                    disabled={authLoading}
-                    minLength={6}
-                    onMouseEnter={() => setCursorHovered(true)} 
-                    onMouseLeave={() => setCursorHovered(false)}
-                  />
-                </div>
+                {authMode !== 'forgot' && (
+                  <div className="relative border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
+                    <label className="block text-[8px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">{dict[lang].labelPassword}</label>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="••••••••"
+                      className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-[#0D0D0D] transition-all placeholder:text-neutral-300"
+                      required
+                      disabled={authLoading}
+                      minLength={6}
+                      onMouseEnter={() => setCursorHovered(true)} 
+                      onMouseLeave={() => setCursorHovered(false)}
+                    />
+                  </div>
+                )}
+
+                {authMode === 'login' && (
+                  <div className="text-right">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode('forgot');
+                        setAuthMessage({ text: '', type: '' });
+                      }}
+                      className="text-[10px] text-[#C9A96E] hover:text-[#B39359] bg-transparent border-0 cursor-pointer p-0 underline tracking-wider"
+                      onMouseEnter={() => setCursorHovered(true)} 
+                      onMouseLeave={() => setCursorHovered(false)}
+                    >
+                      忘記密碼？ Forgot Password?
+                    </button>
+                  </div>
+                )}
+
+                {authMode === 'forgot' && (
+                  <div className="text-left">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAuthMode('login');
+                        setAuthMessage({ text: '', type: '' });
+                      }}
+                      className="text-[10px] text-neutral-400 hover:text-neutral-600 bg-transparent border-0 cursor-pointer p-0 underline tracking-wider"
+                      onMouseEnter={() => setCursorHovered(true)} 
+                      onMouseLeave={() => setCursorHovered(false)}
+                    >
+                      ← 返回登入 Back to Log In
+                    </button>
+                  </div>
+                )}
 
                 {authMode === 'register' && (
                   <div className="relative border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
@@ -897,10 +966,10 @@ export default function ExhibitorLandingPage() {
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />
                       {dict[lang].btnProcessing}
                     </span>
-                  ) : authMode === 'register' ? (
-                    dict[lang].btnSignup
-                  ) : (
+                  ) : authMode === 'login' ? (
                     dict[lang].btnLogin
+                  ) : (
+                    lang === 'zh' ? '發送重設密碼信件 SEND RESET EMAIL' : 'SEND RESET EMAIL'
                   )}
                 </button>
 

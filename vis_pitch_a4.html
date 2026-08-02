@@ -207,14 +207,20 @@
         }
 
         /* Spotlight High-Budget Banner */
+        .spotlight-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
         .spotlight-banner {
             background: radial-gradient(circle at 10% 50%, var(--pola-gold-glow) 0%, var(--glass-bg) 100%);
             border: 1px solid var(--pola-gold-dim);
             border-radius: 10px;
-            padding: 20px 35px;
+            padding: 20px 30px;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             position: relative;
             overflow: hidden;
         }
@@ -223,7 +229,7 @@
             content: '';
             position: absolute;
             right: 0; bottom: 0;
-            width: 150px; height: 150px;
+            width: 120px; height: 120px;
             background: radial-gradient(circle, rgba(201, 169, 110, 0.05) 0%, transparent 70%);
             pointer-events: none;
         }
@@ -231,12 +237,12 @@
         .spotlight-left {
             display: flex;
             align-items: center;
-            gap: 30px;
+            gap: 20px;
         }
 
         .spotlight-huge-pct {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 96px;
+            font-size: 80px;
             font-weight: 300;
             color: var(--pola-gold);
             line-height: 1;
@@ -246,12 +252,12 @@
         .spotlight-meta {
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 4px;
         }
 
         .spotlight-title {
             font-family: 'Noto Serif TC', serif;
-            font-size: 30px; /* Increased from 24px */
+            font-size: 24px;
             font-weight: 500;
             color: #FFFFFF;
             letter-spacing: 0.15em;
@@ -259,20 +265,9 @@
 
         .spotlight-desc {
             font-family: 'Noto Sans TC', sans-serif;
-            font-size: 21px; /* Increased from 14px */
+            font-size: 16px;
             color: var(--text-muted);
             letter-spacing: 0.1em;
-        }
-
-        .spotlight-right-label {
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 18px; /* Increased from 14px */
-            letter-spacing: 0.3em;
-            color: var(--pola-gold);
-            text-transform: uppercase;
-            border: 1px solid var(--pola-gold-dim);
-            padding: 8px 20px;
-            border-radius: 20px;
         }
 
         /* --- Section 2: Values & Comparisons --- */
@@ -593,16 +588,26 @@
                     </div>
                 </div>
                 
-                <!-- Budget Spotlight Banner -->
-                <div class="spotlight-banner">
-                    <div class="spotlight-left">
-                        <span class="spotlight-huge-pct">63%</span>
-                        <div class="spotlight-meta">
-                            <h3 class="spotlight-title">一年收藏預算50萬以上</h3>
-                            <p class="spotlight-desc">展現極強的單客消費實力與美學投資意願</p>
+                <!-- Budget Spotlight Grid -->
+                <div class="spotlight-grid">
+                    <div class="spotlight-banner">
+                        <div class="spotlight-left">
+                            <span class="spotlight-huge-pct">63%</span>
+                            <div class="spotlight-meta">
+                                <h3 class="spotlight-title">一年收藏預算50萬以上</h3>
+                                <p class="spotlight-desc">展現極強的單客消費實力與美學投資意願</p>
+                            </div>
                         </div>
                     </div>
-                    <span class="spotlight-right-label">Core Target</span>
+                    <div class="spotlight-banner">
+                        <div class="spotlight-left">
+                            <span class="spotlight-huge-pct">21%+</span>
+                            <div class="spotlight-meta">
+                                <h3 class="spotlight-title">一年購買預算逾200萬元</h3>
+                                <p class="spotlight-desc">匯聚極具實力的超高淨值頂級藝術買家</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </section>
 
@@ -716,7 +721,7 @@
         <!-- Footer -->
         <footer>
             <span>© 2026/27 VIS FOR THE ARTS. All rights reserved.</span>
-            <span class="footer-logo">VIS</span>
+            <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" style="height: 24px; filter: invert(1); opacity: 0.8;" alt="VIS Logo">
         </footer>
     </div>
 
