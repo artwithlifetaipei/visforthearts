@@ -162,7 +162,7 @@ export default function VIPDashboard() {
             `UID:vis-vip-${profile.id}`,
             'DTSTAMP:20260530T000000Z',
             'DTSTART:20270106T100000Z',
-            'DTEND:20270109T140000Z',
+            'DTEND:20270109T110000Z',
             'SUMMARY:VIS FOR THE ARTS 2027 藝術博覽會 (VIP)',
             'DESCRIPTION:您專屬的 VIS 貴賓尊榮通行證提醒。請於入場時出示您的數位禮賓卡通關。\\n\\n聯絡信箱：visvipteam@gmail.com',
             'LOCATION:台北市中正區延平南路98號',
@@ -182,7 +182,7 @@ export default function VIPDashboard() {
 
     const googleCalendarUrl = () => {
         const text = encodeURIComponent("VIS FOR THE ARTS 2027 藝術博覽會 (VIP)");
-        const dates = "20270106T100000Z/20270109T140000Z"; // Jan 6, 6:00 PM to Jan 9, 10:00 PM Taipei time (UTC+8)
+        const dates = "20270106T100000Z/20270109T110000Z"; // Jan 6, 6:00 PM to Jan 9, 7:00 PM Taipei time (UTC+8)
         const details = encodeURIComponent("您專屬的 VIS 貴賓尊榮通行證提醒。請於入場時出示您的數位禮賓卡通關。\n\n聯絡信箱：visvipteam@gmail.com");
         const location = encodeURIComponent("台北市中正區延平南路98號");
         return `https://www.google.com/calendar/render?action=TEMPLATE&text=${text}&dates=${dates}&details=${details}&location=${location}&sf=true&output=xml`;
