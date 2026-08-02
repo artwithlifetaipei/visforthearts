@@ -297,6 +297,54 @@ export default function VIPDashboard() {
                         <span className="w-6 h-[1px] bg-current opacity-30 group-hover:w-8 transition-all duration-300"></span>
                     </button>
                 </motion.div>
+
+                {/* VIP Timetable & Privileges Callout */}
+                <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                    className={`w-full max-w-sm border-[0.5px] p-6 space-y-5 rounded-none backdrop-blur-md mt-6 shadow-xl ${
+                        isSVIP 
+                            ? 'border-[#DFBA87]/25 bg-[#DFBA87]/5 text-white/90' 
+                            : 'border-[#1A1A1A]/10 bg-white/40 text-[#1A1A1A]/90'
+                    }`}
+                >
+                    {/* Privilege Highlight */}
+                    <div className="border-b border-current/10 pb-4 text-left">
+                        <p className="text-[9.5px] tracking-[0.25em] uppercase text-[#DFBA87] font-semibold mb-2">
+                            VIP PRIVILEGES / 貴賓權益
+                        </p>
+                        <p className="text-[11px] leading-relaxed tracking-wide font-normal">
+                            憑此數位禮賓卡，您於所有展期時段（含預展與公眾日）皆享 **尊榮優先快速通行**。
+                        </p>
+                        <p className="text-[9px] leading-relaxed tracking-wide opacity-60 font-light mt-1">
+                            This digital pass grants you **priority fast-track admission** for all preview and public hours.
+                        </p>
+                    </div>
+
+                    {/* Complete Timetable */}
+                    <div className="space-y-3.5 text-left">
+                        <p className="text-[9.5px] tracking-[0.25em] uppercase text-[#DFBA87] font-semibold">
+                            TIMETABLE / 展會日程
+                        </p>
+                        
+                        <div className="space-y-3 text-[10.5px] leading-relaxed font-light">
+                            <div className="flex justify-between items-start gap-4">
+                                <span className="font-normal shrink-0">VIP 預展 & 開幕酒會<br/><span className="text-[8px] opacity-50 uppercase tracking-wider font-mono">VIP Preview & Vernissage</span></span>
+                                <span className="text-right font-mono font-medium">1/6 (三) 18:00 - 21:30</span>
+                            </div>
+                            
+                            <div className="flex justify-between items-start gap-4 border-t border-current/5 pt-2.5">
+                                <span className="font-normal shrink-0">公眾展期<br/><span className="text-[8px] opacity-50 uppercase tracking-wider font-mono">Public Days</span></span>
+                                <div className="text-right font-mono font-medium space-y-0.5">
+                                    <p>1/7 (四) 12:00 - 18:00</p>
+                                    <p>1/8 (五) 12:00 - 18:00</p>
+                                    <p>1/9 (六) 12:00 - 19:00</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </motion.div>
             </main>
 
             {/* Aesthetic Entrances */}
