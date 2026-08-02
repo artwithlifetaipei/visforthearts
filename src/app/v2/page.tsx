@@ -8,7 +8,7 @@ const quotes = [
         author: "elaceite有好研製"
     },
     {
-        text: "對 Everijoy ⽽⾔，這次參與 VIS Lifestyle and Art Festival，是⼀次能更具體、也更⽴體地向更多人傳遞品牌理念的珍貴經驗。我們⼀直希望透過花，帶來溫柔、浪漫且具有療癒力量的感受，⽽ VIS 提供了⼀個⾼度策展、且能被真正理解的場域，讓花藝不只是被觀看，⽽是成為⼀種被感受、被回應的藝術體驗。",
+        text: "對 Everijoy ⽽⾔，這次參與 VIS Contemporary Culture Fair，是⼀次能更具體、也更⽴體地向更多人傳遞品牌理念的珍貴經驗。我們⼀直希望透過花，帶來溫柔、浪漫且具有療癒力量的感受，⽽ VIS 提供了⼀個⾼度策展、且能被真正理解的場域，讓花藝不只是被觀看，⽽是成為⼀種被感受、被回應的藝術體驗。",
         author: "Everijoy Floral Boutique"
     },
     {
@@ -39,7 +39,7 @@ const quotesEn = [
         author: "elaceite"
     },
     {
-        text: "For Everijoy, participating in the VIS Lifestyle and Art Festival was a precious experience to convey our brand philosophy to more people. We have always hoped to bring a gentle, romantic, and healing feeling through flowers. VIS provided a highly curated space that can be truly understood, letting floral art not just be viewed, but become an artistic experience felt and responded to.",
+        text: "For Everijoy, participating in the VIS Contemporary Culture Fair was a precious experience to convey our brand philosophy to more people. We have always hoped to bring a gentle, romantic, and healing feeling through flowers. VIS provided a highly curated space that can be truly understood, letting floral art not just be viewed, but become an artistic experience felt and responded to.",
         author: "Everijoy Floral Boutique"
     },
     {

@@ -615,7 +615,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
         <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#C9A96E]/10 border border-[#C9A96E]/20 text-xs text-[#DFBA87] uppercase tracking-wider font-semibold">
-              <ShieldCheck className="w-3.5 h-3.5" /> 2027 VIS Lifestyle and Art Festival
+              <ShieldCheck className="w-3.5 h-3.5" /> 2027 VIS Contemporary Culture Fair
             </div>
             <h1 className="text-2xl md:text-3xl font-serif text-white tracking-wide">
               模組 B — 參展規範備忘錄暨行為守則簽署
@@ -970,7 +970,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
               
               <div className="space-y-2">
                 <h3 className="text-sm font-semibold tracking-wider text-[#DFBA87] uppercase flex items-center gap-2">
-                  <FileText className="w-4.5 h-4.5" /> 2027 VIS Lifestyle and Art Festival 參展規範備忘錄立約人
+                  <FileText className="w-4.5 h-4.5" /> 2027 VIS Contemporary Culture Fair 參展規範備忘錄立約人
                 </h3>
                 <p className="text-xs text-neutral-400 font-light leading-relaxed">
                   本備忘錄由以下立約雙方共同遵守。簽署人填寫法定姓名與身分證字號並點擊送出，即代表品牌法人完成本電子合約備忘錄之正式簽字。
@@ -981,7 +981,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
               <div className="grid md:grid-cols-2 gap-4 bg-white/[0.02] border border-white/5 rounded-lg p-4 text-xs">
                 <div className="space-y-1">
                   <span className="text-neutral-500 block text-[9px] uppercase tracking-wider">甲方 (主辦單位) Party A</span>
-                  <span className="text-white font-medium">2027 VIS Lifestyle and Art Festival 主辦單位</span>
+                  <span className="text-white font-medium">2027 VIS Contemporary Culture Fair 主辦單位</span>
                 </div>
                 <div className="space-y-1">
                   <span className="text-neutral-500 block text-[9px] uppercase tracking-wider">乙方 (參展品牌) Party B</span>
