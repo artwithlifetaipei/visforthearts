@@ -1053,8 +1053,8 @@ export default function LandingPage() {
                             <h4 className="curatorial-card-title-zh">國際交流計畫</h4>
                             <p className="curatorial-card-desc">
                                 {lang === 'zh' 
-                                    ? '連結全球設計之都、國際策展人與跨國藝術家，建立跨越國界的學術與市場橋樑。' 
-                                    : 'Connecting global design capitals, international curators, and multinational artists to build bridges for academic and market exchange.'}
+                                    ? '透過邀請來自海外的創意總監、文化媒體、策展人及創意領域代表參與 VIS，持續建立跨越國界的文化人際網絡，讓台灣品牌、創作者與文化工作者，得以直接接觸海外文化社群，開啟更多跨國合作的可能。' 
+                                    : 'By inviting overseas creative directors, cultural media, curators, and creative industry representatives to participate in VIS, we continuously build cross-border cultural networks. This enables Taiwanese brands, creators, and cultural professionals to directly connect with international cultural communities and unlock global opportunities.'}
                             </p>
                         </div>
                         
@@ -1086,8 +1086,8 @@ export default function LandingPage() {
                             <h4 className="curatorial-card-title-zh">官方貴賓專屬互動系統</h4>
                             <p className="curatorial-card-desc">
                                 {lang === 'zh' 
-                                    ? '專為高淨值藏家與貴賓量身打造的專屬數位禮賓平台，進行精準導客與展後關係建立。' 
-                                    : 'A bespoke digital concierge platform designed specifically for high-net-worth collectors and VIP guests to facilitate post-fair connections.'}
+                                    ? '專為兼具品味與消費力的VIS貴賓量身打造的專屬禮賓平台，進行精準導客與展後關係建立。' 
+                                    : 'A bespoke concierge platform designed specifically for VIS VIP guests who possess both refined taste and purchasing power, facilitating precise client acquisition and post-exhibition relationship building.'}
                             </p>
                         </div>
                         
