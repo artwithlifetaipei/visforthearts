@@ -776,15 +776,13 @@ export default function LandingPage() {
                     margin-bottom: 5.5rem;
                     position: relative;
                 }
-                .curatorial-tag {
-                    font-family: var(--font-sans);
-                    font-size: 0.75rem;
-                    font-weight: 500;
-                    color: var(--gold);
-                    letter-spacing: 0.35em;
-                    text-transform: uppercase;
+                .curatorial-logo {
+                    height: 48px;
+                    width: auto;
+                    object-fit: contain;
+                    margin: 0 auto 1.5rem auto;
                     display: block;
-                    margin-bottom: 1rem;
+                    opacity: 0.95;
                 }
                 .curatorial-heading {
                     font-family: var(--font-serif);
@@ -881,6 +879,9 @@ export default function LandingPage() {
                     }
                     .curatorial-card {
                         padding: 3rem 2rem;
+                    }
+                    .curatorial-logo {
+                        height: 38px;
                     }
                 }
 
@@ -1023,9 +1024,13 @@ export default function LandingPage() {
             <section className="curatorial-section" id="curatorial">
                 <div className="curatorial-container">
                     <div className="curatorial-header">
-                        <span className="curatorial-tag">{lang === 'zh' ? '博覽會學術與文化核心' : 'CURATORIAL PILLARS'}</span>
+                        <img 
+                            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                            alt="VIS Logo" 
+                            className="curatorial-logo"
+                        />
                         <h2 className="curatorial-heading">
-                            {lang === 'zh' ? '博覽會定位與文化高度' : 'Fair Scale & Cultural Standing'}
+                            {lang === 'zh' ? '由六大文化系統構成' : 'Composed of Six Cultural Systems'}
                         </h2>
                         <div className="curatorial-header-line"></div>
                     </div>
@@ -1078,7 +1083,7 @@ export default function LandingPage() {
                         <div className="curatorial-card">
                             <span className="curatorial-num">05</span>
                             <h3 className="curatorial-card-title-en">VIP Portal with Looom Club</h3>
-                            <h4 className="curatorial-card-title-zh">高消費貴賓互動系統</h4>
+                            <h4 className="curatorial-card-title-zh">官方貴賓專屬互動系統</h4>
                             <p className="curatorial-card-desc">
                                 {lang === 'zh' 
                                     ? '專為高淨值藏家與貴賓量身打造的專屬數位禮賓平台，進行精準導客與展後關係建立。' 
