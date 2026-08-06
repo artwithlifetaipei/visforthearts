@@ -1064,8 +1064,8 @@ export default function LandingPage() {
                             <h4 className="curatorial-card-title-zh">年度文化命題</h4>
                             <p className="curatorial-card-desc">
                                 {lang === 'zh' 
-                                    ? '每年提出核心學術思辨主題，引導參展品牌與藝術家進行深度的概念策展與論述。' 
-                                    : 'An annual thematic exploration prompting participating brands and artists to engage in deep curatorial discourse and intellectual reflection.'}
+                                    ? '每年透過一道文化命題，邀請不同領域的創作者共同回應，以策展、創作與觀點，重新閱讀文化及其所處的時代。' 
+                                    : 'Each year, we propose a central cultural question, inviting creators across various fields to respond. Through exhibitions, original works, and unique perspectives, we re-evaluate culture and the era we live in.'}
                             </p>
                         </div>
                         
