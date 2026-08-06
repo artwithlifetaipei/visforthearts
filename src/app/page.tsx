@@ -758,6 +758,132 @@ export default function LandingPage() {
                         grid-column: span 1;
                     }
                 }
+
+                /* Curatorial Pillars Section */
+                .curatorial-section {
+                    padding: 9rem 2rem;
+                    background-color: #FAF9F6;
+                    border-top: 0.5px solid var(--border);
+                    border-bottom: 0.5px solid var(--border);
+                    position: relative;
+                }
+                .curatorial-container {
+                    max-width: 1200px;
+                    margin: 0 auto;
+                }
+                .curatorial-header {
+                    text-align: center;
+                    margin-bottom: 5.5rem;
+                    position: relative;
+                }
+                .curatorial-tag {
+                    font-family: var(--font-sans);
+                    font-size: 0.75rem;
+                    font-weight: 500;
+                    color: var(--gold);
+                    letter-spacing: 0.35em;
+                    text-transform: uppercase;
+                    display: block;
+                    margin-bottom: 1rem;
+                }
+                .curatorial-heading {
+                    font-family: var(--font-serif);
+                    font-size: 2.4rem;
+                    font-weight: 400;
+                    letter-spacing: 0.05em;
+                    color: var(--text);
+                }
+                .curatorial-header-line {
+                    width: 40px;
+                    height: 0.5px;
+                    background-color: var(--gold);
+                    margin: 2rem auto 0 auto;
+                    opacity: 0.4;
+                }
+                .curatorial-grid {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 3rem 2.5rem;
+                }
+                .curatorial-card {
+                    background: rgba(255, 255, 255, 0.65);
+                    border: 0.5px solid rgba(201, 169, 110, 0.18);
+                    padding: 3.5rem 2.5rem;
+                    transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+                    position: relative;
+                    display: flex;
+                    flex-direction: column;
+                    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.005);
+                }
+                .curatorial-card:hover {
+                    transform: translateY(-8px);
+                    border-color: rgba(201, 169, 110, 0.5);
+                    background: rgba(255, 255, 255, 0.95);
+                    box-shadow: 0 25px 50px rgba(201, 169, 110, 0.06);
+                }
+                .curatorial-num {
+                    font-family: var(--font-sans);
+                    font-size: 0.7rem;
+                    font-weight: 500;
+                    color: var(--gold);
+                    letter-spacing: 0.2em;
+                    display: block;
+                    margin-bottom: 1.5rem;
+                }
+                .curatorial-card-title-en {
+                    font-family: var(--font-serif);
+                    font-size: 1.5rem;
+                    font-weight: 400;
+                    line-height: 1.25;
+                    font-style: italic;
+                    color: var(--text);
+                    margin-bottom: 0.35rem;
+                    letter-spacing: 0.02em;
+                }
+                .curatorial-card-title-zh {
+                    font-family: var(--font-sans);
+                    font-size: 0.85rem;
+                    font-weight: 400;
+                    color: var(--gold);
+                    letter-spacing: 0.15em;
+                    margin-bottom: 1.2rem;
+                }
+                .curatorial-card-desc {
+                    font-family: var(--font-sans);
+                    font-size: 0.82rem;
+                    line-height: 1.8;
+                    color: #555;
+                    font-weight: 300;
+                    letter-spacing: 0.03em;
+                }
+
+                @media (max-width: 1024px) {
+                    .curatorial-grid {
+                        grid-template-columns: repeat(2, 1fr);
+                        gap: 2rem;
+                    }
+                    .curatorial-section {
+                        padding: 7rem 2rem;
+                    }
+                }
+                @media (max-width: 768px) {
+                    .curatorial-grid {
+                        grid-template-columns: 1fr;
+                    }
+                    .curatorial-section {
+                        padding: 6rem 1.5rem;
+                    }
+                    .curatorial-header {
+                        margin-bottom: 4rem;
+                    }
+                    .curatorial-heading {
+                        font-size: 2rem;
+                    }
+                    .curatorial-card {
+                        padding: 3rem 2rem;
+                    }
+                }
+
 `}</style>
 
             <div className="noise-overlay"></div>
@@ -893,6 +1019,86 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            {/* Curatorial Pillars Section */}
+            <section className="curatorial-section" id="curatorial">
+                <div className="curatorial-container">
+                    <div className="curatorial-header">
+                        <span className="curatorial-tag">{lang === 'zh' ? '博覽會學術與文化核心' : 'CURATORIAL PILLARS'}</span>
+                        <h2 className="curatorial-heading">
+                            {lang === 'zh' ? '博覽會定位與文化高度' : 'Fair Scale & Cultural Standing'}
+                        </h2>
+                        <div className="curatorial-header-line"></div>
+                    </div>
+                    
+                    <div className="curatorial-grid">
+                        <div className="curatorial-card">
+                            <span className="curatorial-num">01</span>
+                            <h3 className="curatorial-card-title-en">100 Years of Culture Programme</h3>
+                            <h4 className="curatorial-card-title-zh">百年文化觀點計劃</h4>
+                            <p className="curatorial-card-desc">
+                                {lang === 'zh' 
+                                    ? '跨越世紀的文化資產與前瞻性美學對話，連結過去與未來的當代經典設計。' 
+                                    : 'A century-spanning cultural dialogue and forward-looking aesthetic framework bridging historic design with contemporary classics.'}
+                            </p>
+                        </div>
+                        
+                        <div className="curatorial-card">
+                            <span className="curatorial-num">02</span>
+                            <h3 className="curatorial-card-title-en">International Programme</h3>
+                            <h4 className="curatorial-card-title-zh">國際交流計畫</h4>
+                            <p className="curatorial-card-desc">
+                                {lang === 'zh' 
+                                    ? '連結全球設計之都、國際策展人與跨國藝術家，建立跨越國界的學術與市場橋樑。' 
+                                    : 'Connecting global design capitals, international curators, and multinational artists to build bridges for academic and market exchange.'}
+                            </p>
+                        </div>
+                        
+                        <div className="curatorial-card">
+                            <span className="curatorial-num">03</span>
+                            <h3 className="curatorial-card-title-en">The Question of the Year</h3>
+                            <h4 className="curatorial-card-title-zh">年度文化命題</h4>
+                            <p className="curatorial-card-desc">
+                                {lang === 'zh' 
+                                    ? '每年提出核心學術思辨主題，引導參展品牌與藝術家進行深度的概念策展與論述。' 
+                                    : 'An annual thematic exploration prompting participating brands and artists to engage in deep curatorial discourse and intellectual reflection.'}
+                            </p>
+                        </div>
+                        
+                        <div className="curatorial-card">
+                            <span className="curatorial-num">04</span>
+                            <h3 className="curatorial-card-title-en">International Advisory Circle</h3>
+                            <h4 className="curatorial-card-title-zh">國際文化顧問團</h4>
+                            <p className="curatorial-card-desc">
+                                {lang === 'zh' 
+                                    ? '由海內外知名館長、學者及行業領袖組成評選與學術指導委員會，確保博覽會之頂尖品質與學術嚴謹度。' 
+                                    : 'Composed of prominent museum directors, scholars, and industry leaders globally to ensure curatorial rigor and elite exhibition quality.'}
+                            </p>
+                        </div>
+                        
+                        <div className="curatorial-card">
+                            <span className="curatorial-num">05</span>
+                            <h3 className="curatorial-card-title-en">VIP Portal with Looom Club</h3>
+                            <h4 className="curatorial-card-title-zh">高消費貴賓互動系統</h4>
+                            <p className="curatorial-card-desc">
+                                {lang === 'zh' 
+                                    ? '專為高淨值藏家與貴賓量身打造的專屬數位禮賓平台，進行精準導客與展後關係建立。' 
+                                    : 'A bespoke digital concierge platform designed specifically for high-net-worth collectors and VIP guests to facilitate post-fair connections.'}
+                            </p>
+                        </div>
+                        
+                        <div className="curatorial-card">
+                            <span className="curatorial-num">06</span>
+                            <h3 className="curatorial-card-title-en">Looom Club</h3>
+                            <h4 className="curatorial-card-title-zh">創意菁英俱樂部</h4>
+                            <p className="curatorial-card-desc">
+                                {lang === 'zh' 
+                                    ? '匯聚頂尖收藏家、企業領袖與創意決策者的精實社群，展開跨領域之高端美學交流。' 
+                                    : 'An exclusive collective gathering elite collectors, business leaders, and creative decision-makers to spark meaningful exchange.'}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
 
             {/* Quote Carousel Section */}
             <section className="quote-section">
