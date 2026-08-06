@@ -1053,8 +1053,8 @@ export default function LandingPage() {
                             <h4 className="curatorial-card-title-zh">國際交流計畫</h4>
                             <p className="curatorial-card-desc">
                                 {lang === 'zh' 
-                                    ? '透過邀請來自海外的創意總監、文化媒體、策展人及創意領域代表參與 VIS，持續建立跨越國界的文化人際網絡，讓台灣品牌、創作者與文化工作者，得以直接接觸海外文化社群，開啟更多跨國合作的可能。' 
-                                    : 'By inviting overseas creative directors, cultural media, curators, and creative industry representatives to participate in VIS, we continuously build cross-border cultural networks. This enables Taiwanese brands, creators, and cultural professionals to directly connect with international cultural communities and unlock global opportunities.'}
+                                    ? '邀請海外創意總監、文化媒體、策展人及創意領域代表參與 VIS，讓台灣品牌與創作事業，得以接觸海外文化社群，開啟更多跨國合作的可能。' 
+                                    : 'By inviting overseas creative directors, cultural media, curators, and creative industry representatives to participate in VIS, we enable Taiwanese brands and creative businesses to connect with international cultural communities and open up cross-border opportunities.'}
                             </p>
                         </div>
                         
@@ -1075,8 +1075,8 @@ export default function LandingPage() {
                             <h4 className="curatorial-card-title-zh">國際文化顧問團</h4>
                             <p className="curatorial-card-desc">
                                 {lang === 'zh' 
-                                    ? '由海內外知名館長、學者及行業領袖組成評選與學術指導委員會，確保博覽會之頂尖品質與學術嚴謹度。' 
-                                    : 'Composed of prominent museum directors, scholars, and industry leaders globally to ensure curatorial rigor and elite exhibition quality.'}
+                                    ? '由藝術、設計收藏家組成評選指導委員會，確保博覽會品質與參展之嚴謹度。' 
+                                    : 'Composed of art and design collectors to form the selection and advisory committee, ensuring exhibition quality and rigorous participation standards.'}
                             </p>
                         </div>
                         
@@ -1097,8 +1097,8 @@ export default function LandingPage() {
                             <h4 className="curatorial-card-title-zh">創意菁英俱樂部</h4>
                             <p className="curatorial-card-desc">
                                 {lang === 'zh' 
-                                    ? '匯聚頂尖收藏家、企業領袖與創意決策者的精實社群，展開跨領域之高端美學交流。' 
-                                    : 'An exclusive collective gathering elite collectors, business leaders, and creative decision-makers to spark meaningful exchange.'}
+                                    ? '匯聚各大領域產業別中，高度重視美學與美感的企業領袖。透過充滿創意決策者的邀請制菁英社群，凝聚更多跨界合作之可能性。' 
+                                    : 'Gathering business leaders across various industries who highly value aesthetics and taste. Through an invitation-only elite community of creative decision-makers, we foster greater opportunities for cross-disciplinary collaboration.'}
                             </p>
                         </div>
                     </div>
