@@ -724,11 +724,11 @@ export default function LandingPage() {
                 }
                 .metric-label {
                     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
-                    font-size: 0.85rem;
-                    letter-spacing: 0.15em;
-                    color: #444444;
-                    font-weight: 300;
-                    line-height: 1.6;
+                    font-size: 0.95rem;
+                    letter-spacing: 0.08em;
+                    color: #1a1a1a;
+                    font-weight: 400;
+                    line-height: 1.5;
                 }
                 .metrics-divider {
                     width: 1px;
