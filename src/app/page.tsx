@@ -95,7 +95,7 @@ export default function LandingPage() {
         return () => observer.disconnect();
     }, []);
 
-    // Quote Carousel auto-play effect (runs only after scrolled into view)
+    // Quote Carousel auto-play effect (runs only after scrolled into view, resets when index changes)
     useEffect(() => {
         if (!hasStartedPlaying) return;
 
@@ -103,7 +103,7 @@ export default function LandingPage() {
             setQuoteIndex((prev) => (prev + 1) % quotes.length);
         }, 8000);
         return () => clearInterval(timer);
-    }, [hasStartedPlaying]);
+    }, [hasStartedPlaying, quoteIndex]);
 
     // Catch Supabase redirect and handle auto-login redirection
     useEffect(() => {
@@ -597,20 +597,32 @@ export default function LandingPage() {
                 .quote-nav {
                     display: flex;
                     justify-content: center;
-                    gap: 1.25rem;
+                    gap: 0.5rem;
                     margin-top: 3.5rem;
+                    position: relative;
+                    z-index: 10;
                 }
                 .quote-dot {
+                    width: 28px;
+                    height: 28px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: transparent;
+                    border: none;
+                    cursor: pointer;
+                    position: relative;
+                    padding: 0;
+                }
+                .quote-dot::after {
+                    content: '';
                     width: 7px;
                     height: 7px;
                     border-radius: 50%;
                     background: #E0DFDB;
-                    border: none;
-                    cursor: pointer;
                     transition: all 0.30s ease;
-                    padding: 0;
                 }
-                .quote-dot.active {
+                .quote-dot.active::after {
                     background: var(--gold);
                     transform: scale(1.35);
                 }
