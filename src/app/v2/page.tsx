@@ -571,11 +571,12 @@ export default function V2LandingPage() {
                     margin-bottom: 0.5rem;
                 }
                 .metric-label {
-                    font-size: 0.95rem;
-                    letter-spacing: 0.05em;
-                    color: #1a1a1a;
-                    font-weight: 500;
-                    line-height: 1.4;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+                    font-size: 0.85rem;
+                    letter-spacing: 0.15em;
+                    color: #444444;
+                    font-weight: 300;
+                    line-height: 1.6;
                 }
                 .metrics-divider {
                     width: 1px;

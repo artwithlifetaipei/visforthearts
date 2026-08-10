@@ -374,7 +374,7 @@ export default function LandingPage() {
                     height: 100vh; padding: 25vh 8vw 12vh 8vw;
                 }
                 .hero-img-container {
-                    height: 100%; width: 50vw; display: flex; align-items: flex-end;
+                    height: 100%; width: 36vw; display: flex; align-items: flex-end;
                     perspective: 1000px;
                 }
                 .hero-img-container img {
@@ -390,7 +390,9 @@ export default function LandingPage() {
                     box-shadow: 0 45px 80px -20px rgba(201, 169, 110, 0.15), 0 15px 40px -15px rgba(0, 0, 0, 0.08);
                 }
                 .hero-text-container {
-                    max-width: 650px;
+                    max-width: 600px;
+                    width: 100%;
+                    flex-shrink: 0;
                     text-align: right;
                     display: flex;
                     flex-direction: column;
@@ -721,11 +723,12 @@ export default function LandingPage() {
                     margin-bottom: 0.5rem;
                 }
                 .metric-label {
-                    font-size: 0.95rem;
-                    letter-spacing: 0.05em;
-                    color: #1a1a1a;
-                    font-weight: 500;
-                    line-height: 1.4;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+                    font-size: 0.85rem;
+                    letter-spacing: 0.15em;
+                    color: #444444;
+                    font-weight: 300;
+                    line-height: 1.6;
                 }
                 .metrics-divider {
                     width: 1px;
