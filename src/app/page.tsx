@@ -390,7 +390,7 @@ export default function LandingPage() {
                     box-shadow: 0 45px 80px -20px rgba(201, 169, 110, 0.15), 0 15px 40px -15px rgba(0, 0, 0, 0.08);
                 }
                 .hero-text-container {
-                    max-width: 450px;
+                    max-width: 650px;
                     text-align: right;
                     display: flex;
                     flex-direction: column;
