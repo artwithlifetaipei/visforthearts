@@ -696,7 +696,7 @@ export default function LandingPage() {
                 .metric-card {
                     background: #FFFFFF;
                     border: 1px solid rgba(201, 169, 110, 0.15);
-                    padding: 2rem 1.5rem;
+                    padding: 2rem 1rem;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -729,6 +729,7 @@ export default function LandingPage() {
                     color: #1a1a1a;
                     font-weight: 400;
                     line-height: 1.5;
+                    white-space: nowrap;
                 }
                 .metrics-divider {
                     width: 1px;
@@ -873,11 +874,11 @@ export default function LandingPage() {
                     letter-spacing: 0.02em;
                 }
                 .curatorial-card-title-zh {
-                    font-family: var(--font-sans);
-                    font-size: 0.85rem;
-                    font-weight: 400;
-                    color: var(--gold);
-                    letter-spacing: 0.15em;
+                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+                    font-size: 1.05rem;
+                    font-weight: 500;
+                    color: #1a1a1a;
+                    letter-spacing: 0.08em;
                     margin-bottom: 1.2rem;
                 }
                 .curatorial-card-desc {

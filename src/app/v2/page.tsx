@@ -544,7 +544,7 @@ export default function V2LandingPage() {
                 .metric-card {
                     background: #FFFFFF;
                     border: 1px solid rgba(201, 169, 110, 0.15);
-                    padding: 2rem 1.5rem;
+                    padding: 2rem 1rem;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
@@ -577,6 +577,7 @@ export default function V2LandingPage() {
                     color: #1a1a1a;
                     font-weight: 400;
                     line-height: 1.5;
+                    white-space: nowrap;
                 }
                 .metrics-divider {
                     width: 1px;
