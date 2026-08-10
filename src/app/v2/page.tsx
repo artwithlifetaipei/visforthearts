@@ -69,13 +69,36 @@ export default function V2LandingPage() {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [lang, setLang] = useState<'zh' | 'en'>('zh');
     const [quoteIndex, setQuoteIndex] = useState(0);
+    const quoteSectionRef = useRef<HTMLElement>(null);
+    const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
 
+    // Intersection Observer to start Quote Carousel only when visible
     useEffect(() => {
+        const element = quoteSectionRef.current;
+        if (!element) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setHasStartedPlaying(true);
+                }
+            },
+            { threshold: 0.15 }
+        );
+
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
+
+    // Quote Carousel auto-play effect (runs only after scrolled into view)
+    useEffect(() => {
+        if (!hasStartedPlaying) return;
+
         const timer = setInterval(() => {
             setQuoteIndex((prev) => (prev + 1) % quotes.length);
         }, 8000);
         return () => clearInterval(timer);
-    }, []);
+    }, [hasStartedPlaying]);
 
     useEffect(() => {
         const scripts = [
@@ -548,10 +571,11 @@ export default function V2LandingPage() {
                     margin-bottom: 0.5rem;
                 }
                 .metric-label {
-                    font-size: 0.75rem;
-                    letter-spacing: 0.15em;
-                    color: #666666;
-                    text-transform: uppercase;
+                    font-size: 0.95rem;
+                    letter-spacing: 0.05em;
+                    color: #1a1a1a;
+                    font-weight: 500;
+                    line-height: 1.4;
                 }
                 .metrics-divider {
                     width: 1px;
@@ -673,7 +697,7 @@ export default function V2LandingPage() {
                     <div className="metrics-grid">
                         <div className="metric-card">
                             <span className="metric-number">71%</span>
-                            <span className="metric-label">{lang === 'zh' ? '共超過品味貴賓' : 'Taste VIPs & Affluent Guests'}</span>
+                            <span className="metric-label">{lang === 'zh' ? '具高消費力與品味貴賓' : 'Taste VIPs & Affluent Guests'}</span>
                         </div>
                         <div className="metric-card">
                             <span className="metric-number">21%</span>
@@ -717,7 +741,7 @@ export default function V2LandingPage() {
 
 
             {/* Quote Carousel Section */}
-            <section className="quote-section">
+            <section className="quote-section" ref={quoteSectionRef}>
                 <div className="quote-container">
                     {(lang === 'zh' ? quotes : quotesEn).map((quote, idx) => (
                         <div key={idx} className={`quote-slide ${quoteIndex === idx ? 'active' : ''}`}>

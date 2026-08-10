@@ -71,17 +71,39 @@ export default function LandingPage() {
     const navRef = useRef<HTMLElement>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [lang, setLang] = useState<'zh' | 'en'>('zh');
-    const [isRedirecting, setIsRedirecting] = useState(true);
     const [quoteIndex, setQuoteIndex] = useState(0);
+    const quoteSectionRef = useRef<HTMLElement>(null);
+    const [hasStartedPlaying, setHasStartedPlaying] = useState(false);
     const router = useRouter();
+    const [isRedirecting, setIsRedirecting] = useState(true);
 
-    // Quote Carousel auto-play effect
+    // Intersection Observer to start Quote Carousel only when visible
     useEffect(() => {
+        const element = quoteSectionRef.current;
+        if (!element) return;
+
+        const observer = new IntersectionObserver(
+            ([entry]) => {
+                if (entry.isIntersecting) {
+                    setHasStartedPlaying(true);
+                }
+            },
+            { threshold: 0.15 }
+        );
+
+        observer.observe(element);
+        return () => observer.disconnect();
+    }, []);
+
+    // Quote Carousel auto-play effect (runs only after scrolled into view)
+    useEffect(() => {
+        if (!hasStartedPlaying) return;
+
         const timer = setInterval(() => {
             setQuoteIndex((prev) => (prev + 1) % quotes.length);
         }, 8000);
         return () => clearInterval(timer);
-    }, []);
+    }, [hasStartedPlaying]);
 
     // Catch Supabase redirect and handle auto-login redirection
     useEffect(() => {
@@ -398,13 +420,21 @@ export default function LandingPage() {
                     color: #FAF9F6;
                     transform: scale(0.97);
                 }
-                .hero-zh { width: 100%; font-size: 1.15rem; font-weight: 300; line-height: 2; margin-bottom: 1.5rem; }
+                .hero-zh {
+                    width: 100%;
+                    font-size: 1.45rem;
+                    font-weight: 300;
+                    line-height: 1.8;
+                    margin-bottom: 2rem;
+                    color: #222;
+                    letter-spacing: 0.02em;
+                }
                 .hero-en {
                     font-family: var(--font-serif);
-                    font-size: 1.2rem;
+                    font-size: 1.8rem;
                     font-style: italic;
                     letter-spacing: 0.05em;
-                    color: #777;
+                    color: var(--gold);
                     margin-top: 0.5rem;
                     width: 100%;
                     text-align: inherit;
@@ -618,8 +648,8 @@ export default function LandingPage() {
                     .hero-img-container { width: 100%; height: 45vh; justify-content: center; }
                     .hero-text-container { text-align: center; margin-top: 4vh; display: flex; flex-direction: column; align-items: center; }
                     .lang-toggle-wrapper { justify-content: center; }
-                    .hero-zh { font-size: 1.1rem; line-height: 1.8; margin-bottom: 1rem; width: 100%; }
-                    .hero-en { font-family: var(--font-serif); font-size: 0.82rem; font-style: italic; line-height: 1.5; width: 100%; text-align: inherit; }
+                    .hero-zh { font-size: 1.25rem; line-height: 1.8; margin-bottom: 1.25rem; width: 100%; }
+                    .hero-en { font-family: var(--font-serif); font-size: 1.35rem; font-style: italic; line-height: 1.5; width: 100%; text-align: inherit; }
                     .desktop-br { display: none; }
                     .mobile-br { display: block; }
                     .exhibition-scroller { padding: 0 10vw; gap: 10vw; }
@@ -691,10 +721,11 @@ export default function LandingPage() {
                     margin-bottom: 0.5rem;
                 }
                 .metric-label {
-                    font-size: 0.75rem;
-                    letter-spacing: 0.15em;
-                    color: #666666;
-                    text-transform: uppercase;
+                    font-size: 0.95rem;
+                    letter-spacing: 0.05em;
+                    color: #1a1a1a;
+                    font-weight: 500;
+                    line-height: 1.4;
                 }
                 .metrics-divider {
                     width: 1px;
@@ -978,7 +1009,7 @@ export default function LandingPage() {
                     <div className="metrics-grid">
                         <div className="metric-card">
                             <span className="metric-number">71%</span>
-                            <span className="metric-label">{lang === 'zh' ? '共超過品味貴賓' : 'Taste VIPs & Affluent Guests'}</span>
+                            <span className="metric-label">{lang === 'zh' ? '具高消費力與品味貴賓' : 'Taste VIPs & Affluent Guests'}</span>
                         </div>
                         <div className="metric-card">
                             <span className="metric-number">21%</span>
@@ -1106,7 +1137,7 @@ export default function LandingPage() {
             </section>
 
             {/* Quote Carousel Section */}
-            <section className="quote-section">
+            <section className="quote-section" ref={quoteSectionRef}>
                 <div className="quote-container">
                     {(lang === 'zh' ? quotes : quotesEn).map((quote, idx) => (
                         <div key={idx} className={`quote-slide ${quoteIndex === idx ? 'active' : ''}`}>
