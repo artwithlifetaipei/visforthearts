@@ -658,7 +658,9 @@ export default function ExhibitorLandingPage() {
               </button>
             )}
             <a 
-              href="mailto:artwithlifetaipei@gmail.com?subject=2027 VIS 參展簡章"
+              href="https://drive.google.com/drive/folders/1UJdWvZ7OFZSB1YaSYcMieM0wRmF9TGUK?usp=drive_link"
+              target="_blank"
+              rel="noopener noreferrer"
               className="btn-pola-outline flex-1"
               onMouseEnter={() => setCursorHovered(true)} 
               onMouseLeave={() => setCursorHovered(false)}
