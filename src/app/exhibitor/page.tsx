@@ -20,6 +20,12 @@ const formatAuthError = (msg: string): string => {
   if (msg.includes('User already registered')) {
     return '此電子信箱已註冊過 (User already registered)。如果您忘記密碼，請點擊下方「忘記密碼」重設密碼；若要直接登入，請切換至「登入 LOG IN」分頁。';
   }
+  if (msg.includes('Error sending recovery email') || msg.includes('unable to send email') || msg.includes('error_sending_recovery_email')) {
+    return '郵件發送服務額度限制或連線受阻 (Error sending recovery email)。建議您直接切換至「註冊 SIGN UP」分頁以該信箱輸入密碼重新註冊/登入，或來信至 artwithlifetaipei@gmail.com 由專人為您協助重設。';
+  }
+  if (msg.includes('rate limit') || msg.includes('Email rate limit exceeded') || msg.includes('over_email_send_rate_limit')) {
+    return '發送重設信件過於頻繁，請於 60 秒後再試，或切換至「註冊 SIGN UP」分頁重新設定。';
+  }
   return msg;
 };
 
@@ -288,6 +294,25 @@ export default function ExhibitorLandingPage() {
       });
 
       if (error) {
+        // If Supabase Auth SMTP recovery mail fails, attempt OTP fallback
+        if (error.message.includes('Error sending recovery email')) {
+          const { error: otpErr } = await supabase.auth.signInWithOtp({
+            email: email.toLowerCase().trim(),
+            options: {
+              emailRedirectTo: `${window.location.origin}/exhibitor/reset-password`,
+              shouldCreateUser: true
+            }
+          });
+          if (!otpErr) {
+            setAuthMessage({ 
+              text: lang === 'zh' 
+                ? '✓ 已發送一次性免密碼登入與重設連結至您的信箱！請前往收信並點擊連結登入。' 
+                : '✓ One-time passwordless login link sent to your inbox! Please check your email.', 
+              type: 'success' 
+            });
+            return;
+          }
+        }
         setAuthMessage({ text: `發送重設信件失敗: ${formatAuthError(error.message)}`, type: 'error' });
       } else {
         setAuthMessage({ 
