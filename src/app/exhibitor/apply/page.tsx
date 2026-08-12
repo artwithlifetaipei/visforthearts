@@ -508,10 +508,18 @@ export default function ExhibitorApplyPage() {
           </p>
           <Link 
             href="/exhibitor"
-            className="block w-full bg-[#C9A96E] hover:bg-[#B39359] text-white text-xs font-semibold tracking-widest uppercase py-3.5 shadow-md transition-colors"
+            className="block w-full bg-[#C9A96E] hover:bg-[#B39359] text-white text-xs font-semibold tracking-widest uppercase py-3.5 shadow-md transition-colors mb-6"
           >
             {dict[lang].loginRedirectBtn}
           </Link>
+
+          <p className="text-[10px] text-[#0D0D0D]/50 font-light tracking-wider text-center leading-relaxed">
+            若註冊/登入發生任何問題，請來信至{' '}
+            <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#C9A96E] underline hover:text-[#B39359] transition-colors">
+              artwithlifetaipei@gmail.com
+            </a>
+            ，將有專人協助您。
+          </p>
         </div>
       </div>
     );

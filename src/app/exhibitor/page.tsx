@@ -1072,6 +1072,14 @@ export default function ExhibitorLandingPage() {
                     {authMessage.text}
                   </div>
                 )}
+
+                <p className="text-[10px] text-[#0D0D0D]/50 font-light tracking-wider text-center mt-6 leading-relaxed font-sans">
+                  若註冊/登入發生任何問題，請來信至{' '}
+                  <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#C9A96E] underline hover:text-[#B39359] transition-colors">
+                    artwithlifetaipei@gmail.com
+                  </a>
+                  ，將有專人協助您。
+                </p>
               </form>
             </div>
           </div>
@@ -1182,6 +1190,14 @@ export default function ExhibitorLandingPage() {
                       {modalMessage.text}
                     </div>
                   )}
+
+                  <p className="text-[10px] text-neutral-400 font-light tracking-wider text-center mt-6 leading-relaxed font-sans">
+                    若註冊/登入發生任何問題，請來信至{' '}
+                    <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#DFBA87] underline hover:text-white transition-colors">
+                      artwithlifetaipei@gmail.com
+                    </a>
+                    ，將有專人協助您。
+                  </p>
                 </form>
               </div>
             </motion.div>

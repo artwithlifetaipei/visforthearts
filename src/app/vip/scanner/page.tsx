@@ -943,6 +943,14 @@ export default function StaffScannerPage() {
                                 {isSendingOtp ? '正在發送...' : '💡 密碼未設定？點此發送登入連結到信箱'}
                             </button>
                         </div>
+
+                        <p className="text-[10px] text-neutral-400 font-light tracking-wider text-center leading-relaxed mt-4">
+                            若註冊/登入發生任何問題，請來信至{' '}
+                            <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#DFBA87] underline hover:text-white transition-colors">
+                                artwithlifetaipei@gmail.com
+                            </a>
+                            ，將有專人協助您。
+                        </p>
                     </form>
                 </motion.div>
             </div>

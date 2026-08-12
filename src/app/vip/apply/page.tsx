@@ -252,6 +252,14 @@ export default function VIPApplyPage() {
                             {dict[lang].backBtn}
                         </button>
                     </div>
+
+                    <p className="text-[10px] text-neutral-500 font-light tracking-wider text-center leading-relaxed">
+                        若註冊/登入發生任何問題，請來信至{' '}
+                        <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#C9A96E] underline hover:text-[#B39359] transition-colors">
+                            artwithlifetaipei@gmail.com
+                        </a>
+                        ，將有專人協助您。
+                    </p>
                 </form>
             </motion.div>
         </div>

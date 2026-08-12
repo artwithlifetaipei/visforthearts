@@ -284,7 +284,14 @@ export default function VIPLoginPage() {
                 className="w-full text-center mt-12 shrink-0 relative z-10 pb-4"
             >
                 <div className="w-6 h-[1px] bg-[#E5E5E5] mx-auto mb-6 transition-all duration-700 hover:w-12"></div>
-                <p className="text-[9px] tracking-[0.4em] text-[#999999] uppercase font-light">
+                <p className="text-[10px] text-[#666666] font-light tracking-wider text-center mt-6 leading-relaxed">
+                    若註冊/登入發生任何問題，請來信至{' '}
+                    <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#DFBA87] underline hover:text-[#1A1A1A] transition-colors">
+                        artwithlifetaipei@gmail.com
+                    </a>
+                    ，將有專人協助您。
+                </p>
+                <p className="text-[9px] tracking-[0.4em] text-[#999999] uppercase font-light mt-4">
                     &copy; 2026 VIS FOR THE ARTS <span className="mx-2 opacity-30">|</span> PORTAL
                 </p>
             </motion.footer>
