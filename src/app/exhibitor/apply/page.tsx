@@ -507,7 +507,7 @@ export default function ExhibitorApplyPage() {
             {dict[lang].loginRequiredSub}
           </p>
           <Link 
-            href="/exhibitor/portal"
+            href="/exhibitor"
             className="block w-full bg-[#C9A96E] hover:bg-[#B39359] text-white text-xs font-semibold tracking-widest uppercase py-3.5 shadow-md transition-colors"
           >
             {dict[lang].loginRedirectBtn}

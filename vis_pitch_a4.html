@@ -207,20 +207,14 @@
         }
 
         /* Spotlight High-Budget Banner */
-        .spotlight-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-        }
-
         .spotlight-banner {
             background: radial-gradient(circle at 10% 50%, var(--pola-gold-glow) 0%, var(--glass-bg) 100%);
             border: 1px solid var(--pola-gold-dim);
             border-radius: 10px;
-            padding: 20px 30px;
+            padding: 20px 35px;
             display: flex;
             align-items: center;
-            justify-content: flex-start;
+            justify-content: space-between;
             position: relative;
             overflow: hidden;
         }
@@ -229,7 +223,7 @@
             content: '';
             position: absolute;
             right: 0; bottom: 0;
-            width: 120px; height: 120px;
+            width: 150px; height: 150px;
             background: radial-gradient(circle, rgba(201, 169, 110, 0.05) 0%, transparent 70%);
             pointer-events: none;
         }
@@ -237,12 +231,12 @@
         .spotlight-left {
             display: flex;
             align-items: center;
-            gap: 20px;
+            gap: 30px;
         }
 
         .spotlight-huge-pct {
             font-family: 'Cormorant Garamond', serif;
-            font-size: 80px;
+            font-size: 96px;
             font-weight: 300;
             color: var(--pola-gold);
             line-height: 1;
@@ -252,12 +246,12 @@
         .spotlight-meta {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 6px;
         }
 
         .spotlight-title {
             font-family: 'Noto Serif TC', serif;
-            font-size: 24px;
+            font-size: 30px;
             font-weight: 500;
             color: #FFFFFF;
             letter-spacing: 0.15em;
@@ -265,9 +259,20 @@
 
         .spotlight-desc {
             font-family: 'Noto Sans TC', sans-serif;
-            font-size: 16px;
+            font-size: 21px;
             color: var(--text-muted);
             letter-spacing: 0.1em;
+        }
+
+        .spotlight-right-label {
+            font-family: 'Cormorant Garamond', serif;
+            font-size: 18px;
+            letter-spacing: 0.3em;
+            color: var(--pola-gold);
+            text-transform: uppercase;
+            border: 1px solid var(--pola-gold-dim);
+            padding: 8px 20px;
+            border-radius: 20px;
         }
 
         /* --- Section 2: Values & Comparisons --- */
@@ -571,8 +576,8 @@
                 <!-- 4 Demographics Card Grid -->
                 <div class="stats-grid-row">
                     <div class="stat-card">
-                        <span class="stat-number"><span style="font-family: 'Noto Serif TC', serif; font-size: 18px; font-style: normal; vertical-align: middle; margin-right: 4px; font-weight: 500; letter-spacing: 0.05em;">共超過</span>71%</span>
-                        <span class="stat-label">品味貴賓</span>
+                        <span class="stat-number">71%</span>
+                        <span class="stat-label">具高消費力與品味貴賓</span>
                     </div>
                     <div class="stat-card">
                         <span class="stat-number">21%</span>
@@ -588,26 +593,16 @@
                     </div>
                 </div>
                 
-                <!-- Budget Spotlight Grid -->
-                <div class="spotlight-grid">
-                    <div class="spotlight-banner">
-                        <div class="spotlight-left">
-                            <span class="spotlight-huge-pct">63%</span>
-                            <div class="spotlight-meta">
-                                <h3 class="spotlight-title">一年收藏預算50萬以上</h3>
-                                <p class="spotlight-desc">展現極強的單客消費實力與美學投資意願</p>
-                            </div>
+                <!-- Budget Spotlight Banner -->
+                <div class="spotlight-banner">
+                    <div class="spotlight-left">
+                        <span class="spotlight-huge-pct">67%</span>
+                        <div class="spotlight-meta">
+                            <h3 class="spotlight-title">一年購買預算80萬以上</h3>
+                            <p class="spotlight-desc">具備強勁的藝術與設計品消費力，為品牌帶來高客單價的轉化效益</p>
                         </div>
                     </div>
-                    <div class="spotlight-banner">
-                        <div class="spotlight-left">
-                            <span class="spotlight-huge-pct">21%+</span>
-                            <div class="spotlight-meta">
-                                <h3 class="spotlight-title">一年購買預算逾200萬元</h3>
-                                <p class="spotlight-desc">匯聚極具實力的超高淨值頂級藝術買家</p>
-                            </div>
-                        </div>
-                    </div>
+                    <span class="spotlight-right-label">Core Target</span>
                 </div>
             </section>
 
