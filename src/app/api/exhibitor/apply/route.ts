@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import nodemailer from 'nodemailer';
+import { Resend } from 'resend';
 
 export async function POST(request: NextRequest) {
   try {
@@ -107,39 +108,15 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: `資料庫儲存失敗: ${dbError.message}` }, { status: 500 });
     }
 
-    // 非同步發送通知郵件給管理員 (背景處理，避免阻塞 API 響應)
+    // 非同步發送通知郵件給管理員 (背景處理，絕不阻塞 API 響應)
     const sendAdminNotification = async () => {
       try {
-        const smtpHost = process.env.SMTP_HOST;
-        const smtpPort = process.env.SMTP_PORT;
-        const smtpUser = process.env.SMTP_USER;
-        const smtpPassword = process.env.SMTP_PASSWORD;
-        const adminEmailsStr = process.env.ADMIN_NOTIFICATION_EMAILS;
-
-        // 如果沒有配置相關環境變數，則跳過發送
-        if (!smtpHost || !smtpPort || !smtpUser || !smtpPassword || !adminEmailsStr) {
-          console.warn('SMTP or Admin notification variables are not fully configured. Skipping email notification.');
-          return;
-        }
-
+        const adminEmailsStr = process.env.ADMIN_NOTIFICATION_EMAILS || 'artwithlifetaipei@gmail.com';
         const adminEmails = adminEmailsStr.split(',').map(e => e.trim()).filter(Boolean);
-        if (adminEmails.length === 0) return;
+        if (adminEmails.length === 0) adminEmails.push('artwithlifetaipei@gmail.com');
 
-        const transporter = nodemailer.createTransport({
-          host: smtpHost,
-          port: parseInt(smtpPort, 10),
-          secure: smtpPort === '465', // true for 465, false for other ports (e.g. 587)
-          auth: {
-            user: smtpUser,
-            pass: smtpPassword,
-          },
-        });
-
-        const mailOptions = {
-          from: `"VIS System Notification" <${smtpUser}>`,
-          to: adminEmails.join(', '),
-          subject: `【新參展申請通知】${brand_name_zh} / ${brand_name_en} 已送出參展申請`,
-          html: `
+        const subject = `【新參展申請通知】${brand_name_zh} / ${brand_name_en} 已送出參展申請`;
+        const htmlContent = `
             <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e5e5e5; border-radius: 8px;">
               <h2 style="color: #C9A96E; border-bottom: 2px solid #C9A96E; padding-bottom: 10px; margin-top: 0;">收到新參展商申請單 Notification</h2>
               <p style="font-size: 14px; color: #666;">系統已成功儲存以下參展商的登記事項，請管理員儘速至大會後台審查匯款憑證與申請資料。</p>
@@ -211,11 +188,71 @@ export async function POST(request: NextRequest) {
                 此信件由 VIS 參展申請系統自動寄發。請勿直接回信。
               </div>
             </div>
-          `,
-        };
+          `;
 
-        await transporter.sendMail(mailOptions);
-        console.log(`Notification email successfully sent to admins.`);
+        // 1. Try Resend API if available
+        const resendApiKey = process.env.RESEND_API_KEY;
+        if (resendApiKey) {
+          const resend = new Resend(resendApiKey);
+          await resend.emails.send({
+            from: process.env.RESEND_FROM_EMAIL || 'VIS System <onboarding@resend.dev>',
+            to: adminEmails,
+            subject,
+            html: htmlContent,
+          });
+          console.log(`Notification email sent via Resend to: ${adminEmails.join(', ')}`);
+          return;
+        }
+
+        // 2. Try Gmail App Password if available
+        const gmailUser = process.env.GMAIL_USER;
+        const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
+        if (gmailUser && gmailAppPassword) {
+          const transporter = nodemailer.createTransport({
+            service: 'gmail',
+            auth: {
+              user: gmailUser,
+              pass: gmailAppPassword,
+            },
+          });
+
+          await transporter.sendMail({
+            from: `"VIS System Notification" <${gmailUser}>`,
+            to: adminEmails.join(', '),
+            subject,
+            html: htmlContent,
+          });
+          console.log(`Notification email sent via Gmail to: ${adminEmails.join(', ')}`);
+          return;
+        }
+
+        // 3. Try custom SMTP if configured
+        const smtpHost = process.env.SMTP_HOST;
+        const smtpPort = process.env.SMTP_PORT || '587';
+        const smtpUser = process.env.SMTP_USER;
+        const smtpPassword = process.env.SMTP_PASSWORD;
+        if (smtpHost && smtpUser && smtpPassword) {
+          const transporter = nodemailer.createTransport({
+            host: smtpHost,
+            port: parseInt(smtpPort, 10),
+            secure: smtpPort === '465',
+            auth: {
+              user: smtpUser,
+              pass: smtpPassword,
+            },
+          });
+
+          await transporter.sendMail({
+            from: `"VIS System Notification" <${smtpUser}>`,
+            to: adminEmails.join(', '),
+            subject,
+            html: htmlContent,
+          });
+          console.log(`Notification email sent via SMTP to: ${adminEmails.join(', ')}`);
+          return;
+        }
+
+        console.warn('No active email provider credentials (RESEND_API_KEY, GMAIL_USER/APP_PASSWORD, or SMTP_HOST) found in environment. Email dispatch skipped.');
       } catch (mailError) {
         console.error('Failed to send admin notification email:', mailError);
       }
