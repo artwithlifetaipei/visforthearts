@@ -1195,7 +1195,7 @@ export default function LandingPage() {
                         </p>
                         <div className="exhibit-buttons-container">
                             <Link href="/exhibitor" className="btn-pola">{lang === 'zh' ? '2027 簡章 Guidelines' : '2027 Guidelines'}</Link>
-                            <Link href="/exhibitor/apply" className="btn-pola btn-pola-gold">{lang === 'zh' ? '線上申請 Apply Online' : 'Apply Online'}</Link>
+                            <Link href="/exhibitor" className="btn-pola btn-pola-gold">{lang === 'zh' ? '線上申請 Apply Online' : 'Apply Online'}</Link>
                         </div>
                     </div>
 

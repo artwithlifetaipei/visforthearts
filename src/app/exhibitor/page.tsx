@@ -792,14 +792,25 @@ export default function ExhibitorLandingPage() {
             </p>
 
             <div className="flex flex-col sm:flex-row justify-center gap-5 mb-10">
-              <Link 
-                href="/exhibitor/apply"
-                className="btn-pola"
-                onMouseEnter={() => setCursorHovered(true)} 
-                onMouseLeave={() => setCursorHovered(false)}
-              >
-                {dict[lang].ctaApply}
-              </Link>
+              {session ? (
+                <Link 
+                  href="/exhibitor/apply"
+                  className="btn-pola"
+                  onMouseEnter={() => setCursorHovered(true)} 
+                  onMouseLeave={() => setCursorHovered(false)}
+                >
+                  {dict[lang].ctaApply}
+                </Link>
+              ) : (
+                <button 
+                  onClick={() => document.getElementById('auth-section')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="btn-pola cursor-pointer"
+                  onMouseEnter={() => setCursorHovered(true)} 
+                  onMouseLeave={() => setCursorHovered(false)}
+                >
+                  {dict[lang].ctaApply}
+                </button>
+              )}
             </div>
 
             <div className="flex justify-center items-center gap-2 text-xs text-[#0D0D0D]/50 font-mono">
