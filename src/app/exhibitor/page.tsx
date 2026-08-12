@@ -397,62 +397,70 @@ export default function ExhibitorLandingPage() {
 
         .btn-pola {
             display: inline-block;
-            background: var(--text);
+            background: linear-gradient(135deg, #2b2b2b 0%, #0d0d0d 100%);
             color: white;
-            padding: 1.25rem 3rem;
-            font-size: 10px;
+            padding: 1.35rem 2rem;
+            font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 0.4em;
+            letter-spacing: 0.22em;
             font-weight: 700;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             text-decoration: none;
-            border: 1px solid var(--text);
+            border: 1px solid #0d0d0d;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
         }
         .btn-pola:hover {
-            background: var(--gold);
-            border-color: var(--gold);
+            background: linear-gradient(135deg, #e3c485 0%, #c9a96e 100%);
+            border-color: #c9a96e;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(201, 169, 110, 0.25);
         }
 
         .btn-pola-gold {
             display: inline-block;
-            background: var(--gold);
+            background: linear-gradient(135deg, #e3c485 0%, #c9a96e 100%);
             color: white;
-            padding: 1.25rem 3rem;
-            font-size: 10px;
+            padding: 1.35rem 2rem;
+            font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 0.4em;
+            letter-spacing: 0.22em;
             font-weight: 700;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             text-decoration: none;
-            border: 1px solid var(--gold);
+            border: 1px solid #c9a96e;
             text-align: center;
+            box-shadow: 0 4px 15px rgba(201, 169, 110, 0.15);
         }
         .btn-pola-gold:hover {
-            background: var(--text);
-            border-color: var(--text);
+            background: linear-gradient(135deg, #2b2b2b 0%, #0d0d0d 100%);
+            border-color: #0d0d0d;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
         }
 
         .btn-pola-outline {
             display: inline-block;
             background: transparent;
             color: var(--text);
-            padding: 1.25rem 3rem;
-            font-size: 10px;
+            padding: 1.35rem 2rem;
+            font-size: 13px;
             text-transform: uppercase;
-            letter-spacing: 0.4em;
+            letter-spacing: 0.22em;
             font-weight: 700;
-            transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
             text-decoration: none;
-            border: 1px solid rgba(13, 13, 13, 0.3);
+            border: 1.5px solid rgba(13, 13, 13, 0.25);
             text-align: center;
         }
         .btn-pola-outline:hover {
-            background: var(--text);
-            border-color: var(--text);
+            background: #0d0d0d;
+            border-color: #0d0d0d;
             color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
         }
       `}} />
 
