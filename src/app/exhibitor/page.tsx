@@ -66,6 +66,14 @@ export default function ExhibitorLandingPage() {
       heroSub: 'Exhibitor Application Portal',
       heroCopy: '作為持續聚集著品味人士所建構而成的場域，\n在台灣，VIS 不只是一個博覽會，\n而是一個最適合「高客單價品牌」的導客解決方案。',
       countdownLabel: '申請截止倒數 COUNTDOWN TO DEADLINE',
+      metricsHeading: '精準客群 ‧ 關係延續',
+      metricsP: '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，篩選出適合品牌深度交流與展後延續的客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。',
+      metricsHighlight: 'VIS 提供的不只是一個展位，而是一套從客群導入到關係延續的品牌成長機制。',
+      m1Label: '具高消費力與品味貴賓',
+      m2Label: '收藏人士',
+      m3Label: '企業主',
+      m4Label: '媒體/意見領袖',
+      m5Label: '一年購買預算80萬以上',
       ctaApply: '立即線上申請 APPLY ONLINE',
       ctaGuidelines: '2027 簡章 2027 Guidelines',
       ctaBrandLogin: '已獲准入選品牌登入 BRAND LOGIN',
@@ -108,6 +116,14 @@ export default function ExhibitorLandingPage() {
       heroSub: 'Exclusive Exhibitor Entrance',
       heroCopy: 'As a curated gathering place for discerning individuals,\nVIS is more than a trade fair in Taiwan —\nit is the premier customer-acquisition platform for high-end brands.',
       countdownLabel: 'COUNTDOWN TO DEADLINE',
+      metricsHeading: 'Discerning Audience · Deep Connection',
+      metricsP: 'Unlike conventional art fairs focusing on high foot traffic and transactional sales, VIS curates an elite group of attendees, fostering genuine brand engagement that extends far beyond the exhibition floor. This targeted ecosystem is ideal for high-ticket brands seeking premium client acquisition, strategic partnerships, and long-term brand loyalty.',
+      metricsHighlight: "By connecting the worlds of art, media, collecting, fashion, design, entrepreneurship and business leadership, VIS offers more than exhibition space, it's an access to a carefully cultivated network that can lead to collecting, editorial exposure, cross-disciplinary collaboration and international opportunities.",
+      m1Label: 'Taste VIPs & Affluent Guests',
+      m2Label: 'Art Collectors',
+      m3Label: 'Business Owners',
+      m4Label: 'Press & KOLs',
+      m5Label: 'Annual Purchase Budget > 800k TWD',
       ctaApply: 'APPLY ONLINE',
       ctaGuidelines: '2027 Guidelines',
       ctaBrandLogin: 'APPROVED BRAND LOGIN',
@@ -596,6 +612,59 @@ export default function ExhibitorLandingPage() {
           ))}
         </motion.p>
         
+        {/* 精準客群 · 關係延續 (Audience Metrics & Value Proposition Section) */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.35, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-5xl mx-auto my-10 md:my-14 p-6 md:p-10 bg-white/60 backdrop-blur-md border border-[#C9A96E]/20 shadow-[0_15px_40px_rgba(201,169,110,0.04)] relative text-left"
+        >
+          <div className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/40 to-transparent" />
+          <div className="absolute inset-x-8 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/40 to-transparent" />
+          
+          <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
+            {/* Left Column: 5 Metrics Cards Grid */}
+            <div className="w-full lg:w-1/2 grid grid-cols-2 gap-3.5 md:gap-4">
+              <div className="bg-white border border-[#C9A96E]/20 p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">71%</span>
+                <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m1Label}</span>
+              </div>
+              <div className="bg-white border border-[#C9A96E]/20 p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">21%</span>
+                <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m2Label}</span>
+              </div>
+              <div className="bg-white border border-[#C9A96E]/20 p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">34%</span>
+                <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m3Label}</span>
+              </div>
+              <div className="bg-white border border-[#C9A96E]/20 p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">13%</span>
+                <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m4Label}</span>
+              </div>
+              <div className="col-span-2 bg-white border border-[#C9A96E]/20 p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">67%</span>
+                <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m5Label}</span>
+              </div>
+            </div>
+
+            {/* Vertical Divider Line for Desktop */}
+            <div className="hidden lg:block w-[1px] h-[340px] bg-[#C9A96E]/25 flex-shrink-0" />
+
+            {/* Right Column: Title, Intro Paragraph & Golden Highlight Box */}
+            <div className="w-full lg:w-1/2 flex flex-col justify-center text-left">
+              <h3 className="font-serif-garamond text-2xl md:text-3xl font-light tracking-wide text-[#0D0D0D] mb-4">
+                {dict[lang].metricsHeading}
+              </h3>
+              <p className="text-xs md:text-sm text-[#555555] leading-relaxed text-justify mb-5 tracking-wide font-sans">
+                {dict[lang].metricsP}
+              </p>
+              <div className="border-l-2 border-[#C9A96E] pl-4 py-1 italic font-serif-garamond text-sm md:text-base text-[#C9A96E] leading-relaxed">
+                {dict[lang].metricsHighlight}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+
         {/* Countdown Timer & Hero CTA Buttons Side by Side for balanced landscape layout */}
         <div className="w-full flex flex-col items-center gap-8 mb-12">
           {mounted && (
