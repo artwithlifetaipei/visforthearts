@@ -257,12 +257,15 @@ export async function POST(request: NextRequest) {
               </p>
 
               <div style="background-color: #FAF9F6; border: 1px solid rgba(201, 169, 110, 0.2); padding: 20px; margin-bottom: 28px;">
-                <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; margin-top: 0; margin-bottom: 10px;">
-                  📌 重要評選日程 Timeline & Next Steps
+                <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; margin-top: 0; margin-bottom: 12px;">
+                  📌 重要日程 Timeline & Next Steps
                 </p>
-                <p style="font-size: 12px; color: #333333; line-height: 1.7; margin: 0;">
-                  • <strong>第一階段入選結果發布日期 Phase 1 Selection Date:</strong> 2026 年 10 月 20 日 前 (By October 20, 2026)<br/>
-                  • 審查結果將透過本電子郵件專人通知。若有任何問題，歡迎隨時聯繫大會展務團隊。
+                <p style="font-size: 12px; color: #333333; line-height: 1.8; margin: 0 0 10px 0;">
+                  • <strong>第一階段入選結果發布日期 Phase 1 Selection Date:</strong> 2026 年 10 月 20 日 前<br/>
+                  • 審查結果將透過大會信箱 <a href="mailto:artwithlifetaipei@gmail.com" style="color: #C9A96E; text-decoration: underline;">artwithlifetaipei@gmail.com</a> 通知。若有任何問題，歡迎隨時透過此電郵聯繫大會展務團隊。
+                </p>
+                <p style="font-size: 11px; color: #666666; line-height: 1.7; margin: 0; border-top: 1px dashed rgba(201, 169, 110, 0.25); padding-top: 10px;">
+                  • Selection results will be notified via our official email (<a href="mailto:artwithlifetaipei@gmail.com" style="color: #C9A96E; text-decoration: underline;">artwithlifetaipei@gmail.com</a>). Should you have any inquiries, please feel free to contact our team via this email address.
                 </p>
               </div>
 
