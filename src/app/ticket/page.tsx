@@ -253,7 +253,7 @@ export default function TicketRegistrationPage() {
                 <div className="flex flex-col items-center mb-10 text-center">
                     <img
                         src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png"
-                        alt="VIS FOR THE ARTS"
+                        alt="VIS Contemporary Culture"
                         className="h-14 md:h-16 object-contain mb-6 opacity-100"
                     />
                     <h1 className="text-xs uppercase tracking-[0.4em] text-[#1A1A1A]/60 font-medium">Digital Entrance Pass</h1>
@@ -309,7 +309,7 @@ export default function TicketRegistrationPage() {
                             {/* Welcome text */}
                             <div className="bg-neutral-50/55 border border-neutral-100 p-5 rounded-none mb-8">
                                 <p className="text-sm font-light leading-relaxed text-[#2D2D2D] tracking-wide">
-                                    歡迎來到 VIS for the Arts。{' '}
+                                    歡迎來到 VIS Contemporary Culture。{' '}
                                     <span className="text-[#C9A96E] font-medium underline underline-offset-4">
                                         {selectedBrand ? selectedBrand.name_zh : '參展品牌'}
                                     </span>{' '}
@@ -500,7 +500,7 @@ export default function TicketRegistrationPage() {
                                             className="accent-[#C9A96E] mt-1 cursor-pointer"
                                         />
                                         <span>
-                                            我同意 VIS for the Arts 隱私權政策，並願意接收未來的展會與活動資訊。
+                                            我同意 VIS Contemporary Culture 隱私權政策，並願意接收未來的展會與活動資訊。
                                         </span>
                                     </label>
                                 </div>

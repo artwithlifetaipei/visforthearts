@@ -292,7 +292,7 @@ export default function VIPLoginPage() {
                     ，將有專人協助您。
                 </p>
                 <p className="text-[9px] tracking-[0.4em] text-[#999999] uppercase font-light mt-4">
-                    &copy; 2026 VIS FOR THE ARTS <span className="mx-2 opacity-30">|</span> PORTAL
+                    &copy; 2026 VIS Contemporary Culture <span className="mx-2 opacity-30">|</span> PORTAL
                 </p>
             </motion.footer>
         </div>

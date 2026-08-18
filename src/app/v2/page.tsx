@@ -883,7 +883,7 @@ export default function V2LandingPage() {
                     <a href="#" className="v2-footer-link">Contact</a>
                     <a href="#" className="v2-footer-link">Privacy</a>
                 </div>
-                <p style={{ fontSize: '9px', letterSpacing: '0.4em', opacity: 0.2 }}>&copy; 2026 VIS FOR THE ARTS. ALL RIGHTS RESERVED.</p>
+                <p style={{ fontSize: '9px', letterSpacing: '0.4em', opacity: 0.2 }}>&copy; 2026 VIS Contemporary Culture. ALL RIGHTS RESERVED.</p>
             </footer>
         </main>
     );

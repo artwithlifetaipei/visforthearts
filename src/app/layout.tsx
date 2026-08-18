@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "VIS FOR THE ARTS",
+  title: "VIS Contemporary Culture",
   description: "Celebrating Contemporary Creativity. Art Festival 2026.",
 };
 

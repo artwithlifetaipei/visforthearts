@@ -1385,7 +1385,7 @@ export default function LandingPage() {
                     {/* Legal */}
                     <div style={{ borderTop: '0.5px solid #f0f0f0' }}>
                         <p style={{ fontSize: '9px', letterSpacing: '0.4em', color: '#BBB', textTransform: 'uppercase', marginTop: '3rem' }}>
-                            &copy; 2026 VIS FOR THE ARTS. ALL RIGHTS RESERVED.
+                            &copy; 2026 VIS Contemporary Culture. ALL RIGHTS RESERVED.
                         </p>
                     </div>
                 </div>

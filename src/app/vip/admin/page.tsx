@@ -1936,7 +1936,7 @@ WITH CHECK (auth.email() IN ('artwithlifetaipei@gmail.com'));`);
                                             type="text"
                                             value={broadcastSubject}
                                             onChange={(e) => setBroadcastSubject(e.target.value)}
-                                            placeholder="請輸入主旨，例如：【VIS for the Arts】展會參觀感謝信"
+                                            placeholder="請輸入主旨，例如：【VIS Contemporary Culture】展會參觀感謝信"
                                             className="w-full py-2 bg-transparent outline-none text-xs text-white"
                                         />
                                     </div>

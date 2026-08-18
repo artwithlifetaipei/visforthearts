@@ -156,7 +156,7 @@ function getTicketEmailHtml(name: string, ticketId: string, slotNameZh: string, 
                 
                 <div class="greeting">
                     親愛的 <strong>${name}</strong>，您好：<br/>
-                    感謝您索取 VIS for the Arts 數位觀展憑證。您的電子入場門票已成功鑄造，詳細資訊如下。
+                    感謝您索取 VIS Contemporary Culture 數位觀展憑證。您的電子入場門票已成功鑄造，詳細資訊如下。
                 </div>
                 
                 <div class="ticket-card">
@@ -192,8 +192,8 @@ function getTicketEmailHtml(name: string, ticketId: string, slotNameZh: string, 
                 </div>
                 
                 <div class="footer">
-                    <p class="footer-text">VIS FOR THE ARTS</p>
-                    <p class="footer-text" style="color: #CCCCCC; font-size: 7px; margin-top: 5px;">&copy; 2027 VIS FOR THE ARTS. All rights reserved.</p>
+                    <p class="footer-text">VIS Contemporary Culture</p>
+                    <p class="footer-text" style="color: #CCCCCC; font-size: 7px; margin-top: 5px;">&copy; 2027 VIS Contemporary Culture. All rights reserved.</p>
                 </div>
             </div>
         </div>
@@ -299,7 +299,7 @@ export async function POST(req: Request) {
                 await transporter.sendMail({
                     from: `"VIS VIP TEAM" <${gmailUser}>`,
                     to: ticket.email,
-                    subject: `【VIS for the Arts】您的專屬數位觀展憑證已解鎖`,
+                    subject: `【VIS Contemporary Culture】您的專屬數位觀展憑證已解鎖`,
                     html: htmlContent
                 });
                 emailSent = true;

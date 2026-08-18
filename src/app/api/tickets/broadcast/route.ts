@@ -126,8 +126,8 @@ function wrapEmailInVisAesthetic(subject: string, content: string): string {
                 </div>
 
                 <div class="footer">
-                    <p class="footer-text">VIS FOR THE ARTS</p>
-                    <p class="footer-text" style="color: #CCCCCC; font-size: 7px; margin-top: 5px;">&copy; 2027 VIS FOR THE ARTS. All rights reserved.</p>
+                    <p class="footer-text">VIS Contemporary Culture</p>
+                    <p class="footer-text" style="color: #CCCCCC; font-size: 7px; margin-top: 5px;">&copy; 2027 VIS Contemporary Culture. All rights reserved.</p>
                 </div>
             </div>
         </div>
