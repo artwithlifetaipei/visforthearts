@@ -118,7 +118,6 @@ export async function POST(request: NextRequest) {
         const subject = `【新參展申請通知】${brand_name_zh} / ${brand_name_en} 已送出參展申請`;
         const htmlContent = `
           <div style="max-width: 620px; margin: 0 auto; padding: 40px 20px; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #FAF9F6; color: #1A1A1A;">
-            {/* Header Logo */}
             <div style="text-align: center; margin-bottom: 28px;">
               <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" alt="VIS Logo" style="height: 42px; width: auto; max-width: 100%; object-fit: contain; margin-bottom: 10px;" />
               <p style="font-size: 10px; font-weight: 600; letter-spacing: 0.35em; color: #C9A96E; text-transform: uppercase; margin: 0;">
@@ -126,7 +125,6 @@ export async function POST(request: NextRequest) {
               </p>
             </div>
 
-            {/* Main Content Card */}
             <div style="background-color: #FFFFFF; border: 1px solid rgba(201, 169, 110, 0.25); padding: 36px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
               <h2 style="font-size: 17px; font-weight: 400; color: #0D0D0D; margin-top: 0; margin-bottom: 8px; text-align: center; letter-spacing: 0.05em;">
                 收到新參展商申請單 Notification
@@ -135,9 +133,7 @@ export async function POST(request: NextRequest) {
                 大會系統已成功收到並儲存以下參展商的登記事項，請管理員儘速至大會後台審查資料與匯款憑證：
               </p>
               
-              {/* Structured Info Table */}
               <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 24px;">
-                {/* Section 1: Brand Info */}
                 <tr style="background-color: #FAF9F6;">
                   <td colspan="2" style="padding: 10px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; border-bottom: 1px solid rgba(201, 169, 110, 0.2);">
                     01. 品牌與公司登記 (Brand Profile)
@@ -160,9 +156,8 @@ export async function POST(request: NextRequest) {
                   <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #1A1A1A; font-family: monospace;">${company_tax_id || '無'}</td>
                 </tr>
 
-                {/* Section 2: Contact Info */}
                 <tr style="background-color: #FAF9F6;">
-                  <td colspan="2" style="padding: 10px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; border-bottom: 1px solid rgba(201, 169, 110, 0.2); margin-top: 16px;">
+                  <td colspan="2" style="padding: 10px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; border-bottom: 1px solid rgba(201, 169, 110, 0.2);">
                     02. 主要聯絡資訊 (Contact Information)
                   </td>
                 </tr>
@@ -191,7 +186,6 @@ export async function POST(request: NextRequest) {
                   </td>
                 </tr>
 
-                {/* Section 3: Booth & Concept */}
                 <tr style="background-color: #FAF9F6;">
                   <td colspan="2" style="padding: 10px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; border-bottom: 1px solid rgba(201, 169, 110, 0.2);">
                     03. 展位志願與展出概念 (Preferences & Concept)
@@ -215,7 +209,6 @@ export async function POST(request: NextRequest) {
                 </tr>
               </table>
 
-              {/* Section 4: Deposit Proof CTA */}
               <div style="background-color: #FAF9F6; border: 1px solid rgba(201, 169, 110, 0.25); padding: 24px; text-align: center; margin-top: 10px;">
                 <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #8C7853; text-transform: uppercase; margin-top: 0; margin-bottom: 12px;">
                   04. 保證金匯款憑證審查 (Payment Proof)
@@ -228,7 +221,6 @@ export async function POST(request: NextRequest) {
               </div>
             </div>
 
-            {/* Footer Notice */}
             <div style="text-align: center; margin-top: 32px; font-size: 10px; color: #999999; letter-spacing: 0.1em;">
               &copy; 2026 VIS Contemporary Culture. All rights reserved.<br/>
               <span style="font-size: 9px; opacity: 0.7; display: inline-block; margin-top: 4px;">此信件由 VIS 參展申請系統自動發送</span>
