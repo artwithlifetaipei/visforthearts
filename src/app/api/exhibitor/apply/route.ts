@@ -228,6 +228,57 @@ export async function POST(request: NextRequest) {
           </div>
         `;
 
+        const confirmSubject = `【VIS Contemporary Culture】參展意向申請收件確認 Proposal Received Notice`;
+        const exhibitorConfirmHtml = `
+          <div style="max-width: 620px; margin: 0 auto; padding: 40px 20px; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #FAF9F6; color: #1A1A1A;">
+            <div style="text-align: center; margin-bottom: 28px;">
+              <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" alt="VIS Logo" style="height: 42px; width: auto; max-width: 100%; object-fit: contain; margin-bottom: 10px;" />
+              <p style="font-size: 10px; font-weight: 600; letter-spacing: 0.35em; color: #C9A96E; text-transform: uppercase; margin: 0;">
+                Exhibitor Proposal Confirmation
+              </p>
+            </div>
+
+            <div style="background-color: #FFFFFF; border: 1px solid rgba(201, 169, 110, 0.25); padding: 36px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
+              <h2 style="font-size: 17px; font-weight: 400; color: #0D0D0D; margin-top: 0; margin-bottom: 6px; text-align: center; letter-spacing: 0.05em;">
+                參展意向申請收件確認
+              </h2>
+              <p style="font-size: 10px; font-weight: 500; letter-spacing: 0.2em; color: #8C7853; text-transform: uppercase; text-align: center; margin-top: 0; margin-bottom: 24px;">
+                Proposal Received Confirmation
+              </p>
+
+              <p style="font-size: 13px; color: #444444; line-height: 1.8; margin-bottom: 12px;">
+                親愛的 <strong>${contact_name}</strong>（${brand_name_zh} / ${brand_name_en}），您好：
+              </p>
+              <p style="font-size: 13px; color: #444444; line-height: 1.8; margin-bottom: 16px; text-align: justify;">
+                感謝您提交 VIS Contemporary Culture 2027 參展意向申請書。大會策展委員會已成功收到您的申請資料與保證金匯款憑證。
+              </p>
+              <p style="font-size: 12px; color: #666666; line-height: 1.7; margin-bottom: 28px; text-align: justify;">
+                Thank you for submitting your exhibition proposal for VIS Contemporary Culture 2027. Our curatorial committee has successfully received your submission details and payment proof.
+              </p>
+
+              <div style="background-color: #FAF9F6; border: 1px solid rgba(201, 169, 110, 0.2); padding: 20px; margin-bottom: 28px;">
+                <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; margin-top: 0; margin-bottom: 10px;">
+                  📌 重要評選日程 Timeline & Next Steps
+                </p>
+                <p style="font-size: 12px; color: #333333; line-height: 1.7; margin: 0;">
+                  • <strong>第一階段入選結果發布日期 Phase 1 Selection Date:</strong> 2026 年 10 月 20 日 前 (By October 20, 2026)<br/>
+                  • 審查結果將透過本電子郵件專人通知。若有任何問題，歡迎隨時聯繫大會展務團隊。
+                </p>
+              </div>
+
+              <div style="text-align: center; border-top: 1px solid #F0F0F0; padding-top: 20px;">
+                <p style="font-size: 11px; color: #888888; margin: 0;">
+                  參展聯繫 Exhibitor Relations: <a href="mailto:artwithlifetaipei@gmail.com" style="color: #C9A96E; text-decoration: underline;">artwithlifetaipei@gmail.com</a>
+                </p>
+              </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 32px; font-size: 10px; color: #999999; letter-spacing: 0.1em;">
+              &copy; 2026 VIS Contemporary Culture. All rights reserved.
+            </div>
+          </div>
+        `;
+
         // 1. Try Resend API if available
         const resendApiKey = process.env.RESEND_API_KEY;
         if (resendApiKey) {
@@ -238,7 +289,15 @@ export async function POST(request: NextRequest) {
             subject,
             html: htmlContent,
           });
-          console.log(`Notification email sent via Resend to: ${adminEmails.join(', ')}`);
+          if (contact_email) {
+            await resend.emails.send({
+              from: process.env.RESEND_FROM_EMAIL || 'VIS System <onboarding@resend.dev>',
+              to: [contact_email],
+              subject: confirmSubject,
+              html: exhibitorConfirmHtml,
+            });
+          }
+          console.log(`Notification & Confirmation emails sent via Resend.`);
           return;
         }
 
@@ -260,7 +319,17 @@ export async function POST(request: NextRequest) {
             subject,
             html: htmlContent,
           });
-          console.log(`Notification email sent via Gmail to: ${adminEmails.join(', ')}`);
+
+          if (contact_email) {
+            await transporter.sendMail({
+              from: `"VIS Contemporary Culture" <${gmailUser}>`,
+              to: contact_email,
+              subject: confirmSubject,
+              html: exhibitorConfirmHtml,
+            });
+          }
+
+          console.log(`Notification & Confirmation emails sent via Gmail.`);
           return;
         }
 

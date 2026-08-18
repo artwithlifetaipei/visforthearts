@@ -90,7 +90,7 @@ export default function ExhibitorApplyPage() {
       submit: "確認送出 SUBMIT",
       submitting: "遞交中 Submitting...",
       successTitle: "參展意向申請已完成遞交",
-      successText: "執行委員會已成功收到貴品牌的參展意向書與保證金匯款憑證。執行委員會將進行專業評估審核，並於 2026 年 10 月 20 日 發布第一階段評選結果通知至您的聯繫信箱。",
+      successText: "執行委員會已成功收到貴品牌的參展意向書與保證金匯款憑證。執行委員會將進行專業評估審核，並於 2026 年 10 月 20 日 前 發布第一階段評選結果通知至您的聯繫信箱。",
       successSubText: "若是成功入選後，大會工作小組將主動與您對接後續行政與古蹟策展事宜",
       backHome: "返回官網首頁",
       floorPlanTitle: "展位平面參考圖 Floor Plan Reference",

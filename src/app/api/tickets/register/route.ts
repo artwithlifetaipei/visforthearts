@@ -156,7 +156,10 @@ function getTicketEmailHtml(name: string, ticketId: string, slotNameZh: string, 
                 
                 <div class="greeting">
                     親愛的 <strong>${name}</strong>，您好：<br/>
-                    感謝您索取 VIS Contemporary Culture 數位觀展憑證。您的電子入場門票已成功鑄造，詳細資訊如下。
+                    感謝您索取 VIS Contemporary Culture 數位觀展憑證。您的電子入場門票已成功鑄造，詳細資訊如下：<br/>
+                    <span style="font-size: 12px; color: #666666; display: block; margin-top: 6px;">
+                        Dear <strong>${name}</strong>, thank you for claiming your VIS Contemporary Culture Digital Pass. Your entrance ticket has been minted successfully:
+                    </span>
                 </div>
                 
                 <div class="ticket-card">
@@ -179,7 +182,7 @@ function getTicketEmailHtml(name: string, ticketId: string, slotNameZh: string, 
                 </div>
                 
                 <div style="font-size: 12px; letter-spacing: 0.05em; color: #1A1A1A; font-weight: 600; margin-top: 30px;">
-                    現場核銷專用 QR CODE
+                    現場核銷專用 QR CODE / ONSITE ENTRY QR CODE
                 </div>
                 
                 <div class="qr-container">
@@ -188,7 +191,8 @@ function getTicketEmailHtml(name: string, ticketId: string, slotNameZh: string, 
                 
                 <div class="ticket-footer-msg">
                     * 請於入場時出示本信件之 QR Code 與已追蹤 @visforthearts 及邀請品牌之 Instagram 畫面供工作人員核銷。<br/>
-                    * 本時段門票採總量管制。若遇現場人潮達場館上限，將啟動『一進一出』之動線管制，敬請持本憑證依序排隊等候進場。
+                    * 本時段門票採總量管制。若遇現場人潮達場館上限，將啟動『一進一出』之動線管制，敬請持本憑證依序排隊等候進場。<br/>
+                    <span style="font-size: 10px; color: #888888; display: block; margin-top: 6px;">* Please present this QR Code and your Instagram following screen for @visforthearts and the inviting brand at entry. Capacity control applies.</span>
                 </div>
                 
                 <div class="footer">
@@ -299,7 +303,7 @@ export async function POST(req: Request) {
                 await transporter.sendMail({
                     from: `"VIS VIP TEAM" <${gmailUser}>`,
                     to: ticket.email,
-                    subject: `【VIS Contemporary Culture】您的專屬數位觀展憑證已解鎖`,
+                    subject: `【VIS Contemporary Culture】您的專屬數位觀展憑證已解鎖 Digital Pass Unlocked`,
                     html: htmlContent
                 });
                 emailSent = true;
