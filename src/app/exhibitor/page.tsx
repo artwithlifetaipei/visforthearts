@@ -225,12 +225,15 @@ export default function ExhibitorLandingPage() {
       const { data, error } = await supabase.auth.signUp({
         email: email.toLowerCase().trim(),
         password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/exhibitor/apply`,
+        }
       });
 
       if (error) {
         setAuthMessage({ text: `註冊失敗: ${formatAuthError(error.message)}`, type: 'error' });
       } else {
-        if (data?.session) {
+        if (data?.session && data?.user?.email_confirmed_at) {
           setSession(data.session);
           try {
             sessionStorage.setItem('vis_temp_session', JSON.stringify(data.session));
@@ -241,7 +244,9 @@ export default function ExhibitorLandingPage() {
           }, 800);
         } else {
           setAuthMessage({ 
-            text: '註冊成功！驗證信件已寄出，請至您的信箱點擊連結驗證以解鎖展位與價格資訊。 (若未收到請檢查垃圾信箱)', 
+            text: lang === 'zh'
+              ? '✓ 註冊成功！驗證信件已寄至您的信箱。為防範他人冒用信箱，請至您的信箱點擊驗證連結開通參展商帳號。 (若未收到請檢查垃圾信件)'
+              : '✓ Sign up successful! Verification email sent. Please click the link in your email to confirm your exhibitor account.', 
             type: 'success' 
           });
         }

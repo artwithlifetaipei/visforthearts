@@ -469,6 +469,33 @@ export default function ExhibitorApplyPage() {
     );
   }
 
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
+
+  const handleResendVerification = async () => {
+    if (!session?.user?.email) return;
+    setIsResending(true);
+    setResendMessage('');
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: session.user.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/exhibitor/apply`,
+        }
+      });
+      if (error) {
+        setResendMessage(lang === 'zh' ? `發送失敗: ${error.message}` : `Failed to resend: ${error.message}`);
+      } else {
+        setResendMessage(lang === 'zh' ? '✓ 驗證信件已重新發送至您的信箱，請至信箱查收！' : '✓ Verification email resent! Please check your inbox.');
+      }
+    } catch (err: any) {
+      setResendMessage(lang === 'zh' ? `發送異常: ${err.message || err}` : `Failed: ${err.message || err}`);
+    } finally {
+      setIsResending(false);
+    }
+  };
+
   if (!session) {
     return (
       <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
@@ -515,6 +542,82 @@ export default function ExhibitorApplyPage() {
 
           <p className="text-[10px] text-[#0D0D0D]/50 font-light tracking-wider text-center leading-relaxed">
             若註冊/登入發生任何問題，請來信至{' '}
+            <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#C9A96E] underline hover:text-[#B39359] transition-colors">
+              artwithlifetaipei@gmail.com
+            </a>
+            ，將有專人協助您。
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  const isUnverified = session?.user && session.user.email_confirmed_at === null && !['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com', 'visvipteam@gmail.com', 'amelie@theartpressasia.com'].includes((session.user.email || '').toLowerCase());
+
+  if (isUnverified) {
+    return (
+      <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
+        {/* Full-bleed architectural background overlay */}
+        <div className="absolute inset-0 pointer-events-none z-0">
+          <img
+            src="/vip_lobby_bg.jpg"
+            alt=""
+            className="w-full h-full object-cover object-center"
+            style={{ filter: 'brightness(0.38) saturate(0.75)' }}
+          />
+          <div
+            className="absolute inset-0"
+            style={{
+              background: 'linear-gradient(180deg, rgba(245,242,235,0.85) 0%, rgba(240,235,225,0.65) 40%, rgba(245,242,235,0.9) 100%)'
+            }}
+          />
+        </div>
+
+        <div className="max-w-md w-full bg-white/95 border border-[#C9A96E]/20 p-10 shadow-2xl relative z-10">
+          <div className="absolute top-4 left-4 w-2.5 h-2.5 border-t-[0.5px] border-l-[0.5px] border-neutral-400 opacity-30"></div>
+          <div className="absolute top-4 right-4 w-2.5 h-2.5 border-t-[0.5px] border-r-[0.5px] border-neutral-400 opacity-30"></div>
+          <div className="absolute bottom-4 left-4 w-2.5 h-2.5 border-b-[0.5px] border-l-[0.5px] border-neutral-400 opacity-30"></div>
+          <div className="absolute bottom-4 right-4 w-2.5 h-2.5 border-b-[0.5px] border-r-[0.5px] border-neutral-400 opacity-30"></div>
+          
+          <img 
+            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+            alt="VIS Logo" 
+            className="h-10 mx-auto mb-8 object-contain"
+          />
+
+          <h2 className="font-serif-garamond text-xl font-light tracking-wide text-[#0D0D0D] mb-3">
+            {lang === 'zh' ? '參展商電子信箱尚未驗證' : 'Exhibitor Email Verification Required'}
+          </h2>
+          <p className="text-xs text-[#0D0D0D]/65 leading-relaxed tracking-wider mb-6">
+            {lang === 'zh' 
+              ? `大會線上申請系統為防範他人冒用電子信箱，要求先進行信箱驗證。已寄出驗證信件至 ${session.user.email}，請至您的信箱點擊驗證連結開通參展商帳號。` 
+              : `To prevent unauthorized email usage, please verify your email address (${session.user.email}) by clicking the link sent to your inbox.`}
+          </p>
+
+          {resendMessage && (
+            <div className="text-[11px] p-3 mb-6 bg-[#C9A96E]/10 border border-[#C9A96E]/20 text-[#8C7853]">
+              {resendMessage}
+            </div>
+          )}
+
+          <button 
+            type="button"
+            onClick={handleResendVerification}
+            disabled={isResending}
+            className="w-full bg-[#0D0D0D] hover:bg-[#C9A96E] text-white text-xs font-semibold tracking-widest uppercase py-3.5 shadow-md transition-colors mb-4 cursor-pointer disabled:opacity-50"
+          >
+            {isResending ? (lang === 'zh' ? '發送中...' : 'Sending...') : (lang === 'zh' ? '重新發送驗證信件 RESEND VERIFICATION' : 'RESEND VERIFICATION')}
+          </button>
+
+          <Link 
+            href="/exhibitor"
+            className="block w-full border border-neutral-300 text-neutral-600 hover:text-black text-xs font-semibold tracking-widest uppercase py-3 transition-colors mb-6"
+          >
+            {lang === 'zh' ? '← 返回登入頁 Back to Login' : '← Back to Login'}
+          </Link>
+
+          <p className="text-[10px] text-[#0D0D0D]/50 font-light tracking-wider text-center leading-relaxed">
+            若驗證過程發生任何問題，請來信至{' '}
             <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#C9A96E] underline hover:text-[#B39359] transition-colors">
               artwithlifetaipei@gmail.com
             </a>
