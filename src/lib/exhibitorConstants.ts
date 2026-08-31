@@ -145,25 +145,25 @@ export const ZONE_III: Zone = {
       price: 108000,
       qty: 2,
       hasStorage: true,
-      note: '入口處兩側',
+      note: '入口處兩側 (另享倉儲區與2F貴賓區)',
     },
     {
-      label: '500*460cm 獨立展位 L2, L6, L7 - 中間區域',
+      label: '500*460cm 獨立展位 L2, L6, L7',
       code: 'L2, L6, L7',
       dimensions: '500*460cm',
       price: 88000,
       qty: 3,
       hasStorage: true,
-      note: '中間區域',
+      note: '獨立展位空間',
     },
     {
-      label: '1000*920cm 最大獨立展位 L1 & L5 - 兩展位打通',
+      label: '1000*500cm 最大獨立展位 L1 & L5 - 兩展位打通',
       code: 'L1 & L5',
-      dimensions: '1000*920cm',
+      dimensions: '1000*500cm',
       price: 158000,
       qty: 2,
       hasStorage: true,
-      note: '兩展位打通',
+      note: '兩展位打通大器格局',
     },
   ],
   includes: {
@@ -171,10 +171,10 @@ export const ZONE_III: Zone = {
     installDays: 1,
     vipPasses: 50,
     exhibitorPasses: 4,
-    storageArea: '另享 倉儲區300*300cm',
-    vipLoungeSeating: '另享 2F貴賓商談區2桌4椅',
+    storageArea: '另享 倉儲區 300*300cm (僅 L3 & L4 享有)',
+    vipLoungeSeating: '另享 2F 貴賓商談區 2 桌 4 椅 (僅 L3 & L4 享有)',
   },
-  note: '*備註：該展區，全展位挑高皆為460cm。',
+  note: '*備註：該展區，全展位挑高皆為 460cm。',
 };
 
 // ─── All Zones ────────────────────────────────────────────
@@ -197,26 +197,36 @@ export interface KeyDate {
 
 export const KEY_DATES: KeyDate[] = [
   {
-    dateStr: '2026/10/15',
-    labelZh: '線上申請截止',
+    dateStr: '2026/10/15 18:00',
+    labelZh: '截止申請',
     labelEn: 'Application Deadline',
   },
   {
-    dateStr: '2026/10/20',
-    labelZh: '評選結果公告',
+    dateStr: '2026/10/20 18:00 前',
+    labelZh: '評選結果公布',
     labelEn: 'Selection Results Announced',
   },
   {
-    dateStr: '2026/10/27',
-    labelZh: '展位費繳清截止',
-    labelEn: 'Booth Fee Payment Deadline',
+    dateStr: '2026/10/27 18:00',
+    labelZh: '繳費期限',
+    labelEn: 'Payment Deadline',
   },
   {
-    dateStr: '2026/11/05',
-    labelZh: '參展品牌公告',
-    labelEn: 'Exhibitor Roster Announced',
+    dateStr: '2026/11月中旬',
+    labelZh: '說明會與 MOU 簽署',
+    labelEn: 'Briefing & MOU Signing',
+  },
+  {
+    dateStr: '2027/01/06',
+    labelZh: '佈展與 VIP 開幕酒會',
+    labelEn: 'Setup & VIP Vernissage',
+  },
+  {
+    dateStr: '2027/01/07 - 01/09',
+    labelZh: '公眾展期與撤場',
+    labelEn: 'Public Days & Move-Out',
   },
 ];
 
-/** Countdown target: 線上申請截止 2026/10/15 midnight (UTC+8) */
-export const APPLICATION_DEADLINE = new Date('2026-10-15T00:00:00+08:00');
+/** Countdown target: 線上申請截止 2026/10/15 18:00 (UTC+8) */
+export const APPLICATION_DEADLINE = new Date('2026-10-15T18:00:00+08:00');

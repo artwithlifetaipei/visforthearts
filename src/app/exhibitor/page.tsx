@@ -860,8 +860,30 @@ export default function ExhibitorLandingPage() {
                   </div>
                 </div>
               </div>
-            </div>
-          </section>
+          </div>
+        </section>
+
+        {/* Floor Plan Display Section */}
+        <section className="py-20 px-6 md:px-12 max-w-5xl mx-auto relative z-10 text-center">
+          <h2 className="text-2xl md:text-3xl font-serif-garamond text-center font-light tracking-[0.1em] mb-2 text-[#0D0D0D]">
+            {lang === 'zh' ? '2027 展覽平面配置圖' : '2027 Exhibition Floor Plan'}
+          </h2>
+          <p className="text-[10px] text-center text-[#0D0D0D]/40 font-light tracking-[0.25em] uppercase mb-10">
+            Taipei Zhongshan Hall - Guangfu Villa Floor Layout
+          </p>
+          <div className="bg-white border border-[#C9A96E]/25 p-3 shadow-lg hover:border-[#C9A96E] transition-colors duration-300">
+            <img 
+              src="/floor_plan_2027.png" 
+              alt="2027 VIS Exhibition Floor Plan" 
+              className="w-full h-auto block"
+            />
+          </div>
+          <p className="text-xs text-[#0D0D0D]/60 text-center mt-4 font-serif-garamond italic">
+            {lang === 'zh' 
+              ? '* 配置說明：包含三大展區——明日經典展區 (A01-A03)、文化實體展區 (A04-A05)、匠心藝藏展區 (L1-L7)' 
+              : '* Layout Note: Includes Future Classics (A01-A03), Cultural Entities (A04-A05), and Designer & Atelier (L1-L7)'}
+          </p>
+        </section>
 
 
 
