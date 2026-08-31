@@ -805,13 +805,12 @@ export default function ExhibitorLandingPage() {
         </div>
       </header>
 
-      {/* Conditionally reveal details based on session */}
-      {session ? (
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-        >
+      {/* Exhibitor Process, Specs, Pricing & Application Sections */}
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
+      >
           {/* Dual Funnel (Process) Section */}
           <section className="bg-white/70 border-y border-[#0D0D0D]/5 py-24 px-6 md:px-12 relative z-10">
             <div className="max-w-5xl mx-auto">
@@ -935,10 +934,10 @@ export default function ExhibitorLandingPage() {
               </a>
             </div>
           </section>
-        </motion.div>
-      ) : (
-        /* If NOT logged in, show the elegant Lock & Auth Box */
-        <section id="auth-section" className="max-w-7xl mx-auto px-6 py-24 relative z-10 scroll-mt-20">
+
+        {/* If NOT logged in, show the Auth Box */}
+        {!session && (
+          <section id="auth-section" className="max-w-7xl mx-auto px-6 py-24 relative z-10 scroll-mt-20">
           <div className="w-full max-w-md mx-auto bg-white border border-[#C9A96E]/20 p-1 rounded-none shadow-[0_20px_50px_rgba(0,0,0,0.03)] relative z-10">
             <div className="border border-[#C9A96E]/10 p-8 md:p-10 flex flex-col bg-white">
               <div className="w-10 h-10 rounded-full border border-[#C9A96E]/30 flex items-center justify-center bg-[#C9A96E]/5 mx-auto text-[#C9A96E] mb-5">
@@ -1115,6 +1114,7 @@ export default function ExhibitorLandingPage() {
           </div>
         </section>
       )}
+      </motion.div>
 
       {/* Premium Login Modal for Approved Brands */}
       <AnimatePresence>
@@ -1221,7 +1221,20 @@ export default function ExhibitorLandingPage() {
                     </div>
                   )}
 
-                  <p className="text-[10px] text-neutral-400 font-light tracking-wider text-center mt-6 leading-relaxed font-sans">
+                  <div className="pt-4 text-center border-t border-white/10 mt-6">
+                    <p className="text-[11px] text-neutral-300 font-serif-garamond mb-2">
+                      {lang === 'zh' ? '首次申請參展的新品牌？' : 'First time applying for exhibition?'}
+                    </p>
+                    <Link
+                      href="/exhibitor/apply"
+                      onClick={() => setIsLoginModalOpen(false)}
+                      className="inline-block bg-[#C9A96E] hover:bg-[#B39359] text-white text-[10px] font-semibold tracking-widest uppercase px-4 py-2 shadow-sm transition-all"
+                    >
+                      {lang === 'zh' ? '前往線上參展意向申請 APPLY ONLINE' : 'APPLY ONLINE'}
+                    </Link>
+                  </div>
+
+                  <p className="text-[10px] text-neutral-400 font-light tracking-wider text-center mt-4 leading-relaxed font-sans">
                     若註冊/登入發生任何問題，請來信至{' '}
                     <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#DFBA87] underline hover:text-white transition-colors">
                       artwithlifetaipei@gmail.com

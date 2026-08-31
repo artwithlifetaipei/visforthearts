@@ -139,8 +139,8 @@ export const ZONE_III: Zone = {
   description: '匠心藝藏展區 Designer & Atelier Brand Sector。適合需要專屬獨立空間，來聚焦表現品牌工藝美學者，同時，亦有全大展唯二的雙倍大器格局展位，完整構築沈浸式體驗。',
   booths: [
     {
-      label: '500*460cm 獨立展位 L2 & L4 - 入口處兩側',
-      code: 'L2&L4',
+      label: '500*460cm 獨立展位 L3 & L4 - 入口處兩側',
+      code: 'L3&L4',
       dimensions: '500*460cm',
       price: 108000,
       qty: 2,
@@ -148,17 +148,17 @@ export const ZONE_III: Zone = {
       note: '入口處兩側',
     },
     {
-      label: '500*460cm 獨立展位 L7-L9 & L11-L12 - 中間區域',
-      code: 'L7-L9 & L11-L12',
+      label: '500*460cm 獨立展位 L2, L6, L7 - 中間區域',
+      code: 'L2, L6, L7',
       dimensions: '500*460cm',
       price: 88000,
-      qty: 4,
+      qty: 3,
       hasStorage: true,
       note: '中間區域',
     },
     {
-      label: '1000*920cm 最大獨立展位 L1 & L3 - 兩展位打通',
-      code: 'L1 & L3',
+      label: '1000*920cm 最大獨立展位 L1 & L5 - 兩展位打通',
+      code: 'L1 & L5',
       dimensions: '1000*920cm',
       price: 158000,
       qty: 2,

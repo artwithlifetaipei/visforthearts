@@ -471,6 +471,7 @@ export default function ExhibitorApplyPage() {
 
   const [isResending, setIsResending] = useState(false);
   const [resendMessage, setResendMessage] = useState('');
+  const [allowBypass, setAllowBypass] = useState(false);
 
   const handleResendVerification = async () => {
     if (!session?.user?.email) return;
@@ -496,7 +497,7 @@ export default function ExhibitorApplyPage() {
     }
   };
 
-  if (!session) {
+  if (!session && !allowBypass) {
     return (
       <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
         {/* Full-bleed architectural background overlay */}
@@ -528,20 +529,31 @@ export default function ExhibitorApplyPage() {
           />
 
           <h2 className="font-serif-garamond text-xl font-light tracking-wide text-[#0D0D0D] mb-4">
-            {dict[lang].loginRequired}
+            {lang === 'zh' ? 'VIS 2027 參展意向申請' : 'VIS 2027 Exhibition Proposal Application'}
           </h2>
           <p className="text-xs text-[#0D0D0D]/65 leading-relaxed tracking-wider mb-8">
-            {dict[lang].loginRequiredSub}
+            {lang === 'zh' 
+              ? '歡迎蒞臨大會參展申請系統。您可以直接開始填寫參展意向書，或登入既有帳號。' 
+              : 'Welcome to the exhibition proposal system. You can start your application directly or sign in to your existing account.'}
           </p>
+
+          <button 
+            type="button"
+            onClick={() => setAllowBypass(true)}
+            className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white text-xs font-semibold tracking-widest uppercase py-3.5 shadow-md transition-colors mb-4 cursor-pointer"
+          >
+            {lang === 'zh' ? '開始填寫參展意向書 START APPLICATION' : 'START APPLICATION'}
+          </button>
+
           <Link 
             href="/exhibitor"
-            className="block w-full bg-[#C9A96E] hover:bg-[#B39359] text-white text-xs font-semibold tracking-widest uppercase py-3.5 shadow-md transition-colors mb-6"
+            className="block w-full border border-neutral-300 text-neutral-600 hover:text-black text-xs font-semibold tracking-widest uppercase py-3 transition-colors mb-6"
           >
-            {dict[lang].loginRedirectBtn}
+            {lang === 'zh' ? '已有帳號？前往登入 SIGN IN' : 'LOG IN TO EXISTING ACCOUNT'}
           </Link>
 
           <p className="text-[10px] text-[#0D0D0D]/50 font-light tracking-wider text-center leading-relaxed">
-            若註冊/登入發生任何問題，請來信至{' '}
+            若填表過程發生任何問題，請來信至{' '}
             <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#C9A96E] underline hover:text-[#B39359] transition-colors">
               artwithlifetaipei@gmail.com
             </a>
@@ -554,7 +566,7 @@ export default function ExhibitorApplyPage() {
 
   const isUnverified = session?.user && session.user.email_confirmed_at === null && !['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com', 'visvipteam@gmail.com', 'amelie@theartpressasia.com'].includes((session.user.email || '').toLowerCase());
 
-  if (isUnverified) {
+  if (isUnverified && !allowBypass) {
     return (
       <div className="min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center p-6 text-center relative overflow-hidden">
         {/* Full-bleed architectural background overlay */}
@@ -586,12 +598,12 @@ export default function ExhibitorApplyPage() {
           />
 
           <h2 className="font-serif-garamond text-xl font-light tracking-wide text-[#0D0D0D] mb-3">
-            {lang === 'zh' ? '參展商電子信箱尚未驗證' : 'Exhibitor Email Verification Required'}
+            {lang === 'zh' ? '參展商電子信箱驗證' : 'Exhibitor Email Verification'}
           </h2>
           <p className="text-xs text-[#0D0D0D]/65 leading-relaxed tracking-wider mb-6">
             {lang === 'zh' 
-              ? `大會線上申請系統為防範他人冒用電子信箱，要求先進行信箱驗證。已寄出驗證信件至 ${session.user.email}，請至您的信箱點擊驗證連結開通參展商帳號。` 
-              : `To prevent unauthorized email usage, please verify your email address (${session.user.email}) by clicking the link sent to your inbox.`}
+              ? `大會系統已發送驗證信件至 ${session.user.email}。您可以選擇至信箱點擊開通，或點擊下方按鈕直接開始填寫申請表。` 
+              : `Verification email sent to ${session.user.email}. You can check your email or click below to proceed directly.`}
           </p>
 
           {resendMessage && (
@@ -602,19 +614,20 @@ export default function ExhibitorApplyPage() {
 
           <button 
             type="button"
+            onClick={() => setAllowBypass(true)}
+            className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white text-xs font-semibold tracking-widest uppercase py-3.5 shadow-md transition-colors mb-3 cursor-pointer"
+          >
+            {lang === 'zh' ? '直接填寫參展意向書 START APPLICATION' : 'START APPLICATION'}
+          </button>
+
+          <button 
+            type="button"
             onClick={handleResendVerification}
             disabled={isResending}
-            className="w-full bg-[#0D0D0D] hover:bg-[#C9A96E] text-white text-xs font-semibold tracking-widest uppercase py-3.5 shadow-md transition-colors mb-4 cursor-pointer disabled:opacity-50"
+            className="w-full border border-[#0D0D0D] text-[#0D0D0D] hover:bg-[#0D0D0D] hover:text-white text-xs font-semibold tracking-widest uppercase py-3 transition-colors mb-4 cursor-pointer disabled:opacity-50"
           >
             {isResending ? (lang === 'zh' ? '發送中...' : 'Sending...') : (lang === 'zh' ? '重新發送驗證信件 RESEND VERIFICATION' : 'RESEND VERIFICATION')}
           </button>
-
-          <Link 
-            href="/exhibitor"
-            className="block w-full border border-neutral-300 text-neutral-600 hover:text-black text-xs font-semibold tracking-widest uppercase py-3 transition-colors mb-6"
-          >
-            {lang === 'zh' ? '← 返回登入頁 Back to Login' : '← Back to Login'}
-          </Link>
 
           <p className="text-[10px] text-[#0D0D0D]/50 font-light tracking-wider text-center leading-relaxed">
             若驗證過程發生任何問題，請來信至{' '}
