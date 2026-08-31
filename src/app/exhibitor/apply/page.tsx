@@ -34,6 +34,9 @@ export default function ExhibitorApplyPage() {
   // Auth Protection state
   const [session, setSession] = useState<any>(null);
   const [authChecking, setAuthChecking] = useState(true);
+  const [isResending, setIsResending] = useState(false);
+  const [resendMessage, setResendMessage] = useState('');
+  const [allowBypass, setAllowBypass] = useState(false);
 
   // Form Fields State
   const [formData, setFormData] = useState({
@@ -468,10 +471,6 @@ export default function ExhibitorApplyPage() {
       </div>
     );
   }
-
-  const [isResending, setIsResending] = useState(false);
-  const [resendMessage, setResendMessage] = useState('');
-  const [allowBypass, setAllowBypass] = useState(false);
 
   const handleResendVerification = async () => {
     if (!session?.user?.email) return;
