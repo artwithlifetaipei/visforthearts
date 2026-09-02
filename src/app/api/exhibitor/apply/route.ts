@@ -115,8 +115,42 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (dbError) {
-      console.error('Database insert error:', dbError);
-      return NextResponse.json({ success: false, error: `資料庫儲存失敗: ${dbError.message}` }, { status: 500 });
+      console.error('Primary database insert error:', dbError);
+      // Resilient Fallback Retry
+      try {
+        const fallbackClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
+        const { error: retryError } = await fallbackClient
+          .from('exhibitor_applications')
+          .insert({
+            brand_name_zh,
+            brand_name_en,
+            company_name_zh: company_name_zh || null,
+            company_tax_id: company_tax_id || null,
+            contact_name,
+            contact_email,
+            contact_phone,
+            contact_address,
+            website_url,
+            instagram_url,
+            zone_id,
+            booth_type,
+            zone_preference_1,
+            zone_preference_2,
+            zone_preference_3,
+            concept_brief,
+            deposit_proof_url,
+            status: 'pending',
+            deposit_paid: false,
+          });
+
+        if (retryError) {
+          console.error('Fallback retry error:', retryError);
+          return NextResponse.json({ success: false, error: `資料庫儲存失敗: ${dbError.message}` }, { status: 500 });
+        }
+      } catch (fallbackException) {
+        console.error('Fallback exception:', fallbackException);
+        return NextResponse.json({ success: false, error: `資料庫儲存失敗: ${dbError.message}` }, { status: 500 });
+      }
     }
 
     // 非同步發送通知郵件給管理員 (背景處理，絕不阻塞 API 響應)
