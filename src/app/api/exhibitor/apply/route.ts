@@ -77,10 +77,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // Use service role key if available to guarantee insertion bypasses RLS
-    const dbClient = process.env.SUPABASE_SERVICE_ROLE_KEY
-      ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY)
-      : supabase;
+    // Use Authorization header, Service Role key, or default supabase client
+    const authHeader = request.headers.get('authorization');
+    const dbClient = authHeader
+      ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+          global: { headers: { Authorization: authHeader } }
+        })
+      : (process.env.SUPABASE_SERVICE_ROLE_KEY
+          ? createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY)
+          : supabase);
 
     // Insert application into DB
     const { data: insertedData, error: dbError } = await dbClient
