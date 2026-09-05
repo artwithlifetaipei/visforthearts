@@ -1,0 +1,74 @@
+<!-- ====================================================================
+     VIS Contemporary Culture – Supabase Auth Magic Link Email Template
+     請複製下方全內容至 Supabase Dashboard ➔ Authentication ➔ Email Templates ➔ Magic Link
+     ==================================================================== -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>VIS Contemporary Culture VIP Magic Link</title>
+</head>
+<body style="margin: 0; padding: 0; background-color: #FAF9F6; color: #1A1A1A; font-family: 'Helvetica Neue', Arial, sans-serif;">
+  <div style="width: 100%; max-width: 620px; margin: 0 auto; padding: 40px 20px; box-sizing: border-box;">
+    
+    <!-- Logo -->
+    <div style="text-align: center; margin-bottom: 32px;">
+      <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" alt="VIS Logo" style="height: 48px; width: auto; max-width: 100%; object-fit: contain; margin-bottom: 12px;" />
+      <p style="font-size: 10px; font-weight: 600; letter-spacing: 0.35em; color: #C9A96E; text-transform: uppercase; margin: 0;">
+        VIP MAGIC LINK ACCESS
+      </p>
+    </div>
+
+    <!-- Container Card -->
+    <div style="background-color: #FFFFFF; border: 1px solid rgba(201, 169, 110, 0.25); padding: 40px 32px; box-shadow: 0 10px 35px rgba(0,0,0,0.03); text-align: center;">
+      
+      <h2 style="font-size: 18px; font-weight: 400; color: #0D0D0D; margin-top: 0; margin-bottom: 8px; letter-spacing: 0.08em; font-family: Georgia, serif;">
+        貴賓專屬數位入口點擊登入
+      </h2>
+      <p style="font-size: 10px; font-weight: 500; letter-spacing: 0.25em; color: #8C7853; text-transform: uppercase; margin-top: 0; margin-bottom: 24px;">
+        ONE-CLICK VIP PORTAL ACCESS
+      </p>
+
+      <p style="font-size: 13.5px; color: #444444; line-height: 1.85; margin-bottom: 24px; text-align: center;">
+        尊貴的貴賓您好，歡迎蒞臨 <strong>VIS Contemporary Culture</strong> 尊榮貴賓專區。請點擊下方按鈕無縫進入您的個人貴賓儀表板，領取專屬禮遇：
+      </p>
+      
+      <p style="font-size: 12px; color: #666666; line-height: 1.7; margin-bottom: 32px; text-align: center;">
+        Welcome to the VIS Contemporary Culture VIP Portal. Please click the button below to enter your personalized dashboard and claim your exclusive privileges:
+      </p>
+
+      <!-- Magic Link Button -->
+      <div style="margin-bottom: 32px;">
+        <a href="{{ .ConfirmationURL }}" target="_blank" style="background-color: #0D0D0D; color: #FFFFFF; text-decoration: none; padding: 16px 36px; font-size: 11px; font-weight: 600; letter-spacing: 0.3em; text-transform: uppercase; display: inline-block; border-radius: 2px; box-shadow: 0 4px 15px rgba(0,0,0,0.15);">
+          進入 VIP 專區 ENTER VIP PORTAL
+        </a>
+      </div>
+
+      <!-- OTP Passcode Box -->
+      {{ if .Token }}
+      <div style="background-color: #FAF9F6; border: 1px solid rgba(201, 169, 110, 0.2); padding: 20px; margin-bottom: 28px; border-radius: 4px;">
+        <p style="font-size: 10px; font-weight: 600; letter-spacing: 0.25em; color: #8C7853; text-transform: uppercase; margin-top: 0; margin-bottom: 10px;">
+          一次性動態驗證碼 ONE-TIME PASSCODE (OTP)
+        </p>
+        <div style="font-size: 24px; font-weight: 700; letter-spacing: 0.4em; color: #0D0D0D; font-family: monospace;">
+          {{ .Token }}
+        </div>
+      </div>
+      {{ end }}
+
+      <!-- REFINED VIP NOTICE (No 1-hour warning) -->
+      <div style="border-top: 1px solid #F0F0F0; padding-top: 20px; font-size: 11px; color: #777777; line-height: 1.8;">
+        * 本邀請連結已為您個人永久開通專屬權益，登入後系統將自動為您保留貴賓身份。<br/>
+        <span style="font-size: 10px; color: #999999;">* This invitation link unlocks your exclusive VIP privileges. Your VIP status remains permanently active once logged in.</span>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div style="text-align: center; margin-top: 32px; font-size: 10px; color: #999999; letter-spacing: 0.1em;">
+      &copy; 2027 VIS Contemporary Culture. All rights reserved.
+    </div>
+
+  </div>
+</body>
+</html>
