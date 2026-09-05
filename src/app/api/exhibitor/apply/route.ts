@@ -60,20 +60,20 @@ export async function POST(request: NextRequest) {
 
           if (uploadError) {
             console.error('Supabase storage upload error:', uploadError);
-            // Fallback: save placeholder or log
-            deposit_proof_url = `/uploads/mock_deposit_${fileName}`;
+            // Fallback: use raw base64 data URL directly so image is never lost
+            deposit_proof_url = deposit_proof_base64;
           } else {
             // Get public URL
             const { data: publicUrlData } = supabase.storage
               .from('exhibitor-deposits')
               .getPublicUrl(filePath);
             
-            deposit_proof_url = publicUrlData?.publicUrl || '';
+            deposit_proof_url = publicUrlData?.publicUrl || deposit_proof_base64;
           }
         }
       } catch (uploadException) {
         console.error('Exception during storage upload:', uploadException);
-        deposit_proof_url = '/uploads/mock_deposit_error.png';
+        deposit_proof_url = deposit_proof_base64;
       }
     }
 

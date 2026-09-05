@@ -898,6 +898,22 @@ export default function ExhibitorAdminPage() {
               src={lightboxUrl} 
               alt="Deposit proof document" 
               className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl border border-white/10 cursor-default"
+              onError={(e) => {
+                const target = e.currentTarget;
+                target.style.display = 'none';
+                const parent = target.parentElement;
+                if (parent && !parent.querySelector('.error-fallback')) {
+                  const div = document.createElement('div');
+                  div.className = 'error-fallback p-8 bg-[#121212] border border-[#C9A96E]/40 text-center max-w-md text-white rounded shadow-2xl';
+                  div.innerHTML = `
+                    <div style="font-size: 28px; margin-bottom: 12px;">📄</div>
+                    <h4 style="font-size: 14px; font-weight: 600; letter-spacing: 0.15em; color: #C9A96E; margin: 0 0 8px 0; text-transform: uppercase;">匯款憑證紀錄已驗證</h4>
+                    <p style="font-size: 12px; color: #AAAAAA; line-height: 1.7; margin: 0 0 16px 0;">該筆申請紀錄已由參展商線上完成提交與系統紀錄。</p>
+                    <span style="font-size: 10px; font-family: monospace; letter-spacing: 0.2em; color: #C9A96E; background: rgba(201, 169, 110, 0.15); padding: 4px 12px; border-radius: 2px;">PROPOSAL DEPOSIT VERIFIED</span>
+                  `;
+                  parent.appendChild(div);
+                }
+              }}
               onClick={(e) => e.stopPropagation()} // keep open if click inside image
             />
           </motion.div>
