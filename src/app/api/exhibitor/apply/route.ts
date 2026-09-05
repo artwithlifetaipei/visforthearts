@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ success: false, error: '缺少必要欄位（含聯繫地址）' }, { status: 400 });
     }
 
-    let deposit_proof_url = '';
+    let deposit_proof_url = deposit_proof_base64 || '';
 
     // Handle base64 image upload to Supabase Storage
     if (deposit_proof_base64 && deposit_proof_filename) {

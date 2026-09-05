@@ -187,6 +187,37 @@ export default function ExhibitorAdminPage() {
     }
   };
 
+  const handleUploadProofForApp = async (appId: string, e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      alert('請選擇圖片檔案 (JPG / PNG / WEBP)');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64Url = reader.result as string;
+      try {
+        const { error } = await supabase
+          .from('exhibitor_applications')
+          .update({ deposit_proof_url: base64Url })
+          .eq('id', appId);
+
+        if (error) {
+          alert(`更換憑證失敗: ${error.message}`);
+        } else {
+          alert('✅ 憑證圖片已成功更新！');
+          loadAllAdminData();
+        }
+      } catch (err: any) {
+        alert(`更換憑證異常: ${err.message}`);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   const getCurrentPreferenceNum = (app: any) => {
     for (const num of [1, 2, 3]) {
       const prefStr = num === 1 ? app.zone_preference_1 :
@@ -549,16 +580,27 @@ export default function ExhibitorAdminPage() {
                                 <span className="text-[10px] text-neutral-400">{zone?.nameZh}</span>
                               </td>
                               <td className="p-4 font-light">
-                                {app.deposit_proof_url ? (
-                                  <button
-                                    onClick={() => setLightboxUrl(app.deposit_proof_url)}
-                                    className="text-[#DFBA87] hover:underline flex items-center gap-1"
-                                  >
-                                    <Eye className="w-3.5 h-3.5" /> 檢視憑證 Image
-                                  </button>
-                                ) : (
-                                  <span className="text-rose-400">未上傳</span>
-                                )}
+                                <div className="flex items-center gap-2">
+                                  {app.deposit_proof_url && !app.deposit_proof_url.startsWith('/uploads/mock_deposit_') ? (
+                                    <button
+                                      onClick={() => setLightboxUrl(app.deposit_proof_url)}
+                                      className="text-[#DFBA87] hover:underline flex items-center gap-1"
+                                    >
+                                      <Eye className="w-3.5 h-3.5" /> 檢視憑證
+                                    </button>
+                                  ) : (
+                                    <span className="text-amber-400/80 text-[10px]">舊紀錄無原圖</span>
+                                  )}
+                                  <label className="text-[10px] text-[#DFBA87] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 border border-[#DFBA87]/30 px-2 py-0.5 rounded cursor-pointer transition-colors inline-flex items-center gap-1">
+                                    📷 上傳/更換
+                                    <input 
+                                      type="file" 
+                                      accept="image/*" 
+                                      className="hidden" 
+                                      onChange={(e) => handleUploadProofForApp(app.id, e)} 
+                                    />
+                                  </label>
+                                </div>
                               </td>
                               <td className="p-4">
                                 <span className={`
