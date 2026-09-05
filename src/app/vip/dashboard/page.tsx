@@ -388,6 +388,20 @@ export default function VIPDashboard() {
                 </motion.button>
             </section>
 
+            {/* VIP Access & Entry Notice Card */}
+            <section className="px-6 mt-6 relative z-10">
+                <div className="bg-white/40 border border-[#DFBA87]/30 p-5 rounded-none backdrop-blur-md text-left">
+                    <h4 className="text-[10px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-2.5">
+                        尊榮貴賓入場與權益維護須知 Notice
+                    </h4>
+                    <ul className="text-[10px] text-neutral-600 space-y-1.5 leading-relaxed font-light">
+                        <li>• <strong>個人專屬不可轉讓</strong>：本數位憑證為貴賓專屬權益開通，嚴禁轉傳、重製或轉讓他人使用。</li>
+                        <li>• <strong>單一時段單次核銷</strong>：為維護展場觀展品質與安全，同一帳號於單一時段限單次掃碼入場，無法重複核銷。</li>
+                        <li>• <strong>登入身份永久保留</strong>：本門戶已為您個人開通專屬權益，登入後系統將自動為您保留貴賓身份。</li>
+                    </ul>
+                </div>
+            </section>
+
             {/* Admin-only CRM link — visible only to admin accounts */}
             {ADMIN_EMAILS.includes(profile.email ?? '') && (
                 <div className="px-6 mt-6 relative z-10">
