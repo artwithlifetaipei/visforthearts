@@ -377,7 +377,7 @@ export default function ExhibitorApplyPage() {
     });
   };
 
-  // Convert image to base64
+  // Convert image to base64 with auto-compression
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -387,19 +387,53 @@ export default function ExhibitorApplyPage() {
       return;
     }
 
-    if (file.size > 2 * 1024 * 1024) {
-      alert(lang === 'zh' ? '檔案不能超過 2MB (為確保連線穩定並防止後台逾時，請將圖片壓縮至 2MB 以下)' : 'File size cannot exceed 2MB. Please compress your image.');
+    if (file.size > 15 * 1024 * 1024) {
+      alert(lang === 'zh' ? '檔案不能超過 15MB' : 'File size cannot exceed 15MB.');
       return;
     }
 
     const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreviewImage(reader.result as string);
-      setFormData(prev => ({
-        ...prev,
-        deposit_proof_base64: reader.result as string,
-        deposit_proof_filename: file.name,
-      }));
+    reader.onload = (event) => {
+      const rawDataUrl = event.target?.result as string;
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX_DIM = 1600;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > MAX_DIM) {
+            height = Math.round((height * MAX_DIM) / width);
+            width = MAX_DIM;
+          }
+        } else {
+          if (height > MAX_DIM) {
+            width = Math.round((width * MAX_DIM) / height);
+            height = MAX_DIM;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx?.drawImage(img, 0, 0, width, height);
+        const compressedBase64 = canvas.toDataURL('image/jpeg', 0.88);
+
+        setPreviewImage(compressedBase64);
+        setFormData(prev => ({
+          ...prev,
+          deposit_proof_base64: compressedBase64,
+          deposit_proof_filename: file.name.replace(/\.[^/.]+$/, "") + ".jpg",
+        }));
+      };
+      img.onerror = () => {
+        setPreviewImage(rawDataUrl);
+        setFormData(prev => ({
+          ...prev,
+          deposit_proof_base64: rawDataUrl,
+          deposit_proof_filename: file.name,
+        }));
+      };
+      img.src = rawDataUrl;
     };
     reader.readAsDataURL(file);
   };

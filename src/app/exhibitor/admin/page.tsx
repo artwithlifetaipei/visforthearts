@@ -75,13 +75,8 @@ export default function ExhibitorAdminPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'applications' | 'vip' | 'compliance' | 'media'>('applications');
 
-  // Database States — initialized from sessionStorage cache for instant re-load
-  const [applications, setApplications] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try { const c = sessionStorage.getItem('vis_admin_applications'); return c ? JSON.parse(c) : []; } catch { return []; }
-    }
-    return [];
-  });
+  // Database States
+  const [applications, setApplications] = useState<any[]>([]);
   const [vipList, setVipList] = useState<any[]>(() => {
     if (typeof window !== 'undefined') {
       try { const c = sessionStorage.getItem('vis_admin_viplist'); return c ? JSON.parse(c) : []; } catch { return []; }
@@ -105,15 +100,14 @@ export default function ExhibitorAdminPage() {
   const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [expandedAppId, setExpandedAppId] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
-  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [lightboxApp, setLightboxApp] = useState<any | null>(null);
+  const [mediaLightboxUrl, setMediaLightboxUrl] = useState<string | null>(null);
   const [selectedPrefs, setSelectedPrefs] = useState<Record<string, number>>({});
 
   // Authenticate Admin
   useEffect(() => {
     const checkAdmin = async () => {
-      // If we already have cached data, show UI immediately (isLoading=true only on cold start)
-      const hasCachedData = typeof window !== 'undefined' && !!sessionStorage.getItem('vis_admin_applications');
-      if (!hasCachedData) setIsLoading(true);
+      setIsLoading(true);
 
       const { data: { session } } = await supabase.auth.getSession();
       
@@ -174,9 +168,8 @@ export default function ExhibitorAdminPage() {
       setComplianceList(complianceData);
       setMediaAssets(mediaData);
 
-      // Cache results in sessionStorage for instant next-visit load
+      // Cache non-application states in sessionStorage
       try {
-        sessionStorage.setItem('vis_admin_applications', JSON.stringify(appData));
         sessionStorage.setItem('vis_admin_viplist', JSON.stringify(vipData));
         sessionStorage.setItem('vis_admin_compliance', JSON.stringify(complianceData));
         sessionStorage.setItem('vis_admin_media', JSON.stringify(mediaData));
@@ -196,26 +189,60 @@ export default function ExhibitorAdminPage() {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = async () => {
-      const base64Url = reader.result as string;
-      try {
-        const { error } = await supabase
-          .from('exhibitor_applications')
-          .update({ deposit_proof_url: base64Url })
-          .eq('id', appId);
-
-        if (error) {
-          alert(`更換憑證失敗: ${error.message}`);
-        } else {
-          alert('✅ 憑證圖片已成功更新！');
-          loadAllAdminData();
-        }
-      } catch (err: any) {
-        alert(`更換憑證異常: ${err.message}`);
-      }
+    // Client-side compression to avoid giant base64 payloads
+    const compressImage = (f: File): Promise<string> => {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          const img = new Image();
+          img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_DIM = 1600;
+            let width = img.width;
+            let height = img.height;
+            if (width > height) {
+              if (width > MAX_DIM) {
+                height = Math.round((height * MAX_DIM) / width);
+                width = MAX_DIM;
+              }
+            } else {
+              if (height > MAX_DIM) {
+                width = Math.round((width * MAX_DIM) / height);
+                height = MAX_DIM;
+              }
+            }
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx?.drawImage(img, 0, 0, width, height);
+            resolve(canvas.toDataURL('image/jpeg', 0.88));
+          };
+          img.onerror = () => resolve(event.target?.result as string);
+          img.src = event.target?.result as string;
+        };
+        reader.onerror = (err) => reject(err);
+        reader.readAsDataURL(f);
+      });
     };
-    reader.readAsDataURL(file);
+
+    try {
+      const base64Url = await compressImage(file);
+      const { error } = await supabase
+        .from('exhibitor_applications')
+        .update({ deposit_proof_url: base64Url })
+        .eq('id', appId);
+
+      if (error) {
+        alert(`更換憑證失敗: ${error.message}`);
+      } else {
+        alert('✅ 憑證圖片已成功更新！');
+        // Instantly update local table and modal state
+        setApplications(prev => prev.map(a => a.id === appId ? { ...a, deposit_proof_url: base64Url } : a));
+        setLightboxApp((prev: any) => prev && prev.id === appId ? { ...prev, deposit_proof_url: base64Url } : prev);
+      }
+    } catch (err: any) {
+      alert(`更換憑證異常: ${err.message}`);
+    }
   };
 
   const getCurrentPreferenceNum = (app: any) => {
@@ -581,15 +608,15 @@ export default function ExhibitorAdminPage() {
                               </td>
                               <td className="p-4 font-light">
                                 <div className="flex items-center gap-2">
-                                  {app.deposit_proof_url && !app.deposit_proof_url.startsWith('/uploads/mock_deposit_') ? (
+                                  {app.deposit_proof_url ? (
                                     <button
-                                      onClick={() => setLightboxUrl(app.deposit_proof_url)}
-                                      className="text-[#DFBA87] hover:underline flex items-center gap-1"
+                                      onClick={() => setLightboxApp(app)}
+                                      className="text-[#DFBA87] hover:underline flex items-center gap-1 font-medium"
                                     >
                                       <Eye className="w-3.5 h-3.5" /> 檢視憑證
                                     </button>
                                   ) : (
-                                    <span className="text-amber-400/80 text-[10px]">舊紀錄無原圖</span>
+                                    <span className="text-amber-400/80 text-[10px]">無憑證</span>
                                   )}
                                   <label className="text-[10px] text-[#DFBA87] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 border border-[#DFBA87]/30 px-2 py-0.5 rounded cursor-pointer transition-colors inline-flex items-center gap-1">
                                     📷 上傳/更換
@@ -706,6 +733,70 @@ export default function ExhibitorAdminPage() {
                                       <div>
                                         <h4 className="text-[#DFBA87] font-semibold uppercase tracking-wider mb-1">參展核心概念 Concept Brief</h4>
                                         <p className="bg-[#0A0A0A] border border-white/5 p-3 rounded text-neutral-400 leading-relaxed font-sans">{app.concept_brief || '未填寫'}</p>
+                                      </div>
+
+                                      {/* Remittance Proof Card */}
+                                      <div>
+                                        <h4 className="text-[#DFBA87] font-semibold uppercase tracking-wider mb-2 flex items-center justify-between">
+                                          <span>保證金匯款憑證 (Remittance Proof)</span>
+                                          <span className="text-[10px] text-emerald-400 font-mono">履約保證金 NT$ 20,000</span>
+                                        </h4>
+                                        {app.deposit_proof_url ? (
+                                          <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-3 flex items-center gap-4">
+                                            <img 
+                                              src={app.deposit_proof_url} 
+                                              alt={`【${app.brand_name_zh}】匯款憑證`} 
+                                              className="w-24 h-32 object-contain bg-white/5 rounded border border-white/10 cursor-pointer hover:opacity-90 transition-opacity"
+                                              onClick={() => setLightboxApp(app)}
+                                            />
+                                            <div className="space-y-2">
+                                              <div className="text-xs text-neutral-300 font-medium">
+                                                參展商已上傳正式保證金匯款證明
+                                              </div>
+                                              <div className="text-[11px] text-neutral-400 font-mono">
+                                                申請品牌：{app.brand_name_zh} ({app.brand_name_en})
+                                              </div>
+                                              <div className="flex gap-2 pt-1">
+                                                <button
+                                                  onClick={() => setLightboxApp(app)}
+                                                  className="text-[11px] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 text-[#DFBA87] border border-[#DFBA87]/30 px-3 py-1 rounded transition-colors flex items-center gap-1.5 font-medium"
+                                                >
+                                                  <Eye className="w-3 h-3" /> 檢視高清大圖
+                                                </button>
+                                                <a
+                                                  href={`/api/exhibitor/proof?id=${app.id}`}
+                                                  target="_blank"
+                                                  rel="noreferrer"
+                                                  className="text-[11px] bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 px-2.5 py-1 rounded transition-colors flex items-center gap-1"
+                                                >
+                                                  <ExternalLink className="w-3 h-3" /> 新分頁開啟
+                                                </a>
+                                                <label className="text-[11px] text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-1">
+                                                  📷 更換
+                                                  <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    className="hidden" 
+                                                    onChange={(e) => handleUploadProofForApp(app.id, e)} 
+                                                  />
+                                                </label>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 text-center">
+                                            <p className="text-neutral-500 text-xs mb-2">尚未上傳匯款憑證</p>
+                                            <label className="text-xs text-[#DFBA87] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 border border-[#DFBA87]/30 px-3 py-1 rounded cursor-pointer transition-colors inline-flex items-center gap-1">
+                                              📷 補登/上傳匯款憑證
+                                              <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                className="hidden" 
+                                                onChange={(e) => handleUploadProofForApp(app.id, e)} 
+                                              />
+                                            </label>
+                                          </div>
+                                        )}
                                       </div>
 
                                       {/* Action Triggers */}
@@ -896,7 +987,7 @@ export default function ExhibitorAdminPage() {
                     <div 
                       key={asset.id} 
                       className="border border-white/5 bg-white/[0.01] rounded-lg overflow-hidden group hover:border-[#C9A96E]/30 transition-all cursor-pointer"
-                      onClick={() => setLightboxUrl(asset.file_url)}
+                      onClick={() => setMediaLightboxUrl(asset.file_url)}
                     >
                       <div className="aspect-[4/3] overflow-hidden bg-neutral-900">
                         <img 
@@ -922,41 +1013,123 @@ export default function ExhibitorAdminPage() {
 
       {/* Lightbox / Modal for Deposit Proof image review */}
       <AnimatePresence>
-        {lightboxUrl && (
+        {lightboxApp && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-3 md:p-6"
+            onClick={() => setLightboxApp(null)}
+          >
+            <div 
+              className="bg-[#121212] border border-white/10 rounded-xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Top Bar */}
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-white/[0.02]">
+                <div className="min-w-0 pr-4">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-white tracking-wide truncate">
+                      【{lightboxApp.brand_name_zh}】保證金匯款憑證審查
+                    </span>
+                    <span className="text-[10px] font-mono text-[#DFBA87] bg-[#DFBA87]/10 border border-[#DFBA87]/30 px-2 py-0.5 rounded">
+                      NT$ 20,000
+                    </span>
+                  </div>
+                  <div className="text-xs text-neutral-400 font-mono mt-0.5 truncate">
+                    {lightboxApp.brand_name_en} • 聯繫人：{lightboxApp.contact_name} ({lightboxApp.contact_email}) • 展位：{lightboxApp.booth_type}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {lightboxApp.deposit_proof_url && (
+                    <>
+                      <a
+                        href={`/api/exhibitor/proof?id=${lightboxApp.id}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-xs bg-white/5 hover:bg-white/15 text-neutral-300 px-3 py-1.5 rounded transition-all flex items-center gap-1.5 border border-white/10"
+                        title="在新分頁檢視原始大圖"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" /> 開啟原圖
+                      </a>
+                      <a
+                        href={`/api/exhibitor/proof?id=${lightboxApp.id}`}
+                        download={`匯款憑證_${lightboxApp.brand_name_zh}_2027.png`}
+                        className="text-xs bg-white/5 hover:bg-white/15 text-neutral-300 px-3 py-1.5 rounded transition-all flex items-center gap-1.5 border border-white/10"
+                        title="下載原始圖檔"
+                      >
+                        <Download className="w-3.5 h-3.5" /> 下載
+                      </a>
+                    </>
+                  )}
+                  <label className="text-xs text-[#DFBA87] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 border border-[#DFBA87]/30 px-3 py-1.5 rounded cursor-pointer transition-colors flex items-center gap-1.5">
+                    📷 更換圖檔
+                    <input 
+                      type="file" 
+                      accept="image/*" 
+                      className="hidden" 
+                      onChange={(e) => handleUploadProofForApp(lightboxApp.id, e)} 
+                    />
+                  </label>
+                  <button 
+                    className="text-neutral-400 hover:text-white rounded-full p-1.5 transition-colors ml-1"
+                    onClick={() => setLightboxApp(null)}
+                  >
+                    <XCircle className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Modal Image Body */}
+              <div className="flex-1 overflow-auto p-4 md:p-6 flex items-center justify-center bg-[#090909] min-h-[360px]">
+                {lightboxApp.deposit_proof_url ? (
+                  <img 
+                    src={lightboxApp.deposit_proof_url} 
+                    alt={`【${lightboxApp.brand_name_zh}】保證金匯款憑證`}
+                    className="max-w-full max-h-[72vh] object-contain rounded-lg shadow-2xl border border-white/10 cursor-default"
+                  />
+                ) : (
+                  <div className="text-center p-8 text-neutral-400">
+                    <p className="text-sm mb-3">此申請尚未上傳匯款憑證</p>
+                    <label className="text-xs text-[#DFBA87] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 border border-[#DFBA87]/30 px-3 py-1.5 rounded cursor-pointer transition-colors inline-flex items-center gap-1.5">
+                      📷 立即上傳憑證
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        className="hidden" 
+                        onChange={(e) => handleUploadProofForApp(lightboxApp.id, e)} 
+                      />
+                    </label>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Media Assets Lightbox */}
+      <AnimatePresence>
+        {mediaLightboxUrl && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 cursor-zoom-out"
-            onClick={() => setLightboxUrl(null)}
+            onClick={() => setMediaLightboxUrl(null)}
           >
             <button 
               className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2"
-              onClick={() => setLightboxUrl(null)}
+              onClick={() => setMediaLightboxUrl(null)}
             >
               <XCircle className="w-6 h-6" />
             </button>
             <img 
-              src={lightboxUrl} 
-              alt="Deposit proof document" 
-              className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl border border-white/10 cursor-default"
-              onError={(e) => {
-                const target = e.currentTarget;
-                target.style.display = 'none';
-                const parent = target.parentElement;
-                if (parent && !parent.querySelector('.error-fallback')) {
-                  const div = document.createElement('div');
-                  div.className = 'error-fallback p-8 bg-[#121212] border border-[#C9A96E]/40 text-center max-w-md text-white rounded shadow-2xl';
-                  div.innerHTML = `
-                    <div style="font-size: 28px; margin-bottom: 12px;">📄</div>
-                    <h4 style="font-size: 14px; font-weight: 600; letter-spacing: 0.15em; color: #C9A96E; margin: 0 0 8px 0; text-transform: uppercase;">匯款憑證紀錄已驗證</h4>
-                    <p style="font-size: 12px; color: #AAAAAA; line-height: 1.7; margin: 0 0 16px 0;">該筆申請紀錄已由參展商線上完成提交與系統紀錄。</p>
-                    <span style="font-size: 10px; font-family: monospace; letter-spacing: 0.2em; color: #C9A96E; background: rgba(201, 169, 110, 0.15); padding: 4px 12px; border-radius: 2px;">PROPOSAL DEPOSIT VERIFIED</span>
-                  `;
-                  parent.appendChild(div);
-                }
-              }}
-              onClick={(e) => e.stopPropagation()} // keep open if click inside image
+              src={mediaLightboxUrl} 
+              alt="Media Asset" 
+              className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl border border-white/10"
+              onClick={(e) => e.stopPropagation()}
             />
           </motion.div>
         )}

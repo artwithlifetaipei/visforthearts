@@ -160,6 +160,13 @@ export async function POST(request: NextRequest) {
         const adminEmails = adminEmailsStr.split(',').map(e => e.trim()).filter(Boolean);
         if (adminEmails.length === 0) adminEmails.push('artwithlifetaipei@gmail.com');
 
+        const appRecordId = insertedData?.id || '';
+        const siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.visforthearts.com';
+        const proofViewUrl = appRecordId 
+          ? `${siteBaseUrl}/api/exhibitor/proof?id=${appRecordId}` 
+          : (deposit_proof_url.startsWith('http') ? deposit_proof_url : `${siteBaseUrl}/exhibitor/admin`);
+        const adminPortalUrl = `${siteBaseUrl}/exhibitor/admin`;
+
         const subject = `【新參展申請通知】${brand_name_zh} / ${brand_name_en} 已送出參展申請`;
         const htmlContent = `
           <div style="max-width: 620px; margin: 0 auto; padding: 40px 20px; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #FAF9F6; color: #1A1A1A;">
@@ -255,12 +262,26 @@ export async function POST(request: NextRequest) {
               </table>
 
               <div style="background-color: #FAF9F6; border: 1px solid rgba(201, 169, 110, 0.25); padding: 24px; text-align: center; margin-top: 10px;">
-                <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #8C7853; text-transform: uppercase; margin-top: 0; margin-bottom: 12px;">
+                <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #8C7853; text-transform: uppercase; margin-top: 0; margin-bottom: 14px;">
                   04. 保證金匯款憑證審查 (Payment Proof)
                 </p>
                 ${
                   deposit_proof_url 
-                    ? `<a href="${deposit_proof_url}" target="_blank" style="background-color: #0D0D0D; color: #FFFFFF; text-decoration: none; padding: 12px 28px; font-size: 11px; font-weight: 600; letter-spacing: 0.25em; text-transform: uppercase; display: inline-block; border-radius: 2px;">檢視憑證圖片 VIEW PROOF</a>`
+                    ? `
+                      <div style="margin-bottom: 18px;">
+                        <a href="${proofViewUrl}" target="_blank" style="display: inline-block; text-decoration: none;">
+                          <img src="${proofViewUrl}" alt="匯款憑證" style="max-width: 260px; max-height: 220px; width: auto; height: auto; object-fit: contain; border-radius: 6px; border: 1px solid #E2E8F0; box-shadow: 0 4px 12px rgba(0,0,0,0.08); display: block; margin: 0 auto;" />
+                        </a>
+                      </div>
+                      <div style="text-align: center;">
+                        <a href="${proofViewUrl}" target="_blank" style="background-color: #0D0D0D; color: #FFFFFF; text-decoration: none; padding: 12px 24px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; display: inline-block; border-radius: 2px; margin: 4px;">
+                          檢視憑證完整大圖 VIEW PROOF
+                        </a>
+                        <a href="${adminPortalUrl}" target="_blank" style="background-color: #8C7853; color: #FFFFFF; text-decoration: none; padding: 12px 24px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; display: inline-block; border-radius: 2px; margin: 4px;">
+                          前往後台審核 GO TO ADMIN
+                        </a>
+                      </div>
+                    `
                     : '<span style="font-size: 12px; color: #999;">參展商未上傳憑證圖片</span>'
                 }
               </div>
