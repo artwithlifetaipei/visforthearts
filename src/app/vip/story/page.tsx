@@ -218,7 +218,7 @@ export default function ZodiacStoryPage() {
                             className="h-10 mx-auto brightness-0 invert opacity-80"
                             alt="VIS Logo"
                         />
-                        <p className="text-[6.5px] tracking-[0.4em] uppercase text-white/30 mt-1.5 font-light">FOR THE ARTS</p>
+                        <p className="text-[6.5px] tracking-[0.4em] uppercase text-white/30 mt-1.5 font-light">CONTEMPORARY CULTURE</p>
                     </div>
 
                     {/* Subtle paper texture overlay */}
