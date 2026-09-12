@@ -348,7 +348,55 @@ export async function POST(request: NextRequest) {
           </div>
         `;
 
-        // 1. Try Resend API if available
+        // 1. Prioritize Gmail SMTP (Primary and standard across VIS platform)
+        const gmailUser = process.env.GMAIL_USER;
+        const gmailAppPassword = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, '');
+        if (gmailUser && gmailAppPassword) {
+          const transporter = nodemailer.createTransport({
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
+            auth: {
+              user: gmailUser,
+              pass: gmailAppPassword,
+            },
+            connectionTimeout: 10000,
+            greetingTimeout: 10000,
+            socketTimeout: 15000,
+          });
+
+          const tasks: Promise<any>[] = [
+            transporter.sendMail({
+              from: `"VIS System Notification" <${gmailUser}>`,
+              to: adminEmails.join(', '),
+              subject,
+              html: htmlContent,
+            })
+          ];
+
+          if (contact_email) {
+            tasks.push(
+              transporter.sendMail({
+                from: `"VIS Contemporary Culture" <${gmailUser}>`,
+                to: contact_email,
+                subject: confirmSubject,
+                html: exhibitorConfirmHtml,
+              })
+            );
+          }
+
+          const results = await Promise.allSettled(tasks);
+          results.forEach((r, idx) => {
+            if (r.status === 'rejected') {
+              console.error(`Email delivery error for task ${idx}:`, r.reason);
+            } else {
+              console.log(`Notification/Confirmation email ${idx} sent successfully via Gmail.`);
+            }
+          });
+          return;
+        }
+
+        // 2. Fallback: Resend API if available
         const resendApiKey = process.env.RESEND_API_KEY;
         if (resendApiKey) {
           const resend = new Resend(resendApiKey);
@@ -370,39 +418,7 @@ export async function POST(request: NextRequest) {
           return;
         }
 
-        // 2. Try Gmail App Password if available
-        const gmailUser = process.env.GMAIL_USER;
-        const gmailAppPassword = process.env.GMAIL_APP_PASSWORD;
-        if (gmailUser && gmailAppPassword) {
-          const transporter = nodemailer.createTransport({
-            service: 'gmail',
-            auth: {
-              user: gmailUser,
-              pass: gmailAppPassword,
-            },
-          });
-
-          await transporter.sendMail({
-            from: `"VIS System Notification" <${gmailUser}>`,
-            to: adminEmails.join(', '),
-            subject,
-            html: htmlContent,
-          });
-
-          if (contact_email) {
-            await transporter.sendMail({
-              from: `"VIS Contemporary Culture" <${gmailUser}>`,
-              to: contact_email,
-              subject: confirmSubject,
-              html: exhibitorConfirmHtml,
-            });
-          }
-
-          console.log(`Notification & Confirmation emails sent via Gmail.`);
-          return;
-        }
-
-        // 3. Try custom SMTP if configured
+        // 3. Fallback: custom SMTP if configured
         const smtpHost = process.env.SMTP_HOST;
         const smtpPort = process.env.SMTP_PORT || '587';
         const smtpUser = process.env.SMTP_USER;
@@ -428,14 +444,18 @@ export async function POST(request: NextRequest) {
           return;
         }
 
-        console.warn('No active email provider credentials (RESEND_API_KEY, GMAIL_USER/APP_PASSWORD, or SMTP_HOST) found in environment. Email dispatch skipped.');
+        console.warn('No active email provider credentials (GMAIL_USER/APP_PASSWORD, RESEND_API_KEY, or SMTP_HOST) found in environment. Email dispatch skipped.');
       } catch (mailError) {
         console.error('Failed to send admin notification email:', mailError);
       }
     };
 
-    // 背景背景執行發信，絕不阻塞前端響應
-    sendAdminNotification();
+    // 等候發信完成，確保 Serverless Lambda 在關閉前完整送出信件（不阻塞錯誤回傳）
+    try {
+      await sendAdminNotification();
+    } catch (e) {
+      console.error('sendAdminNotification uncaught exception:', e);
+    }
 
     return NextResponse.json({ 
       success: true, 
