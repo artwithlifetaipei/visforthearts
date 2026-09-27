@@ -969,9 +969,16 @@ export default function ExhibitorApplyPage() {
                       className="w-full h-auto block"
                     />
                   </div>
-                  <p className="text-[10px] text-[#0D0D0D]/75 font-normal mt-2.5 text-center">
-                    {lang === 'zh' ? '備註：所有金額皆為未稅價格。' : 'Notice: All prices are exclusive of tax.'}
-                  </p>
+                  <div className="mt-3.5 space-y-1.5 text-center">
+                    <p className="text-xs md:text-sm text-[#8C7853] font-medium tracking-wide">
+                      {lang === 'zh' 
+                        ? '＊備註：咖色覆蓋展位，皆為大會預先特選保留位，不開放勾選。' 
+                        : '* Note: Booths highlighted in brown are pre-curated reserved booths by the committee and are not available for selection.'}
+                    </p>
+                    <p className="text-[10px] text-[#0D0D0D]/60 font-normal">
+                      {lang === 'zh' ? '備註：所有金額皆為未稅價格。' : 'Notice: All prices are exclusive of tax.'}
+                    </p>
+                  </div>
                 </div>
 
                 {/* Specifications & Inclusions */}

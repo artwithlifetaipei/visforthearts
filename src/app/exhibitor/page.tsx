@@ -878,7 +878,12 @@ export default function ExhibitorLandingPage() {
               className="w-full h-auto block"
             />
           </div>
-          <p className="text-xs text-[#0D0D0D]/60 text-center mt-4 font-serif-garamond italic">
+          <p className="text-xs md:text-sm text-[#8C7853] font-medium text-center mt-4 tracking-wide">
+            {lang === 'zh' 
+              ? '＊備註：咖色覆蓋展位，皆為大會預先特選保留位，不開放勾選。' 
+              : '* Note: Booths highlighted in brown are pre-curated reserved booths by the committee and are not available for selection.'}
+          </p>
+          <p className="text-xs text-[#0D0D0D]/60 text-center mt-2 font-serif-garamond italic">
             {lang === 'zh' 
               ? '* 配置說明：包含三大展區——明日經典展區 (A01-A03)、文化實體展區 (A04-A05)、匠心藝藏展區 (L1-L7)' 
               : '* Layout Note: Includes Future Classics (A01-A03), Cultural Entities (A04-A05), and Designer & Atelier (L1-L7)'}
