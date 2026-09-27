@@ -757,7 +757,7 @@ export default function ExhibitorLandingPage() {
               </button>
             )}
             <a 
-              href="https://drive.google.com/drive/folders/1UJdWvZ7OFZSB1YaSYcMieM0wRmF9TGUK?usp=drive_link"
+              href="https://drive.google.com/file/d/1MGj1MLLeMvV6mf7wyRDb800BfMYZBkdW/view?usp=sharing"
               target="_blank"
               rel="noopener noreferrer"
               className="btn-pola-outline flex-1"
