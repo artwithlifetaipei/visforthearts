@@ -341,6 +341,7 @@ export default function ExhibitorAdminPage() {
   };
 
   // Action: Approve Application
+  // Action: Approve Application
   const handleApproveApplication = async (app: any) => {
     if (actionLoadingId) return;
     setActionLoadingId(app.id);
@@ -368,61 +369,39 @@ export default function ExhibitorAdminPage() {
         chosenBoothType = 'MAKING-PROJECT';
       }
 
-      // 1. Update status in exhibitor_applications
-      const { error: appErr } = await supabase
-        .from('exhibitor_applications')
-        .update({ 
-          status: 'approved', 
-          deposit_paid: true,
-          zone_id: chosenZoneId,
-          booth_type: chosenBoothType
+      // 1. Get current admin session token
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      // 2. Call backend approval API to update DB, activate brand, and dispatch admission email
+      const res = await fetch('/api/exhibitor/approve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          applicationId: app.id,
+          zoneId: chosenZoneId,
+          boothType: chosenBoothType
         })
-        .eq('id', app.id);
+      });
 
-      if (appErr) throw appErr;
-
-      // 2. Create the brand portal record in exhibitor_brands
-      // Check if it already exists first
-      const { data: existingBrand } = await supabase
-        .from('exhibitor_brands')
-        .select('id')
-        .eq('application_id', app.id)
-        .maybeSingle();
-
-      if (!existingBrand) {
-        const isMicro = chosenBoothType === 'T';
-        const { error: brandErr } = await supabase
-          .from('exhibitor_brands')
-          .insert({
-            application_id: app.id,
-            brand_name_zh: app.brand_name_zh,
-            brand_name_en: app.brand_name_en,
-            zone_id: chosenZoneId,
-            booth_type: chosenBoothType,
-            is_micro_exposure: isMicro,
-            portal_email: app.contact_email.toLowerCase().trim(),
-          });
-        
-        if (brandErr) throw brandErr;
-      } else {
-        const isMicro = chosenBoothType === 'T';
-        const { error: brandErr } = await supabase
-          .from('exhibitor_brands')
-          .update({
-            zone_id: chosenZoneId,
-            booth_type: chosenBoothType,
-            is_micro_exposure: isMicro
-          })
-          .eq('application_id', app.id);
-
-        if (brandErr) throw brandErr;
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.error || '核准處理失敗');
       }
 
       await loadAllAdminData();
+
+      const emailNote = result.emailSent 
+        ? `\n\n✉️ 已成功寄送【正式入選核准通知電郵】至申請人信箱：\n${app.contact_email}`
+        : (result.emailError ? `\n\n⚠️ 電郵發送異常: ${result.emailError}` : '');
+
       if (isMaking) {
-        alert(`「${app.brand_name_zh}」造物計畫特展申請已審查通過！已核准特展席位，並已自動建立參展商協作帳號！`);
+        alert(`🎉「${app.brand_name_zh}」造物計畫特展申請已審查通過！\n\n✅ 已核准特展席位\n✅ 已自動開通參展商協作平台權限${emailNote}`);
       } else {
-        alert(`「${app.brand_name_zh}」申請已審查通過，已分配為您所選取的展位順位，並已自動建立/同步參展商協作帳號！`);
+        alert(`🎉「${app.brand_name_zh}」申請已審查通過！\n\n✅ 已分配展位順位 (${chosenBoothType})\n✅ 已自動開通參展商協作平台權限${emailNote}`);
       }
 
     } catch (err: any) {
