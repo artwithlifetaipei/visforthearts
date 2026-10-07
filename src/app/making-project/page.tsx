@@ -361,12 +361,40 @@ export default function MakingProjectPage() {
             <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Commission</span>
               <p className="text-sm font-medium text-[#0D0D0D]">現場銷售 0%</p>
-              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">不抽取任何交易佣金</span>
+              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">免抽成・自行收款</span>
             </div>
             <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
-              <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Passes</span>
-              <p className="text-sm font-medium text-[#0D0D0D]">參展證 & 貴賓卡</p>
-              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">專屬創作者通行資格</span>
+              <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Curation</span>
+              <p className="text-sm font-medium text-[#0D0D0D]">VIS 統一陳列</p>
+              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">大會規劃專屬展台</span>
+            </div>
+          </div>
+
+          {/* Curatorial & Operational Notice */}
+          <div className="mt-6 bg-white border border-[#C9A96E]/20 p-5 md:p-6 text-xs text-[#0D0D0D]/75 leading-relaxed grid md:grid-cols-3 gap-5">
+            <div>
+              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-1">
+                ✦ 展台規劃與陳列 Scenography
+              </p>
+              <p className="font-light text-[#0D0D0D]/80">
+                大會提供展示檯面，展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐陳列），營造高質感的當代工藝聚落。
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-1">
+                ✦ 現場展售與金流 Sales & Payment
+              </p>
+              <p className="font-light text-[#0D0D0D]/80">
+                現場銷售 0% 免抽成。由創作者/品牌自行於現場收款（創作者可自備現金、LINE Pay、個人刷卡機等），大會完全不經手交易款項。
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-1">
+                ✦ 現場駐點交流 Staffing
+              </p>
+              <p className="font-light text-[#0D0D0D]/80">
+                四天展期營業時間內，創作者或品牌代表需全程駐點，在場向藏家與觀眾解說創作脈絡、深度交流並親自經營品牌客戶。
+              </p>
             </div>
           </div>
         </header>
@@ -828,7 +856,7 @@ export default function MakingProjectPage() {
                           className="mt-1 w-4 h-4 accent-[#8C7853] rounded"
                         />
                         <span className="text-xs text-[#0D0D0D]/80 leading-relaxed">
-                          <strong>【參展費用與未錄取退款協議】</strong> 我同意為維護大展申請公正秩序，申請單位須於提交申請表之同時繳交參展費用新台幣 12,000 元整並附上匯款證明。<strong>若經評審委員會審查未獲錄取之單位，大會將於公告錄取名單後之 14 個工作日內，將參展費用 12,000 元整無息全額退還至原匯款帳戶</strong>（跨行手續費由退款金額中扣除）。
+                          <strong>【參展費用繳交與退款協議】</strong> 我同意為維護大展評審秩序，申請單位須於送出申請時繳交參展費用新台幣 12,000 元整並附上匯款證明。<strong>若經評審委員會審查未獲錄取之單位，大會將於公告錄取名單後 14 個工作日內，將參展費用 12,000 元整無息全額退還至原匯款帳戶</strong>；<strong>若通過評選獲得錄取，於錄取通知後 7 天內提出放棄者可扣除手續費退還 50% 參展費，逾期提出放棄者恕不予退款</strong>。
                         </span>
                       </label>
 
@@ -840,7 +868,7 @@ export default function MakingProjectPage() {
                           className="mt-1 w-4 h-4 accent-[#8C7853] rounded"
                         />
                         <span className="text-xs text-[#0D0D0D]/80 leading-relaxed">
-                          <strong>【原創造物與手作精神承諾】</strong> 我保證展出之作品均為創作者原創物件，符合「造物計畫」回歸物件本體、由人的手決定比例與觸感之核心理念，並同意遵守大會隱私權保護政策與個人資料收集聲明。
+                          <strong>【原創造物、統一陳列與現場駐點承諾】</strong> 我保證展出之作品均為創作者原創物件，符合「造物計畫」核心精神。我理解並同意<strong>展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐）</strong>，現場交易由品牌自行收款（免抽成 0%），且<strong>四天展期營業時間內創作者或品牌代表需全程駐點</strong>向觀眾解說、交流並自行維護展品，並遵守大會隱私權保護政策與個人資料聲明。
                         </span>
                       </label>
                     </div>

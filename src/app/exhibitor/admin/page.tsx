@@ -7,9 +7,18 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, FileText, Users, Image as ImageIcon, CheckCircle, XCircle, 
   Download, Eye, Mail, Phone, Globe, Calendar, ExternalLink, Loader2, RefreshCw, ChevronDown, ChevronUp,
-  Signature, FileCheck
+  Signature, FileCheck, Sparkles
 } from 'lucide-react';
 import { ZONE_MAP, ALL_ZONES } from '@/lib/exhibitorConstants';
+
+export const isMakingProjectApp = (app: any) => {
+  return (
+    app?.zone_id === 'making-project' ||
+    app?.booth_type === 'MAKING-PROJECT' ||
+    app?.booth_type?.includes('造物計畫') ||
+    (app?.zone_preference_1 && app?.zone_preference_1.includes('造物計畫'))
+  );
+};
 
 const parsePreference = (prefStr: string) => {
   if (!prefStr) return null;
@@ -73,7 +82,7 @@ export default function ExhibitorAdminPage() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'applications' | 'vip' | 'compliance' | 'media'>('applications');
+  const [activeTab, setActiveTab] = useState<'applications' | 'making-project' | 'vip' | 'compliance' | 'media'>('applications');
 
   // Database States
   const [applications, setApplications] = useState<any[]>([]);
@@ -327,20 +336,26 @@ export default function ExhibitorAdminPage() {
     setActionLoadingId(app.id);
 
     try {
-      const selectedPrefNum = selectedPrefs[app.id] || 1;
+      const isMaking = isMakingProjectApp(app);
       let chosenZoneId = app.zone_id;
       let chosenBoothType = app.booth_type;
 
-      const prefStr = selectedPrefNum === 1 ? app.zone_preference_1 :
-                      selectedPrefNum === 2 ? app.zone_preference_2 :
-                      app.zone_preference_3;
-      
-      if (prefStr) {
-        const parsed = parsePreference(prefStr);
-        if (parsed) {
-          chosenZoneId = parsed.zone_id;
-          chosenBoothType = parsed.booth_type;
+      if (!isMaking) {
+        const selectedPrefNum = selectedPrefs[app.id] || 1;
+        const prefStr = selectedPrefNum === 1 ? app.zone_preference_1 :
+                        selectedPrefNum === 2 ? app.zone_preference_2 :
+                        app.zone_preference_3;
+        
+        if (prefStr) {
+          const parsed = parsePreference(prefStr);
+          if (parsed) {
+            chosenZoneId = parsed.zone_id;
+            chosenBoothType = parsed.booth_type;
+          }
         }
+      } else {
+        chosenZoneId = 'artsy';
+        chosenBoothType = 'MAKING-PROJECT';
       }
 
       // 1. Update status in exhibitor_applications
@@ -394,7 +409,11 @@ export default function ExhibitorAdminPage() {
       }
 
       await loadAllAdminData();
-      alert(`「${app.brand_name_zh}」申請已審查通過，已分配為您所選取的展位順位，並已自動建立/同步參展商協作帳號！`);
+      if (isMaking) {
+        alert(`「${app.brand_name_zh}」造物計畫特展申請已審查通過！已核准特展席位，並已自動建立參展商協作帳號！`);
+      } else {
+        alert(`「${app.brand_name_zh}」申請已審查通過，已分配為您所選取的展位順位，並已自動建立/同步參展商協作帳號！`);
+      }
 
     } catch (err: any) {
       alert(`審核操作失敗: ${err.message}`);
@@ -458,13 +477,17 @@ export default function ExhibitorAdminPage() {
     document.body.removeChild(link);
   };
 
-  // Filtered Applications helper
-  const getFilteredApps = () => {
-    if (appFilter === 'all') return applications;
-    return applications.filter(a => a.status === appFilter);
-  };
+  // Split regular applications vs Making Project
+  const regularApplications = applications.filter(a => !isMakingProjectApp(a));
+  const makingProjectApplications = applications.filter(a => isMakingProjectApp(a));
 
-  const filteredApps = getFilteredApps();
+  const filteredRegularApps = appFilter === 'all' 
+    ? regularApplications 
+    : regularApplications.filter(a => a.status === appFilter);
+
+  const filteredMakingProjectApps = appFilter === 'all' 
+    ? makingProjectApplications 
+    : makingProjectApplications.filter(a => a.status === appFilter);
 
   if (isLoading) {
     return (
@@ -510,7 +533,8 @@ export default function ExhibitorAdminPage() {
         {/* Tab Menu */}
         <div className="flex border-b border-white/5 space-x-1 overflow-x-auto pb-px">
           {[
-            { id: 'applications' as const, label: '申請管理', icon: FileText, count: applications.length },
+            { id: 'applications' as const, label: '正規展位申請', icon: FileText, count: regularApplications.length },
+            { id: 'making-project' as const, label: '造物計畫專區', icon: Sparkles, count: makingProjectApplications.length },
             { id: 'vip' as const, label: 'VIP 名單匯總', icon: Users, count: vipList.length },
             { id: 'compliance' as const, label: '守則簽署狀態', icon: CheckCircle, count: complianceList.length },
             { id: 'media' as const, label: '媒體素材匯總', icon: ImageIcon, count: mediaAssets.length },
@@ -570,9 +594,9 @@ export default function ExhibitorAdminPage() {
               </div>
 
               {/* Applications Table */}
-              {filteredApps.length === 0 ? (
+              {filteredRegularApps.length === 0 ? (
                 <div className="text-center py-12 text-neutral-500 text-xs font-light">
-                  無符合篩選條件的參展申請案。
+                  無符合篩選條件的正規展位參展申請案。
                 </div>
               ) : (
                 <div className="border border-white/5 rounded overflow-x-auto">
@@ -588,7 +612,7 @@ export default function ExhibitorAdminPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {filteredApps.map((app) => {
+                      {filteredRegularApps.map((app) => {
                         const isExpanded = expandedAppId === app.id;
                         const zone = ZONE_MAP[app.zone_id as 'artsy' | 'premier' | 'atelier'];
                         
@@ -833,7 +857,314 @@ export default function ExhibitorAdminPage() {
             </div>
           )}
 
-          {/* TAB 2: VIP LIST MANAGER */}
+          {/* TAB 2: THE MAKING PROJECT MANAGER */}
+          {activeTab === 'making-project' && (
+            <div className="space-y-6">
+              {/* Header Stats */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 bg-white/[0.02] border border-white/5 p-4 rounded-lg">
+                <div>
+                  <span className="text-[10px] text-neutral-400 font-mono tracking-widest uppercase block">總申請件數 Total</span>
+                  <p className="text-xl font-mono font-bold text-white mt-0.5">{makingProjectApplications.length}</p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-amber-400 font-mono tracking-widest uppercase block">待審核件數 Pending</span>
+                  <p className="text-xl font-mono font-bold text-amber-400 mt-0.5">
+                    {makingProjectApplications.filter(a => a.status === 'pending').length}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-emerald-400 font-mono tracking-widest uppercase block">已核准錄取 Approved</span>
+                  <p className="text-xl font-mono font-bold text-emerald-400 mt-0.5">
+                    {makingProjectApplications.filter(a => a.status === 'approved').length}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-[10px] text-[#DFBA87] font-mono tracking-widest uppercase block">專案費用標準 Fee</span>
+                  <p className="text-sm font-semibold text-[#DFBA87] mt-1">NT$ 12,000 / 四天</p>
+                </div>
+              </div>
+
+              {/* Status Filters */}
+              <div className="flex gap-2 text-xs">
+                {[
+                  { id: 'all' as const, label: '全部' },
+                  { id: 'pending' as const, label: '待審核' },
+                  { id: 'approved' as const, label: '已通過' },
+                  { id: 'rejected' as const, label: '已拒絕' },
+                ].map((filter) => (
+                  <button
+                    key={filter.id}
+                    onClick={() => setAppFilter(filter.id)}
+                    className={`
+                      px-4 py-2 rounded transition-all
+                      ${appFilter === filter.id 
+                        ? 'bg-[#C9A96E] text-white' 
+                        : 'bg-white/5 text-neutral-400 hover:text-white'
+                      }
+                    `}
+                  >
+                    {filter.label}
+                  </button>
+                ))}
+              </div>
+
+              {/* Applications Table */}
+              {filteredMakingProjectApps.length === 0 ? (
+                <div className="text-center py-12 text-neutral-500 text-xs font-light">
+                  無符合篩選條件的「造物計畫」申請案。
+                </div>
+              ) : (
+                <div className="border border-white/5 rounded overflow-x-auto">
+                  <table className="w-full text-left border-collapse text-xs">
+                    <thead>
+                      <tr className="bg-white/[0.02] border-b border-white/5 text-neutral-400">
+                        <th className="p-4 font-semibold tracking-wide">品牌 / 創作者 (Brand & Maker)</th>
+                        <th className="p-4 font-semibold tracking-wide">媒材分類 / 席位</th>
+                        <th className="p-4 font-semibold tracking-wide">參展費用憑證</th>
+                        <th className="p-4 font-semibold tracking-wide">審核狀態</th>
+                        <th className="p-4 font-semibold tracking-wide">提交時間</th>
+                        <th className="p-4 font-semibold tracking-wide text-right">管理操作</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredMakingProjectApps.map((app) => {
+                        const isExpanded = expandedAppId === app.id;
+                        
+                        return (
+                          <>
+                            <tr 
+                              key={app.id} 
+                              className={`border-b border-white/5 hover:bg-white/[0.01] transition-colors ${isExpanded ? 'bg-white/[0.01]' : ''}`}
+                            >
+                              <td className="p-4 font-medium">
+                                <div className="text-white font-medium">{app.brand_name_zh}</div>
+                                <div className="text-[10px] text-neutral-400 font-mono mt-0.5">{app.brand_name_en}</div>
+                              </td>
+                              <td className="p-4 font-light">
+                                <span className="font-semibold block text-[#DFBA87]">造物計畫特展席位</span>
+                                <span className="text-[10px] text-neutral-400">
+                                  {app.zone_preference_1 || '原創造物類別'}
+                                </span>
+                              </td>
+                              <td className="p-4 font-light">
+                                <div className="flex items-center gap-2">
+                                  {app.deposit_proof_url ? (
+                                    <button
+                                      onClick={() => setLightboxApp(app)}
+                                      className="text-[#DFBA87] hover:underline flex items-center gap-1 font-medium"
+                                    >
+                                      <Eye className="w-3.5 h-3.5" /> 檢視憑證 (NT$ 12,000)
+                                    </button>
+                                  ) : (
+                                    <span className="text-amber-400/80 text-[10px]">無憑證</span>
+                                  )}
+                                  <label className="text-[10px] text-[#DFBA87] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 border border-[#DFBA87]/30 px-2 py-0.5 rounded cursor-pointer transition-colors inline-flex items-center gap-1">
+                                    📷 上傳/更換
+                                    <input 
+                                      type="file" 
+                                      accept="image/*" 
+                                      className="hidden" 
+                                      onChange={(e) => handleUploadProofForApp(app.id, e)} 
+                                    />
+                                  </label>
+                                </div>
+                              </td>
+                              <td className="p-4">
+                                <span className={`
+                                  text-[10px] font-semibold tracking-wider px-2 py-0.5 rounded border uppercase
+                                  ${app.status === 'approved' ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' : 
+                                    app.status === 'rejected' ? 'text-rose-400 bg-rose-500/10 border-rose-500/20' : 
+                                    'text-amber-400 bg-amber-500/10 border-amber-500/20'}
+                                `}>
+                                  {app.status === 'approved' ? '已核准' : app.status === 'rejected' ? '已駁回' : '審查中'}
+                                </span>
+                              </td>
+                              <td className="p-4 text-neutral-400 font-mono">
+                                {new Date(app.created_at).toLocaleDateString()}
+                              </td>
+                              <td className="p-4 text-right space-x-2">
+                                <button
+                                  onClick={() => setExpandedAppId(isExpanded ? null : app.id)}
+                                  className="text-neutral-400 hover:text-white p-1 rounded transition-colors inline-flex items-center"
+                                  title="展開詳情"
+                                >
+                                  {isExpanded ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                                </button>
+                              </td>
+                            </tr>
+
+                            {/* Expanded Detail view */}
+                            {isExpanded && (
+                              <tr className="bg-white/[0.005]">
+                                <td colSpan={6} className="p-6 border-b border-white/5">
+                                  <div className="grid md:grid-cols-2 gap-6 text-xs text-neutral-300 font-light">
+                                    {/* Left Column: Creator Information & Concept */}
+                                    <div className="space-y-4">
+                                      <div>
+                                        <h4 className="text-[#DFBA87] font-semibold uppercase tracking-wider mb-2">
+                                          01. 創作者與聯絡人資訊
+                                        </h4>
+                                        <div className="space-y-1.5 bg-white/[0.02] p-4 rounded-lg border border-white/5">
+                                          <div><strong className="text-neutral-400">品牌/創作者：</strong> {app.brand_name_zh} / {app.brand_name_en}</div>
+                                          <div><strong className="text-neutral-400">主要聯絡人：</strong> {app.contact_name}</div>
+                                          <div><strong className="text-neutral-400">電子信箱：</strong> <a href={`mailto:${app.contact_email}`} className="text-[#DFBA87] underline">{app.contact_email}</a></div>
+                                          <div><strong className="text-neutral-400">聯絡電話：</strong> {app.contact_phone}</div>
+                                          <div><strong className="text-neutral-400">通訊地址：</strong> {app.contact_address || '未提供'}</div>
+                                          <div><strong className="text-neutral-400">公司抬頭/統編：</strong> {app.company_name_zh || '個人創作'} {app.company_tax_id ? `(${app.company_tax_id})` : ''}</div>
+                                          {(app.website_url || app.instagram_url) && (
+                                            <div className="pt-1 flex gap-3 text-neutral-400">
+                                              {app.website_url && (
+                                                <a href={app.website_url} target="_blank" rel="noreferrer" className="text-[#DFBA87] hover:underline flex items-center gap-1">
+                                                  <Globe className="w-3 h-3" /> 官方網站
+                                                </a>
+                                              )}
+                                              {app.instagram_url && (
+                                                <a href={app.instagram_url} target="_blank" rel="noreferrer" className="text-[#DFBA87] hover:underline flex items-center gap-1">
+                                                  <ExternalLink className="w-3 h-3" /> Instagram
+                                                </a>
+                                              )}
+                                            </div>
+                                          )}
+                                        </div>
+                                      </div>
+
+                                      {/* Concept Brief */}
+                                      <div>
+                                        <h4 className="text-[#DFBA87] font-semibold uppercase tracking-wider mb-2">
+                                          02. 核心造物理念 (Brief)
+                                        </h4>
+                                        <div className="bg-white/[0.02] p-4 rounded-lg border border-white/5 leading-relaxed text-neutral-200 whitespace-pre-wrap">
+                                          {app.concept_brief || '未填寫造物理念簡述。'}
+                                        </div>
+                                      </div>
+                                    </div>
+
+                                    {/* Right Column: Fee Proof & Actions */}
+                                    <div className="space-y-4">
+                                      <div>
+                                        <h4 className="text-[#DFBA87] font-semibold uppercase tracking-wider mb-2 flex items-center justify-between">
+                                          <span>03. 參展費用匯款憑證 (Remittance Proof)</span>
+                                          <span className="text-[10px] text-emerald-400 font-mono">專案參展費 NT$ 12,000</span>
+                                        </h4>
+                                        {app.deposit_proof_url ? (
+                                          <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-3 flex items-center gap-4">
+                                            <img 
+                                              src={app.deposit_proof_url} 
+                                              alt={`【${app.brand_name_zh}】參展費憑證`} 
+                                              className="w-24 h-32 object-contain bg-white/5 rounded border border-white/10 cursor-pointer hover:opacity-90 transition-opacity"
+                                              onClick={() => setLightboxApp(app)}
+                                            />
+                                            <div className="space-y-2">
+                                              <div className="text-xs text-neutral-300 font-medium">
+                                                創作者已上傳 NT$ 12,000 參展費用匯款證明
+                                              </div>
+                                              <div className="text-[11px] text-neutral-400 font-mono">
+                                                申請品牌：{app.brand_name_zh} ({app.brand_name_en})
+                                              </div>
+                                              <div className="flex gap-2 pt-1">
+                                                <button
+                                                  onClick={() => setLightboxApp(app)}
+                                                  className="text-[11px] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 text-[#DFBA87] border border-[#DFBA87]/30 px-3 py-1 rounded transition-colors flex items-center gap-1.5 font-medium"
+                                                >
+                                                  <Eye className="w-3 h-3" /> 檢視高清大圖
+                                                </button>
+                                                <a
+                                                  href={`/api/exhibitor/proof?id=${app.id}`}
+                                                  target="_blank"
+                                                  rel="noreferrer"
+                                                  className="text-[11px] bg-white/5 hover:bg-white/10 text-neutral-300 border border-white/10 px-2.5 py-1 rounded transition-colors flex items-center gap-1"
+                                                >
+                                                  <ExternalLink className="w-3 h-3" /> 新分頁開啟
+                                                </a>
+                                                <label className="text-[11px] text-neutral-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 px-2.5 py-1 rounded cursor-pointer transition-colors flex items-center gap-1">
+                                                  📷 更換
+                                                  <input 
+                                                    type="file" 
+                                                    accept="image/*" 
+                                                    className="hidden" 
+                                                    onChange={(e) => handleUploadProofForApp(app.id, e)} 
+                                                  />
+                                                </label>
+                                              </div>
+                                            </div>
+                                          </div>
+                                        ) : (
+                                          <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 text-center">
+                                            <p className="text-neutral-500 text-xs mb-2">尚未上傳匯款憑證</p>
+                                            <label className="text-xs text-[#DFBA87] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 border border-[#DFBA87]/30 px-3 py-1 rounded cursor-pointer transition-colors inline-flex items-center gap-1">
+                                              📷 補登上傳匯款憑證
+                                              <input 
+                                                type="file" 
+                                                accept="image/*" 
+                                                className="hidden" 
+                                                onChange={(e) => handleUploadProofForApp(app.id, e)} 
+                                              />
+                                            </label>
+                                          </div>
+                                        )}
+                                      </div>
+
+                                      {/* Action Triggers */}
+                                      <div className="pt-2">
+                                        {app.status === 'pending' && (
+                                          <div className="flex gap-3">
+                                            <button
+                                              onClick={() => handleApproveApplication(app)}
+                                              disabled={actionLoadingId !== null}
+                                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold tracking-wider px-4 py-2 rounded flex items-center gap-1"
+                                            >
+                                              {actionLoadingId === app.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '核准錄取 (Approve)'}
+                                            </button>
+                                            <button
+                                              onClick={() => handleRejectApplication(app.id)}
+                                              disabled={actionLoadingId !== null}
+                                              className="border border-rose-500/30 hover:bg-rose-500/10 text-rose-400 font-semibold tracking-wider px-4 py-2 rounded"
+                                            >
+                                              婉拒 (Reject)
+                                            </button>
+                                          </div>
+                                        )}
+                                        {app.status === 'approved' && (
+                                          <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 p-3 rounded">
+                                            <span className="text-emerald-400 text-xs font-medium">✓ 已核准「造物計畫特展席位」，協作帳號已就緒</span>
+                                            <button
+                                              onClick={() => handleRejectApplication(app.id)}
+                                              disabled={actionLoadingId !== null}
+                                              className="text-[11px] text-rose-400 hover:underline"
+                                            >
+                                              撤回/駁回
+                                            </button>
+                                          </div>
+                                        )}
+                                        {app.status === 'rejected' && (
+                                          <div className="flex items-center justify-between bg-rose-500/10 border border-rose-500/20 p-3 rounded">
+                                            <span className="text-rose-400 text-xs">✕ 已駁回此申請案</span>
+                                            <button
+                                              onClick={() => handleApproveApplication(app)}
+                                              disabled={actionLoadingId !== null}
+                                              className="text-[11px] text-emerald-400 hover:underline"
+                                            >
+                                              重新核准
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
+                                    </div>
+                                  </div>
+                                </td>
+                              </tr>
+                            )}
+                          </>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* TAB 3: VIP LIST MANAGER */}
           {activeTab === 'vip' && (
             <div className="space-y-6">
               <div className="flex justify-between items-center">
