@@ -1113,9 +1113,6 @@ export default function MakingProjectPage() {
                       <p className="text-3xl font-serif text-[#0D0D0D] font-light">
                         NT$ <span className="font-mono font-bold text-[#8C7853]">12,000</span>
                       </p>
-                      <p className="text-[11px] text-[#0D0D0D]/60 mt-1">
-                        {lang === 'zh' ? '（2027.01.06–01.09 台北中山堂展期，含佈展、VIP預展、開幕酒會與公眾展期，免銷售抽成）' : '(Jan 6–9, 2027 at Taipei Zhongshan Hall inclusive, 0% sales commission)'}
-                      </p>
                     </div>
 
                     {/* Bank Info */}
