@@ -319,34 +319,35 @@ export default function MakingProjectPage() {
           <div className="bg-white border border-[#C9A96E]/25 p-8 md:p-10 shadow-sm text-left relative overflow-hidden">
             <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#C9A96E]/10 to-transparent pointer-events-none" />
             
-            <p className="text-sm md:text-base leading-relaxed text-[#0D0D0D]/90 font-light mb-6 tracking-wide text-justify">
+            <div className="space-y-4 text-sm md:text-base leading-relaxed font-light tracking-wide text-justify">
               {lang === 'zh' ? (
                 <>
-                  <span className="font-medium text-[#8C7853] block text-base md:text-lg mb-3">
-                    造物，是將對生活的理解，轉化為具體形狀的過程。
+                  <span className="font-medium text-[#8C7853] block text-base md:text-lg mb-2">
+                    支持更多獨立創作者的長遠實踐與持續發展，為本計畫的核心宗旨。
                   </span>
-                  在 AI 興起、形式愈來愈容易被大量生成與複製的時代，「造物計劃」將目光放回物件本身，重新觀看由人的手決定的比例、觸感與差異。
+                  <p className="text-[#0D0D0D]/90">
+                    「造物計劃」邀請以個人或小型工作室為核心的獨立創作者，以強調人進行造物價值與意義為核，透過諸如陶、木、金屬、玻璃與纖維等材料，呈現各自對物件與生活的理解。
+                  </p>
+                  <p className="text-[#0D0D0D]/80">
+                    在 AI 興起、形式容易被大量生成與複製的時代，重新觀看人的判斷如何轉化為比例、觸感與差異，也讓觀眾透過觀看、選擇與使用，建立自己的品味。
+                  </p>
                 </>
               ) : (
                 <>
-                  <span className="font-medium text-[#8C7853] block text-base md:text-lg mb-3">
-                    Making is the process of translating one’s understanding of living into tangible forms.
+                  <span className="font-medium text-[#8C7853] block text-base md:text-lg mb-2">
+                    Supporting the long-term practice and flourishing of independent creators lies at the very core of this initiative.
                   </span>
-                  In an era shaped by AI, where forms can be effortlessly synthesized and endlessly duplicated, The Making Project redirects its gaze back to the physical object itself — observing once more the proportions, tactile sensations, and human nuances dictated by the maker’s hands.
+                  <p className="text-[#0D0D0D]/90">
+                    The Making Project invites independent creators centered around individuals or small studios to spotlight the intrinsic value and meaning of human making. Through materials such as ceramics, wood, metal, glass, and fiber, makers present their unique perspectives on objects and everyday living.
+                  </p>
+                  <p className="text-[#0D0D0D]/80">
+                    In an era where AI emerges and forms are easily generated and duplicated at scale, we revisit how human judgment translates into proportion, texture, and nuance — inviting audiences to cultivate their own taste through observation, selection, and daily use.
+                  </p>
                 </>
               )}
-            </p>
-
-            <p className="text-sm md:text-base leading-relaxed text-[#0D0D0D]/80 font-light tracking-wide text-justify">
-              {lang === 'zh' ? (
-                '透過不同獨立創作者的作品，讓觀眾看見當代人如何理解生活、使用物件，以及建立自己的品味。從創作者的製作，到使用者的選擇，一件物件所承載的觀點，在進入生活之後繼續延伸。'
-              ) : (
-                'Through the creations of independent makers, visitors discover how contemporaries comprehend life, interact with everyday objects, and cultivate their aesthetic taste. From the artisan’s crafting to the user’s choice, the philosophy embodied within an object continues to unfold as it enters everyday life.'
-              )}
-            </p>
+            </div>
           </div>
 
-          {/* Exhibition Highlights Grid */}
           {/* Exhibition Highlights Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
