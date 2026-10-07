@@ -1146,9 +1146,15 @@ export default function MakingProjectPage() {
                     </div>
 
                     <div className="bg-amber-500/5 border border-amber-500/20 p-4 text-xs text-[#8C7853] leading-relaxed">
-                      💡 <strong>匯款備註說明：</strong> 匯款時請務必在備註欄填寫「
-                      <strong>{formData.brand_name_zh || '您的品牌/創作者名稱'} VIS造物</strong>
-                      」，匯款完成後請將網銀扣款截圖或ATM交易明細拍照上傳至下方。
+                      {lang === 'zh' ? (
+                        <>
+                          💡 <strong>匯款備註說明：</strong> 匯款時請務必在備註欄填寫「<strong>{formData.brand_name_zh || '您的品牌名'}</strong>」，匯款完成後請將網銀扣款截圖或ATM交易明細拍照上傳至下方。
+                        </>
+                      ) : (
+                        <>
+                          💡 <strong>Payment Memo Note:</strong> Please include &quot;<strong>{formData.brand_name_en || formData.brand_name_zh || 'Your Brand Name'}</strong>&quot; in the transfer memo field, and upload transaction proof screenshot below.
+                        </>
+                      )}
                     </div>
 
                     {/* Upload Section */}
