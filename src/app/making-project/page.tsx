@@ -378,22 +378,34 @@ export default function MakingProjectPage() {
             <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Dates & Venue</span>
               <p className="text-sm font-medium text-[#0D0D0D]">2027.01.06–01.09</p>
-              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">台北中山堂</span>
+              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">
+                {lang === 'zh' ? '台北中山堂' : 'Taipei Zhongshan Hall'}
+              </span>
             </div>
             <div className="bg-white border border-[#C9A96E]/40 p-5 text-center bg-[#C9A96E]/[0.02]">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#C9A96E] mb-1">Exhibition Fee</span>
               <p className="text-base font-semibold text-[#8C7853]">NT$ 12,000</p>
-              <span className="text-[11px] text-[#0D0D0D]/60 block mt-0.5">專案參展費 / 全展期</span>
+              <span className="text-[11px] text-[#0D0D0D]/60 block mt-0.5">
+                {lang === 'zh' ? '專案參展費 / 全展期' : 'Full 4-Day Period'}
+              </span>
             </div>
             <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Commission</span>
-              <p className="text-sm font-medium text-[#0D0D0D]">現場銷售 0%</p>
-              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">免抽成・自行收款</span>
+              <p className="text-sm font-medium text-[#0D0D0D]">
+                {lang === 'zh' ? '現場銷售 0%' : '0% Commission'}
+              </p>
+              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">
+                {lang === 'zh' ? '免抽成・自行收款' : 'Direct Creator Sales'}
+              </span>
             </div>
             <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Curation</span>
-              <p className="text-sm font-medium text-[#0D0D0D]">VIS 統一陳列</p>
-              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">大會規劃專屬展台</span>
+              <p className="text-sm font-medium text-[#0D0D0D]">
+                {lang === 'zh' ? 'VIS 統一陳列' : 'VIS Curated Display'}
+              </p>
+              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">
+                {lang === 'zh' ? '大會規劃專屬展台' : 'Curated Table Scenography'}
+              </span>
             </div>
           </div>
 
@@ -486,26 +498,32 @@ export default function MakingProjectPage() {
           <div className="mt-6 bg-white border border-[#C9A96E]/20 p-5 md:p-6 text-xs text-[#0D0D0D]/75 leading-relaxed grid md:grid-cols-3 gap-5">
             <div>
               <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-1">
-                ✦ 展台規劃與陳列 Scenography
+                ✦ {lang === 'zh' ? '展台規劃與陳列 Scenography' : 'Display Scenography'}
               </p>
               <p className="font-light text-[#0D0D0D]/80">
-                大會提供展示檯面，展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐陳列）。每席位最多可有 4 件展示位置，單件以寬、深各 10 公分、高 30 公分以內為原則（特殊尺寸可另行討論）。展期可不限次更換上台作品，售出後亦可持續上架遞補。
+                {lang === 'zh'
+                  ? '大會提供展示檯面，展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐陳列）。每席位最多可有 4 件展示位置，單件以寬、深各 10 公分、高 30 公分以內為原則（特殊尺寸可另行討論）。展期可不限次更換上台作品，售出後亦可持續上架遞補。'
+                  : 'Display tables are provided and curated uniformly by the VIS curatorial team (curated shared display, not an isolated booth; creators only need to provide pieces for exhibition). Each stall accommodates up to 4 display spots on the table, with each piece within 10cm wide × 10cm deep × 30cm high (custom dimensions subject to discussion). Pieces may be rotated or restocked without limit when sold.'}
               </p>
             </div>
             <div>
               <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-1">
-                ✦ 現場展售與金流 Sales & Logistics
+                ✦ {lang === 'zh' ? '現場展售與金流 Sales & Logistics' : 'Sales & Logistics'}
               </p>
               <p className="font-light text-[#0D0D0D]/80">
-                現場銷售 0% 免抽成，由創作者/品牌自行於現場收款（支援現金、LINE Pay、個人刷卡機等），大會完全不經手交易款項。現場作品運輸、商品包裝及銷售後交付由創作者負責。
+                {lang === 'zh'
+                  ? '現場銷售 0% 免抽成，由創作者/品牌自行於現場收款（支援現金、LINE Pay、個人刷卡機等），大會完全不經手交易款項。現場作品運輸、商品包裝及銷售後交付由創作者負責。'
+                  : '0% sales commission. Creators collect sales proceeds directly on-site (supporting cash, mobile payment, card terminals, etc.); the fair handles zero transaction funds. On-site transportation, packaging, and post-sale delivery are handled by creators.'}
               </p>
             </div>
             <div>
               <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-1">
-                ✦ 現場駐點交流 Staffing
+                ✦ {lang === 'zh' ? '現場駐點交流 Staffing' : 'On-Site Staffing'}
               </p>
               <p className="font-light text-[#0D0D0D]/80">
-                四天展期營業時間內，創作者或品牌代表需全程駐點，在場向藏家與觀眾解說創作脈絡、深度交流並親自經營品牌客戶。
+                {lang === 'zh'
+                  ? '四天展期營業時間內，創作者或品牌代表需全程駐點，在場向藏家與觀眾解說創作脈絡、深度交流並親自經營品牌客戶。'
+                  : 'During the 4-day exhibition opening hours, creators or brand representatives must be present throughout the event to engage with collectors and visitors, explain artistic concepts, and build direct client relationships.'}
               </p>
             </div>
           </div>
@@ -528,9 +546,11 @@ export default function MakingProjectPage() {
                   : 'The curatorial committee has successfully received your proposal and exhibition fee payment proof (NT$ 12,000). The committee will conduct a review and announce results via email.'}
               </p>
               <div className="bg-[#FAF9F6] border border-[#0D0D0D]/10 p-5 mb-8 text-xs text-[#0D0D0D]/70 leading-relaxed text-left max-w-md mx-auto">
-                <p className="font-semibold text-[#8C7853] mb-1">📌 審核與退款保證：</p>
-                <p>• 評選結果將透過大會官方信箱 <span className="font-mono text-[#0D0D0D]">artwithlifetaipei@gmail.com</span> 寄發。</p>
-                <p className="mt-1">• 若未獲錄取，大會將於公告後 14 個工作日內，將參展費用全額無息退還至原匯款帳戶。</p>
+                <p className="font-semibold text-[#8C7853] mb-1">
+                  {lang === 'zh' ? '📌 審核與退款保證：' : '📌 Review & Refund Guarantee:'}
+                </p>
+                <p>• {lang === 'zh' ? '評選結果將透過大會官方信箱 ' : 'Review results will be sent from '}<span className="font-mono text-[#0D0D0D]">artwithlifetaipei@gmail.com</span>{lang === 'zh' ? ' 寄發。' : '.'}</p>
+                <p className="mt-1">• {lang === 'zh' ? '若未獲錄取，大會將於公告後 14 個工作日內，將參展費用全額無息退還至原匯款帳戶。' : 'If not selected, the exhibition fee will be fully refunded without interest within 14 business days.'}</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 <Link
@@ -933,27 +953,33 @@ export default function MakingProjectPage() {
                     {/* Summary Table */}
                     <div className="border border-[#0D0D0D]/10 divide-y divide-[#0D0D0D]/10 text-xs">
                       <div className="grid grid-cols-3 p-3.5 bg-[#FAF9F6]">
-                        <span className="font-semibold text-[#8C7853]">計畫項目 Project</span>
-                        <span className="col-span-2 text-[#0D0D0D] font-medium">VIS 2027 造物計畫 The Making Project（2027.01.06–01.09 台北中山堂）</span>
+                        <span className="font-semibold text-[#8C7853]">{lang === 'zh' ? '計畫項目' : 'Project'}</span>
+                        <span className="col-span-2 text-[#0D0D0D] font-medium">
+                          {lang === 'zh' 
+                            ? 'VIS 2027 造物計畫（2027.01.06–01.09 台北中山堂）' 
+                            : 'VIS 2027 The Making Project (Jan 6–9, 2027 Taipei Zhongshan Hall)'}
+                        </span>
                       </div>
                       <div className="grid grid-cols-3 p-3.5">
-                        <span className="font-semibold text-[#8C7853]">品牌 / 創作者 Brand</span>
+                        <span className="font-semibold text-[#8C7853]">{lang === 'zh' ? '品牌 / 創作者' : 'Brand / Creator'}</span>
                         <span className="col-span-2 text-[#0D0D0D]">{formData.brand_name_zh} / {formData.brand_name_en}</span>
                       </div>
                       <div className="grid grid-cols-3 p-3.5">
-                        <span className="font-semibold text-[#8C7853]">聯絡人 / 信箱 Contact</span>
+                        <span className="font-semibold text-[#8C7853]">{lang === 'zh' ? '聯絡人 / 信箱' : 'Contact / Email'}</span>
                         <span className="col-span-2 text-[#0D0D0D]">{formData.contact_name} ({formData.contact_email})</span>
                       </div>
                       <div className="grid grid-cols-3 p-3.5">
-                        <span className="font-semibold text-[#8C7853]">創作媒材類別 Category</span>
+                        <span className="font-semibold text-[#8C7853]">{lang === 'zh' ? '創作媒材類別' : 'Material Category'}</span>
                         <span className="col-span-2 text-[#0D0D0D]">{formData.material_category}</span>
                       </div>
                       <div className="grid grid-cols-3 p-3.5">
-                        <span className="font-semibold text-[#8C7853]">參展費用 Fee</span>
-                        <span className="col-span-2 font-mono font-bold text-[#8C7853]">NT$ 12,000（憑證已上傳）</span>
+                        <span className="font-semibold text-[#8C7853]">{lang === 'zh' ? '參展費用' : 'Exhibition Fee'}</span>
+                        <span className="col-span-2 font-mono font-bold text-[#8C7853]">
+                          NT$ 12,000 {lang === 'zh' ? '（憑證已上傳）' : '(Proof Uploaded)'}
+                        </span>
                       </div>
                       <div className="grid grid-cols-3 p-3.5">
-                        <span className="font-semibold text-[#8C7853]">核心造物理念 Brief</span>
+                        <span className="font-semibold text-[#8C7853]">{lang === 'zh' ? '核心造物理念' : 'Concept Brief'}</span>
                         <span className="col-span-2 text-[#0D0D0D]/80 whitespace-pre-wrap">{formData.concept_brief}</span>
                       </div>
                     </div>
@@ -968,7 +994,15 @@ export default function MakingProjectPage() {
                           className="mt-1 w-4 h-4 accent-[#8C7853] rounded"
                         />
                         <span className="text-xs text-[#0D0D0D]/80 leading-relaxed">
-                          <strong>【參展費用繳交與退款協議】</strong> 我同意為維護大展評審秩序，申請單位須於送出申請時繳交參展費用新台幣 12,000 元整並附上匯款證明。<strong>若經評審委員會審查未獲錄取之單位，大會將於公告錄取名單後 14 個工作日內，將參展費用 12,000 元整無息全額退還至原匯款帳戶</strong>；<strong>若通過評選獲得錄取，於錄取通知後 7 天內提出放棄者可扣除手續費退還 50% 參展費，逾期提出放棄者恕不予退款</strong>。
+                          {lang === 'zh' ? (
+                            <>
+                              <strong>【參展費用繳交與退款協議】</strong> 我同意為維護大展評審秩序，申請單位須於送出申請時繳交參展費用新台幣 12,000 元整並附上匯款證明。<strong>若經評審委員會審查未獲錄取之單位，大會將於公告錄取名單後 14 個工作日內，將參展費用 12,000 元整無息全額退還至原匯款帳戶</strong>；<strong>若通過評選獲得錄取，於錄取通知後 7 天內提出放棄者可扣除手續費退還 50% 參展費，逾期提出放棄者恕不予退款</strong>。
+                            </>
+                          ) : (
+                            <>
+                              <strong>[Exhibition Fee Payment & Refund Agreement]</strong> To maintain curatorial integrity, applicants must submit the exhibition fee of NT$ 12,000 with proof of wire transfer upon applying. <strong>If not selected by the jury, the full exhibition fee of NT$ 12,000 will be refunded without interest to the original account within 14 working days of result announcement</strong>; <strong>if selected, cancellation within 7 days of notice is eligible for a 50% refund (less processing fees); cancellations beyond 7 days are strictly non-refundable</strong>.
+                            </>
+                          )}
                         </span>
                       </label>
 
@@ -980,7 +1014,15 @@ export default function MakingProjectPage() {
                           className="mt-1 w-4 h-4 accent-[#8C7853] rounded"
                         />
                         <span className="text-xs text-[#0D0D0D]/80 leading-relaxed">
-                          <strong>【原創造物、非工廠製造與展務承諾】</strong> 我保證展出之作品均為創作者原創手作物件（<strong>絕非工廠開模或流水線大量製造</strong>），符合「造物計畫」唯一核心準則。我理解並同意<strong>展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐）</strong>，現場交易由品牌自行收款（免抽成 0%），且<strong>四天展期營業時間內創作者或品牌代表需全程駐點</strong>向觀眾解說、交流並自行維護展品，並遵守大會隱私權保護政策與個人資料聲明。
+                          {lang === 'zh' ? (
+                            <>
+                              <strong>【原創造物、非工廠製造與展務承諾】</strong> 我保證展出之作品均為創作者原創手作物件（<strong>絕非工廠開模或流水線大量製造</strong>），符合「造物計畫」唯一核心準則。我理解並同意<strong>展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐）</strong>，現場交易由品牌自行收款（免抽成 0%），且<strong>四天展期營業時間內創作者或品牌代表需全程駐點</strong>向觀眾解說、交流並自行維護展品，並遵守大會隱私權保護政策與個人資料聲明。
+                            </>
+                          ) : (
+                            <>
+                              <strong>[Original Craft, Non-Factory Made & Exhibition Commitment]</strong> I warrant that all exhibited pieces are original handmade works (<strong>strictly non-factory molded or mass manufactured</strong>), adhering to the core principle of The Making Project. I understand and agree that <strong>display tables are curated uniformly by the VIS team (shared display table, not individual booths; creators only bring objects)</strong>, transactions are collected directly by the creator (0% commission), and <strong>creators or brand representatives must be present throughout the 4-day exhibition hours</strong> to communicate with visitors and safeguard exhibits, complying with fair policies.
+                            </>
+                          )}
                         </span>
                       </label>
                     </div>
