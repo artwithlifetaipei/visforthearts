@@ -1033,8 +1033,8 @@ export default function MakingProjectPage() {
                         </h4>
                         <p className="text-xs text-[#0D0D0D]/60 mt-1">
                           {lang === 'zh' 
-                            ? '包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證與貴賓觀展卡' 
-                            : 'Includes: Shared curated table display stall, 0% sales commission, Exhibitor badge & VIP Passes'}
+                            ? '包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證1張、與工作室貴賓名額5名' 
+                            : 'Includes: Shared curated table display stall, 0% sales commission, 1 Exhibitor Badge & 5 Studio VIP Passes'}
                         </p>
                       </div>
                       <div className="text-right whitespace-nowrap">
