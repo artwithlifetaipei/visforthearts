@@ -12,11 +12,21 @@ import {
 import { ZONE_MAP, ALL_ZONES } from '@/lib/exhibitorConstants';
 
 export const isMakingProjectApp = (app: any) => {
+  if (!app) return false;
+  const boothType = String(app.booth_type || '').toUpperCase();
+  const zoneId = String(app.zone_id || '').toLowerCase();
+  const pref1 = String(app.zone_preference_1 || '');
+  const pref2 = String(app.zone_preference_2 || '');
+  const pref3 = String(app.zone_preference_3 || '');
+
   return (
-    app?.zone_id === 'making-project' ||
-    app?.booth_type === 'MAKING-PROJECT' ||
-    app?.booth_type?.includes('造物計畫') ||
-    (app?.zone_preference_1 && app?.zone_preference_1.includes('造物計畫'))
+    zoneId === 'making-project' ||
+    boothType === 'MAKING-PROJECT' ||
+    boothType.includes('MAKING') ||
+    boothType.includes('造物') ||
+    pref1.includes('造物') ||
+    pref2.includes('造物') ||
+    pref3.includes('造物')
   );
 };
 
@@ -489,6 +499,142 @@ export default function ExhibitorAdminPage() {
     ? makingProjectApplications 
     : makingProjectApplications.filter(a => a.status === appFilter);
 
+  // Export Regular Applications to CSV
+  const handleExportRegularAppsCsv = () => {
+    if (filteredRegularApps.length === 0) {
+      alert('目前無符合條件的正規展位申請案可匯出。');
+      return;
+    }
+
+    const headers = [
+      '申請案號 (ID)',
+      '品牌中文名稱 (Brand Zh)',
+      '品牌英文名稱 (Brand En)',
+      '公司抬頭 (Company Name)',
+      '統一編號 (Tax ID)',
+      '聯絡人 (Contact Person)',
+      '聯絡人職稱 (Title)',
+      '聯絡電話 (Phone)',
+      '電子信箱 (Email)',
+      '通訊地址 (Address)',
+      '官網 / 品牌連結 (Website)',
+      'Instagram (IG)',
+      '申請展位規格 (Booth Type)',
+      '首選展區志願1 (Preference 1)',
+      '次選展區志願2 (Preference 2)',
+      '備選展區志願3 (Preference 3)',
+      '核定展區 (Assigned Zone)',
+      '審核狀態 (Status)',
+      '保證金匯款末五碼 (Bank Last 5)',
+      '繳費憑證連結 (Payment Proof URL)',
+      '申請提交時間 (Created At)'
+    ];
+
+    const rows = filteredRegularApps.map(app => [
+      String(app.id || ''),
+      String(app.brand_name_zh || ''),
+      String(app.brand_name_en || ''),
+      String(app.company_name_zh || ''),
+      String(app.company_tax_id || ''),
+      String(app.contact_name || ''),
+      String(app.contact_title || ''),
+      String(app.contact_phone || ''),
+      String(app.contact_email || ''),
+      String(app.contact_address || ''),
+      String(app.website_url || ''),
+      String(app.instagram_url || ''),
+      String(app.booth_type || ''),
+      String(app.zone_preference_1 || ''),
+      String(app.zone_preference_2 || ''),
+      String(app.zone_preference_3 || ''),
+      String(app.zone_id || ''),
+      app.status === 'approved' ? '已核准' : app.status === 'rejected' ? '已駁回' : '審查中',
+      String(app.deposit_bank_last5 || ''),
+      String(app.deposit_proof_url ? (app.deposit_proof_url.startsWith('data:') ? '[Base64 圖片已上傳]' : app.deposit_proof_url) : '無'),
+      new Date(app.created_at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
+    ]);
+
+    const csvContent = 
+      '\uFEFF' + 
+      [headers.join(','), ...rows.map(e => e.map(val => `"${val.replace(/"/g, '""')}"`).join(','))].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `2027_VIS_Regular_Exhibitors_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Export Making Project Applications to CSV
+  const handleExportMakingProjectCsv = () => {
+    if (filteredMakingProjectApps.length === 0) {
+      alert('目前無符合條件的造物計畫申請案可匯出。');
+      return;
+    }
+
+    const headers = [
+      '專案案號 (ID)',
+      '創作者/品牌名稱 (Brand Zh)',
+      '英文標記 (Brand En)',
+      '單位/公司抬頭 (Company Name)',
+      '統一編號/立案號 (Tax ID)',
+      '申請代表 (Contact Person)',
+      '職稱 (Title)',
+      '聯絡電話 (Phone)',
+      '電子信箱 (Email)',
+      '工作室通訊地址 (Address)',
+      '作品網站 / 社群 (Website)',
+      'Instagram (IG)',
+      '媒材分類 (Craft Category)',
+      '專案席位 (Booth Type)',
+      '參展費用 (Fee NTD)',
+      '創作簡述與核心理念 (Artwork Concept / Brief)',
+      '審核狀態 (Status)',
+      '費用匯款末五碼 (Bank Last 5)',
+      '繳費憑證連結 (Payment Proof URL)',
+      '申請提交時間 (Created At)'
+    ];
+
+    const rows = filteredMakingProjectApps.map(app => [
+      String(app.id || ''),
+      String(app.brand_name_zh || ''),
+      String(app.brand_name_en || ''),
+      String(app.company_name_zh || '個人創作'),
+      String(app.company_tax_id || ''),
+      String(app.contact_name || ''),
+      String(app.contact_title || ''),
+      String(app.contact_phone || ''),
+      String(app.contact_email || ''),
+      String(app.contact_address || ''),
+      String(app.website_url || ''),
+      String(app.instagram_url || ''),
+      String(app.zone_preference_1 || '原創造物類別'),
+      '造物計畫專案席位 (MAKING-PROJECT)',
+      'NT$ 12,000',
+      String(app.concept_brief || ''),
+      app.status === 'approved' ? '已核准' : app.status === 'rejected' ? '已駁回' : '審查中',
+      String(app.deposit_bank_last5 || ''),
+      String(app.deposit_proof_url ? (app.deposit_proof_url.startsWith('data:') ? '[Base64 圖片已上傳]' : app.deposit_proof_url) : '無'),
+      new Date(app.created_at).toLocaleString('zh-TW', { timeZone: 'Asia/Taipei' })
+    ]);
+
+    const csvContent = 
+      '\uFEFF' + 
+      [headers.join(','), ...rows.map(e => e.map(val => `"${val.replace(/"/g, '""')}"`).join(','))].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `2027_VIS_Making_Project_Applicants_${Date.now()}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center text-[#DFBA87]">
@@ -569,28 +715,39 @@ export default function ExhibitorAdminPage() {
           {/* TAB 1: APPLICATIONS MANAGER */}
           {activeTab === 'applications' && (
             <div className="space-y-6">
-              {/* App Status Filters */}
-              <div className="flex gap-2 text-xs">
-                {[
-                  { id: 'all' as const, label: '全部' },
-                  { id: 'pending' as const, label: '待審核' },
-                  { id: 'approved' as const, label: '已通過' },
-                  { id: 'rejected' as const, label: '已拒絕' },
-                ].map((filter) => (
-                  <button
-                    key={filter.id}
-                    onClick={() => setAppFilter(filter.id)}
-                    className={`
-                      px-4 py-2 rounded transition-all
-                      ${appFilter === filter.id 
-                        ? 'bg-[#C9A96E] text-white' 
-                        : 'bg-white/5 text-neutral-400 hover:text-white'
-                      }
-                    `}
-                  >
-                    {filter.label}
-                  </button>
-                ))}
+              {/* App Status Filters & CSV Export */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex gap-2 text-xs overflow-x-auto pb-1 sm:pb-0">
+                  {[
+                    { id: 'all' as const, label: '全部' },
+                    { id: 'pending' as const, label: '待審核' },
+                    { id: 'approved' as const, label: '已通過' },
+                    { id: 'rejected' as const, label: '已拒絕' },
+                  ].map((filter) => (
+                    <button
+                      key={filter.id}
+                      onClick={() => setAppFilter(filter.id)}
+                      className={`
+                        px-4 py-2 rounded transition-all whitespace-nowrap
+                        ${appFilter === filter.id 
+                          ? 'bg-[#C9A96E] text-white' 
+                          : 'bg-white/5 text-neutral-400 hover:text-white'
+                        }
+                      `}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleExportRegularAppsCsv}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded bg-white/5 hover:bg-[#C9A96E]/20 text-[#DFBA87] hover:text-[#C9A96E] border border-[#C9A96E]/30 text-xs transition-colors self-start sm:self-auto shrink-0"
+                  title="匯出正規展位申請名單 CSV"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>匯出正規申請 CSV ({filteredRegularApps.length})</span>
+                </button>
               </div>
 
               {/* Applications Table */}
@@ -884,28 +1041,39 @@ export default function ExhibitorAdminPage() {
                 </div>
               </div>
 
-              {/* Status Filters */}
-              <div className="flex gap-2 text-xs">
-                {[
-                  { id: 'all' as const, label: '全部' },
-                  { id: 'pending' as const, label: '待審核' },
-                  { id: 'approved' as const, label: '已通過' },
-                  { id: 'rejected' as const, label: '已拒絕' },
-                ].map((filter) => (
-                  <button
-                    key={filter.id}
-                    onClick={() => setAppFilter(filter.id)}
-                    className={`
-                      px-4 py-2 rounded transition-all
-                      ${appFilter === filter.id 
-                        ? 'bg-[#C9A96E] text-white' 
-                        : 'bg-white/5 text-neutral-400 hover:text-white'
-                      }
-                    `}
-                  >
-                    {filter.label}
-                  </button>
-                ))}
+              {/* Status Filters & CSV Export */}
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                <div className="flex gap-2 text-xs overflow-x-auto pb-1 sm:pb-0">
+                  {[
+                    { id: 'all' as const, label: '全部' },
+                    { id: 'pending' as const, label: '待審核' },
+                    { id: 'approved' as const, label: '已通過' },
+                    { id: 'rejected' as const, label: '已拒絕' },
+                  ].map((filter) => (
+                    <button
+                      key={filter.id}
+                      onClick={() => setAppFilter(filter.id)}
+                      className={`
+                        px-4 py-2 rounded transition-all whitespace-nowrap
+                        ${appFilter === filter.id 
+                          ? 'bg-[#C9A96E] text-white' 
+                          : 'bg-white/5 text-neutral-400 hover:text-white'
+                        }
+                      `}
+                    >
+                      {filter.label}
+                    </button>
+                  ))}
+                </div>
+
+                <button
+                  onClick={handleExportMakingProjectCsv}
+                  className="inline-flex items-center gap-2 px-3.5 py-2 rounded bg-white/5 hover:bg-[#C9A96E]/20 text-[#DFBA87] hover:text-[#C9A96E] border border-[#C9A96E]/30 text-xs transition-colors self-start sm:self-auto shrink-0"
+                  title="匯出造物計畫申請名單 CSV"
+                >
+                  <Download className="w-3.5 h-3.5" />
+                  <span>匯出造物計畫 CSV ({filteredMakingProjectApps.length})</span>
+                </button>
               </div>
 
               {/* Applications Table */}
