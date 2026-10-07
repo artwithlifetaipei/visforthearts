@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { ArrowLeft, ArrowRight, Upload, CheckCircle2, ShieldCheck, X, FileText, Loader2, Sparkles, Layers, Compass, Check } from 'lucide-react';
+import { ArrowLeft, ArrowRight, Upload, CheckCircle2, ShieldCheck, X, FileText, Loader2, Sparkles, Layers, Compass, Check, Maximize2, Eye } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 
 const MAKING_PROJECT_FEE = 12000;
@@ -29,6 +29,15 @@ export default function MakingProjectPage() {
   const [agreeTerms1, setAgreeTerms1] = useState(false);
   const [agreeTerms2, setAgreeTerms2] = useState(false);
   const [lang, setLang] = useState<'zh' | 'en'>('zh');
+
+  // Lightbox Modal for Scenography Images
+  const [activeImageModal, setActiveImageModal] = useState<{
+    src: string;
+    captionZh: string;
+    captionEn: string;
+    titleZh: string;
+    titleEn: string;
+  } | null>(null);
 
   // Auth session state
   const [session, setSession] = useState<any>(null);
@@ -303,44 +312,44 @@ export default function MakingProjectPage() {
       <main className="pt-28 pb-24 px-6 md:px-12 max-w-5xl mx-auto">
 
         {/* ── Curation Intro Section ── */}
-        <header className="py-12 md:py-16 text-center max-w-3xl mx-auto border-b border-[#C9A96E]/20">
-          <div className="inline-flex items-center gap-2 px-3 py-1 mb-6 border border-[#C9A96E]/30 bg-[#C9A96E]/5 text-[#8C7853] text-[10px] tracking-[0.3em] uppercase">
-            <Sparkles className="w-3 h-3" /> VIS 2027 Special Curatorial Initiative
+        <header className="py-10 md:py-14 text-center max-w-3xl mx-auto">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 mb-6 border border-[#C9A96E]/30 bg-[#C9A96E]/5 text-[#8C7853] text-[10px] font-mono tracking-[0.25em] uppercase rounded-full">
+            <Sparkles className="w-3 h-3 text-[#C9A96E]" /> VIS 2027 Special Curatorial Initiative
           </div>
 
-          <h1 className="text-3xl md:text-5xl font-serif font-light tracking-wide text-[#0D0D0D] mb-4">
-            {lang === 'zh' ? 'THE MAKING PROJECT' : 'THE MAKING PROJECT'}
+          <h1 className="text-3xl md:text-5xl font-serif font-light tracking-wide text-[#0D0D0D] mb-3">
+            THE MAKING PROJECT
           </h1>
-          <h2 className="text-xl md:text-2xl font-light tracking-[0.2em] text-[#8C7853] mb-8">
-            {lang === 'zh' ? '造物計畫 申請專區' : 'Curatorial Open Call'}
+          <h2 className="text-base md:text-lg font-light tracking-[0.25em] text-[#8C7853] uppercase mb-10 font-mono">
+            {lang === 'zh' ? '造物計畫 專屬申請' : 'Curatorial Open Call'}
           </h2>
 
           {/* Core Philosophy Statement */}
-          <div className="bg-white border border-[#C9A96E]/25 p-8 md:p-10 shadow-sm text-left relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-[#C9A96E]/10 to-transparent pointer-events-none" />
+          <div className="bg-white border border-[#C9A96E]/25 p-8 md:p-12 shadow-[0_4px_30px_rgba(0,0,0,0.02)] text-left relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-gradient-to-br from-[#C9A96E]/10 to-transparent pointer-events-none" />
             
-            <div className="space-y-4 text-sm md:text-base leading-relaxed font-light tracking-wide text-justify">
+            <div className="space-y-5 text-sm md:text-base leading-relaxed font-light tracking-wide text-justify">
               {lang === 'zh' ? (
                 <>
-                  <span className="font-medium text-[#8C7853] block text-base md:text-lg mb-2">
+                  <span className="font-serif font-medium text-[#8C7853] block text-base md:text-lg mb-3 tracking-wide">
                     支持更多獨立創作者的長遠實踐與持續發展，為本計畫的核心宗旨。
                   </span>
-                  <p className="text-[#0D0D0D]/90">
+                  <p className="text-[#0D0D0D]/90 leading-loose">
                     「造物計劃」邀請以個人或小型工作室為核心的獨立創作者，以強調人進行造物價值與意義為核，透過諸如陶、木、金屬、玻璃與纖維等材料，呈現各自對物件與生活的理解。
                   </p>
-                  <p className="text-[#0D0D0D]/80">
+                  <p className="text-[#0D0D0D]/80 leading-loose">
                     在 AI 興起、形式容易被大量生成與複製的時代，重新觀看人的判斷如何轉化為比例、觸感與差異，也讓觀眾透過觀看、選擇與使用，建立自己的品味。
                   </p>
                 </>
               ) : (
                 <>
-                  <span className="font-medium text-[#8C7853] block text-base md:text-lg mb-2">
+                  <span className="font-serif font-medium text-[#8C7853] block text-base md:text-lg mb-3 tracking-wide">
                     Supporting the long-term practice and flourishing of independent creators lies at the very core of this initiative.
                   </span>
-                  <p className="text-[#0D0D0D]/90">
+                  <p className="text-[#0D0D0D]/90 leading-loose">
                     The Making Project invites independent creators centered around individuals or small studios to spotlight the intrinsic value and meaning of human making. Through materials such as ceramics, wood, metal, glass, and fiber, makers present their unique perspectives on objects and everyday living.
                   </p>
-                  <p className="text-[#0D0D0D]/80">
+                  <p className="text-[#0D0D0D]/80 leading-loose">
                     In an era where AI emerges and forms are easily generated and duplicated at scale, we revisit how human judgment translates into proportion, texture, and nuance — inviting audiences to cultivate their own taste through observation, selection, and daily use.
                   </p>
                 </>
@@ -348,8 +357,8 @@ export default function MakingProjectPage() {
             </div>
 
             {/* Essential Criterion Highlight Box */}
-            <div className="mt-6 pt-6 border-t border-[#0D0D0D]/10">
-              <div className="bg-[#FAF9F6] border-l-2 border-[#8C7853] p-4.5 md:p-5 rounded-r">
+            <div className="mt-8 pt-6 border-t border-[#0D0D0D]/10">
+              <div className="bg-[#FAF9F6] border-l-2 border-[#8C7853] p-5 md:p-6 rounded-r">
                 <div className="flex items-center gap-2 mb-2">
                   <span className="w-1.5 h-1.5 rounded-full bg-[#8C7853]" />
                   <span className="text-[11px] font-mono tracking-[0.2em] uppercase text-[#8C7853] font-semibold">
@@ -372,24 +381,140 @@ export default function MakingProjectPage() {
               </div>
             </div>
           </div>
+        </header>
 
+        {/* ── Editorial Scenography Gallery Showcase ── */}
+        <section className="space-y-6">
+          <div className="flex flex-col md:flex-row md:items-end justify-between border-b border-[#0D0D0D]/10 pb-4 gap-3">
+            <div>
+              <div className="inline-flex items-center gap-1.5 text-[10px] font-mono tracking-[0.25em] text-[#8C7853] uppercase mb-1.5">
+                <Sparkles className="w-3 h-3 text-[#C9A96E]" />
+                {lang === 'zh' ? '展台空間意象 SCENOGRAPHY MOCKUP' : 'SCENOGRAPHY & SPATIAL ESSENCE'}
+              </div>
+              <h3 className="text-xl md:text-2xl font-serif text-[#0D0D0D] tracking-wide">
+                {lang === 'zh' ? '大平面共享展示空間・陳列模擬示意' : 'Shared Curated Display Table — Spatial Concept'}
+              </h3>
+            </div>
+            <p className="text-xs text-[#0D0D0D]/60 max-w-md font-light leading-relaxed">
+              {lang === 'zh'
+                ? '大會提供統一白色大平面檯面，由策展團隊依光線與器型統一陳列，呈現人手造物之細膩差異、比例與觸感。'
+                : 'A unified white platform curated by the VIS team, spotlighting human craftsmanship, proportions, and tactile nuances.'}
+            </p>
+          </div>
+
+          {/* Dual Gallery Grid */}
+          <div className="grid md:grid-cols-2 gap-6 md:gap-8">
+            {/* Photo 1 Card */}
+            <div 
+              onClick={() => setActiveImageModal({
+                src: '/images/making-project/scenography_1.jpg',
+                titleZh: '大平面白色展台整體意象',
+                titleEn: 'Spatial Overview — Shared Platform',
+                captionZh: '大會規劃之統一展台，以開闊視野與素雅白色為基底，讓每一件手工器物在空間光線與留白中自然對話。',
+                captionEn: 'Unified white presentation platform designed by VIS, creating architectural breathing room for handcrafted objects in natural gallery light.'
+              })}
+              className="group bg-white border border-[#0D0D0D]/10 p-4 md:p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_36px_rgba(201,169,110,0.12)] hover:border-[#C9A96E]/50 transition-all duration-500 cursor-pointer flex flex-col justify-between"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden bg-[#FAF9F6]">
+                <img
+                  src="/images/making-project/scenography_1.jpg"
+                  alt="Scenography Spatial Overview"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-500 flex items-center justify-center">
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3.5 py-1.5 bg-white/95 backdrop-blur-sm text-[#0D0D0D] text-[11px] font-mono tracking-widest uppercase flex items-center gap-1.5 shadow-md">
+                    <Maximize2 className="w-3.5 h-3.5 text-[#8C7853]" />
+                    {lang === 'zh' ? '點擊放大檢視' : 'Enlarge Preview'}
+                  </span>
+                </div>
+                <div className="absolute top-3 left-3 bg-[#0D0D0D]/80 backdrop-blur-sm text-[#FAF9F6] text-[10px] font-mono tracking-wider px-2.5 py-1 uppercase">
+                  FIG 01・SPATIAL OVERVIEW
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3.5 border-t border-[#0D0D0D]/5">
+                <div className="flex items-baseline justify-between mb-1.5">
+                  <h4 className="font-serif text-sm md:text-base text-[#0D0D0D] font-medium tracking-wide">
+                    {lang === 'zh' ? '大平面白色展台整體意象' : 'Spatial Overview — Shared Platform'}
+                  </h4>
+                  <span className="text-[10px] font-mono text-[#8C7853] uppercase tracking-wider">
+                    {lang === 'zh' ? '空間透視' : 'Perspective'}
+                  </span>
+                </div>
+                <p className="text-xs text-[#0D0D0D]/70 font-light leading-relaxed">
+                  {lang === 'zh'
+                    ? '大會規劃之統一展台，以開闊視野與素雅白色為基底，讓每一件手工器物在空間光線與留白中自然對話。'
+                    : 'Unified white presentation platform designed by VIS, creating architectural breathing room for handcrafted objects in natural gallery light.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Photo 2 Card */}
+            <div 
+              onClick={() => setActiveImageModal({
+                src: '/images/making-project/scenography_2.jpg',
+                titleZh: '器物尺度與陳列細節模擬',
+                titleEn: 'Object Proportions & Display Nuance',
+                captionZh: '單席位最多可有 4 件展示位置（寬深 10cm、高 30cm 以內），器型在漫射照明下展現質地紋理與手作溫度。',
+                captionEn: 'Up to 4 pieces per stall (within 10×10×30 cm), highlighting proportions, clay glazes, and human handcraft under diffused exhibition illumination.'
+              })}
+              className="group bg-white border border-[#0D0D0D]/10 p-4 md:p-5 shadow-[0_4px_24px_rgba(0,0,0,0.03)] hover:shadow-[0_12px_36px_rgba(201,169,110,0.12)] hover:border-[#C9A96E]/50 transition-all duration-500 cursor-pointer flex flex-col justify-between"
+            >
+              <div className="relative aspect-[4/5] overflow-hidden bg-[#FAF9F6]">
+                <img
+                  src="/images/making-project/scenography_2.jpg"
+                  alt="Scenography Object Nuance"
+                  className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                />
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/25 transition-colors duration-500 flex items-center justify-center">
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity duration-300 px-3.5 py-1.5 bg-white/95 backdrop-blur-sm text-[#0D0D0D] text-[11px] font-mono tracking-widest uppercase flex items-center gap-1.5 shadow-md">
+                    <Maximize2 className="w-3.5 h-3.5 text-[#8C7853]" />
+                    {lang === 'zh' ? '點擊放大檢視' : 'Enlarge Preview'}
+                  </span>
+                </div>
+                <div className="absolute top-3 left-3 bg-[#0D0D0D]/80 backdrop-blur-sm text-[#FAF9F6] text-[10px] font-mono tracking-wider px-2.5 py-1 uppercase">
+                  FIG 02・TACTILE & SCALE
+                </div>
+              </div>
+
+              <div className="mt-4 pt-3.5 border-t border-[#0D0D0D]/5">
+                <div className="flex items-baseline justify-between mb-1.5">
+                  <h4 className="font-serif text-sm md:text-base text-[#0D0D0D] font-medium tracking-wide">
+                    {lang === 'zh' ? '器物尺度與陳列細節模擬' : 'Object Proportions & Display Nuance'}
+                  </h4>
+                  <span className="text-[10px] font-mono text-[#8C7853] uppercase tracking-wider">
+                    {lang === 'zh' ? '比例與紋理' : 'Texture & Scale'}
+                  </span>
+                </div>
+                <p className="text-xs text-[#0D0D0D]/70 font-light leading-relaxed">
+                  {lang === 'zh'
+                    ? '單席位最多可有 4 件展示位置（寬深 10cm、高 30cm 以內），器型在漫射照明下展現質地紋理與手作溫度。'
+                    : 'Up to 4 pieces per stall (within 10×10×30 cm), highlighting proportions, clay glazes, and human handcraft under diffused exhibition illumination.'}
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* ── Key Highlights & Operational Framework ── */}
+        <section className="space-y-6 pt-4">
           {/* Exhibition Highlights Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
-            <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="bg-white border border-[#0D0D0D]/10 p-5 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:border-[#C9A96E]/50 transition-all">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Dates & Venue</span>
               <p className="text-sm font-medium text-[#0D0D0D]">2027.01.06–01.09</p>
               <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">
                 {lang === 'zh' ? '台北中山堂' : 'Taipei Zhongshan Hall'}
               </span>
             </div>
-            <div className="bg-white border border-[#C9A96E]/40 p-5 text-center bg-[#C9A96E]/[0.02]">
+            <div className="bg-white border border-[#C9A96E]/40 p-5 text-center bg-[#C9A96E]/[0.02] shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:border-[#C9A96E] transition-all">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#C9A96E] mb-1">Exhibition Fee</span>
               <p className="text-base font-semibold text-[#8C7853]">NT$ 12,000</p>
               <span className="text-[11px] text-[#0D0D0D]/60 block mt-0.5">
                 {lang === 'zh' ? '專案參展費 / 全展期' : 'Full 4-Day Period'}
               </span>
             </div>
-            <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
+            <div className="bg-white border border-[#0D0D0D]/10 p-5 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:border-[#C9A96E]/50 transition-all">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Commission</span>
               <p className="text-sm font-medium text-[#0D0D0D]">
                 {lang === 'zh' ? '現場銷售 0%' : '0% Commission'}
@@ -398,7 +523,7 @@ export default function MakingProjectPage() {
                 {lang === 'zh' ? '免抽成・自行收款' : 'Direct Creator Sales'}
               </span>
             </div>
-            <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
+            <div className="bg-white border border-[#0D0D0D]/10 p-5 text-center shadow-[0_2px_12px_rgba(0,0,0,0.02)] hover:border-[#C9A96E]/50 transition-all">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Curation</span>
               <p className="text-sm font-medium text-[#0D0D0D]">
                 {lang === 'zh' ? 'VIS 統一陳列' : 'VIS Curated Display'}
@@ -409,13 +534,47 @@ export default function MakingProjectPage() {
             </div>
           </div>
 
+          {/* Curatorial & Operational Notice */}
+          <div className="bg-white border border-[#C9A96E]/20 p-6 md:p-8 text-xs text-[#0D0D0D]/75 leading-relaxed grid md:grid-cols-3 gap-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
+            <div className="border-b md:border-b-0 md:border-r border-[#0D0D0D]/5 pb-5 md:pb-0 md:pr-6">
+              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
+                <span className="text-[#C9A96E]">✦</span> {lang === 'zh' ? '展台規劃與陳列 Scenography' : 'Display Scenography'}
+              </p>
+              <p className="font-light text-[#0D0D0D]/80 leading-relaxed text-justify">
+                {lang === 'zh'
+                  ? '大會提供展示檯面，展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐陳列）。每席位最多可有 4 件展示位置，單件以寬、深各 10 公分、高 30 公分以內為原則（特殊尺寸可另行討論）。展期可不限次更換上台作品，售出後亦可持續上架遞補。'
+                  : 'Display tables are provided and curated uniformly by the VIS curatorial team (curated shared display, not an isolated booth; creators only need to provide pieces for exhibition). Each stall accommodates up to 4 display spots on the table, with each piece within 10cm wide × 10cm deep × 30cm high (custom dimensions subject to discussion). Pieces may be rotated or restocked without limit when sold.'}
+              </p>
+            </div>
+            <div className="border-b md:border-b-0 md:border-r border-[#0D0D0D]/5 pb-5 md:pb-0 md:pr-6">
+              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
+                <span className="text-[#C9A96E]">✦</span> {lang === 'zh' ? '現場展售與金流 Sales & Logistics' : 'Sales & Logistics'}
+              </p>
+              <p className="font-light text-[#0D0D0D]/80 leading-relaxed text-justify">
+                {lang === 'zh'
+                  ? '現場銷售 0% 免抽成，由創作者/品牌自行於現場收款（支援現金、LINE Pay、個人刷卡機等），大會完全不經手交易款項。現場作品運輸、商品包裝及銷售後交付由創作者負責。'
+                  : '0% sales commission. Creators collect sales proceeds directly on-site (supporting cash, mobile payment, card terminals, etc.); the fair handles zero transaction funds. On-site transportation, packaging, and post-sale delivery are handled by creators.'}
+              </p>
+            </div>
+            <div>
+              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
+                <span className="text-[#C9A96E]">✦</span> {lang === 'zh' ? '現場駐點交流 Staffing' : 'On-Site Staffing'}
+              </p>
+              <p className="font-light text-[#0D0D0D]/80 leading-relaxed text-justify">
+                {lang === 'zh'
+                  ? '四天展期營業時間內，創作者或品牌代表需全程駐點，在場向藏家與觀眾解說創作脈絡、深度交流並親自經營品牌客戶。'
+                  : 'During the 4-day exhibition opening hours, creators or brand representatives must be present throughout the event to engage with collectors and visitors, explain artistic concepts, and build direct client relationships.'}
+              </p>
+            </div>
+          </div>
+
           {/* Detailed Schedule & Venue Card */}
-          <div className="mt-6 bg-white border border-[#C9A96E]/30 p-6 md:p-8 shadow-sm text-left">
+          <div className="bg-white border border-[#C9A96E]/30 p-6 md:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.02)] text-left">
             <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-5 border-b border-[#0D0D0D]/10 gap-2">
               <div>
                 <span className="text-[10px] font-mono tracking-[0.25em] text-[#8C7853] uppercase block">Venue & Schedule</span>
                 <h3 className="text-base md:text-lg font-serif text-[#0D0D0D]">
-                  展場地點與詳細時程表
+                  {lang === 'zh' ? '展場地點與詳細時程表' : 'Venue & Detailed Schedule'}
                 </h3>
               </div>
               <div className="text-xs text-[#0D0D0D]/70 md:text-right">
@@ -493,41 +652,7 @@ export default function MakingProjectPage() {
               </div>
             </div>
           </div>
-
-          {/* Curatorial & Operational Notice */}
-          <div className="mt-6 bg-white border border-[#C9A96E]/20 p-5 md:p-6 text-xs text-[#0D0D0D]/75 leading-relaxed grid md:grid-cols-3 gap-5">
-            <div>
-              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-1">
-                ✦ {lang === 'zh' ? '展台規劃與陳列 Scenography' : 'Display Scenography'}
-              </p>
-              <p className="font-light text-[#0D0D0D]/80">
-                {lang === 'zh'
-                  ? '大會提供展示檯面，展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐陳列）。每席位最多可有 4 件展示位置，單件以寬、深各 10 公分、高 30 公分以內為原則（特殊尺寸可另行討論）。展期可不限次更換上台作品，售出後亦可持續上架遞補。'
-                  : 'Display tables are provided and curated uniformly by the VIS curatorial team (curated shared display, not an isolated booth; creators only need to provide pieces for exhibition). Each stall accommodates up to 4 display spots on the table, with each piece within 10cm wide × 10cm deep × 30cm high (custom dimensions subject to discussion). Pieces may be rotated or restocked without limit when sold.'}
-              </p>
-            </div>
-            <div>
-              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-1">
-                ✦ {lang === 'zh' ? '現場展售與金流 Sales & Logistics' : 'Sales & Logistics'}
-              </p>
-              <p className="font-light text-[#0D0D0D]/80">
-                {lang === 'zh'
-                  ? '現場銷售 0% 免抽成，由創作者/品牌自行於現場收款（支援現金、LINE Pay、個人刷卡機等），大會完全不經手交易款項。現場作品運輸、商品包裝及銷售後交付由創作者負責。'
-                  : '0% sales commission. Creators collect sales proceeds directly on-site (supporting cash, mobile payment, card terminals, etc.); the fair handles zero transaction funds. On-site transportation, packaging, and post-sale delivery are handled by creators.'}
-              </p>
-            </div>
-            <div>
-              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-1">
-                ✦ {lang === 'zh' ? '現場駐點交流 Staffing' : 'On-Site Staffing'}
-              </p>
-              <p className="font-light text-[#0D0D0D]/80">
-                {lang === 'zh'
-                  ? '四天展期營業時間內，創作者或品牌代表需全程駐點，在場向藏家與觀眾解說創作脈絡、深度交流並親自經營品牌客戶。'
-                  : 'During the 4-day exhibition opening hours, creators or brand representatives must be present throughout the event to engage with collectors and visitors, explain artistic concepts, and build direct client relationships.'}
-              </p>
-            </div>
-          </div>
-        </header>
+        </section>
 
         {/* ── Application Wizard Section ── */}
         <section id="application-form" className="py-12">
@@ -574,32 +699,56 @@ export default function MakingProjectPage() {
             /* Wizard Steps */
             <div>
               {/* Stepper Header */}
-              <div className="mb-10">
-                <div className="grid grid-cols-4 gap-2 border-b border-[#0D0D0D]/10 pb-4">
-                  {[
-                    { step: 1, zh: '1. 品牌與創作者', en: '1. Creator Profile' },
-                    { step: 2, zh: '2. 媒材與造物理念', en: '2. Creation Brief' },
-                    { step: 3, zh: '3. 參展費用繳交', en: '3. Exhibition Fee' },
-                    { step: 4, zh: '4. 確認與送出', en: '4. Agreement' },
-                  ].map((item) => (
-                    <div 
-                      key={item.step}
-                      className={`text-center cursor-pointer transition-all ${
-                        currentStep === item.step 
-                          ? 'border-b-2 border-[#8C7853] pb-2 text-[#8C7853] font-semibold' 
-                          : currentStep > item.step 
-                            ? 'text-[#0D0D0D] font-medium' 
-                            : 'text-[#0D0D0D]/30'
-                      }`}
-                      onClick={() => {
-                        if (item.step < currentStep) setCurrentStep(item.step);
-                      }}
-                    >
-                      <span className="block text-xs md:text-sm font-sans tracking-wide">
-                        {lang === 'zh' ? item.zh : item.en}
-                      </span>
-                    </div>
-                  ))}
+              <div className="mb-12">
+                <div className="relative">
+                  {/* Subtle connecting line for desktop */}
+                  <div className="hidden md:block absolute top-[18px] left-[10%] right-[10%] h-[1px] bg-[#0D0D0D]/10 z-0" />
+                  
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 relative z-10">
+                    {[
+                      { step: 1, zh: '品牌與創作者', en: 'Creator Profile' },
+                      { step: 2, zh: '媒材與造物理念', en: 'Creation Brief' },
+                      { step: 3, zh: '參展費用繳交', en: 'Exhibition Fee' },
+                      { step: 4, zh: '確認與送出', en: 'Agreement' },
+                    ].map((item) => {
+                      const isActive = currentStep === item.step;
+                      const isCompleted = currentStep > item.step;
+                      return (
+                        <div 
+                          key={item.step}
+                          className={`bg-white md:bg-transparent p-3 md:p-1 rounded-sm border md:border-none ${
+                            isActive 
+                              ? 'border-[#8C7853]/40 shadow-sm md:shadow-none' 
+                              : 'border-[#0D0D0D]/5'
+                          } text-center cursor-pointer transition-all group`}
+                          onClick={() => {
+                            if (item.step < currentStep) setCurrentStep(item.step);
+                          }}
+                        >
+                          <div className="inline-flex items-center justify-center gap-2 mb-2">
+                            <span className={`w-8 h-8 rounded-full text-xs font-mono flex items-center justify-center transition-all ${
+                              isActive 
+                                ? 'bg-[#8C7853] text-white shadow-md ring-4 ring-[#8C7853]/15 font-semibold' 
+                                : isCompleted 
+                                  ? 'bg-[#0D0D0D] text-white' 
+                                  : 'bg-white border border-[#0D0D0D]/20 text-[#0D0D0D]/40 group-hover:border-[#8C7853]/50'
+                            }`}>
+                              {isCompleted ? '✓' : `0${item.step}`}
+                            </span>
+                          </div>
+                          <span className={`block text-xs md:text-[13px] tracking-wide font-sans transition-colors ${
+                            isActive 
+                              ? 'text-[#8C7853] font-semibold' 
+                              : isCompleted 
+                                ? 'text-[#0D0D0D] font-medium' 
+                                : 'text-[#0D0D0D]/40 group-hover:text-[#0D0D0D]/70'
+                          }`}>
+                            {lang === 'zh' ? item.zh : item.en}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
                 </div>
               </div>
 
@@ -790,11 +939,19 @@ export default function MakingProjectPage() {
                     <div className="bg-[#FAF9F6] border border-[#C9A96E]/30 p-5 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                       <div>
                         <span className="text-[10px] uppercase font-mono tracking-widest text-[#8C7853] block mb-0.5">Applied Scheme</span>
-                        <h4 className="text-sm font-semibold text-[#0D0D0D]">造物計畫特展席位 The Making Project Stall</h4>
-                        <p className="text-xs text-[#0D0D0D]/60 mt-1">包含：獨立展台席位、四天展期現場銷售 0% 抽成、參展者證與貴賓觀展卡</p>
+                        <h4 className="text-sm font-semibold text-[#0D0D0D]">
+                          {lang === 'zh' ? '造物計畫特展席位 The Making Project Stall' : 'The Making Project Stall'}
+                        </h4>
+                        <p className="text-xs text-[#0D0D0D]/60 mt-1">
+                          {lang === 'zh' 
+                            ? '包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證與貴賓觀展卡' 
+                            : 'Includes: Shared curated table display stall, 0% sales commission, Exhibitor badge & VIP Passes'}
+                        </p>
                       </div>
                       <div className="text-right whitespace-nowrap">
-                        <span className="text-xs text-[#0D0D0D]/50 block">專案參展費</span>
+                        <span className="text-xs text-[#0D0D0D]/50 block">
+                          {lang === 'zh' ? '專案參展費' : 'Exhibition Fee'}
+                        </span>
                         <span className="text-lg font-bold font-mono text-[#8C7853]">NT$ 12,000</span>
                       </div>
                     </div>
@@ -1078,6 +1235,47 @@ export default function MakingProjectPage() {
         </section>
 
       </main>
+
+      {/* Lightbox Modal for Scenography Images */}
+      {activeImageModal && (
+        <div 
+          className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 md:p-8 animate-fade-in"
+          onClick={() => setActiveImageModal(null)}
+        >
+          <div 
+            className="relative max-w-4xl w-full bg-[#0D0D0D] border border-white/10 p-4 md:p-6 text-white shadow-2xl flex flex-col max-h-[92vh]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setActiveImageModal(null)}
+              className="absolute top-4 right-4 z-10 w-9 h-9 rounded-full bg-white/10 hover:bg-white hover:text-black text-white flex items-center justify-center transition-all border border-white/20"
+              aria-label="Close Preview"
+            >
+              <X className="w-5 h-5" />
+            </button>
+            <div className="relative overflow-hidden flex-1 flex items-center justify-center min-h-0 bg-black/50 py-2">
+              <img
+                src={activeImageModal.src}
+                alt={lang === 'zh' ? activeImageModal.titleZh : activeImageModal.titleEn}
+                className="max-h-[68vh] w-auto max-w-full object-contain mx-auto shadow-lg"
+              />
+            </div>
+            <div className="pt-4 border-t border-white/10 mt-3 flex flex-col md:flex-row md:items-center justify-between gap-2 text-xs">
+              <div>
+                <h5 className="font-serif text-sm font-medium text-[#C9A96E] tracking-wide">
+                  {lang === 'zh' ? activeImageModal.titleZh : activeImageModal.titleEn}
+                </h5>
+                <p className="text-white/70 text-[11px] font-light mt-0.5 max-w-xl leading-relaxed">
+                  {lang === 'zh' ? activeImageModal.captionZh : activeImageModal.captionEn}
+                </p>
+              </div>
+              <span className="text-[10px] font-mono text-white/40 uppercase tracking-widest whitespace-nowrap">
+                VIS 2027 Scenography Concept
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="border-t border-[#0D0D0D]/10 py-12 text-center text-xs text-[#0D0D0D]/40 font-mono tracking-widest">
