@@ -1119,34 +1119,81 @@ export default function MakingProjectPage() {
                     </div>
 
                     {/* Bank Info */}
-                    <div className="grid md:grid-cols-2 gap-6">
-                      <div className="bg-[#FAF9F6] border border-[#0D0D0D]/10 p-5">
-                        <span className="text-[10px] font-mono tracking-widest text-[#8C7853] uppercase block mb-2">
-                          {lang === 'zh' ? '國內匯款帳戶 (Domestic Bank Transfer)' : 'Domestic Bank Transfer'}
-                        </span>
-                        <div className="space-y-1.5 text-xs text-[#0D0D0D]/80">
-                          <p><strong>銀行代號：</strong>808（玉山銀行）</p>
-                          <p><strong>分行名稱：</strong>中崙分行</p>
-                          <p>
-                            <strong>戶名：</strong>泰德文化創意社
-                            <span className="text-[11px] text-[#0D0D0D]/60 block sm:inline sm:ml-1">
-                              （或 泰德文化創意社郭芝妘，視各家銀行規定而異）
-                            </span>
-                          </p>
-                          <p className="font-mono"><strong>帳號：</strong><span className="text-base font-bold text-[#8C7853]">0912940021772</span></p>
+                    <div className="bg-[#FAF9F6] border border-[#C9A96E]/20 p-5 md:p-6">
+                      <div className="grid md:grid-cols-2 gap-6">
+                        {/* Domestic Remittance */}
+                        <div className="space-y-3">
+                          <span className="text-[#C9A96E] text-xs font-semibold block uppercase tracking-wider font-mono">
+                            {lang === 'zh' ? '國內匯款 (DOMESTIC REMITTANCE)' : 'DOMESTIC REMITTANCE'}
+                          </span>
+                          <div className="space-y-2 text-xs">
+                            <div>
+                              <span className="text-[#0D0D0D]/60 block text-[10px] font-sans font-medium tracking-wide">
+                                銀行/分行 BANK / BRANCH
+                              </span>
+                              <span className="font-semibold text-neutral-800 text-sm">
+                                808 玉山銀行 / 中崙分行
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-[#0D0D0D]/60 block text-[10px] font-sans font-medium tracking-wide">
+                                帳號 ACCOUNT NUMBER
+                              </span>
+                              <span className="font-semibold text-[#C9A96E] font-mono text-sm tracking-wider">
+                                0912940021772
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-[#0D0D0D]/60 block text-[10px] font-sans font-medium tracking-wide">
+                                戶名 ACCOUNT NAME
+                              </span>
+                              <span className="font-semibold text-[#0D0D0D] leading-snug block">
+                                泰德文化創意社 <span className="text-[11px] text-neutral-500 font-light">/ 或</span><br />
+                                泰德文化創意社郭芝妘 <span className="text-[10.5px] text-neutral-500 font-light">（視銀行規定而異）</span>
+                              </span>
+                            </div>
+                          </div>
                         </div>
-                      </div>
 
-                      <div className="bg-[#FAF9F6] border border-[#0D0D0D]/10 p-5">
-                        <span className="text-[10px] font-mono tracking-widest text-[#8C7853] uppercase block mb-2">
-                          {lang === 'zh' ? '國外匯款資訊 (International Wire)' : 'International Wire Transfer'}
-                        </span>
-                        <div className="space-y-1.5 text-xs text-[#0D0D0D]/80 font-mono">
-                          <p><strong>Bank:</strong> E.Sun Bank (808)</p>
-                          <p><strong>Branch:</strong> Zhonglun Branch</p>
-                          <p><strong>SWIFT Code:</strong> ESUNTWTP</p>
-                          <p><strong>Beneficiary:</strong> ART PRESS and Life Co.</p>
-                          <p><strong>Account:</strong> <span className="text-base font-bold text-[#8C7853]">0912940021772</span></p>
+                        {/* International Remittance */}
+                        <div className="space-y-3 border-t md:border-t-0 md:border-l border-[#0D0D0D]/10 pt-4 md:pt-0 md:pl-6">
+                          <span className="text-[#C9A96E] text-xs font-semibold block uppercase tracking-wider font-mono">
+                            {lang === 'zh' ? '國外匯款 (INTERNATIONAL REMITTANCE)' : 'INTERNATIONAL REMITTANCE'}
+                          </span>
+                          <div className="space-y-2 text-xs font-mono">
+                            <div>
+                              <span className="text-[#0D0D0D]/60 block text-[10px] font-sans font-medium tracking-wide">
+                                SWIFT CODE
+                              </span>
+                              <span className="font-semibold text-neutral-800 text-sm">
+                                ESUNTWTP
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-[#0D0D0D]/60 block text-[10px] font-sans font-medium tracking-wide">
+                                BENEFICIARY&apos;S NAME
+                              </span>
+                              <span className="font-semibold text-neutral-800 text-sm">
+                                ART PRESS and Life Co.
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-[#0D0D0D]/60 block text-[10px] font-sans font-medium tracking-wide">
+                                BENEFICIARY BRANCH
+                              </span>
+                              <span className="font-semibold text-neutral-800 text-sm">
+                                E.Sun Bank / Zhonglun Branch
+                              </span>
+                            </div>
+                            <div>
+                              <span className="text-[#0D0D0D]/60 block text-[10px] font-sans font-medium tracking-wide">
+                                ACCOUNT NUMBER
+                              </span>
+                              <span className="font-semibold text-[#C9A96E] text-sm tracking-wider">
+                                0912940021772
+                              </span>
+                            </div>
+                          </div>
                         </div>
                       </div>
                     </div>
