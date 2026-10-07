@@ -735,7 +735,7 @@ export default function MakingProjectPage() {
                   </span>
                 </div>
                 <div className="space-y-1.5 text-[#0D0D0D]/80">
-                  <p>• <strong>12:00 – 19:00</strong>｜{lang === 'zh' ? '公眾展期' : 'Public Day'}</p>
+                  <p>• <strong>13:00 – 19:00</strong>｜{lang === 'zh' ? '公眾展期' : 'Public Day'}</p>
                   <p>• <strong>19:00 – 21:30</strong>｜{lang === 'zh' ? '撤場' : 'Move-Out'}</p>
                 </div>
               </div>
