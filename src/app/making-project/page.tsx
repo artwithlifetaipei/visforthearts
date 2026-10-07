@@ -15,7 +15,6 @@ const MATERIAL_CATEGORIES = [
   '木作細工 Fine Woodwork',
   '玻璃工藝 Studio Glass',
   '纖維織物 Fiber & Textile',
-  '氣味生活 Olfactory & Fragrance',
   '複合媒材 Mixed Media',
   '其他原創造物 Other Original Crafts'
 ];
