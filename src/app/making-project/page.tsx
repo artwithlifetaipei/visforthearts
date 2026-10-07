@@ -360,12 +360,12 @@ export default function MakingProjectPage() {
                   {lang === 'zh' ? (
                     <p>
                       <strong className="text-[#0D0D0D] font-semibold">作品絕非工廠製造：</strong>
-                      為恪守對手工造物精神的純粹堅持，「造物計畫」唯一的申請條件為：<strong className="text-[#8C7853] font-semibold">參展物件絕不可為工廠開模、代工流水線或工業化大量複製製造</strong>。每一件作品必須由創作者個人或獨立工作室親手製作成形，保有人的雙手在塑形與打磨當下所賦予的溫度、觸感與不可替代的造物靈魂。
+                      秉持支持更多獨立創作者的長遠實踐與持續發展的核心價值，本計畫唯一的申請條件為：<strong className="text-[#8C7853] font-semibold">參展物件絕不可為工廠開模、代工流水線或工業化大量複製製造</strong>。每一件作品必須由創作者個人或獨立工作室親手製作成形，保有人的雙手在塑形與打磨當下所賦予的溫度、觸感與不可替代的造物靈魂。
                     </p>
                   ) : (
                     <p>
                       <strong className="text-[#0D0D0D] font-semibold">Strictly Non-Factory Produced:</strong>
-                      To uphold the authentic spirit of craft, the sole prerequisite for The Making Project is that <strong className="text-[#8C7853] font-semibold">exhibited objects must strictly not be factory-manufactured, mass-molded, or produced via industrial assembly lines</strong>. Every piece must be crafted by the individual creator or independent studio by hand, preserving the human touch, deliberate nuance, and irreplaceable soul embedded within.
+                      Upholding our core mission to support the long-term practice and flourishing of independent creators, the sole prerequisite for this initiative is that <strong className="text-[#8C7853] font-semibold">exhibited objects must strictly not be factory-manufactured, mass-molded, or produced via industrial assembly lines</strong>. Every piece must be crafted by the individual creator or independent studio by hand, preserving the human touch, deliberate nuance, and irreplaceable soul embedded within.
                     </p>
                   )}
                 </div>
@@ -489,15 +489,15 @@ export default function MakingProjectPage() {
                 ✦ 展台規劃與陳列 Scenography
               </p>
               <p className="font-light text-[#0D0D0D]/80">
-                大會提供展示檯面，展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐陳列），營造高質感的當代工藝聚落。
+                大會提供展示檯面，展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐陳列）。每席位最多可有 4 件展示位置，單件以寬、深各 10 公分、高 30 公分以內為原則（特殊尺寸可另行討論）。展期可不限次更換上台作品，售出後亦可持續上架遞補。
               </p>
             </div>
             <div>
               <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-1">
-                ✦ 現場展售與金流 Sales & Payment
+                ✦ 現場展售與金流 Sales & Logistics
               </p>
               <p className="font-light text-[#0D0D0D]/80">
-                現場銷售 0% 免抽成。由創作者/品牌自行於現場收款（創作者可自備現金、LINE Pay、個人刷卡機等），大會完全不經手交易款項。
+                現場銷售 0% 免抽成，由創作者/品牌自行於現場收款（支援現金、LINE Pay、個人刷卡機等），大會完全不經手交易款項。現場作品運輸、商品包裝及銷售後交付由創作者負責。
               </p>
             </div>
             <div>
