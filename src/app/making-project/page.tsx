@@ -1122,25 +1122,31 @@ export default function MakingProjectPage() {
                     <div className="grid md:grid-cols-2 gap-6">
                       <div className="bg-[#FAF9F6] border border-[#0D0D0D]/10 p-5">
                         <span className="text-[10px] font-mono tracking-widest text-[#8C7853] uppercase block mb-2">
-                          國內匯款帳戶 (Domestic Bank Transfer)
+                          {lang === 'zh' ? '國內匯款帳戶 (Domestic Bank Transfer)' : 'Domestic Bank Transfer'}
                         </span>
                         <div className="space-y-1.5 text-xs text-[#0D0D0D]/80">
-                          <p><strong>銀行代號：</strong>013（國泰世華銀行）</p>
-                          <p><strong>分行名稱：</strong>南門分行</p>
-                          <p><strong>戶名：</strong>有相生活有限公司</p>
-                          <p className="font-mono"><strong>帳號：</strong>264-03-501438-6</p>
+                          <p><strong>銀行代號：</strong>808（玉山銀行）</p>
+                          <p><strong>分行名稱：</strong>中崙分行</p>
+                          <p>
+                            <strong>戶名：</strong>泰德文化創意社
+                            <span className="text-[11px] text-[#0D0D0D]/60 block sm:inline sm:ml-1">
+                              （或 泰德文化創意社郭芝妘，視各家銀行規定而異）
+                            </span>
+                          </p>
+                          <p className="font-mono"><strong>帳號：</strong><span className="text-base font-bold text-[#8C7853]">0912940021772</span></p>
                         </div>
                       </div>
 
                       <div className="bg-[#FAF9F6] border border-[#0D0D0D]/10 p-5">
                         <span className="text-[10px] font-mono tracking-widest text-[#8C7853] uppercase block mb-2">
-                          國外匯款資訊 (International Wire)
+                          {lang === 'zh' ? '國外匯款資訊 (International Wire)' : 'International Wire Transfer'}
                         </span>
                         <div className="space-y-1.5 text-xs text-[#0D0D0D]/80 font-mono">
-                          <p><strong>Bank:</strong> Cathay United Bank (013)</p>
-                          <p><strong>SWIFT Code:</strong> UWBKTWTP</p>
-                          <p><strong>Beneficiary:</strong> YO SHIANG LIVING CO., LTD.</p>
-                          <p><strong>Account:</strong> 264-03-501438-6</p>
+                          <p><strong>Bank:</strong> E.Sun Bank (808)</p>
+                          <p><strong>Branch:</strong> Zhonglun Branch</p>
+                          <p><strong>SWIFT Code:</strong> ESUNTWTP</p>
+                          <p><strong>Beneficiary:</strong> ART PRESS and Life Co.</p>
+                          <p><strong>Account:</strong> <span className="text-base font-bold text-[#8C7853]">0912940021772</span></p>
                         </div>
                       </div>
                     </div>
