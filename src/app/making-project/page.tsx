@@ -377,12 +377,12 @@ export default function MakingProjectPage() {
               <div>
                 <span className="text-[10px] font-mono tracking-[0.25em] text-[#8C7853] uppercase block">Venue & Schedule</span>
                 <h3 className="text-base md:text-lg font-serif text-[#0D0D0D]">
-                  {lang === 'zh' ? '展場地點與詳細時程表' : 'Venue & Detailed Schedule'}
+                  展場地點與詳細時程表
                 </h3>
               </div>
               <div className="text-xs text-[#0D0D0D]/70 md:text-right">
                 <p className="font-medium text-[#0D0D0D]">
-                  {lang === 'zh' ? '台北中山堂 Taipei Zhongshan Hall' : 'Taipei Zhongshan Hall'}
+                  台北中山堂 Taipei Zhongshan Hall
                 </p>
                 <p className="text-[11px] text-[#0D0D0D]/50">
                   台北市中正區光復里延平南路 98 號 (No. 98, Yanping S Rd, Zhongzheng District, Taipei)
@@ -394,47 +394,63 @@ export default function MakingProjectPage() {
               {/* Day 1 */}
               <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4 space-y-2">
                 <div className="flex items-center justify-between border-b border-[#0D0D0D]/10 pb-1.5">
-                  <span className="font-semibold text-[#8C7853]">2027 年 1 月 6 日 星期三 (Wed, Jan 6, 2027)</span>
-                  <span className="text-[10px] font-mono text-[#0D0D0D]/50 uppercase">Installation & Vernissage</span>
+                  <span className="font-semibold text-[#8C7853]">
+                    {lang === 'zh' ? '2027 年 1 月 6 日 星期三' : 'Wednesday, January 6, 2027'}
+                  </span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/50">
+                    {lang === 'zh' ? '佈展與貴賓預展' : 'Installation & Vernissage'}
+                  </span>
                 </div>
                 <div className="space-y-1.5 text-[#0D0D0D]/80">
-                  <p>• <strong>10:00 – 17:00</strong>｜佈展日期 Installation</p>
-                  <p>• <strong>18:00</strong>｜開幕酒會 Vernissage（僅限邀請 by invitation only）</p>
-                  <p>• <strong>18:00 – 21:30</strong>｜VIP 預展 VIP Preview（僅限邀請 by invitation only）</p>
+                  <p>• <strong>10:00 – 17:00</strong>｜{lang === 'zh' ? '佈展' : 'Installation'}</p>
+                  <p>• <strong>18:00</strong>｜{lang === 'zh' ? '開幕酒會（僅限邀請）' : 'Vernissage (by invitation only)'}</p>
+                  <p>• <strong>18:00 – 21:30</strong>｜{lang === 'zh' ? 'VIP 預展（僅限邀請）' : 'VIP Preview (by invitation only)'}</p>
                 </div>
               </div>
 
               {/* Day 2 */}
               <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4 space-y-2">
                 <div className="flex items-center justify-between border-b border-[#0D0D0D]/10 pb-1.5">
-                  <span className="font-semibold text-[#8C7853]">2027 年 1 月 7 日 星期四 (Thu, Jan 7, 2027)</span>
-                  <span className="text-[10px] font-mono text-[#0D0D0D]/50 uppercase">Public Day 1</span>
+                  <span className="font-semibold text-[#8C7853]">
+                    {lang === 'zh' ? '2027 年 1 月 7 日 星期四' : 'Thursday, January 7, 2027'}
+                  </span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/50">
+                    {lang === 'zh' ? '公眾展期' : 'Public Day 1'}
+                  </span>
                 </div>
                 <div className="text-[#0D0D0D]/80 space-y-1">
-                  <p>• <strong>12:00 – 18:00</strong>｜公眾展期 Public Day</p>
+                  <p>• <strong>12:00 – 18:00</strong>｜{lang === 'zh' ? '公眾展期' : 'Public Day'}</p>
                 </div>
               </div>
 
               {/* Day 3 */}
               <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4 space-y-2">
                 <div className="flex items-center justify-between border-b border-[#0D0D0D]/10 pb-1.5">
-                  <span className="font-semibold text-[#8C7853]">2027 年 1 月 8 日 星期五 (Fri, Jan 8, 2027)</span>
-                  <span className="text-[10px] font-mono text-[#0D0D0D]/50 uppercase">Public Day 2</span>
+                  <span className="font-semibold text-[#8C7853]">
+                    {lang === 'zh' ? '2027 年 1 月 8 日 星期五' : 'Friday, January 8, 2027'}
+                  </span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/50">
+                    {lang === 'zh' ? '公眾展期' : 'Public Day 2'}
+                  </span>
                 </div>
                 <div className="text-[#0D0D0D]/80 space-y-1">
-                  <p>• <strong>12:00 – 18:00</strong>｜公眾展期 Public Day</p>
+                  <p>• <strong>12:00 – 18:00</strong>｜{lang === 'zh' ? '公眾展期' : 'Public Day'}</p>
                 </div>
               </div>
 
               {/* Day 4 */}
               <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4 space-y-2">
                 <div className="flex items-center justify-between border-b border-[#0D0D0D]/10 pb-1.5">
-                  <span className="font-semibold text-[#8C7853]">2027 年 1 月 9 日 星期六 (Sat, Jan 9, 2027)</span>
-                  <span className="text-[10px] font-mono text-[#0D0D0D]/50 uppercase">Public Day 3 & Move-Out</span>
+                  <span className="font-semibold text-[#8C7853]">
+                    {lang === 'zh' ? '2027 年 1 月 9 日 星期六' : 'Saturday, January 9, 2027'}
+                  </span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/50">
+                    {lang === 'zh' ? '公眾展期與撤場' : 'Public Day 3 & Move-Out'}
+                  </span>
                 </div>
                 <div className="space-y-1.5 text-[#0D0D0D]/80">
-                  <p>• <strong>12:00 – 19:00</strong>｜公眾展期 Public Day</p>
-                  <p>• <strong>19:00 – 21:30</strong>｜撤場 Move-Out</p>
+                  <p>• <strong>12:00 – 19:00</strong>｜{lang === 'zh' ? '公眾展期' : 'Public Day'}</p>
+                  <p>• <strong>19:00 – 21:30</strong>｜{lang === 'zh' ? '撤場' : 'Move-Out'}</p>
                 </div>
               </div>
             </div>
