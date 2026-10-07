@@ -347,16 +347,17 @@ export default function MakingProjectPage() {
           </div>
 
           {/* Exhibition Highlights Grid */}
+          {/* Exhibition Highlights Grid */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-8">
             <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
-              <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Duration</span>
-              <p className="text-sm font-medium text-[#0D0D0D]">4 天展期</p>
-              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">1日佈展 + 3日展售</span>
+              <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Dates & Venue</span>
+              <p className="text-sm font-medium text-[#0D0D0D]">2027.01.06–01.09</p>
+              <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">台北中山堂</span>
             </div>
             <div className="bg-white border border-[#C9A96E]/40 p-5 text-center bg-[#C9A96E]/[0.02]">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#C9A96E] mb-1">Exhibition Fee</span>
               <p className="text-base font-semibold text-[#8C7853]">NT$ 12,000</p>
-              <span className="text-[11px] text-[#0D0D0D]/60 block mt-0.5">專案參展費 / 四天</span>
+              <span className="text-[11px] text-[#0D0D0D]/60 block mt-0.5">專案參展費 / 全展期</span>
             </div>
             <div className="bg-white border border-[#0D0D0D]/5 p-5 text-center">
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Commission</span>
@@ -367,6 +368,75 @@ export default function MakingProjectPage() {
               <span className="block text-[10px] uppercase font-mono tracking-widest text-[#8C7853] mb-1">Curation</span>
               <p className="text-sm font-medium text-[#0D0D0D]">VIS 統一陳列</p>
               <span className="text-[11px] text-[#0D0D0D]/50 block mt-0.5">大會規劃專屬展台</span>
+            </div>
+          </div>
+
+          {/* Detailed Schedule & Venue Card */}
+          <div className="mt-6 bg-white border border-[#C9A96E]/30 p-6 md:p-8 shadow-sm text-left">
+            <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-5 border-b border-[#0D0D0D]/10 gap-2">
+              <div>
+                <span className="text-[10px] font-mono tracking-[0.25em] text-[#8C7853] uppercase block">Venue & Schedule</span>
+                <h3 className="text-base md:text-lg font-serif text-[#0D0D0D]">
+                  {lang === 'zh' ? '展場地點與詳細時程表' : 'Venue & Detailed Schedule'}
+                </h3>
+              </div>
+              <div className="text-xs text-[#0D0D0D]/70 md:text-right">
+                <p className="font-medium text-[#0D0D0D]">
+                  {lang === 'zh' ? '台北中山堂 Taipei Zhongshan Hall' : 'Taipei Zhongshan Hall'}
+                </p>
+                <p className="text-[11px] text-[#0D0D0D]/50">
+                  台北市中正區光復里延平南路 98 號 (No. 98, Yanping S Rd, Zhongzheng District, Taipei)
+                </p>
+              </div>
+            </div>
+
+            <div className="grid md:grid-cols-2 gap-4 text-xs">
+              {/* Day 1 */}
+              <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4 space-y-2">
+                <div className="flex items-center justify-between border-b border-[#0D0D0D]/10 pb-1.5">
+                  <span className="font-semibold text-[#8C7853]">2027 年 1 月 6 日 星期三 (Wed, Jan 6, 2027)</span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/50 uppercase">Installation & Vernissage</span>
+                </div>
+                <div className="space-y-1.5 text-[#0D0D0D]/80">
+                  <p>• <strong>10:00 – 17:00</strong>｜佈展日期 Installation</p>
+                  <p>• <strong>18:00</strong>｜開幕酒會 Vernissage（僅限邀請 by invitation only）</p>
+                  <p>• <strong>18:00 – 21:30</strong>｜VIP 預展 VIP Preview（僅限邀請 by invitation only）</p>
+                </div>
+              </div>
+
+              {/* Day 2 */}
+              <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4 space-y-2">
+                <div className="flex items-center justify-between border-b border-[#0D0D0D]/10 pb-1.5">
+                  <span className="font-semibold text-[#8C7853]">2027 年 1 月 7 日 星期四 (Thu, Jan 7, 2027)</span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/50 uppercase">Public Day 1</span>
+                </div>
+                <div className="text-[#0D0D0D]/80 space-y-1">
+                  <p>• <strong>12:00 – 18:00</strong>｜公眾展期 Public Day</p>
+                </div>
+              </div>
+
+              {/* Day 3 */}
+              <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4 space-y-2">
+                <div className="flex items-center justify-between border-b border-[#0D0D0D]/10 pb-1.5">
+                  <span className="font-semibold text-[#8C7853]">2027 年 1 月 8 日 星期五 (Fri, Jan 8, 2027)</span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/50 uppercase">Public Day 2</span>
+                </div>
+                <div className="text-[#0D0D0D]/80 space-y-1">
+                  <p>• <strong>12:00 – 18:00</strong>｜公眾展期 Public Day</p>
+                </div>
+              </div>
+
+              {/* Day 4 */}
+              <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4 space-y-2">
+                <div className="flex items-center justify-between border-b border-[#0D0D0D]/10 pb-1.5">
+                  <span className="font-semibold text-[#8C7853]">2027 年 1 月 9 日 星期六 (Sat, Jan 9, 2027)</span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/50 uppercase">Public Day 3 & Move-Out</span>
+                </div>
+                <div className="space-y-1.5 text-[#0D0D0D]/80">
+                  <p>• <strong>12:00 – 19:00</strong>｜公眾展期 Public Day</p>
+                  <p>• <strong>19:00 – 21:30</strong>｜撤場 Move-Out</p>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -736,7 +806,7 @@ export default function MakingProjectPage() {
                         NT$ <span className="font-mono font-bold text-[#8C7853]">12,000</span>
                       </p>
                       <p className="text-[11px] text-[#0D0D0D]/60 mt-1">
-                        {lang === 'zh' ? '（四天展期，含 1 天佈展與 3 天正式展出，所有展位皆免銷售抽成）' : '(4 days inclusive, 0% sales commission)'}
+                        {lang === 'zh' ? '（2027.01.06–01.09 台北中山堂展期，含佈展、VIP預展、開幕酒會與公眾展期，免銷售抽成）' : '(Jan 6–9, 2027 at Taipei Zhongshan Hall inclusive, 0% sales commission)'}
                       </p>
                     </div>
 
@@ -822,7 +892,7 @@ export default function MakingProjectPage() {
                     <div className="border border-[#0D0D0D]/10 divide-y divide-[#0D0D0D]/10 text-xs">
                       <div className="grid grid-cols-3 p-3.5 bg-[#FAF9F6]">
                         <span className="font-semibold text-[#8C7853]">計畫項目 Project</span>
-                        <span className="col-span-2 text-[#0D0D0D] font-medium">VIS 2027 造物計畫 The Making Project</span>
+                        <span className="col-span-2 text-[#0D0D0D] font-medium">VIS 2027 造物計畫 The Making Project（2027.01.06–01.09 台北中山堂）</span>
                       </div>
                       <div className="grid grid-cols-3 p-3.5">
                         <span className="font-semibold text-[#8C7853]">品牌 / 創作者 Brand</span>
