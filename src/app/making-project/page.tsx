@@ -535,36 +535,126 @@ export default function MakingProjectPage() {
           </div>
 
           {/* Curatorial & Operational Notice */}
-          <div className="bg-white border border-[#C9A96E]/20 p-6 md:p-8 text-xs text-[#0D0D0D]/75 leading-relaxed grid md:grid-cols-3 gap-6 shadow-[0_4px_24px_rgba(0,0,0,0.02)]">
-            <div className="border-b md:border-b-0 md:border-r border-[#0D0D0D]/5 pb-5 md:pb-0 md:pr-6">
-              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
-                <span className="text-[#C9A96E]">✦</span> {lang === 'zh' ? '展台規劃與陳列 Scenography' : 'Display Scenography'}
-              </p>
-              <p className="font-light text-[#0D0D0D]/80 leading-relaxed text-justify">
-                {lang === 'zh'
-                  ? '大會提供展示檯面，展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐陳列）。每席位最多可有 4 件展示位置，單件以寬、深各 10 公分、高 30 公分以內為原則（特殊尺寸可另行討論）。展期可不限次更換上台作品，售出後亦可持續上架遞補。'
-                  : 'Display tables are provided and curated uniformly by the VIS curatorial team (curated shared display, not an isolated booth; creators only need to provide pieces for exhibition). Each stall accommodates up to 4 display spots on the table, with each piece within 10cm wide × 10cm deep × 30cm high (custom dimensions subject to discussion). Pieces may be rotated or restocked without limit when sold.'}
-              </p>
+          <div className="grid md:grid-cols-3 gap-6">
+            {/* Card 1: Scenography */}
+            <div className="bg-white border border-[#C9A96E]/25 p-6 md:p-7 shadow-[0_2px_16px_rgba(0,0,0,0.02)] flex flex-col justify-between hover:border-[#C9A96E]/60 transition-all">
+              <div>
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#0D0D0D]/10">
+                  <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-[#8C7853] font-semibold flex items-center gap-1.5">
+                    <span className="text-[#C9A96E]">✦</span> SCENOGRAPHY
+                  </span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/40 uppercase">01 / 03</span>
+                </div>
+                <h4 className="font-serif text-base text-[#0D0D0D] font-medium tracking-wide mb-4">
+                  {lang === 'zh' ? '展台規劃與陳列' : 'Display Scenography'}
+                </h4>
+                <ul className="space-y-3 text-xs md:text-[13px] text-[#0D0D0D]/80 leading-relaxed text-left">
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#8C7853] mt-1 text-[10px]">■</span>
+                    <span>
+                      {lang === 'zh' ? (
+                        <><strong>VIS 策展統一陳列</strong>：大會提供展示檯面，陳列由策展團隊統一規劃（非獨立攤位，創作者攜帶作品進駐）。</>
+                      ) : (
+                        <><strong>Unified Display Platform</strong>: Display tables curated uniformly by the VIS team (shared display, not isolated booths).</>
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#8C7853] mt-1 text-[10px]">■</span>
+                    <span>
+                      {lang === 'zh' ? (
+                        <><strong>席位規格</strong>：每席最多展示 4 件作品，單件以寬深各 10cm、高 30cm 內為原則（特殊尺寸可另議）。</>
+                      ) : (
+                        <><strong>Stall Capacity</strong>: Up to 4 display spots on table, max 10cm W × 10cm D × 30cm H (custom sizes negotiable).</>
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#8C7853] mt-1 text-[10px]">■</span>
+                    <span>
+                      {lang === 'zh' ? (
+                        <><strong>彈性遞補</strong>：展期可不限次更換上台作品，售出後亦可持續上架遞補。</>
+                      ) : (
+                        <><strong>Flexible Restocking</strong>: Pieces may be rotated or restocked without limit when sold.</>
+                      )}
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div className="border-b md:border-b-0 md:border-r border-[#0D0D0D]/5 pb-5 md:pb-0 md:pr-6">
-              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
-                <span className="text-[#C9A96E]">✦</span> {lang === 'zh' ? '現場展售與金流 Sales & Logistics' : 'Sales & Logistics'}
-              </p>
-              <p className="font-light text-[#0D0D0D]/80 leading-relaxed text-justify">
-                {lang === 'zh'
-                  ? '現場銷售 0% 免抽成，由創作者/品牌自行於現場收款（支援現金、LINE Pay、個人刷卡機等），大會完全不經手交易款項。現場作品運輸、商品包裝及銷售後交付由創作者負責。'
-                  : '0% sales commission. Creators collect sales proceeds directly on-site (supporting cash, mobile payment, card terminals, etc.); the fair handles zero transaction funds. On-site transportation, packaging, and post-sale delivery are handled by creators.'}
-              </p>
+
+            {/* Card 2: Sales & Logistics */}
+            <div className="bg-white border border-[#C9A96E]/25 p-6 md:p-7 shadow-[0_2px_16px_rgba(0,0,0,0.02)] flex flex-col justify-between hover:border-[#C9A96E]/60 transition-all">
+              <div>
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#0D0D0D]/10">
+                  <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-[#8C7853] font-semibold flex items-center gap-1.5">
+                    <span className="text-[#C9A96E]">✦</span> SALES & LOGISTICS
+                  </span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/40 uppercase">02 / 03</span>
+                </div>
+                <h4 className="font-serif text-base text-[#0D0D0D] font-medium tracking-wide mb-4">
+                  {lang === 'zh' ? '現場展售與金流' : 'Sales & Logistics'}
+                </h4>
+                <ul className="space-y-3 text-xs md:text-[13px] text-[#0D0D0D]/80 leading-relaxed text-left">
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#8C7853] mt-1 text-[10px]">■</span>
+                    <span>
+                      {lang === 'zh' ? (
+                        <><strong>0% 免抽成・自主收款</strong>：現場銷售免抽成，由品牌自行收款（支援現金、LINE Pay、刷卡機等），大會完全不經手款項。</>
+                      ) : (
+                        <><strong>0% Commission</strong>: Creators collect proceeds directly (cash, mobile pay, card terminals); fair takes zero cut.</>
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#8C7853] mt-1 text-[10px]">■</span>
+                    <span>
+                      {lang === 'zh' ? (
+                        <><strong>物流與包裝交付</strong>：現場作品進撤運輸、商品包裝及銷售交付由創作者全權負責。</>
+                      ) : (
+                        <><strong>Packaging & Delivery</strong>: On-site transport, packaging, and hand-off to buyers handled by creators.</>
+                      )}
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </div>
-            <div>
-              <p className="font-semibold text-[#8C7853] uppercase tracking-wider text-[11px] mb-2 flex items-center gap-1.5">
-                <span className="text-[#C9A96E]">✦</span> {lang === 'zh' ? '現場駐點交流 Staffing' : 'On-Site Staffing'}
-              </p>
-              <p className="font-light text-[#0D0D0D]/80 leading-relaxed text-justify">
-                {lang === 'zh'
-                  ? '四天展期營業時間內，創作者或品牌代表需全程駐點，在場向藏家與觀眾解說創作脈絡、深度交流並親自經營品牌客戶。'
-                  : 'During the 4-day exhibition opening hours, creators or brand representatives must be present throughout the event to engage with collectors and visitors, explain artistic concepts, and build direct client relationships.'}
-              </p>
+
+            {/* Card 3: Staffing */}
+            <div className="bg-white border border-[#C9A96E]/25 p-6 md:p-7 shadow-[0_2px_16px_rgba(0,0,0,0.02)] flex flex-col justify-between hover:border-[#C9A96E]/60 transition-all">
+              <div>
+                <div className="flex items-center justify-between pb-3 mb-4 border-b border-[#0D0D0D]/10">
+                  <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-[#8C7853] font-semibold flex items-center gap-1.5">
+                    <span className="text-[#C9A96E]">✦</span> STAFFING
+                  </span>
+                  <span className="text-[10px] font-mono text-[#0D0D0D]/40 uppercase">03 / 03</span>
+                </div>
+                <h4 className="font-serif text-base text-[#0D0D0D] font-medium tracking-wide mb-4">
+                  {lang === 'zh' ? '現場駐點交流' : 'On-Site Staffing'}
+                </h4>
+                <ul className="space-y-3 text-xs md:text-[13px] text-[#0D0D0D]/80 leading-relaxed text-left">
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#8C7853] mt-1 text-[10px]">■</span>
+                    <span>
+                      {lang === 'zh' ? (
+                        <><strong>四天全程駐點</strong>：四天展期營業時間內，創作者或品牌代表需全程駐點在場。</>
+                      ) : (
+                        <><strong>Full 4-Day Presence</strong>: Creators or brand reps must be present throughout open hours.</>
+                      )}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-2">
+                    <span className="text-[#8C7853] mt-1 text-[10px]">■</span>
+                    <span>
+                      {lang === 'zh' ? (
+                        <><strong>深度對話交流</strong>：向藏家與觀眾解說創作理念與工藝細節，直接經營品牌顧客。</>
+                      ) : (
+                        <><strong>Direct Engagement</strong>: Engage collectors and visitors directly, sharing artistic concepts and building clientele.</>
+                      )}
+                    </span>
+                  </li>
+                </ul>
+              </div>
             </div>
           </div>
 
