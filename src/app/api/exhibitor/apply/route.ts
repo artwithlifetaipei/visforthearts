@@ -18,6 +18,7 @@ export async function POST(request: NextRequest) {
       contact_address,
       website_url,
       instagram_url,
+      material_category,
       zone_id,
       booth_type,
       zone_preference_1,
@@ -79,6 +80,7 @@ export async function POST(request: NextRequest) {
 
     // Detect Making Project and normalize zone_id for DB constraint compliance
     const isMakingProject = zone_id === 'making-project' || booth_type === 'MAKING-PROJECT' || booth_type?.includes('造物計畫') || (zone_preference_1 && zone_preference_1.includes('造物計畫'));
+    const safeMaterialCategory = material_category || (zone_preference_1?.match(/\((.*?)\)/)?.[1] ?? '');
     const safeZoneId = (zone_id === 'making-project' || !['artsy', 'premier', 'atelier'].includes(zone_id)) ? 'artsy' : zone_id;
 
     // Use Authorization header, Service Role key, or default supabase client
@@ -157,12 +159,15 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    // 非同步發送通知郵件給管理員 (背景處理，絕不阻塞 API 響應)
+    // 非同步發送通知郵件給管理員與申請者 (背景處理，絕不阻塞 API 響應)
     const sendAdminNotification = async () => {
       try {
-        const adminEmailsStr = process.env.ADMIN_NOTIFICATION_EMAILS || 'artwithlifetaipei@gmail.com';
-        const adminEmails = adminEmailsStr.split(',').map(e => e.trim()).filter(Boolean);
-        if (adminEmails.length === 0) adminEmails.push('artwithlifetaipei@gmail.com');
+        const DEFAULT_ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
+        const configuredAdmins = (process.env.ADMIN_NOTIFICATION_EMAILS || '')
+          .split(',')
+          .map(e => e.trim().toLowerCase())
+          .filter(Boolean);
+        const adminEmails = Array.from(new Set([...DEFAULT_ADMIN_EMAILS, ...configuredAdmins]));
 
         const appRecordId = insertedData?.id || '';
         const siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.visforthearts.com';
@@ -188,7 +193,7 @@ export async function POST(request: NextRequest) {
                 ${isMakingProject ? '收到新「造物計畫」申請單 The Making Project' : '收到新參展商申請單 Notification'}
               </h2>
               <p style="font-size: 13px; color: #555555; line-height: 1.8; margin-bottom: 28px; text-align: center;">
-                大會系統已成功收到並儲存以下${isMakingProject ? '創作者/品牌之造物計畫' : '參展商'}登記事項，請管理員儘速至大會後台審查資料與匯款憑證：
+                大會系統已成功收到並儲存以下${isMakingProject ? '創作者 / 品牌之「造物計畫」' : '參展商'}登記事項，請管理員儘速至大會後台審查資料與匯款憑證：
               </p>
               
               <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 24px;">
@@ -246,21 +251,27 @@ export async function POST(request: NextRequest) {
 
                 <tr style="background-color: #FAF9F6;">
                   <td colspan="2" style="padding: 10px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; border-bottom: 1px solid rgba(201, 169, 110, 0.2);">
-                    03. ${isMakingProject ? '計畫意向與創作理念 (The Making Project Brief)' : '展位志願與展出概念 (Preferences & Concept)'}
+                    03. ${isMakingProject ? '造物計畫席位與理念 (The Making Project Brief)' : '展位志願與展出概念 (Preferences & Concept)'}
                   </td>
                 </tr>
                 <tr>
                   <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">${isMakingProject ? '申請席位' : '展位類型首選'}</td>
-                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #1A1A1A; font-weight: 600;">${booth_type}</td>
+                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #1A1A1A; font-weight: 600;">${isMakingProject ? 'VIS 2027 造物計畫專屬特展席位' : booth_type}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">${isMakingProject ? '展區 / 媒材類別' : '展區志願順序'}</td>
+                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">${isMakingProject ? '媒材創作類別' : '展區志願順序'}</td>
                   <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #1A1A1A; line-height: 1.7;">
                     ${isMakingProject 
-                      ? `${zone_preference_1 || '造物計畫專屬席位 (NT$12,000 / 4天)'}` 
+                      ? `${safeMaterialCategory || '未指定'}` 
                       : `1: ${zone_preference_1 || '無'}<br/>2: ${zone_preference_2 || '無'}<br/>3: ${zone_preference_3 || '無'}`}
                   </td>
                 </tr>
+                ${isMakingProject ? `
+                <tr>
+                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">席位規格與權益</td>
+                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #1A1A1A; line-height: 1.7;">包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證1張、工作室貴賓名額5名</td>
+                </tr>
+                ` : ''}
                 <tr>
                   <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">${isMakingProject ? '核心造物理念' : '展出美學概要'}</td>
                   <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #333333; line-height: 1.7; white-space: pre-wrap;">${concept_brief || '無'}</td>
@@ -329,11 +340,60 @@ export async function POST(request: NextRequest) {
                   ? '感謝您提交 VIS Contemporary Culture 2027「造物計畫」參展意向申請書。大會策展委員會已成功收到您的申請資料與參展費用（NT$ 12,000）匯款憑證。' 
                   : '感謝您提交 VIS Contemporary Culture 2027 參展意向申請書。大會策展委員會已成功收到您的申請資料與保證金匯款憑證。'}
               </p>
-              <p style="font-size: 12px; color: #666666; line-height: 1.7; margin-bottom: 28px; text-align: justify;">
+              <p style="font-size: 12px; color: #666666; line-height: 1.7; margin-bottom: 24px; text-align: justify;">
                 ${isMakingProject
                   ? 'Thank you for submitting your application for VIS Contemporary Culture 2027 "The Making Project". Our curatorial committee has successfully received your proposal and exhibition fee payment proof (NT$ 12,000).'
                   : 'Thank you for submitting your exhibition proposal for VIS Contemporary Culture 2027. Our curatorial committee has successfully received your submission details and payment proof.'}
               </p>
+
+              <div style="background-color: #FAF9F6; border: 1px solid rgba(201, 169, 110, 0.2); padding: 20px; margin-bottom: 24px;">
+                <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; margin-top: 0; margin-bottom: 14px;">
+                  📋 申請摘要 Application Summary
+                </p>
+                <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+                  <tr>
+                    <td style="padding: 8px 0; color: #8C7853; width: 32%; border-bottom: 1px solid #EEEEEE;">品牌名稱</td>
+                    <td style="padding: 8px 0; color: #1A1A1A; font-weight: 600; border-bottom: 1px solid #EEEEEE;">${brand_name_zh} / ${brand_name_en}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #8C7853; border-bottom: 1px solid #EEEEEE;">申請席位</td>
+                    <td style="padding: 8px 0; color: #1A1A1A; border-bottom: 1px solid #EEEEEE;">${isMakingProject ? 'VIS 2027 造物計畫專屬特展席位' : booth_type}</td>
+                  </tr>
+                  ${isMakingProject ? `
+                  <tr>
+                    <td style="padding: 8px 0; color: #8C7853; border-bottom: 1px solid #EEEEEE;">媒材類別</td>
+                    <td style="padding: 8px 0; color: #1A1A1A; border-bottom: 1px solid #EEEEEE;">${safeMaterialCategory || '未指定'}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #8C7853; border-bottom: 1px solid #EEEEEE;">席位規格與權益</td>
+                    <td style="padding: 8px 0; color: #1A1A1A; border-bottom: 1px solid #EEEEEE; line-height: 1.6;">包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證 1 張、工作室貴賓名額 5 名</td>
+                  </tr>
+                  ` : `
+                  <tr>
+                    <td style="padding: 8px 0; color: #8C7853; border-bottom: 1px solid #EEEEEE;">展區志願</td>
+                    <td style="padding: 8px 0; color: #1A1A1A; border-bottom: 1px solid #EEEEEE;">1: ${zone_preference_1 || '無'}</td>
+                  </tr>
+                  `}
+                  <tr>
+                    <td style="padding: 8px 0; color: #8C7853; border-bottom: 1px solid #EEEEEE;">聯絡代表</td>
+                    <td style="padding: 8px 0; color: #1A1A1A; border-bottom: 1px solid #EEEEEE;">${contact_name}（${contact_phone || '未填寫'}）</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #8C7853; border-bottom: 1px solid #EEEEEE;">通知信箱</td>
+                    <td style="padding: 8px 0; color: #1A1A1A; border-bottom: 1px solid #EEEEEE;">${contact_email}</td>
+                  </tr>
+                  <tr>
+                    <td style="padding: 8px 0; color: #8C7853; border-bottom: 1px solid #EEEEEE;">匯款憑證</td>
+                    <td style="padding: 8px 0; color: #1A1A1A; border-bottom: 1px solid #EEEEEE;">${deposit_proof_url ? '已上傳匯款憑證，待大會核帳中 (Uploaded & Pending Verification)' : '未提供'}</td>
+                  </tr>
+                  ${concept_brief ? `
+                  <tr>
+                    <td style="padding: 8px 0; color: #8C7853; vertical-align: top; padding-top: 10px;">展出理念概要</td>
+                    <td style="padding: 8px 0; color: #333333; line-height: 1.6; padding-top: 10px; white-space: pre-wrap;">${concept_brief}</td>
+                  </tr>
+                  ` : ''}
+                </table>
+              </div>
 
               <div style="background-color: #FAF9F6; border: 1px solid rgba(201, 169, 110, 0.2); padding: 20px; margin-bottom: 28px;">
                 <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; margin-top: 0; margin-bottom: 12px;">
@@ -341,7 +401,7 @@ export async function POST(request: NextRequest) {
                 </p>
                 <p style="font-size: 12px; color: #333333; line-height: 1.8; margin: 0 0 10px 0;">
                   • <strong>第一階段入選結果發布日期 Phase 1 Selection Date:</strong> 2026 年 10 月 20 日 前<br/>
-                  • 審查結果將透過大會信箱 <a href="mailto:artwithlifetaipei@gmail.com" style="color: #C9A96E; text-decoration: underline;">artwithlifetaipei@gmail.com</a> 通知。若有任何問題，歡迎隨時透過此電郵聯繫大會展務團隊。
+                  • 審查結果將透過大會官方信箱 <a href="mailto:artwithlifetaipei@gmail.com" style="color: #C9A96E; text-decoration: underline;">artwithlifetaipei@gmail.com</a> 通知。若有任何問題，歡迎隨時透過此電郵聯繫大會展務團隊。
                 </p>
                 <p style="font-size: 11px; color: #666666; line-height: 1.7; margin: 0; border-top: 1px dashed rgba(201, 169, 110, 0.25); padding-top: 10px;">
                   • Selection results will be notified via our official email (<a href="mailto:artwithlifetaipei@gmail.com" style="color: #C9A96E; text-decoration: underline;">artwithlifetaipei@gmail.com</a>). Should you have any inquiries, please feel free to contact our team via this email address.
@@ -378,15 +438,21 @@ export async function POST(request: NextRequest) {
             socketTimeout: 15000,
           });
 
-          const tasks: Promise<any>[] = [
-            transporter.sendMail({
-              from: `"VIS System Notification" <${gmailUser}>`,
-              to: adminEmails.join(', '),
-              subject,
-              html: htmlContent,
-            })
-          ];
+          const tasks: Promise<any>[] = [];
 
+          // Send notification email to each admin
+          for (const adminEmail of adminEmails) {
+            tasks.push(
+              transporter.sendMail({
+                from: `"VIS System Notification" <${gmailUser}>`,
+                to: adminEmail,
+                subject,
+                html: htmlContent,
+              })
+            );
+          }
+
+          // Send confirmation email to applicant
           if (contact_email) {
             tasks.push(
               transporter.sendMail({
@@ -447,19 +513,30 @@ export async function POST(request: NextRequest) {
             },
           });
 
-          await transporter.sendMail({
-            from: `"VIS System Notification" <${smtpUser}>`,
-            to: adminEmails.join(', '),
-            subject,
-            html: htmlContent,
-          });
-          console.log(`Notification email sent via SMTP to: ${adminEmails.join(', ')}`);
+          for (const adminEmail of adminEmails) {
+            await transporter.sendMail({
+              from: `"VIS System Notification" <${smtpUser}>`,
+              to: adminEmail,
+              subject,
+              html: htmlContent,
+            });
+          }
+
+          if (contact_email) {
+            await transporter.sendMail({
+              from: `"VIS Contemporary Culture" <${smtpUser}>`,
+              to: contact_email,
+              subject: confirmSubject,
+              html: exhibitorConfirmHtml,
+            });
+          }
+          console.log(`Notification & Confirmation emails sent via SMTP to: ${adminEmails.join(', ')}`);
           return;
         }
 
         console.warn('No active email provider credentials (GMAIL_USER/APP_PASSWORD, RESEND_API_KEY, or SMTP_HOST) found in environment. Email dispatch skipped.');
       } catch (mailError) {
-        console.error('Failed to send admin notification email:', mailError);
+        console.error('Failed to send notification emails:', mailError);
       }
     };
 
