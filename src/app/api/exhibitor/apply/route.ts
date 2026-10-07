@@ -397,14 +397,15 @@ export async function POST(request: NextRequest) {
 
               <div style="background-color: #FAF9F6; border: 1px solid rgba(201, 169, 110, 0.2); padding: 20px; margin-bottom: 28px;">
                 <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; margin-top: 0; margin-bottom: 12px;">
-                  📌 重要日程 Timeline & Next Steps
+                  📌 審核須知與重要日程 Review Policy & Next Steps
                 </p>
                 <p style="font-size: 12px; color: #333333; line-height: 1.8; margin: 0 0 10px 0;">
+                  • <strong>參展資格審查聲明：</strong>大會策展委員會將依申請資料與手工造物理念進行嚴謹審查。<strong>須待收到大會官方信箱正式寄發之「核准錄取通知」（Official Admission Notice）後，始正式確立參展資格與保留展台席位</strong>。若經審查未獲錄取，大會將於公告後 14 個工作日內將參展費用全額無息退還。<br/>
                   • <strong>第一階段入選結果發布日期 Phase 1 Selection Date:</strong> 2026 年 10 月 20 日 前<br/>
                   • 審查結果將透過大會官方信箱 <a href="mailto:artwithlifetaipei@gmail.com" style="color: #C9A96E; text-decoration: underline;">artwithlifetaipei@gmail.com</a> 通知。若有任何問題，歡迎隨時透過此電郵聯繫大會展務團隊。
                 </p>
                 <p style="font-size: 11px; color: #666666; line-height: 1.7; margin: 0; border-top: 1px dashed rgba(201, 169, 110, 0.25); padding-top: 10px;">
-                  • Selection results will be notified via our official email (<a href="mailto:artwithlifetaipei@gmail.com" style="color: #C9A96E; text-decoration: underline;">artwithlifetaipei@gmail.com</a>). Should you have any inquiries, please feel free to contact our team via this email address.
+                  • <strong>Curatorial Review Policy:</strong> Submitting a proposal initiates the review procedure. Participation and stall reservation are confirmed ONLY upon receiving the official "Admission Approval Notice" via email (<a href="mailto:artwithlifetaipei@gmail.com" style="color: #C9A96E; text-decoration: underline;">artwithlifetaipei@gmail.com</a>). If not selected, exhibition fees will be refunded 100% in full.
                 </p>
               </div>
 

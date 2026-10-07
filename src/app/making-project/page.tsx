@@ -741,6 +741,111 @@ export default function MakingProjectPage() {
               </div>
             </div>
           </div>
+
+          {/* ── Application & Review Procedure Card ── */}
+          <div className="bg-white border border-[#C9A96E]/30 p-6 md:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.02)] text-left">
+            <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-6 border-b border-[#0D0D0D]/10 gap-2">
+              <div>
+                <span className="text-[10px] font-mono tracking-[0.25em] text-[#8C7853] uppercase block">Procedure & Selection</span>
+                <h3 className="text-base md:text-lg font-serif text-[#0D0D0D]">
+                  {lang === 'zh' ? '造物計畫申請與審核流程' : 'Application & Curatorial Review Procedure'}
+                </h3>
+              </div>
+              <span className="text-[11px] font-mono text-[#8C7853] bg-[#C9A96E]/10 px-3 py-1 border border-[#C9A96E]/30 self-start md:self-auto uppercase tracking-wider">
+                {lang === 'zh' ? '4 階段審核機制' : '4-Stage Review Framework'}
+              </span>
+            </div>
+
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+              {/* Stage 1 */}
+              <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4.5 space-y-2 relative flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-2 border-b border-[#0D0D0D]/10 mb-2">
+                    <span className="text-[10px] font-mono tracking-widest text-[#8C7853] font-semibold">STAGE 01</span>
+                    <span className="text-[10px] font-mono text-[#0D0D0D]/40">STEP 1</span>
+                  </div>
+                  <h4 className="font-serif text-sm text-[#0D0D0D] font-medium mb-1.5">
+                    {lang === 'zh' ? '線上申請與繳費' : 'Submission & Fee'}
+                  </h4>
+                  <p className="text-[#0D0D0D]/70 font-light leading-relaxed">
+                    {lang === 'zh' 
+                      ? '填寫創作者與品牌簡介、闡述手工藝造物理念，並於線上完成參展意向費用（NT$ 12,000）之匯款憑證上傳。'
+                      : 'Complete creator profile, submit handcraft brief, and upload exhibition fee (NT$ 12,000) remittance receipt.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Stage 2 */}
+              <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4.5 space-y-2 relative flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-2 border-b border-[#0D0D0D]/10 mb-2">
+                    <span className="text-[10px] font-mono tracking-widest text-[#8C7853] font-semibold">STAGE 02</span>
+                    <span className="text-[10px] font-mono text-[#0D0D0D]/40">STEP 2</span>
+                  </div>
+                  <h4 className="font-serif text-sm text-[#0D0D0D] font-medium mb-1.5">
+                    {lang === 'zh' ? '策展委員會資格審查' : 'Curatorial Review'}
+                  </h4>
+                  <p className="text-[#0D0D0D]/70 font-light leading-relaxed">
+                    {lang === 'zh'
+                      ? '評審委員會進行逐案審閱，嚴格把關「非工廠製造、純手作成形」核心原則，評估媒材工藝與展區風貌。'
+                      : 'The curatorial jury reviews each submission, verifying strictly non-factory craftsmanship and aesthetic integrity.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Stage 3 */}
+              <div className="bg-[#C9A96E]/5 border-2 border-[#8C7853]/40 p-4.5 space-y-2 relative shadow-sm flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-2 border-b border-[#8C7853]/20 mb-2">
+                    <span className="text-[10px] font-mono tracking-widest text-[#8C7853] font-bold">STAGE 03</span>
+                    <span className="text-[9px] font-mono bg-[#8C7853] text-white px-1.5 py-0.5 rounded-xs font-semibold">核心確認</span>
+                  </div>
+                  <h4 className="font-serif text-sm text-[#0D0D0D] font-semibold mb-1.5 text-[#8C7853]">
+                    {lang === 'zh' ? '官方核准與參展確立' : 'Official Approval & Admission'}
+                  </h4>
+                  <p className="text-[#0D0D0D]/90 font-medium leading-relaxed">
+                    {lang === 'zh'
+                      ? '【重要】收到大會官方信箱（artwithlifetaipei@gmail.com）發送之正式「核准錄取通知」後，始正式具備參展資格與保留席位。'
+                      : '[CRITICAL] Participation and stall reservation are only officially confirmed upon receiving the formal Official Admission Notice from our official email.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Stage 4 */}
+              <div className="bg-[#FAF9F6] border border-[#0D0D0D]/5 p-4.5 space-y-2 relative flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between pb-2 border-b border-[#0D0D0D]/10 mb-2">
+                    <span className="text-[10px] font-mono tracking-widest text-[#8C7853] font-semibold">STAGE 04</span>
+                    <span className="text-[10px] font-mono text-[#0D0D0D]/40">STEP 4</span>
+                  </div>
+                  <h4 className="font-serif text-sm text-[#0D0D0D] font-medium mb-1.5">
+                    {lang === 'zh' ? '進駐佈展與四天展期' : 'Installation & Fair'}
+                  </h4>
+                  <p className="text-[#0D0D0D]/70 font-light leading-relaxed">
+                    {lang === 'zh'
+                      ? '獲選創作者領取參展者證與 5 名貴賓名額，於 2027.01.06 進駐中山堂展台陳列佈展，展開全展期自主展售與交流。'
+                      : 'Selected creators receive exhibitor badge & 5 VIP passes, installing on shared curated tables at Zhongshan Hall on Jan 6, 2027.'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Review Clarification Callout */}
+            <div className="mt-5 p-4 bg-[#FAF9F6] border-l-2 border-[#8C7853] text-xs text-[#0D0D0D]/80 leading-relaxed">
+              <strong className="text-[#0D0D0D] font-semibold">
+                {lang === 'zh' ? '💡 關於參展資格審核說明：' : '💡 Curatorial Review & Formal Participation Policy:'}
+              </strong>
+              {lang === 'zh' ? (
+                <span>
+                  送出本線上申請表與繳交參展費用係為啟動大會策展委員會之審查程序，<strong>並非送出即代表取得席位</strong>。為確保古蹟展場之展出水準與空間和諧，大會採嚴謹之策展甄選機制，<strong>申請單位須待收到大會官方正式發出之「核准錄取通知信」（由 artwithlifetaipei@gmail.com 寄發），方代表正式確立參展資格與保留展台席位</strong>。若經委員會評選未獲入選，大會將於公告結果後 14 個工作日內，將參展費用全額無息退還至原匯款帳戶，請創作者安心申請。
+                </span>
+              ) : (
+                <span>
+                  Submitting this application and remitting the fee initiates the curatorial review procedure and <strong>does not automatically grant an exhibition spot</strong>. To preserve curatorial excellence, <strong>participation and table reservations are only formally valid once you receive the official "Admission Approval Notice" from our email (artwithlifetaipei@gmail.com)</strong>. If not selected, the fee will be 100% refunded in full within 14 business days.
+                </span>
+              )}
+            </div>
+          </div>
         </section>
 
         {/* ── Application Wizard Section ── */}
@@ -756,14 +861,14 @@ export default function MakingProjectPage() {
               </h3>
               <p className="text-sm text-[#0D0D0D]/75 leading-relaxed mb-6 max-w-lg mx-auto">
                 {lang === 'zh' 
-                  ? '大會策展委員會已成功收到貴品牌的造物計畫意向書與參展費用（NT$ 12,000）匯款憑證。執行委員會將進行專業評估審核，並發布評選結果通知至您的聯繫信箱。'
-                  : 'The curatorial committee has successfully received your proposal and exhibition fee payment proof (NT$ 12,000). The committee will conduct a review and announce results via email.'}
+                  ? '大會策展委員會已成功收到貴品牌的造物計畫意向書與參展費用（NT$ 12,000）匯款憑證。本計畫採嚴謹策展甄選機制，大會進行專業評估審核後，申請單位須於收到官方發出之正式核准錄取通知後，方代表正式取得參展席位。審查結果將發布至您的聯繫信箱。'
+                  : 'The curatorial committee has successfully received your proposal and exhibition fee payment proof (NT$ 12,000). Applications undergo rigorous jury review; participation is officially confirmed upon receipt of the formal Admission Approval Notice via email.'}
               </p>
               <div className="bg-[#FAF9F6] border border-[#0D0D0D]/10 p-5 mb-8 text-xs text-[#0D0D0D]/70 leading-relaxed text-left max-w-md mx-auto">
                 <p className="font-semibold text-[#8C7853] mb-1">
-                  {lang === 'zh' ? '📌 審核與退款保證：' : '📌 Review & Refund Guarantee:'}
+                  {lang === 'zh' ? '📌 審核須知與退款保證：' : '📌 Review Policy & Refund Guarantee:'}
                 </p>
-                <p>• {lang === 'zh' ? '評選結果將透過大會官方信箱 ' : 'Review results will be sent from '}<span className="font-mono text-[#0D0D0D]">artwithlifetaipei@gmail.com</span>{lang === 'zh' ? ' 寄發。' : '.'}</p>
+                <p>• {lang === 'zh' ? '收到大會官方信箱 ' : 'Admission notices will be sent from '}<span className="font-mono text-[#0D0D0D]">artwithlifetaipei@gmail.com</span>{lang === 'zh' ? ' 寄發之正式「核准錄取通知」後，始正式確立參展席位資格。' : '; participation is formally confirmed only upon receipt.'}</p>
                 <p className="mt-1">• {lang === 'zh' ? '若未獲錄取，大會將於公告後 14 個工作日內，將參展費用全額無息退還至原匯款帳戶。' : 'If not selected, the exhibition fee will be fully refunded without interest within 14 business days.'}</p>
               </div>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
@@ -1286,6 +1391,18 @@ export default function MakingProjectPage() {
                       </div>
                     </div>
 
+                    {/* Review & Formal Admission Notice Banner */}
+                    <div className="bg-[#FAF9F6] border-l-2 border-[#8C7853] p-4 text-xs text-[#0D0D0D]/80 leading-relaxed">
+                      <p className="font-semibold text-[#8C7853] mb-1">
+                        {lang === 'zh' ? '📌 參展資格審查聲明：' : '📌 Formal Admission Policy:'}
+                      </p>
+                      <p>
+                        {lang === 'zh'
+                          ? '送出本申請與上傳費用水單為啟動審查程序。大會採嚴謹策展甄選，申請者須待收到大會官方信箱（artwithlifetaipei@gmail.com）正式寄發之「核准錄取通知」（Official Admission Notice）後，方代表正式取得參展席位。若未獲錄取，大會將於公告後 14 個工作日內全額無息退還參展費用。'
+                          : 'Submitting this form initiates the curatorial review procedure. Participation and stall reservation are only officially confirmed upon receiving the formal Admission Approval Notice from artwithlifetaipei@gmail.com. If not selected, fees are 100% refunded within 14 business days.'}
+                      </p>
+                    </div>
+
                     {/* Agreement Checkboxes */}
                     <div className="space-y-4 pt-2">
                       <label className="flex items-start gap-3 cursor-pointer group">
@@ -1298,11 +1415,11 @@ export default function MakingProjectPage() {
                         <span className="text-xs text-[#0D0D0D]/80 leading-relaxed">
                           {lang === 'zh' ? (
                             <>
-                              <strong>【參展費用繳交與退款協議】</strong> 我同意為維護大展評審秩序，申請單位須於送出申請時繳交參展費用新台幣 12,000 元整並附上匯款證明。<strong>若經評審委員會審查未獲錄取之單位，大會將於公告錄取名單後 14 個工作日內，將參展費用 12,000 元整無息全額退還至原匯款帳戶</strong>；<strong>若通過評選獲得錄取，於錄取通知後 7 天內提出放棄者可扣除手續費退還 50% 參展費，逾期提出放棄者恕不予退款</strong>。
+                              <strong>【參展費用繳交與審核錄取協議】</strong> 我理解送出本申請表與繳交參展費用新台幣 12,000 元整係為啟動大會資格審查之必要程序；<strong>須待收到大會官方信箱（artwithlifetaipei@gmail.com）正式寄發之「核准錄取通知」（Official Admission Notice）後，始正式具備參展資格與保留展台席位</strong>。若經評審委員會審查未獲錄取之單位，大會將於公告錄取名單後 14 個工作日內，將參展費用 12,000 元整無息全額退還至原匯款帳戶；若通過評選獲得錄取，於錄取通知後 7 天內提出放棄者可扣除手續費退還 50% 參展費，逾期提出放棄者恕不予退款。
                             </>
                           ) : (
                             <>
-                              <strong>[Exhibition Fee Payment & Refund Agreement]</strong> To maintain curatorial integrity, applicants must submit the exhibition fee of NT$ 12,000 with proof of wire transfer upon applying. <strong>If not selected by the jury, the full exhibition fee of NT$ 12,000 will be refunded without interest to the original account within 14 working days of result announcement</strong>; <strong>if selected, cancellation within 7 days of notice is eligible for a 50% refund (less processing fees); cancellations beyond 7 days are strictly non-refundable</strong>.
+                              <strong>[Exhibition Fee Payment & Admission Agreement]</strong> I understand that submitting this application with proof of NT$ 12,000 is required to initiate the curatorial review process; <strong>formal participation and table stall reservation are confirmed ONLY upon receiving the official "Admission Approval Notice" from artwithlifetaipei@gmail.com</strong>. If not selected by the jury, the full fee of NT$ 12,000 will be refunded without interest within 14 working days of result announcement; if selected, cancellation within 7 days is eligible for a 50% refund (less processing fees); cancellations beyond 7 days are non-refundable.
                             </>
                           )}
                         </span>
