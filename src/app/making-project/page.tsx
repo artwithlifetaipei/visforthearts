@@ -346,6 +346,31 @@ export default function MakingProjectPage() {
                 </>
               )}
             </div>
+
+            {/* Essential Criterion Highlight Box */}
+            <div className="mt-6 pt-6 border-t border-[#0D0D0D]/10">
+              <div className="bg-[#FAF9F6] border-l-2 border-[#8C7853] p-4.5 md:p-5 rounded-r">
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#8C7853]" />
+                  <span className="text-[11px] font-mono tracking-[0.2em] uppercase text-[#8C7853] font-semibold">
+                    {lang === 'zh' ? '【計畫唯一參展條件】' : '【Core Participation Criterion】'}
+                  </span>
+                </div>
+                <div className="text-xs md:text-sm text-[#0D0D0D]/90 font-light leading-relaxed">
+                  {lang === 'zh' ? (
+                    <p>
+                      <strong className="text-[#0D0D0D] font-semibold">作品絕非工廠製造：</strong>
+                      為恪守對手工造物精神的純粹堅持，「造物計畫」唯一的申請條件為：<strong className="text-[#8C7853] font-semibold">參展物件絕不可為工廠開模、代工流水線或工業化大量複製製造</strong>。每一件作品必須由創作者個人或獨立工作室親手製作成形，保有人的雙手在塑形與打磨當下所賦予的溫度、觸感與不可替代的造物靈魂。
+                    </p>
+                  ) : (
+                    <p>
+                      <strong className="text-[#0D0D0D] font-semibold">Strictly Non-Factory Produced:</strong>
+                      To uphold the authentic spirit of craft, the sole prerequisite for The Making Project is that <strong className="text-[#8C7853] font-semibold">exhibited objects must strictly not be factory-manufactured, mass-molded, or produced via industrial assembly lines</strong>. Every piece must be crafted by the individual creator or independent studio by hand, preserving the human touch, deliberate nuance, and irreplaceable soul embedded within.
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
           </div>
 
           {/* Exhibition Highlights Grid */}
@@ -955,7 +980,7 @@ export default function MakingProjectPage() {
                           className="mt-1 w-4 h-4 accent-[#8C7853] rounded"
                         />
                         <span className="text-xs text-[#0D0D0D]/80 leading-relaxed">
-                          <strong>【原創造物、統一陳列與現場駐點承諾】</strong> 我保證展出之作品均為創作者原創物件，符合「造物計畫」核心精神。我理解並同意<strong>展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐）</strong>，現場交易由品牌自行收款（免抽成 0%），且<strong>四天展期營業時間內創作者或品牌代表需全程駐點</strong>向觀眾解說、交流並自行維護展品，並遵守大會隱私權保護政策與個人資料聲明。
+                          <strong>【原創造物、非工廠製造與展務承諾】</strong> 我保證展出之作品均為創作者原創手作物件（<strong>絕非工廠開模或流水線大量製造</strong>），符合「造物計畫」唯一核心準則。我理解並同意<strong>展台與陳列由 VIS 策展團隊統一規劃提供（非獨立攤位，創作者只需提供參展物件進駐）</strong>，現場交易由品牌自行收款（免抽成 0%），且<strong>四天展期營業時間內創作者或品牌代表需全程駐點</strong>向觀眾解說、交流並自行維護展品，並遵守大會隱私權保護政策與個人資料聲明。
                         </span>
                       </label>
                     </div>
