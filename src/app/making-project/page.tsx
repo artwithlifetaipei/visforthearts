@@ -47,8 +47,8 @@ export default function MakingProjectPage() {
     website_url: '',
     instagram_url: '',
     material_category: '生活家具器物 Lifestyle Objects',
-    zone_id: 'making-project',
-    booth_type: '造物計畫席位 The Making Project Stall',
+    zone_id: 'artsy',
+    booth_type: 'MAKING-PROJECT',
     zone_preference_1: '造物計畫特展席位 (NT$12,000 / 4天)',
     zone_preference_2: '無',
     zone_preference_3: '無',
@@ -229,6 +229,8 @@ export default function MakingProjectPage() {
 
       const submissionData = {
         ...formData,
+        zone_id: 'artsy',
+        booth_type: 'MAKING-PROJECT',
         zone_preference_1: `造物計畫特展席位 (${formData.material_category}) (NT$12,000 / 4天)`,
       };
 

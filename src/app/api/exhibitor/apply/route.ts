@@ -77,6 +77,10 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Detect Making Project and normalize zone_id for DB constraint compliance
+    const isMakingProject = zone_id === 'making-project' || booth_type === 'MAKING-PROJECT' || booth_type?.includes('造物計畫') || (zone_preference_1 && zone_preference_1.includes('造物計畫'));
+    const safeZoneId = (zone_id === 'making-project' || !['artsy', 'premier', 'atelier'].includes(zone_id)) ? 'artsy' : zone_id;
+
     // Use Authorization header, Service Role key, or default supabase client
     const authHeader = request.headers.get('authorization');
     const dbClient = authHeader
@@ -101,7 +105,7 @@ export async function POST(request: NextRequest) {
         contact_address,
         website_url,
         instagram_url,
-        zone_id,
+        zone_id: safeZoneId,
         booth_type,
         zone_preference_1,
         zone_preference_2,
@@ -132,7 +136,7 @@ export async function POST(request: NextRequest) {
             contact_address,
             website_url,
             instagram_url,
-            zone_id,
+            zone_id: safeZoneId,
             booth_type,
             zone_preference_1,
             zone_preference_2,
@@ -166,8 +170,6 @@ export async function POST(request: NextRequest) {
           ? `${siteBaseUrl}/api/exhibitor/proof?id=${appRecordId}` 
           : (deposit_proof_url.startsWith('http') ? deposit_proof_url : `${siteBaseUrl}/exhibitor/admin`);
         const adminPortalUrl = `${siteBaseUrl}/exhibitor/admin`;
-
-        const isMakingProject = zone_id === 'making-project';
         const subject = isMakingProject 
           ? `【造物計畫新申請】${brand_name_zh} / ${brand_name_en} 已送出「造物計畫」申請`
           : `【新參展申請通知】${brand_name_zh} / ${brand_name_en} 已送出參展申請`;
