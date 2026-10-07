@@ -167,22 +167,26 @@ export async function POST(request: NextRequest) {
           : (deposit_proof_url.startsWith('http') ? deposit_proof_url : `${siteBaseUrl}/exhibitor/admin`);
         const adminPortalUrl = `${siteBaseUrl}/exhibitor/admin`;
 
-        const subject = `【新參展申請通知】${brand_name_zh} / ${brand_name_en} 已送出參展申請`;
+        const isMakingProject = zone_id === 'making-project';
+        const subject = isMakingProject 
+          ? `【造物計畫新申請】${brand_name_zh} / ${brand_name_en} 已送出「造物計畫」申請`
+          : `【新參展申請通知】${brand_name_zh} / ${brand_name_en} 已送出參展申請`;
+
         const htmlContent = `
           <div style="max-width: 620px; margin: 0 auto; padding: 40px 20px; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #FAF9F6; color: #1A1A1A;">
             <div style="text-align: center; margin-bottom: 28px;">
               <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" alt="VIS Logo" style="height: 42px; width: auto; max-width: 100%; object-fit: contain; margin-bottom: 10px;" />
               <p style="font-size: 10px; font-weight: 600; letter-spacing: 0.35em; color: #C9A96E; text-transform: uppercase; margin: 0;">
-                Exhibitor Application Notification
+                ${isMakingProject ? 'The Making Project Application' : 'Exhibitor Application Notification'}
               </p>
             </div>
 
             <div style="background-color: #FFFFFF; border: 1px solid rgba(201, 169, 110, 0.25); padding: 36px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
               <h2 style="font-size: 17px; font-weight: 400; color: #0D0D0D; margin-top: 0; margin-bottom: 8px; text-align: center; letter-spacing: 0.05em;">
-                收到新參展商申請單 Notification
+                ${isMakingProject ? '收到新「造物計畫」申請單 The Making Project' : '收到新參展商申請單 Notification'}
               </h2>
               <p style="font-size: 13px; color: #555555; line-height: 1.8; margin-bottom: 28px; text-align: center;">
-                大會系統已成功收到並儲存以下參展商的登記事項，請管理員儘速至大會後台審查資料與匯款憑證：
+                大會系統已成功收到並儲存以下${isMakingProject ? '創作者/品牌之造物計畫' : '參展商'}登記事項，請管理員儘速至大會後台審查資料與匯款憑證：
               </p>
               
               <table style="width: 100%; border-collapse: collapse; font-size: 13px; margin-bottom: 24px;">
@@ -240,30 +244,30 @@ export async function POST(request: NextRequest) {
 
                 <tr style="background-color: #FAF9F6;">
                   <td colspan="2" style="padding: 10px 14px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #C9A96E; text-transform: uppercase; border-bottom: 1px solid rgba(201, 169, 110, 0.2);">
-                    03. 展位志願與展出概念 (Preferences & Concept)
+                    03. ${isMakingProject ? '計畫意向與創作理念 (The Making Project Brief)' : '展位志願與展出概念 (Preferences & Concept)'}
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">展位類型首選</td>
+                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">${isMakingProject ? '申請席位' : '展位類型首選'}</td>
                   <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #1A1A1A; font-weight: 600;">${booth_type}</td>
                 </tr>
                 <tr>
-                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">展區志願順序</td>
+                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">${isMakingProject ? '展區 / 媒材類別' : '展區志願順序'}</td>
                   <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #1A1A1A; line-height: 1.7;">
-                    1: ${zone_preference_1 || '無'}<br/>
-                    2: ${zone_preference_2 || '無'}<br/>
-                    3: ${zone_preference_3 || '無'}
+                    ${isMakingProject 
+                      ? `${zone_preference_1 || '造物計畫專屬席位 (NT$12,000 / 4天)'}` 
+                      : `1: ${zone_preference_1 || '無'}<br/>2: ${zone_preference_2 || '無'}<br/>3: ${zone_preference_3 || '無'}`}
                   </td>
                 </tr>
                 <tr>
-                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">展出美學概要</td>
+                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">${isMakingProject ? '核心造物理念' : '展出美學概要'}</td>
                   <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #333333; line-height: 1.7; white-space: pre-wrap;">${concept_brief || '無'}</td>
                 </tr>
               </table>
 
               <div style="background-color: #FAF9F6; border: 1px solid rgba(201, 169, 110, 0.25); padding: 24px; text-align: center; margin-top: 10px;">
                 <p style="font-size: 11px; font-weight: 600; letter-spacing: 0.2em; color: #8C7853; text-transform: uppercase; margin-top: 0; margin-bottom: 14px;">
-                  04. 保證金匯款憑證審查 (Payment Proof)
+                  04. ${isMakingProject ? '參展費用匯款憑證審查 (Exhibition Fee: NT$ 12,000)' : '保證金匯款憑證審查 (Payment Proof)'}
                 </p>
                 ${
                   deposit_proof_url 
@@ -294,32 +298,39 @@ export async function POST(request: NextRequest) {
           </div>
         `;
 
-        const confirmSubject = `【VIS Contemporary Culture】參展意向申請收件確認 Proposal Received Notice`;
+        const confirmSubject = isMakingProject
+          ? `【VIS Contemporary Culture】「造物計畫」參展意向申請收件確認 Proposal Received Notice`
+          : `【VIS Contemporary Culture】參展意向申請收件確認 Proposal Received Notice`;
+
         const exhibitorConfirmHtml = `
           <div style="max-width: 620px; margin: 0 auto; padding: 40px 20px; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #FAF9F6; color: #1A1A1A;">
             <div style="text-align: center; margin-bottom: 28px;">
               <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" alt="VIS Logo" style="height: 42px; width: auto; max-width: 100%; object-fit: contain; margin-bottom: 10px;" />
               <p style="font-size: 10px; font-weight: 600; letter-spacing: 0.35em; color: #C9A96E; text-transform: uppercase; margin: 0;">
-                Exhibitor Proposal Confirmation
+                ${isMakingProject ? 'The Making Project Confirmation' : 'Exhibitor Proposal Confirmation'}
               </p>
             </div>
 
             <div style="background-color: #FFFFFF; border: 1px solid rgba(201, 169, 110, 0.25); padding: 36px 30px; box-shadow: 0 10px 30px rgba(0,0,0,0.03);">
               <h2 style="font-size: 17px; font-weight: 400; color: #0D0D0D; margin-top: 0; margin-bottom: 6px; text-align: center; letter-spacing: 0.05em;">
-                參展意向申請收件確認
+                ${isMakingProject ? '「造物計畫」參展意向申請收件確認' : '參展意向申請收件確認'}
               </h2>
               <p style="font-size: 10px; font-weight: 500; letter-spacing: 0.2em; color: #8C7853; text-transform: uppercase; text-align: center; margin-top: 0; margin-bottom: 24px;">
-                Proposal Received Confirmation
+                ${isMakingProject ? 'The Making Project Proposal Received' : 'Proposal Received Confirmation'}
               </p>
 
               <p style="font-size: 13px; color: #444444; line-height: 1.8; margin-bottom: 12px;">
                 親愛的 <strong>${contact_name}</strong>（${brand_name_zh} / ${brand_name_en}），您好：
               </p>
               <p style="font-size: 13px; color: #444444; line-height: 1.8; margin-bottom: 16px; text-align: justify;">
-                感謝您提交 VIS Contemporary Culture 2027 參展意向申請書。大會策展委員會已成功收到您的申請資料與保證金匯款憑證。
+                ${isMakingProject 
+                  ? '感謝您提交 VIS Contemporary Culture 2027「造物計畫」參展意向申請書。大會策展委員會已成功收到您的申請資料與參展費用（NT$ 12,000）匯款憑證。' 
+                  : '感謝您提交 VIS Contemporary Culture 2027 參展意向申請書。大會策展委員會已成功收到您的申請資料與保證金匯款憑證。'}
               </p>
               <p style="font-size: 12px; color: #666666; line-height: 1.7; margin-bottom: 28px; text-align: justify;">
-                Thank you for submitting your exhibition proposal for VIS Contemporary Culture 2027. Our curatorial committee has successfully received your submission details and payment proof.
+                ${isMakingProject
+                  ? 'Thank you for submitting your application for VIS Contemporary Culture 2027 "The Making Project". Our curatorial committee has successfully received your proposal and exhibition fee payment proof (NT$ 12,000).'
+                  : 'Thank you for submitting your exhibition proposal for VIS Contemporary Culture 2027. Our curatorial committee has successfully received your submission details and payment proof.'}
               </p>
 
               <div style="background-color: #FAF9F6; border: 1px solid rgba(201, 169, 110, 0.2); padding: 20px; margin-bottom: 28px;">
