@@ -349,7 +349,7 @@ export default function MakingProjectPage() {
         <div className="absolute top-10 left-1/2 -translate-x-1/2 w-[720px] h-[400px] bg-[radial-gradient(ellipse_at_center,rgba(201,169,110,0.14),transparent_70%)] blur-3xl pointer-events-none -z-10" />
 
         {/* ── Curation Intro Section ── */}
-        <header className="relative py-12 md:py-16 text-center max-w-4xl mx-auto">
+        <header className="relative py-12 md:py-16 text-center max-w-5xl mx-auto">
           {/* Curatorial Masthead Overline */}
           <div className="inline-flex items-center gap-3.5 mb-6">
             <span className="w-6 sm:w-12 h-px bg-gradient-to-r from-transparent to-[#C9A96E]" />
@@ -393,7 +393,7 @@ export default function MakingProjectPage() {
           </div>
 
           {/* Curatorial Plaque */}
-          <div className="bg-white/95 backdrop-blur-md border border-[#C9A96E]/30 p-8 sm:p-12 md:p-14 shadow-[0_20px_50px_rgba(201,169,110,0.06)] text-left relative overflow-hidden rounded-xs">
+          <div className="bg-white/95 backdrop-blur-md border border-[#C9A96E]/30 p-6 sm:p-10 md:p-12 shadow-[0_20px_50px_rgba(201,169,110,0.06)] text-left relative overflow-hidden rounded-xs">
             {/* Architectural Corner Accents */}
             <div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-[#C9A96E]/60 pointer-events-none" />
             <div className="absolute top-3 right-3 w-3 h-3 border-t border-r border-[#C9A96E]/60 pointer-events-none" />
@@ -409,10 +409,15 @@ export default function MakingProjectPage() {
                   CURATORIAL THESIS // 策展宗旨
                 </span>
               </div>
-              <h3 className="font-serif-garamond text-xl sm:text-2xl md:text-[26px] text-[#111111] font-normal leading-[1.4] tracking-wide">
-                {lang === 'zh' 
-                  ? '「支持更多獨立創作者的長遠實踐與持續發展，為本計畫的核心宗旨。」' 
-                  : '"Supporting the long-term practice and flourishing of independent creators lies at the very core of this initiative."'}
+              <h3 className="font-serif-garamond text-base sm:text-lg md:text-xl lg:text-[22px] xl:text-[24px] text-[#111111] font-normal leading-[1.45] tracking-wide sm:whitespace-nowrap">
+                {lang === 'zh' ? (
+                  <>
+                    <span className="inline-block">「支持更多獨立創作者的長遠實踐與持續發展，</span>
+                    <span className="inline-block">為本計畫的核心宗旨。」</span>
+                  </>
+                ) : (
+                  <span>"Supporting the long-term practice and flourishing of independent creators lies at the very core of this initiative."</span>
+                )}
               </h3>
             </div>
 
