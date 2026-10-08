@@ -192,7 +192,7 @@ export async function POST(req: Request) {
                   親愛的創作者 / 品牌代表 <strong>${app.contact_name}</strong>（${app.brand_name_zh}）您好：
                 </p>
                 <p style="font-size: 14px; line-height: 1.8; color: #333333;">
-                  誠摯恭喜您！大會策展委員會已完成「VIS 2027 造物計畫」之策展甄選與作品審查。我們非常榮幸地正式通知您：您的創作提案<strong>《${app.brand_name_zh}》</strong>已正式通過策展評核，獲得 2027 VIS 台北中山堂光復廳之參展資格！
+                  誠摯恭喜您！大會策展委員會已完成「VIS 2027 造物計畫」之提案審查與作品評核。我們非常榮幸地正式通知您：您的創作提案<strong>《${app.brand_name_zh}》</strong>已正式通過策展評核，獲得 2027 VIS 台北中山堂光復廳之參展資格！
                 </p>
 
                 <!-- Approval Status Card -->
@@ -298,7 +298,7 @@ export async function POST(req: Request) {
                   敬啟者 <strong>${app.contact_name}</strong>（${app.brand_name_zh}）您好：
                 </p>
                 <p style="font-size: 14px; line-height: 1.8; color: #333333;">
-                  感謝貴品牌參與 2027 VIS 參展甄選。大會策展委員會已完成評審甄選與空間配置規劃，我們非常榮幸地正式通知您：貴品牌<strong>《${app.brand_name_zh}》</strong>已獲大會正式核准入選！
+                  感謝貴品牌參與 2027 VIS 參展申請。大會策展委員會已完成審查評核與空間配置規劃，我們非常榮幸地正式通知您：貴品牌<strong>《${app.brand_name_zh}》</strong>已獲大會正式核准入選！
                 </p>
 
                 <!-- Approval Status Card -->

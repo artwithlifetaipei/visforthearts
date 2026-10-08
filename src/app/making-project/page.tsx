@@ -298,7 +298,7 @@ export default function MakingProjectPage() {
                 THE MAKING PROJECT
               </span>
               <span className="text-[9px] font-sans-outfit tracking-[0.3em] text-[#8C7853] uppercase leading-tight font-light">
-                2027 CURATORIAL CALL
+                2027 CURATORIAL INITIATIVE
               </span>
             </div>
           </Link>
@@ -354,7 +354,7 @@ export default function MakingProjectPage() {
           <div className="inline-flex items-center gap-3.5 mb-6">
             <span className="w-6 sm:w-12 h-px bg-gradient-to-r from-transparent to-[#C9A96E]" />
             <span className="text-[10px] sm:text-[11px] font-sans-outfit tracking-[0.34em] text-[#8C7853] uppercase font-medium">
-              VIS 2027 CURATORIAL INITIATIVE // SPECIAL OPEN CALL
+              VIS 2027 SPECIAL CURATORIAL INITIATIVE // PROPOSAL INVITATION
             </span>
             <span className="w-6 sm:w-12 h-px bg-gradient-to-l from-transparent to-[#C9A96E]" />
           </div>
@@ -367,7 +367,7 @@ export default function MakingProjectPage() {
           {/* Bilingual Subtitle */}
           <div className="flex flex-col sm:flex-row items-center justify-center gap-1.5 sm:gap-3 mb-6">
             <span className="font-serif-garamond text-base sm:text-xl tracking-[0.28em] text-[#8C7853] font-normal uppercase">
-              {lang === 'zh' ? '「造 物 計 畫」特 展 席 位 甄 選' : 'CURATORIAL OPEN CALL'}
+              {lang === 'zh' ? '「造 物 計 畫」特 展 席 位 專 屬 申 請' : 'SPECIAL CURATORIAL INITIATIVE'}
             </span>
             <span className="hidden sm:inline text-[#C9A96E]/40">•</span>
             <span className="text-[11px] sm:text-xs font-sans-outfit tracking-[0.2em] text-[#1A1A1A]/50 uppercase font-light">
@@ -863,7 +863,7 @@ export default function MakingProjectPage() {
           <div className="bg-white border border-[#C9A96E]/30 p-6 md:p-8 shadow-[0_4px_24px_rgba(0,0,0,0.02)] text-left">
             <div className="flex flex-col md:flex-row md:items-center justify-between pb-4 mb-6 border-b border-[#0D0D0D]/10 gap-2">
               <div>
-                <span className="text-[10px] font-mono tracking-[0.25em] text-[#8C7853] uppercase block">Procedure & Selection</span>
+                <span className="text-[10px] font-mono tracking-[0.25em] text-[#8C7853] uppercase block">Procedure & Review</span>
                 <h3 className="text-base md:text-lg font-serif text-[#0D0D0D]">
                   {lang === 'zh' ? '造物計畫申請與審核流程' : 'Application & Curatorial Review Procedure'}
                 </h3>
@@ -940,7 +940,7 @@ export default function MakingProjectPage() {
                   </h4>
                   <p className="text-[#0D0D0D]/70 font-light leading-relaxed">
                     {lang === 'zh'
-                      ? '獲選創作者領取參展者證與 5 名貴賓名額，於 2027.01.06 進駐中山堂展台陳列佈展，展開全展期自主展售與交流。'
+                      ? '錄取參展創作者領取參展者證與 5 名貴賓名額，於 2027.01.06 進駐中山堂展台陳列佈展，展開全展期自主展售與交流。'
                       : 'Selected creators receive exhibitor badge & 5 VIP passes, installing on shared curated tables at Zhongshan Hall on Jan 6, 2027.'}
                   </p>
                 </div>
@@ -954,7 +954,7 @@ export default function MakingProjectPage() {
               </strong>
               {lang === 'zh' ? (
                 <span>
-                  送出本線上申請表與繳交參展費用係為啟動大會策展委員會之審查程序，<strong>並非送出即代表取得席位</strong>。為確保古蹟展場之展出水準與空間和諧，大會採嚴謹之策展甄選機制，<strong>申請單位須待收到大會官方正式發出之「核准錄取通知信」（由 artwithlifetaipei@gmail.com 寄發），方代表正式確立參展資格與保留展台席位</strong>。若經委員會評選未獲入選，大會將於公告結果後 14 個工作日內，將參展費用全額無息退還至原匯款帳戶，請創作者安心申請。
+                  送出本線上申請表與繳交參展費用係為啟動大會策展委員會之審查程序，<strong>並非送出即代表取得席位</strong>。為確保古蹟展場之展出水準與空間和諧，大會採嚴謹之策展審查機制，<strong>申請單位須待收到大會官方正式發出之「核准錄取通知信」（由 artwithlifetaipei@gmail.com 寄發），方代表正式確立參展資格與保留展台席位</strong>。若經委員會審查未獲核准錄取，大會將於公告結果後 14 個工作日內，將參展費用全額無息退還至原匯款帳戶，請創作者安心申請。
                 </span>
               ) : (
                 <span>
@@ -978,7 +978,7 @@ export default function MakingProjectPage() {
               </h3>
               <p className="text-sm text-[#0D0D0D]/75 leading-relaxed mb-6 max-w-lg mx-auto">
                 {lang === 'zh' 
-                  ? '大會策展委員會已成功收到貴品牌的造物計畫意向書與參展費用（NT$ 12,000）匯款憑證。本計畫採嚴謹策展甄選機制，大會進行專業評估審核後，申請單位須於收到官方發出之正式核准錄取通知後，方代表正式取得參展席位。審查結果將發布至您的聯繫信箱。'
+                  ? '大會策展委員會已成功收到貴品牌的造物計畫意向書與參展費用（NT$ 12,000）匯款憑證。本計畫採嚴謹策展審查機制，大會進行專業評估審核後，申請單位須於收到官方發出之正式核准錄取通知後，方代表正式取得參展席位。審查結果將發布至您的聯繫信箱。'
                   : 'The curatorial committee has successfully received your proposal and exhibition fee payment proof (NT$ 12,000). Applications undergo rigorous jury review; participation is officially confirmed upon receipt of the formal Admission Approval Notice via email.'}
               </p>
               <div className="bg-[#FAF9F6] border border-[#0D0D0D]/10 p-5 mb-8 text-xs text-[#0D0D0D]/70 leading-relaxed text-left max-w-md mx-auto">
@@ -1515,7 +1515,7 @@ export default function MakingProjectPage() {
                       </p>
                       <p>
                         {lang === 'zh'
-                          ? '送出本申請與上傳費用水單為啟動審查程序。大會採嚴謹策展甄選，申請者須待收到大會官方信箱（artwithlifetaipei@gmail.com）正式寄發之「核准錄取通知」（Official Admission Notice）後，方代表正式取得參展席位。若未獲錄取，大會將於公告後 14 個工作日內全額無息退還參展費用。'
+                          ? '送出本申請與上傳費用水單為啟動審查程序。大會採嚴謹策展審查機制，申請者須待收到大會官方信箱（artwithlifetaipei@gmail.com）正式寄發之「核准錄取通知」（Official Admission Notice）後，方代表正式取得參展席位。若未獲錄取，大會將於公告後 14 個工作日內全額無息退還參展費用。'
                           : 'Submitting this form initiates the curatorial review procedure. Participation and stall reservation are only officially confirmed upon receiving the formal Admission Approval Notice from artwithlifetaipei@gmail.com. If not selected, fees are 100% refunded within 14 business days.'}
                       </p>
                     </div>
@@ -1532,7 +1532,7 @@ export default function MakingProjectPage() {
                         <span className="text-xs text-[#0D0D0D]/80 leading-relaxed">
                           {lang === 'zh' ? (
                             <>
-                              <strong>【參展費用繳交與審核錄取協議】</strong> 我理解送出本申請表與繳交參展費用新台幣 12,000 元整係為啟動大會資格審查之必要程序；<strong>須待收到大會官方信箱（artwithlifetaipei@gmail.com）正式寄發之「核准錄取通知」（Official Admission Notice）後，始正式具備參展資格與保留展台席位</strong>。若經評審委員會審查未獲錄取之單位，大會將於公告錄取名單後 14 個工作日內，將參展費用 12,000 元整無息全額退還至原匯款帳戶；若通過評選獲得錄取，於錄取通知後 7 天內提出放棄者可扣除手續費退還 50% 參展費，逾期提出放棄者恕不予退款。
+                              <strong>【參展費用繳交與審核錄取協議】</strong> 我理解送出本申請表與繳交參展費用新台幣 12,000 元整係為啟動大會資格審查之必要程序；<strong>須待收到大會官方信箱（artwithlifetaipei@gmail.com）正式寄發之「核准錄取通知」（Official Admission Notice）後，始正式具備參展資格與保留展台席位</strong>。若經評審委員會審查未獲錄取之單位，大會將於公告錄取名單後 14 個工作日內，將參展費用 12,000 元整無息全額退還至原匯款帳戶；若通過審查獲得核准錄取，於錄取通知後 7 天內提出放棄者可扣除手續費退還 50% 參展費，逾期提出放棄者恕不予退款。
                             </>
                           ) : (
                             <>
