@@ -428,10 +428,13 @@ export default function MakingProjectPage() {
                 {lang === 'zh' ? (
                   <>
                     <p className="leading-loose">
-                      「造物計劃」邀請以個人或小型工作室為核心的獨立創作者，以強調人進行造物價值與意義為核，透過諸如陶、木、金屬、玻璃與纖維等材料，呈現各自對物件與生活的理解。
+                      「造物計畫」邀請以個人或小型工作室為核心的獨立創作者，以強調人進行造物價值與意義為核，透過諸如陶、木、金屬、玻璃與纖維等材料，呈現各自對物件與生活的理解。
                     </p>
                     <p className="leading-loose text-[#111111]/75">
                       在 AI 興起、形式容易被大量生成與複製的時代，重新觀看人的判斷如何轉化為比例、觸感與差異，也讓觀眾透過觀看、選擇與使用，建立自己的品味。
+                    </p>
+                    <p className="leading-loose text-[#111111]/80">
+                      我們深知，唯有直接觸及具備深厚鑑賞力與實質消費力的客群，創作者才能為自己的手作實踐找到持續深耕與長遠發展的根基；然而在現行藝術生態中，此類匯聚高端藏家的殿堂級展場，往往伴隨著高昂的展位成本與沉重門檻，令人望而卻步。「造物計畫」正是為打破此一界限而發起——以台北中山堂歷史古蹟的頂級氛圍為舞台，透過大會統一策展與親民的專案共享席位，大幅減輕進駐負擔，讓獨立創作者得以在毫無後顧之憂的純粹姿態下，直接與深度藏家對話，為手作藝術開拓長久可持續的生存土壤。
                     </p>
                   </>
                 ) : (
@@ -441,6 +444,9 @@ export default function MakingProjectPage() {
                     </p>
                     <p className="leading-loose text-[#111111]/75">
                       In an era where AI emerges and forms are easily generated and duplicated at scale, we revisit how human judgment translates into proportion, texture, and nuance — inviting audiences to cultivate their own taste through observation, selection, and daily use.
+                    </p>
+                    <p className="leading-loose text-[#111111]/80">
+                      We believe that connecting directly with patrons and collectors possessing discerning taste and genuine purchasing power is essential for sustaining an independent creative practice long-term. Yet traditionally, prestigious platforms that gather such an audience require prohibitive financial commitments and intimidating operational barriers. The Making Project was conceived to dismantle this divide — leveraging our historic museum-grade platform to lower the threshold through unified curation and accessible shared stalls, empowering makers to engage high-value collectors and foster lasting patronage without excessive burdens.
                     </p>
                   </>
                 )}
@@ -716,9 +722,9 @@ export default function MakingProjectPage() {
                     <span className="text-[#8C7853] mt-1 text-[10px]">■</span>
                     <span>
                       {lang === 'zh' ? (
-                        <><strong>0% 免抽成・自主收款</strong>：現場銷售免抽成，由品牌自行收款（支援現金、LINE Pay、刷卡機等），大會完全不經手款項。</>
+                        <><strong>0% 免抽成・自主收款</strong>：現場銷售免抽成，由品牌自行收款（支援現金、LINE Pay、刷卡機等），所得收益 100% 歸創作者所有，實質減輕營運負擔並支持手作永續發展。</>
                       ) : (
-                        <><strong>0% Commission</strong>: Creators collect proceeds directly (cash, mobile pay, card terminals); fair takes zero cut.</>
+                        <><strong>0% Commission</strong>: Creators collect 100% of proceeds directly (cash, mobile pay, card terminals); fair takes zero cut to foster sustainable creative practice.</>
                       )}
                     </span>
                   </li>
@@ -763,9 +769,9 @@ export default function MakingProjectPage() {
                     <span className="text-[#8C7853] mt-1 text-[10px]">■</span>
                     <span>
                       {lang === 'zh' ? (
-                        <><strong>深度對話交流</strong>：向藏家與觀眾解說創作理念與工藝細節，直接經營品牌顧客。</>
+                        <><strong>深度對話交流</strong>：直接面對具實質消費力與藝術鑑賞力的藏家及品味受眾，親身解說創作理念與工藝細節，拓展長遠支持者。</>
                       ) : (
-                        <><strong>Direct Engagement</strong>: Engage collectors and visitors directly, sharing artistic concepts and building clientele.</>
+                        <><strong>Direct Engagement</strong>: Engage collectors with discerning taste and purchasing power directly, sharing creative ethos and building lasting clientele.</>
                       )}
                     </span>
                   </li>
