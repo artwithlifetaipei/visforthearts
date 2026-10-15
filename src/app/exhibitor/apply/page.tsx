@@ -727,6 +727,28 @@ export default function ExhibitorApplyPage() {
       {/* Multi-step Container */}
       <main className={`relative z-10 mx-auto px-6 pt-10 transition-all duration-300 ${currentStep === 2 ? 'max-w-6xl' : 'max-w-4xl'}`}>
         
+        {/* Special Extension Notice Banner */}
+        {!submitSuccess && (
+          <div className="mb-8 p-4 bg-white/80 border border-[#C9A96E]/35 shadow-xs flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+            <div className="flex items-start sm:items-center gap-2.5 text-[#8C7853]">
+              <span className="text-[#C9A96E] text-base leading-none">✦</span>
+              <div>
+                <strong className="text-[#0D0D0D] font-medium mr-1.5">
+                  {lang === 'zh' ? '大會特別公告：' : 'Official Notice:'}
+                </strong>
+                <span className="text-[#0D0D0D]/75">
+                  {lang === 'zh'
+                    ? '因應各方熱烈參展申請需求，線上意向申請特別加開延長至今日（10/15）23:59 截止。'
+                    : 'Due to popular application demand, online submissions are specially extended to 23:59 tonight (Oct 15).'}
+                </span>
+              </div>
+            </div>
+            <span className="self-end sm:self-auto text-[10px] font-mono text-[#8C7853] bg-[#C9A96E]/10 border border-[#C9A96E]/30 px-2.5 py-0.5 uppercase tracking-wider whitespace-nowrap">
+              {lang === 'zh' ? '特別加開延長' : 'Special Extension'}
+            </span>
+          </div>
+        )}
+
         {/* Step Indicator Progress Bar */}
         {!submitSuccess && (
           <div className="mb-10">

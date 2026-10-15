@@ -193,6 +193,8 @@ export interface KeyDate {
   dateStr: string; // ISO-like 'YYYY/MM/DD'
   labelZh: string;
   labelEn: string;
+  noteZh?: string;
+  noteEn?: string;
 }
 
 export const KEY_DATES: KeyDate[] = [
@@ -200,6 +202,8 @@ export const KEY_DATES: KeyDate[] = [
     dateStr: '2026/10/15 23:59',
     labelZh: '截止申請',
     labelEn: 'Application Deadline',
+    noteZh: '因應需求特別加開至今日午夜',
+    noteEn: 'Specially extended upon high demand',
   },
   {
     dateStr: '2026/10/20 18:00 前',

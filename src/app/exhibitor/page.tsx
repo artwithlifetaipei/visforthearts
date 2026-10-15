@@ -705,9 +705,19 @@ export default function ExhibitorLandingPage() {
               className="bg-white/40 backdrop-blur-md rounded-none p-5 border border-[#C9A96E]/20 shadow-[0_10px_30px_rgba(201,169,110,0.02)] w-full max-w-xl relative"
             >
               <div className="absolute inset-x-4 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/30 to-transparent" />
-              <div className="flex items-center justify-center gap-2 mb-4 text-[#C9A96E]">
-                <Clock className="w-4 h-4" />
-                <span className="text-[10px] tracking-[0.3em] font-semibold uppercase">{dict[lang].countdownLabel}</span>
+              <div className="flex flex-col items-center justify-center gap-2 mb-4 text-[#C9A96E]">
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4" />
+                  <span className="text-[10px] tracking-[0.3em] font-semibold uppercase">{dict[lang].countdownLabel}</span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-3 py-1 bg-[#C9A96E]/10 border border-[#C9A96E]/30 text-[#8C7853] text-[10px] md:text-[11px] font-sans tracking-wide">
+                  <span>✦</span>
+                  <span>
+                    {lang === 'zh' 
+                      ? '因應各方申請需求・特別加開延長至今日 23:59 截止' 
+                      : 'Specially extended to 23:59 tonight upon high demand'}
+                  </span>
+                </div>
               </div>
               <div className="grid grid-cols-4 gap-3 md:gap-5">
                 <div className="border border-[#C9A96E]/15 p-2 bg-white/40">
@@ -914,6 +924,11 @@ export default function ExhibitorLandingPage() {
                     <h4 className="font-mono text-[#C9A96E] text-xs font-semibold tracking-wider mb-2">{item.dateStr}</h4>
                     <p className="text-xs text-[#0D0D0D]/85 font-medium tracking-wide">{item.labelZh}</p>
                     <p className="text-[9px] text-[#0D0D0D]/40 uppercase tracking-widest mt-1">{item.labelEn}</p>
+                    {item.noteZh && (
+                      <span className="mt-2 text-[9px] text-[#8C7853] bg-[#C9A96E]/10 border border-[#C9A96E]/25 px-2 py-0.5 inline-block rounded-xs">
+                        {lang === 'zh' ? item.noteZh : item.noteEn}
+                      </span>
+                    )}
                   </div>
                 ))}
               </div>

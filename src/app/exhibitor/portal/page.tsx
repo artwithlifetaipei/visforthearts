@@ -274,6 +274,9 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                 <div className="text-base font-bold text-white font-mono mt-1">{date.dateStr}</div>
                 <div className="text-xs text-neutral-300 font-light mt-1.5">{date.labelZh}</div>
                 <div className="text-[10px] text-neutral-500 uppercase tracking-widest font-light mt-0.5">{date.labelEn}</div>
+                {date.noteZh && (
+                  <div className="text-[10px] text-[#DFBA87] mt-2 font-mono">{date.noteZh}</div>
+                )}
                 
                 <div className={`mt-4 inline-block text-[9px] font-semibold tracking-wider px-2 py-1 rounded border uppercase ${status.color}`}>
                   {status.label}
