@@ -197,7 +197,7 @@ export interface KeyDate {
 
 export const KEY_DATES: KeyDate[] = [
   {
-    dateStr: '2026/10/15 18:00',
+    dateStr: '2026/10/15 23:59',
     labelZh: '截止申請',
     labelEn: 'Application Deadline',
   },
@@ -228,5 +228,5 @@ export const KEY_DATES: KeyDate[] = [
   },
 ];
 
-/** Countdown target: 線上申請截止 2026/10/15 18:00 (UTC+8) */
-export const APPLICATION_DEADLINE = new Date('2026-10-15T18:00:00+08:00');
+/** Countdown target: 線上申請截止 2026/10/15 23:59 (UTC+8) */
+export const APPLICATION_DEADLINE = new Date('2026-10-15T23:59:59+08:00');
