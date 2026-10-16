@@ -216,7 +216,7 @@ export async function POST(req: Request) {
                   <li><strong>大平面展示檯面席位</strong>：由 VIS 策展團隊統一規劃高品質展示空間與照明氛圍。</li>
                   <li><strong>現場銷售 0% 抽成</strong>：四天展期內現場交易款項 100% 歸創作者所有。</li>
                   <li><strong>參展者證 1 張</strong>：展期四天自由進出展場與工作通道。</li>
-                  <li><strong>工作室貴賓名額 5 名</strong>：可於參展商後台提報 5 位親友或藏家貴賓專屬免票觀展名額。</li>
+                  <li><strong>工作室貴賓名額 10 名</strong>：可於參展商後台提報 10 位親友或藏家貴賓專屬免票觀展名額。</li>
                 </ul>
 
                 <!-- Schedule -->
@@ -247,7 +247,7 @@ export async function POST(req: Request) {
                   03. 參展商專屬協作平台 (Brand Portal Access)
                 </h3>
                 <p style="font-size: 13px; color: #444444; line-height: 1.8; margin: 10px 0;">
-                  大會已自動為您開通專屬協作後台。您可於後台<strong>簽署古蹟參展守則、提報 5 名貴賓觀展名單、以及上傳品牌媒體宣傳素材</strong>。
+                  大會已自動為您開通專屬協作後台。您可於後台<strong>簽署古蹟參展守則、提報 10 名貴賓觀展名單、以及上傳品牌媒體宣傳素材</strong>。
                 </p>
                 <div style="background-color: #FAF9F6; border: 1px solid #EAEAEA; border-radius: 4px; padding: 16px; margin: 14px 0; font-size: 13px;">
                   <div><strong>登入帳號 Login Email：</strong> <span style="color: #8C7853; font-family: monospace;">${app.contact_email}</span></div>

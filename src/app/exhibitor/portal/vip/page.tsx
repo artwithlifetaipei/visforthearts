@@ -40,8 +40,14 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formError, setFormError] = useState('');
 
-  // 30 or 50 based on zone ID 'atelier' ("III.匠心藝藏品牌展區")
-  const vipLimit = brand?.zone_id === 'atelier' ? 50 : 30;
+  // Check if brand belongs to Making Project (特展席位: 10位貴賓名單)
+  const isMakingProject = 
+    brand?.booth_type === 'MAKING-PROJECT' || 
+    brand?.booth_type?.includes('造物') || 
+    brand?.zone_id === 'making-project';
+
+  // 10 for Making Project, 50 for Atelier, 30 for others
+  const vipLimit = isMakingProject ? 10 : (brand?.zone_id === 'atelier' ? 50 : 30);
 
   useEffect(() => {
     const loadBrandAndVips = async () => {
@@ -214,7 +220,11 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
             模組 C — VIP 貴賓名單提報中心
           </h1>
           <p className="text-xs text-neutral-400 font-light mt-1">
-            一般參展品牌可免費提報 <strong className="text-[#DFBA87]">最多 {vipLimit} 位</strong> 貴賓，享有大會優先入場禮遇。
+            {isMakingProject ? (
+              <>「造物計畫」特展席位創作者可提報 <strong className="text-[#DFBA87]">最多 10 位</strong> 工作室貴賓名單，享有大會專屬免票入場禮遇。</>
+            ) : (
+              <>一般參展品牌可免費提報 <strong className="text-[#DFBA87]">最多 {vipLimit} 位</strong> 貴賓，享有大會優先入場禮遇。</>
+            )}
           </p>
         </div>
         <div className="bg-white/5 border border-white/5 px-4 py-2 rounded text-xs font-mono text-[#DFBA87]">
