@@ -85,7 +85,7 @@ async function runTests() {
         contact_phone: '0912345678',
         contact_address: '台北市中正區',
         zone_id: 'artsy',
-        booth_type: 'S01-03,S06-08',
+        booth_type: 'A01',
         zone_preference_1: 'Zone_A',
         concept_brief: 'E2E test concept description',
         deposit_proof_url: 'https://placehold.co/600x400',

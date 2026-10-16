@@ -9,7 +9,7 @@ import {
   Download, Eye, Mail, Phone, Globe, Calendar, ExternalLink, Loader2, RefreshCw, ChevronDown, ChevronUp,
   Signature, FileCheck, Sparkles
 } from 'lucide-react';
-import { ZONE_MAP, ALL_ZONES } from '@/lib/exhibitorConstants';
+import { ZONE_MAP, ALL_ZONES, formatBoothDisplay, normalizeBoothCode, getBoothPrice } from '@/lib/exhibitorConstants';
 
 export const isMakingProjectApp = (app: any) => {
   if (!app) return false;
@@ -66,15 +66,15 @@ const parsePreference = (prefStr: string) => {
     let booth_type = '';
     const codeMatch = prefStr.match(/-\s*([A-Za-z0-9\-]+)/);
     if (codeMatch && codeMatch[1]) {
-      booth_type = codeMatch[1];
+      booth_type = normalizeBoothCode(codeMatch[1], zone_id);
     } else {
-      booth_type = zone_id === 'artsy' ? 'S01-03,S06-08' : zone_id === 'premier' ? 'M9-M15' : 'A-ENTRANCE';
+      booth_type = zone_id === 'artsy' ? 'A01' : zone_id === 'premier' ? 'A04' : 'L3';
     }
 
     return {
       zone_id,
       booth_type,
-      price: price || (zone_id === 'artsy' ? 42000 : zone_id === 'premier' ? 42000 : 108000),
+      price: price || getBoothPrice(booth_type, zone_id),
     };
   } catch (err) {
     console.error('Error parsing preference fallback:', err);
@@ -285,7 +285,7 @@ export default function ExhibitorAdminPage() {
 
     try {
       let chosenZoneId = app.zone_id;
-      let chosenBoothType = app.booth_type;
+      let chosenBoothType = normalizeBoothCode(app.booth_type, app.zone_id);
 
       const prefStr = selectedPrefNum === 1 ? app.zone_preference_1 :
                       selectedPrefNum === 2 ? app.zone_preference_2 :
@@ -295,7 +295,7 @@ export default function ExhibitorAdminPage() {
         const parsed = parsePreference(prefStr);
         if (parsed) {
           chosenZoneId = parsed.zone_id;
-          chosenBoothType = parsed.booth_type;
+          chosenBoothType = normalizeBoothCode(parsed.booth_type, chosenZoneId);
         }
       }
 
@@ -341,15 +341,14 @@ export default function ExhibitorAdminPage() {
   };
 
   // Action: Approve Application
-  // Action: Approve Application
   const handleApproveApplication = async (app: any) => {
     if (actionLoadingId) return;
     setActionLoadingId(app.id);
 
     try {
       const isMaking = isMakingProjectApp(app);
-      let chosenZoneId = app.zone_id;
-      let chosenBoothType = app.booth_type;
+      let chosenZoneId = isMaking ? 'artsy' : app.zone_id;
+      let chosenBoothType = isMaking ? 'MAKING-PROJECT' : normalizeBoothCode(app.booth_type, app.zone_id);
 
       if (!isMaking) {
         const selectedPrefNum = selectedPrefs[app.id] || 1;
@@ -361,7 +360,7 @@ export default function ExhibitorAdminPage() {
           const parsed = parsePreference(prefStr);
           if (parsed) {
             chosenZoneId = parsed.zone_id;
-            chosenBoothType = parsed.booth_type;
+            chosenBoothType = normalizeBoothCode(parsed.booth_type, chosenZoneId);
           }
         }
       } else {
@@ -763,7 +762,7 @@ export default function ExhibitorAdminPage() {
                                 <div className="text-[10px] text-neutral-400 font-mono mt-0.5">{app.brand_name_en}</div>
                               </td>
                               <td className="p-4 font-light">
-                                <span className="font-semibold block text-[#DFBA87]">{app.booth_type}</span>
+                                <span className="font-semibold block text-[#DFBA87]">{formatBoothDisplay(app.booth_type, app.zone_id)}</span>
                                 <span className="text-[10px] text-neutral-400">{zone?.nameZh}</span>
                               </td>
                               <td className="p-4 font-light">
@@ -1515,7 +1514,7 @@ export default function ExhibitorAdminPage() {
                     </span>
                   </div>
                   <div className="text-xs text-neutral-400 font-mono mt-0.5 truncate">
-                    {lightboxApp.brand_name_en} • 聯繫人：{lightboxApp.contact_name} ({lightboxApp.contact_email}) • 展位：{lightboxApp.booth_type}
+                    {lightboxApp.brand_name_en} • 聯繫人：{lightboxApp.contact_name} ({lightboxApp.contact_email}) • 展位：{formatBoothDisplay(lightboxApp.booth_type, lightboxApp.zone_id)}
                   </div>
                 </div>
 

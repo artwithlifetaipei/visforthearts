@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { formatBoothDisplay } from '@/lib/exhibitorConstants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu, X, Calendar, FileCheck, Users, Image as ImageIcon, LogOut, ShieldCheck, 
@@ -41,7 +42,15 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
     if (typeof window !== 'undefined') {
       try {
         const saved = sessionStorage.getItem('vis_portal_brand_data');
-        return saved ? JSON.parse(saved) : null;
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed.booth_type === 'string' && (parsed.booth_type.includes('S01') || parsed.booth_type.includes('S06') || parsed.booth_type === 'S-2x2')) {
+            parsed.booth_type = 'A01';
+            sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(parsed));
+          }
+          return parsed;
+        }
+        return null;
       } catch { return null; }
     }
     return null;
@@ -196,6 +205,9 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
       }
 
       if (data) {
+        if (data.booth_type && (data.booth_type.includes('S01') || data.booth_type.includes('S06') || data.booth_type === 'S-2x2')) {
+          data.booth_type = 'A01';
+        }
         setBrandData(data);
         sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(data));
       } else {
@@ -207,7 +219,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               brand_name_zh: '大會測試品牌 (管理員)',
               brand_name_en: 'VIS Admin Test Brand',
               zone_id: 'artsy',
-              booth_type: 'S01-03,S06-08',
+              booth_type: 'A01',
               is_micro_exposure: false,
               portal_email: formattedEmail,
             })
@@ -223,7 +235,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               brand_name_zh: '大會測試品牌 (管理員)',
               brand_name_en: 'VIS Admin Test Brand',
               zone_id: 'artsy',
-              booth_type: 'S01-03,S06-08',
+              booth_type: 'A01',
               is_micro_exposure: false,
               portal_email: formattedEmail,
             };
@@ -325,7 +337,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
           contact_email: demoEmail,
           contact_phone: '0988-123-456',
           zone_id: 'artsy',
-          booth_type: 'S01-03,S06-08',
+          booth_type: 'A01',
           concept_brief: '融入東方古典意象的琉璃陳設展位。',
           status: 'approved',
           deposit_paid: true,
@@ -629,7 +641,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
             <h3 className="text-sm font-semibold text-white tracking-wide">{brandData?.brand_name_zh}</h3>
             <p className="text-[10px] text-neutral-400 font-light truncate">{brandData?.brand_name_en}</p>
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#C9A96E]/10 border border-[#C9A96E]/20 text-[9px] text-[#DFBA87]">
-              <span>展位規格: {brandData?.booth_type}</span>
+              <span>展位規格: {formatBoothDisplay(brandData?.booth_type, brandData?.zone_id)}</span>
             </div>
           </div>
 

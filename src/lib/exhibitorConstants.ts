@@ -125,7 +125,7 @@ export const ZONE_II: Zone = {
     vipPasses: 30,
     exhibitorPasses: 4,
   },
-  note: '參展品牌人員皆可於現場進行銷售，不抽成。\n大會提供各展位 1展台，尺寸為 H90.5 * W60.5 * 60.5cm，下方可置物。\nM1-M8展台數2，分別為：H90.5 * W97.3 * 47.5與H90.5 * W60.5 * 60.5cm。\n額外需求：倉儲區收費為每平方米 1000元/四日。',
+  note: '參展品牌人員皆可於現場進行銷售，不抽成。\n大會提供各展位 1 展台，尺寸為 H90.5 * W60.5 * 60.5cm，下方可置物。\nA05 雙展台展位展台數為 2，分別為：H90.5 * W97.3 * 47.5 與 H90.5 * W60.5 * 60.5cm。\n額外需求：倉儲區收費為每平方米 1000元/四日。',
 };
 
 // ─── Zone III – 匠心藝藏展區 ─────────────────────────
@@ -234,3 +234,119 @@ export const KEY_DATES: KeyDate[] = [
 
 /** Countdown target: 線上申請截止 2026/10/15 23:59 (UTC+8) */
 export const APPLICATION_DEADLINE = new Date('2026-10-15T23:59:59+08:00');
+
+// ─── Booth Code Normalization & Display Helpers ──────────────
+
+/**
+ * Normalizes legacy booth codes (e.g. 'S01-03,S06-08', 'S01-S06', 'M9-M15', 'A-ENTRANCE', 'S-2x2')
+ * into the modern official 2027 VIS booth scheme (A01-A05, L1-L7, S-02, MAKING-PROJECT, T).
+ */
+export function normalizeBoothCode(boothType?: string | null, zoneId?: string | null): string {
+  if (!boothType || !boothType.trim()) {
+    if (zoneId === 'artsy') return 'A01';
+    if (zoneId === 'premier') return 'A04';
+    if (zoneId === 'atelier') return 'L3';
+    return 'A01';
+  }
+
+  const raw = boothType.trim();
+
+  // Legacy mappings
+  if (raw.includes('S01') || raw.includes('S06') || raw === 'S-2x2') {
+    return 'A01';
+  }
+  if (raw.includes('M9') || raw.includes('M15') || raw.includes('M1-M8')) {
+    return 'A04';
+  }
+  if (raw === 'A-ENTRANCE' || raw.toUpperCase().includes('ENTRANCE')) {
+    return 'S-02';
+  }
+  if (raw === 'MAKING-PROJECT' || raw.includes('造物')) {
+    return 'MAKING-PROJECT';
+  }
+  if (raw.includes('L6') && raw.includes('L7')) {
+    return 'L6 & L7';
+  }
+
+  return raw;
+}
+
+/**
+ * Formats booth code into official curatorial name for badges, cards, and notification displays.
+ * Completely eliminates any legacy codes from appearing on the front-end.
+ */
+export function formatBoothDisplay(boothType?: string | null, zoneId?: string | null): string {
+  const code = normalizeBoothCode(boothType, zoneId);
+
+  // Exact standard code mappings
+  switch (code) {
+    case 'A01':
+      return 'A01 展台式展位';
+    case 'A02':
+      return 'A02 展台式展位';
+    case 'A03':
+      return 'A03 展台式展位';
+    case 'A04':
+      return 'A04 展台式展位';
+    case 'A05':
+      return 'A05 雙展台展位';
+    case 'S-02':
+      return 'S-02 迎賓展台位';
+    case 'L1':
+      return 'L1 最大獨立展位';
+    case 'L2':
+      return 'L2 獨立展位';
+    case 'L3':
+      return 'L3 獨立展位';
+    case 'L4':
+      return 'L4 獨立展位';
+    case 'L3&L4':
+      return 'L3 & L4 獨立展位';
+    case 'L5':
+    case 'MAKING-PROJECT':
+      return 'L5「造物計畫」特展席位';
+    case 'L6':
+      return 'L6 獨立展位';
+    case 'L7':
+      return 'L7 獨立展位';
+    case 'L6 & L7':
+    case 'L6, L7':
+    case 'L6&L7':
+      return 'L6 & L7「凝時之藏」古董專區';
+    case 'L1 & L5':
+      return 'L1 & L5 最大獨立展位';
+    case 'T':
+      return 'T區 微型曝光席位';
+    default:
+      if (code.startsWith('A01')) return 'A01 展台式展位';
+      if (code.startsWith('A02')) return 'A02 展台式展位';
+      if (code.startsWith('A03')) return 'A03 展台式展位';
+      if (code.startsWith('A04')) return 'A04 展台式展位';
+      if (code.startsWith('A05')) return 'A05 雙展台展位';
+      return code;
+  }
+}
+
+/**
+ * Retrieves official booth fee according to modern 2027 VIS specs.
+ */
+export function getBoothPrice(boothType?: string | null, zoneId?: string | null): number {
+  const code = normalizeBoothCode(boothType, zoneId);
+
+  if (code === 'MAKING-PROJECT') return 12000;
+  if (code === 'A01') return 40000;
+  if (code === 'A02') return 38000;
+  if (code === 'A03') return 32000;
+  if (code === 'A04') return 42000;
+  if (code === 'A05') return 45000;
+  if (code === 'L3&L4' || code === 'L3' || code === 'L4') return 108000;
+  if (code === 'L2' || code === 'L6' || code === 'L7') return 88000;
+  if (code === 'L6 & L7' || code === 'L1 & L5' || code === 'L1') return 158000;
+
+  // Fallback by zone
+  if (zoneId === 'artsy') return 40000;
+  if (zoneId === 'premier') return 42000;
+  if (zoneId === 'atelier') return 88000;
+  return 40000;
+}
+

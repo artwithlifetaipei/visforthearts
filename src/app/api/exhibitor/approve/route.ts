@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import nodemailer from 'nodemailer';
+import { formatBoothDisplay, normalizeBoothCode } from '@/lib/exhibitorConstants';
 
 const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
 
@@ -91,7 +92,8 @@ export async function POST(req: Request) {
       pref1.includes('造物');
 
     const finalZoneId = isMakingProject ? 'artsy' : (zoneId || app.zone_id || 'artsy');
-    const finalBoothType = isMakingProject ? 'MAKING-PROJECT' : (boothType || app.booth_type || 'S-2x2');
+    const rawBoothType = boothType || app.booth_type || 'A01';
+    const finalBoothType = isMakingProject ? 'MAKING-PROJECT' : normalizeBoothCode(rawBoothType, finalZoneId);
 
     // 4. Update status in exhibitor_applications
     const { error: appUpdateErr } = await adminDb
@@ -284,10 +286,10 @@ export async function POST(req: Request) {
                     ✓ 官方正式核准錄取 APPROVED
                   </span>
                   <div style="font-size: 15px; font-weight: 600; color: #1A1A1A; margin-bottom: 4px;">
-                    核定展區：${finalZoneId === 'premier' ? '精鑑展區 Premier' : finalZoneId === 'atelier' ? '藝藏展區 Atelier' : '獨立展位 Artsy'}
+                    核定展區：${finalZoneId === 'premier' ? '文化實體展區 Premier' : finalZoneId === 'atelier' ? '匠心藝藏展區 Atelier' : '明日經典展區 Artsy'}
                   </div>
                   <div style="font-size: 13px; color: #666666;">
-                    核定規格：${finalBoothType} ｜ 履約保證金轉帳已核驗完成
+                    核定規格：${formatBoothDisplay(finalBoothType, finalZoneId)} ｜ 履約保證金轉帳已核驗完成
                   </div>
                 </div>
 

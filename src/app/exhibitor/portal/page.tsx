@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { KEY_DATES, DEPOSIT_AMOUNT, ZONE_MAP } from '@/lib/exhibitorConstants';
+import { KEY_DATES, DEPOSIT_AMOUNT, ZONE_MAP, formatBoothDisplay, normalizeBoothCode, getBoothPrice } from '@/lib/exhibitorConstants';
 import { motion } from 'framer-motion';
 import { 
   Calendar, CreditCard, Award, ClipboardCheck, Users, 
@@ -140,9 +140,14 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   }
 
   // Get zone/booth price
+  const normalizedCode = normalizeBoothCode(brand.booth_type, brand.zone_id);
   const zone = ZONE_MAP[brand.zone_id as 'artsy' | 'premier' | 'atelier'];
-  const boothInfo = zone?.booths.find(b => b.code === brand.booth_type);
-  const boothPrice = boothInfo?.price || 0;
+  const boothInfo = zone?.booths.find(b => 
+    b.code === brand.booth_type || 
+    b.code === normalizedCode ||
+    (normalizedCode && b.code.includes(normalizedCode))
+  );
+  const boothPrice = boothInfo?.price || getBoothPrice(brand.booth_type, brand.zone_id);
 
   // Determine current active timeline phase
   const getTimelineStatus = (dateStr: string) => {
@@ -208,7 +213,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
         </div>
         <div className="text-xs bg-white/5 border border-white/10 px-4 py-2.5 rounded font-mono flex items-center gap-2 text-[#DFBA87]">
           <Award className="w-4 h-4" />
-          <span>展位: {brand.booth_type} ({zone?.nameZh})</span>
+          <span>展位: {formatBoothDisplay(brand.booth_type, brand.zone_id)} ({zone?.nameZh || '大會特展'})</span>
         </div>
       </div>
 
@@ -333,7 +338,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                 NT$ {boothPrice.toLocaleString()}
               </div>
               <p className="text-[11px] text-neutral-400 font-light leading-relaxed">
-                展位規格為 <strong className="text-[#DFBA87]">{brand.booth_type} ({boothInfo?.label})</strong>。尾款請於大會指定截止日前完成匯付，並提供水單以開立電子發票。
+                展位規格為 <strong className="text-[#DFBA87]">{formatBoothDisplay(brand.booth_type, brand.zone_id)}</strong>。尾款請於大會指定截止日前完成匯付，並提供水單以開立電子發票。
               </p>
             </div>
             <div className="border-t border-white/5 pt-4 mt-6 text-[10px] text-neutral-500 italic">
