@@ -219,32 +219,9 @@ export async function POST(req: Request) {
                   <li><strong>工作室貴賓名額 10 名</strong>：可於參展商後台提報 10 位親友或藏家貴賓專屬免票觀展名額。</li>
                 </ul>
 
-                <!-- Schedule -->
-                <h3 style="font-size: 13px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #8C7853; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; margin-top: 28px;">
-                  02. 重要展期時程 (Key Exhibition Schedule)
-                </h3>
-                <table style="width: 100%; border-collapse: collapse; font-size: 12px; color: #444444; margin: 12px 0;">
-                  <tr style="border-bottom: 1px solid #F0F0F0;">
-                    <td style="padding: 8px 0; font-weight: 600; width: 35%; color: #1A1A1A;">2027.01.06 (三)</td>
-                    <td style="padding: 8px 0;">10:00–17:00 佈展報到 ｜ 18:30–21:30 VIP預展暨開幕酒會</td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #F0F0F0;">
-                    <td style="padding: 8px 0; font-weight: 600; color: #1A1A1A;">2027.01.07 (四)</td>
-                    <td style="padding: 8px 0;">11:00–19:00 公眾展期首日</td>
-                  </tr>
-                  <tr style="border-bottom: 1px solid #F0F0F0;">
-                    <td style="padding: 8px 0; font-weight: 600; color: #1A1A1A;">2027.01.08 (五)</td>
-                    <td style="padding: 8px 0;">11:00–19:00 公眾展期次日</td>
-                  </tr>
-                  <tr>
-                    <td style="padding: 8px 0; font-weight: 600; color: #1A1A1A;">2027.01.09 (六)</td>
-                    <td style="padding: 8px 0;">13:00–19:00 公眾展期最終日 ｜ 19:00–21:30 撤場離場</td>
-                  </tr>
-                </table>
-
                 <!-- Portal Access -->
                 <h3 style="font-size: 13px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #8C7853; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; margin-top: 28px;">
-                  03. 參展商專屬協作平台 (Brand Portal Access)
+                  02. 參展商專屬協作平台 (Brand Portal Access)
                 </h3>
                 <p style="font-size: 13px; color: #444444; line-height: 1.8; margin: 10px 0;">
                   大會已自動為您開通專屬協作後台。您可於後台<strong>簽署古蹟參展守則、提報 10 名貴賓觀展名單、以及上傳品牌媒體宣傳素材</strong>。
