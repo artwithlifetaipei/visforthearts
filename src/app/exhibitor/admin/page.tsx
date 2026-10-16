@@ -2,12 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, FileText, Users, Image as ImageIcon, CheckCircle, XCircle, 
   Download, Eye, Mail, Phone, Globe, Calendar, ExternalLink, Loader2, RefreshCw, ChevronDown, ChevronUp,
-  Signature, FileCheck, Sparkles
+  Signature, FileCheck, Sparkles, Lock, LogOut, ArrowRight, AlertTriangle
 } from 'lucide-react';
 import { ZONE_MAP, ALL_ZONES, formatBoothDisplay, normalizeBoothCode, getBoothPrice } from '@/lib/exhibitorConstants';
 
@@ -83,9 +84,11 @@ const parsePreference = (prefStr: string) => {
   return null;
 };
 
-const ADMIN_EMAILS = [
+export const ADMIN_EMAILS = [
   'artwithlifetaipei@gmail.com',
   'ameliecykuo@gmail.com',
+  'amelie@theartpressasia.com',
+  'visvipteam@gmail.com',
 ];
 
 export default function ExhibitorAdminPage() {
@@ -93,6 +96,14 @@ export default function ExhibitorAdminPage() {
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState<'applications' | 'making-project' | 'vip' | 'compliance' | 'media'>('applications');
+
+  // Admin Login States
+  const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
+  const [isLoggingIn, setIsLoggingIn] = useState(false);
+  const [isSendingMagicLink, setIsSendingMagicLink] = useState(false);
+  const [loginFeedback, setLoginFeedback] = useState<{ type: 'error' | 'success'; text: string } | null>(null);
 
   // Database States
   const [applications, setApplications] = useState<any[]>([]);
@@ -135,20 +146,123 @@ export default function ExhibitorAdminPage() {
 
       if (!session || !isAdmin) {
         setIsAuthorized(false);
-        router.push('/exhibitor/portal');
+        setCurrentUserEmail(userEmail);
         setIsLoading(false);
         return;
       }
 
       setIsAuthorized(true);
+      setCurrentUserEmail(userEmail);
       setIsLoading(false);
       // Load data in background (non-blocking on revisit)
       loadAllAdminData();
     };
 
     checkAdmin();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+      if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session) {
+        const userEmail = (session.user.email || '').toLowerCase().trim();
+        if (ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(userEmail)) {
+          setIsAuthorized(true);
+          setCurrentUserEmail(userEmail);
+          setIsLoading(false);
+          loadAllAdminData();
+        }
+      } else if (event === 'SIGNED_OUT') {
+        setIsAuthorized(false);
+        setCurrentUserEmail('');
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [router]);
+  }, []);
+
+  const handleAdminPasswordLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoggingIn(true);
+    setLoginFeedback(null);
+
+    const email = adminEmail.toLowerCase().trim();
+    if (!ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(email)) {
+      setLoginFeedback({ type: 'error', text: '權限不足：此信箱非 2027 VIS 授權之大會管理員帳號。' });
+      setIsLoggingIn(false);
+      return;
+    }
+
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password: adminPassword,
+      });
+
+      if (error) {
+        setLoginFeedback({ 
+          type: 'error', 
+          text: error.message === 'Invalid login credentials' 
+            ? '管理員密碼錯誤，請確認密碼或使用下方 Magic Link 一次性登入連結。' 
+            : `登入失敗: ${error.message}` 
+        });
+      } else if (data.session) {
+        setIsAuthorized(true);
+        setCurrentUserEmail(email);
+        loadAllAdminData();
+      }
+    } catch (err: any) {
+      setLoginFeedback({ type: 'error', text: `系統連線異常: ${err.message || err}` });
+    } finally {
+      setIsLoggingIn(false);
+    }
+  };
+
+  const handleAdminMagicLink = async () => {
+    const email = adminEmail.toLowerCase().trim();
+    if (!email) {
+      setLoginFeedback({ type: 'error', text: '請先輸入大會管理員 Email 信箱。' });
+      return;
+    }
+
+    if (!ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(email)) {
+      setLoginFeedback({ type: 'error', text: '權限不足：此信箱非 2027 VIS 授權之大會管理員帳號。' });
+      return;
+    }
+
+    setIsSendingMagicLink(true);
+    setLoginFeedback(null);
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email,
+        options: {
+          emailRedirectTo: typeof window !== 'undefined' ? `${window.location.origin}/exhibitor/admin` : undefined,
+          shouldCreateUser: false,
+        },
+      });
+
+      if (error) {
+        setLoginFeedback({ type: 'error', text: `發送失敗: ${error.message}` });
+      } else {
+        setLoginFeedback({ 
+          type: 'success', 
+          text: '✓ 大會管理員一次性免密登入連結已寄至您的信箱！請收信點擊連結即可直接進入管理後台。' 
+        });
+      }
+    } catch (err: any) {
+      setLoginFeedback({ type: 'error', text: `發送異常: ${err.message || err}` });
+    } finally {
+      setIsSendingMagicLink(false);
+    }
+  };
+
+  const handleAdminLogout = async () => {
+    await supabase.auth.signOut();
+    setIsAuthorized(false);
+    setCurrentUserEmail('');
+    setLoginFeedback(null);
+  };
 
   const loadAllAdminData = async () => {
     try {
@@ -624,7 +738,135 @@ export default function ExhibitorAdminPage() {
     );
   }
 
-  if (!isAuthorized) return null;
+  if (!isAuthorized) {
+    return (
+      <div className="min-h-screen bg-[#0D0D0D] flex flex-col p-6 font-sans-outfit text-white relative overflow-hidden justify-center items-center">
+        {/* Ambient background glow */}
+        <div className="fixed inset-0 pointer-events-none opacity-20 bg-[radial-gradient(circle_at_center,#C9A96E_1px,transparent_1px)] bg-[size:32px_32px] z-0" />
+        
+        <div className="w-full max-w-md bg-[#111111] border border-[#C9A96E]/20 p-8 rounded-xl relative z-10 shadow-2xl space-y-6">
+          <div className="text-center space-y-2">
+            <div className="w-12 h-12 rounded-full border border-[#DFBA87] flex items-center justify-center bg-white/5 mx-auto text-[#DFBA87]">
+              <ShieldCheck className="w-6 h-6" />
+            </div>
+            <h1 className="text-xl md:text-2xl font-serif-garamond text-[#DFBA87] tracking-wider pt-2">
+              2027 VIS 參展審核管理後台
+            </h1>
+            <p className="text-[10px] text-neutral-400 font-light tracking-[0.2em] uppercase">
+              Exhibitor Administration & Curation
+            </p>
+          </div>
+
+          {currentUserEmail ? (
+            <div className="bg-amber-500/10 border border-amber-500/25 rounded-lg p-4 space-y-3 text-xs text-amber-200">
+              <div className="flex items-center gap-2 font-medium text-amber-400">
+                <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                <span>帳號權限不足 (Access Restricted)</span>
+              </div>
+              <p className="font-light leading-relaxed text-[11px] text-neutral-300">
+                目前登入的帳號為 <strong className="text-white font-mono">{currentUserEmail}</strong>，該帳號非大會授權之管理員。
+              </p>
+              <div className="pt-2 flex flex-col gap-2">
+                <button
+                  type="button"
+                  onClick={handleAdminLogout}
+                  className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-2.5 rounded text-xs font-semibold tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <LogOut className="w-3.5 h-3.5" /> 登出並切換大會管理員帳號
+                </button>
+                <Link
+                  href="/exhibitor/portal"
+                  className="w-full text-center py-2 text-xs text-neutral-400 hover:text-white transition-colors"
+                >
+                  前往參展商協作平台 →
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <form onSubmit={handleAdminPasswordLogin} className="space-y-4">
+              <div>
+                <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-1.5">
+                  大會管理員信箱 ADMIN EMAIL
+                </label>
+                <input
+                  type="email"
+                  value={adminEmail}
+                  onChange={(e) => setAdminEmail(e.target.value)}
+                  placeholder="artwithlifetaipei@gmail.com"
+                  className="w-full text-xs tracking-wider border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-3.5 py-2.5 outline-none text-white transition-all"
+                  required
+                  disabled={isLoggingIn || isSendingMagicLink}
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-1.5">
+                  管理員密碼 PASSWORD
+                </label>
+                <input
+                  type="password"
+                  value={adminPassword}
+                  onChange={(e) => setAdminPassword(e.target.value)}
+                  placeholder="請輸入密碼"
+                  className="w-full text-xs tracking-wider border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-3.5 py-2.5 outline-none text-white transition-all"
+                  disabled={isLoggingIn || isSendingMagicLink}
+                />
+              </div>
+
+              {loginFeedback && (
+                <div className={`text-xs p-3 rounded border font-light leading-relaxed ${
+                  loginFeedback.type === 'error'
+                    ? 'bg-rose-500/10 border-rose-500/25 text-rose-300'
+                    : 'bg-emerald-500/10 border-emerald-500/25 text-emerald-300'
+                }`}>
+                  {loginFeedback.text}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoggingIn || isSendingMagicLink}
+                className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-2.5 rounded text-xs font-semibold tracking-[0.15em] uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              >
+                {isLoggingIn ? <Loader2 className="w-4 h-4 animate-spin" /> : '密碼登入 LOGIN WITH PASSWORD'}
+              </button>
+
+              <div className="relative flex py-1 items-center">
+                <div className="flex-grow border-t border-white/5"></div>
+                <span className="flex-shrink mx-3 text-[9px] text-neutral-500 font-semibold tracking-widest uppercase">或者 OR</span>
+                <div className="flex-grow border-t border-white/5"></div>
+              </div>
+
+              <button
+                type="button"
+                onClick={handleAdminMagicLink}
+                disabled={isLoggingIn || isSendingMagicLink}
+                className="w-full border border-dashed border-[#DFBA87]/40 hover:border-[#DFBA87] hover:bg-[#DFBA87]/5 text-[#DFBA87] py-2.5 rounded text-xs font-semibold tracking-[0.15em] transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+              >
+                {isSendingMagicLink ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-3.5 h-3.5" />}
+                發送 MAGIC LINK 免密安全登入信
+              </button>
+
+              <div className="pt-2 flex justify-between items-center text-[10px] text-neutral-500">
+                <Link
+                  href={`/exhibitor/reset-password${adminEmail ? `?email=${encodeURIComponent(adminEmail)}` : ''}`}
+                  className="hover:text-[#DFBA87] transition-colors"
+                >
+                  重設密碼 Reset Password →
+                </Link>
+                <Link
+                  href="/exhibitor/portal"
+                  className="hover:text-[#DFBA87] transition-colors"
+                >
+                  前往參展商協作平台 →
+                </Link>
+              </div>
+            </form>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-[#0D0D0D] text-white font-sans-outfit p-6 md:p-12 relative">
@@ -634,6 +876,40 @@ export default function ExhibitorAdminPage() {
 
       {/* Main Admin Container */}
       <div className="max-w-7xl mx-auto space-y-8 relative z-10">
+
+        {/* Top Admin Status & Navigation Bar */}
+        <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3 pb-4 border-b border-white/5 text-xs">
+          <div className="flex items-center gap-2 text-neutral-400 font-mono text-[11px]">
+            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+            <span>管理員在線：<strong className="text-white">{currentUserEmail}</strong></span>
+          </div>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Link
+              href="/exhibitor/portal"
+              className="px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white transition-colors flex items-center gap-1.5 text-[11px]"
+            >
+              <ExternalLink className="w-3 h-3 text-[#DFBA87]" /> 參展品牌入口
+            </Link>
+            <Link
+              href="/vip/admin"
+              className="px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white transition-colors flex items-center gap-1.5 text-[11px]"
+            >
+              <Users className="w-3 h-3 text-[#DFBA87]" /> VIP 貴賓後台
+            </Link>
+            <Link
+              href="/vip/scanner"
+              className="px-3 py-1.5 rounded bg-white/5 hover:bg-white/10 text-neutral-300 hover:text-white transition-colors flex items-center gap-1.5 text-[11px]"
+            >
+              <ShieldCheck className="w-3 h-3 text-[#DFBA87]" /> 現場核銷端
+            </Link>
+            <button
+              onClick={handleAdminLogout}
+              className="px-3 py-1.5 rounded bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 transition-colors flex items-center gap-1 text-[11px] cursor-pointer"
+            >
+              <LogOut className="w-3 h-3" /> 登出
+            </button>
+          </div>
+        </div>
         
         {/* Header Title */}
         <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">

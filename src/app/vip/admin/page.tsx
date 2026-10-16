@@ -9,6 +9,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 const ADMIN_EMAILS = [
     'artwithlifetaipei@gmail.com',
     'ameliecykuo@gmail.com',
+    'amelie@theartpressasia.com',
+    'visvipteam@gmail.com',
 ];
 
 type VIPEntry = {

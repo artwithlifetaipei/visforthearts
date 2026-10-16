@@ -5,7 +5,12 @@ import { cookies } from 'next/headers';
 import nodemailer from 'nodemailer';
 import { formatBoothDisplay, normalizeBoothCode } from '@/lib/exhibitorConstants';
 
-const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
+const ADMIN_EMAILS = [
+  'artwithlifetaipei@gmail.com',
+  'ameliecykuo@gmail.com',
+  'amelie@theartpressasia.com',
+  'visvipteam@gmail.com',
+];
 
 async function createSupabaseServerClient() {
   const cookieStore = await cookies();

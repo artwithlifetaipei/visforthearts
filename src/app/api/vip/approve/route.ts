@@ -3,7 +3,12 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 
-const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
+const ADMIN_EMAILS = [
+    'artwithlifetaipei@gmail.com',
+    'ameliecykuo@gmail.com',
+    'amelie@theartpressasia.com',
+    'visvipteam@gmail.com',
+];
 
 async function createSupabaseServerClient() {
     const cookieStore = await cookies();

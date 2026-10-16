@@ -14,6 +14,8 @@ import {
 const ADMIN_EMAILS = [
   'artwithlifetaipei@gmail.com',
   'ameliecykuo@gmail.com',
+  'amelie@theartpressasia.com',
+  'visvipteam@gmail.com',
 ];
 
 export default function ExhibitorPortalLayout({ children }: { children: React.ReactNode }) {
@@ -690,6 +692,22 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               );
             })}
           </nav>
+
+          {/* Admin Mode Switcher Button */}
+          {ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes((userEmail || '').toLowerCase().trim()) && (
+            <div className="pt-4 border-t border-white/5 mt-4">
+              <Link
+                href="/exhibitor/admin"
+                className="flex items-center justify-between p-3 rounded text-xs tracking-wider border border-[#DFBA87]/40 bg-[#DFBA87]/10 text-[#DFBA87] hover:bg-[#DFBA87]/20 transition-all font-medium"
+              >
+                <div className="flex items-center gap-2.5">
+                  <ShieldCheck className="w-4 h-4 text-[#DFBA87]" />
+                  <span>大會審查管理後台</span>
+                </div>
+                <ArrowRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          )}
         </div>
 
         {/* Sidebar Footer */}
