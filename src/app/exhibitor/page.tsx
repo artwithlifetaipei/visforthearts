@@ -1253,6 +1253,18 @@ export default function ExhibitorLandingPage() {
                     )}
                   </button>
 
+                  <div className="text-center pt-2">
+                    <Link
+                      href={`/exhibitor/reset-password${modalEmail ? `?email=${encodeURIComponent(modalEmail)}` : ''}`}
+                      onClick={() => setIsLoginModalOpen(false)}
+                      className="text-[10px] text-[#DFBA87]/80 hover:text-[#DFBA87] underline underline-offset-4 tracking-wider transition-colors inline-block"
+                      onMouseEnter={() => setCursorHovered(true)} 
+                      onMouseLeave={() => setCursorHovered(false)}
+                    >
+                      {lang === 'zh' ? '忘記密碼或首次登入設定？點此重設密碼' : 'Forgot password or first time setup? Reset here'}
+                    </Link>
+                  </div>
+
                   {modalMessage.text && (
                     <div className={`text-[11px] font-light leading-relaxed p-3 rounded-none border text-center mt-4 ${
                       modalMessage.type === 'error' 

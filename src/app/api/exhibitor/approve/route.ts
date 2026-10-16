@@ -162,7 +162,7 @@ export async function POST(req: Request) {
         });
 
         const portalUrl = 'https://www.visforthearts.com/exhibitor/portal';
-        const resetPasswordUrl = 'https://www.visforthearts.com/exhibitor/reset-password';
+        const resetPasswordUrl = `https://www.visforthearts.com/exhibitor/reset-password?email=${encodeURIComponent(app.contact_email)}`;
 
         let subject = '';
         let htmlContent = '';

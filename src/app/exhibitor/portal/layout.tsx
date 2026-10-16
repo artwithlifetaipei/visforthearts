@@ -509,6 +509,15 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
                 {loginLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : '登入協作平台 LOGIN TO PORTAL'}
               </button>
 
+              <div className="text-center pt-1">
+                <Link 
+                  href={`/exhibitor/reset-password${loginEmail ? `?email=${encodeURIComponent(loginEmail)}` : ''}`}
+                  className="text-[10px] text-[#DFBA87]/80 hover:text-[#DFBA87] underline underline-offset-4 tracking-wider transition-colors inline-block"
+                >
+                  忘記密碼或首次設定？點此重設密碼 Reset Password →
+                </Link>
+              </div>
+
               <div className="relative flex py-2 items-center">
                 <div className="flex-grow border-t border-white/5"></div>
                 <span className="flex-shrink mx-4 text-[9px] text-neutral-500 font-semibold tracking-widest uppercase">或者 OR</span>
