@@ -415,7 +415,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         icon: FileCheck,
       },
       {
-        name: '模組 C — VIP 貴賓名單',
+        name: '模組 C — VIP 專屬貴賓邀請',
         href: '/exhibitor/portal/vip',
         icon: Users,
         badge: isMicro ? '限一般展商' : null,

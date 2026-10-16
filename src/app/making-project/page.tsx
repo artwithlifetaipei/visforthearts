@@ -946,8 +946,8 @@ export default function MakingProjectPage() {
                   </h4>
                   <p className="text-[#0D0D0D]/70 font-light leading-relaxed">
                     {lang === 'zh'
-                      ? '錄取參展創作者領取參展者證與 10 名貴賓名額，於 2027.01.06 進駐中山堂展台陳列佈展，展開全展期自主展售與交流。'
-                      : 'Selected creators receive exhibitor badge & 10 VIP passes, installing on shared curated tables at Zhongshan Hall on Jan 6, 2027.'}
+                      ? '錄取參展創作者領取參展者證，並享有 10 位專屬貴賓免票觀展邀請禮遇，於 2027.01.06 進駐中山堂展台陳列佈展，展開全展期自主展售與交流。'
+                      : 'Selected creators receive exhibitor badge and enjoy complimentary VIP invitation passes for 10 exclusive guests, installing on shared curated tables at Zhongshan Hall on Jan 6, 2027.'}
                   </p>
                 </div>
               </div>
@@ -1261,8 +1261,8 @@ export default function MakingProjectPage() {
                         </h4>
                         <p className="text-xs text-[#0D0D0D]/60 mt-1">
                           {lang === 'zh' 
-                            ? '包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證1張、與工作室貴賓名額10名' 
-                            : 'Includes: Shared curated table display stall, 0% sales commission, 1 Exhibitor Badge & 10 Studio VIP Passes'}
+                            ? '包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證 1 張、與 10 位專屬貴賓免票邀請禮遇' 
+                            : 'Includes: Shared curated table display stall, 0% sales commission, 1 Exhibitor Badge & 10 Complimentary VIP Guest Invitations'}
                         </p>
                       </div>
                       <div className="text-right whitespace-nowrap">

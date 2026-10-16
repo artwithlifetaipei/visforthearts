@@ -242,7 +242,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             <>
               <div className={`flex items-center gap-2 p-2.5 rounded border ${vipCount > 0 ? 'bg-white/5 border-white/5 text-neutral-300' : 'bg-transparent border-dashed border-amber-500/20 text-neutral-500'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${vipCount > 0 ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                <span>模組 C：VIP 名單 ({vipCount}位)</span>
+                <span>模組 C：專屬貴賓禮遇 ({vipCount}位)</span>
               </div>
               <div className={`flex items-center gap-2 p-2.5 rounded border ${mediaCount >= 3 ? 'bg-white/5 border-white/5 text-neutral-300' : 'bg-transparent border-dashed border-amber-500/20 text-neutral-500'}`}>
                 <span className={`w-1.5 h-1.5 rounded-full ${mediaCount >= 3 ? 'bg-emerald-400' : 'bg-amber-400'}`} />
@@ -251,7 +251,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             </>
           ) : (
             <div className="col-span-2 flex items-center justify-center p-2.5 border border-dashed border-white/5 rounded text-[10px] text-neutral-600 tracking-wider">
-              * 微型曝光品牌 (T區) 豁免模組 C 與 D 的提交義務
+              * 微型曝光品牌 (T區) 不適用模組 C 與 D 之專屬禮遇
             </div>
           )}
         </div>

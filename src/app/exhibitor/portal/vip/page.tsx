@@ -95,7 +95,7 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
     if (!brand || adding) return;
 
     if (vips.length >= vipLimit) {
-      setFormError(`已達提報名額上限 (${vipLimit}位)。`);
+      setFormError(`已達專屬貴賓邀請席次上限 (${vipLimit} 位)。`);
       return;
     }
 
@@ -128,9 +128,9 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
 
       if (error) {
         if (error.code === '23505') { // unique constraint violation
-          setFormError('該電子信箱已在貴品牌的提報名單中。');
+          setFormError('該電子信箱已在貴品牌的專屬邀請名單中。');
         } else {
-          setFormError(`提報失敗: ${error.message}`);
+          setFormError(`邀請設定失敗: ${error.message}`);
         }
       } else {
         const updated = [data, ...vips];
@@ -196,10 +196,10 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
           <Lock className="w-5 h-5" />
         </div>
         <div>
-          <h2 className="text-lg font-serif-garamond text-white tracking-wider">模組 C — VIP 貴賓提報 (已豁免)</h2>
+          <h2 className="text-lg font-serif-garamond text-white tracking-wider">模組 C — VIP 專屬貴賓邀請 (已豁免)</h2>
           <p className="text-xs text-neutral-400 font-light leading-relaxed mt-2.5 max-w-md mx-auto">
             貴品牌所選之 <strong className="text-[#DFBA87]">T區 (微型曝光方案) </strong> 
-            參展規格，依大會合約規範不包含 VIP 貴賓提報與發卡禮遇。大會秘書處已為您豁免本模組的提交義務。
+            參展規格，依大會合約規範未包含貴賓邀請額度。大會秘書處已為您標記完成本模組。
           </p>
         </div>
         <div className="text-[10px] text-neutral-500 border-t border-white/5 pt-4 max-w-xs mx-auto">
@@ -217,18 +217,18 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
         <div>
           <h1 className="text-2xl font-serif-garamond text-white tracking-wider flex items-center gap-2">
             <Users className="w-6 h-6 text-[#DFBA87]" />
-            模組 C — VIP 貴賓名單提報中心
+            模組 C — 專屬 VIP 貴賓邀請禮遇中心
           </h1>
           <p className="text-xs text-neutral-400 font-light mt-1">
             {isMakingProject ? (
-              <>「造物計畫」特展席位創作者可提報 <strong className="text-[#DFBA87]">最多 10 位</strong> 工作室貴賓名單，享有大會專屬免票入場禮遇。</>
+              <>大會尊榮致贈「造物計畫」特展席位創作者 <strong className="text-[#DFBA87]">10 位專屬貴賓免票邀請禮遇</strong>。您可以自主邀請最重要的藏家、合作夥伴或摯友親臨，享有大會專屬免票優先入場禮遇。</>
             ) : (
-              <>一般參展品牌可免費提報 <strong className="text-[#DFBA87]">最多 {vipLimit} 位</strong> 貴賓，享有大會優先入場禮遇。</>
+              <>大會尊榮致贈參展品牌 <strong className="text-[#DFBA87]">專屬 {vipLimit} 位</strong> VIP 貴賓免票邀請禮遇。您可以自主指定摯友、重要藏家或合作夥伴，尊享大會優先入場禮遇。</>
             )}
           </p>
         </div>
         <div className="bg-white/5 border border-white/5 px-4 py-2 rounded text-xs font-mono text-[#DFBA87]">
-          已提報 VIP 總數: {vips.length} / {vipLimit}
+          已指定邀請貴賓席次: {vips.length} / {vipLimit}
         </div>
       </div>
 
@@ -237,7 +237,7 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
         {/* Submit Form Card */}
         <div className="bg-[#111111] border border-white/5 rounded-xl p-6 h-fit space-y-4">
           <h2 className="text-xs font-semibold tracking-widest text-[#DFBA87] uppercase flex items-center gap-1.5 border-b border-white/5 pb-3">
-            <UserPlus className="w-4 h-4" /> 提報單筆 VIP
+            <UserPlus className="w-4 h-4" /> 新增專屬貴賓邀請
           </h2>
 
           <form onSubmit={handleAddVip} className="space-y-4">
@@ -279,11 +279,11 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
               {adding ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  提報中...
+                  發送邀請中...
                 </>
               ) : (
                 <>
-                  <UserPlus className="w-3.5 h-3.5" /> 提交提報 VIP
+                  <UserPlus className="w-3.5 h-3.5" /> 發送專屬貴賓邀請
                 </>
               )}
             </button>
@@ -300,13 +300,13 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
         {/* Real-time VIP list */}
         <div className="lg:col-span-2 bg-[#111111] border border-white/5 rounded-xl p-6 flex flex-col min-h-[300px]">
           <h2 className="text-xs font-semibold tracking-widest text-[#DFBA87] uppercase border-b border-white/5 pb-3 mb-4">
-            已提交貴賓名單 Current VIP List
+            已指定專屬貴賓名單 Current VIP Guest List
           </h2>
 
           {vips.length === 0 ? (
             <div className="flex-grow flex flex-col justify-center items-center text-center p-8 text-neutral-500 space-y-2">
               <Mail className="w-8 h-8 text-neutral-600" />
-              <p className="text-xs font-light">目前尚未提報任何 VIP 貴賓名單</p>
+              <p className="text-xs font-light">目前尚未指定任何專屬貴賓邀請</p>
             </div>
           ) : (
             <div className="flex-grow overflow-y-auto max-h-[400px] space-y-2.5 pr-2">
@@ -337,7 +337,7 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
                         onClick={() => handleDeleteVip(vip.id)}
                         disabled={deletingId === vip.id}
                         className="text-neutral-500 hover:text-rose-400 p-1.5 rounded hover:bg-rose-500/10 transition-colors"
-                        title="撤銷提報"
+                        title="移除邀請"
                       >
                         {deletingId === vip.id ? (
                           <Loader2 className="w-3.5 h-3.5 animate-spin" />
