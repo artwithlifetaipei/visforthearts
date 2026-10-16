@@ -169,7 +169,7 @@ export async function POST(req: Request) {
 
         if (isMakingProject) {
           // --- MAKING PROJECT ADMISSION EMAIL ---
-          subject = `【VIS 2027 造物計畫】正式核准錄取通知 Official Admission Notice — ${app.brand_name_zh}`;
+          subject = `【2027 VIS Contemporary Culture】「造物計畫」正式核准錄取通知 Official Admission Notice — ${app.brand_name_zh}`;
           
           const materialCategory = app.zone_preference_1?.match(/\((.*?)\)/)?.[1] || '原創造物類別';
 
@@ -254,7 +254,7 @@ export async function POST(req: Request) {
           `;
         } else {
           // --- REGULAR EXHIBITOR ADMISSION EMAIL ---
-          subject = `【VIS 2027 國際當代藝術與生活美學展】正式核准錄取通知 Official Admission Notice — ${app.brand_name_zh}`;
+          subject = `【2027 VIS Contemporary Culture】正式核准錄取通知 Official Admission Notice — ${app.brand_name_zh}`;
 
           htmlContent = `
             <div style="max-width: 620px; margin: 0 auto; padding: 40px 20px; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #FAF9F6; color: #1A1A1A;">
