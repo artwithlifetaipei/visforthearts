@@ -221,9 +221,9 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
           </h1>
           <p className="text-xs text-neutral-400 font-light mt-1">
             {isMakingProject ? (
-              <>大會尊榮致贈「造物計畫」特展席位創作者 <strong className="text-[#DFBA87]">10 位專屬貴賓免票邀請禮遇</strong>。您可以自主邀請最重要的藏家、合作夥伴或摯友親臨，享有大會專屬免票優先入場禮遇。</>
+              <>大會特別致贈「造物計畫」特展創作者 <strong className="text-[#DFBA87]">10 張專屬 VIP 貴賓票</strong>。受邀之重要藏家、合作夥伴或親友貴賓憑此票尊享<strong className="text-[#DFBA87]">全時段免排隊優先入場</strong>之專屬禮遇。</>
             ) : (
-              <>大會尊榮致贈參展品牌 <strong className="text-[#DFBA87]">專屬 {vipLimit} 位</strong> VIP 貴賓免票邀請禮遇。您可以自主指定摯友、重要藏家或合作夥伴，尊享大會優先入場禮遇。</>
+              <>大會特別致贈參展品牌 <strong className="text-[#DFBA87]">專屬 {vipLimit} 張 VIP 貴賓票</strong>。受邀之重要藏家、合作夥伴或親友貴賓憑此票尊享<strong className="text-[#DFBA87]">全時段免排隊優先入場</strong>之專屬禮遇。</>
             )}
           </p>
         </div>
@@ -357,10 +357,13 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
             <Lock className="w-3.5 h-3.5 flex-shrink-0 text-[#DFBA87]" />
             <div className="space-y-1">
               <p>
-                大會承諾：您所提交的貴賓資訊將進行加密安全保護，僅供大會公關團隊用於本屆藝術節貴賓引導與後續客戶服務聯繫，絕不用於其他商業推廣。
+                <strong className="text-neutral-400">VIP 貴賓權益說明：</strong>本屆展會現場不另售一般門票。大會特為參展品牌與創作者保留尊榮「VIP 貴賓票」，受邀貴賓憑此票尊享全展期「全時段免排隊優先入場」之專屬通關禮遇。
               </p>
               <p>
-                品牌需確認上傳之 VIP 聯絡資料，皆已取得當事人同意，授權提供予 VIS 大會作為本次展會票務與行銷聯繫使用。若因名單未經授權引發之法律糾紛，由品牌負擔全責。
+                大會承諾：您所提交的貴賓資訊將進行加密安全保護，僅供大會公關團隊用於本屆展會發送電子貴賓憑證與現場接待服務，絕不用於其他商業推廣。
+              </p>
+              <p>
+                品牌需確認上傳之 VIP 聯絡資料，皆已取得當事人同意，授權提供予 VIS 大會作為本次展會票務與接待聯繫使用。若因名單未經授權引發之法律糾紛，由品牌負擔全責。
               </p>
             </div>
           </div>

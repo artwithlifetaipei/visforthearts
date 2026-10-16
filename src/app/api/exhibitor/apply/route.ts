@@ -272,7 +272,7 @@ export async function POST(request: NextRequest) {
                 ${isMakingProject ? `
                 <tr>
                   <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; font-weight: 500; color: #8C7853;">席位規格與權益</td>
-                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #1A1A1A; line-height: 1.7;">包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證 1 張、享 10 位專屬貴賓免票邀請禮遇</td>
+                  <td style="padding: 12px 14px; border-bottom: 1px solid #F0F0F0; color: #1A1A1A; line-height: 1.7;">包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證 1 張、致贈 10 張專屬 VIP 貴賓票（享全時段免排隊優先入場）</td>
                 </tr>
                 ` : ''}
                 <tr>
@@ -369,7 +369,7 @@ export async function POST(request: NextRequest) {
                   </tr>
                   <tr>
                     <td style="padding: 8px 0; color: #8C7853; border-bottom: 1px solid #EEEEEE;">席位規格與權益</td>
-                    <td style="padding: 8px 0; color: #1A1A1A; border-bottom: 1px solid #EEEEEE; line-height: 1.6;">包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證 1 張、享 10 位專屬貴賓免票邀請禮遇</td>
+                    <td style="padding: 8px 0; color: #1A1A1A; border-bottom: 1px solid #EEEEEE; line-height: 1.6;">包含：大平面展示檯面席位（VIS 統一規劃）、四天展期現場銷售 0% 抽成、參展者證 1 張、致贈 10 張專屬 VIP 貴賓票（享全時段免排隊優先入場）</td>
                   </tr>
                   ` : `
                   <tr>
