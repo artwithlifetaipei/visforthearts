@@ -4,6 +4,9 @@ import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
 
+export const dynamic = 'force-dynamic';
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -423,56 +426,45 @@ export async function POST(request: NextRequest) {
         `;
 
         // 1. Prioritize Gmail SMTP (Primary and standard across VIS platform)
-        const gmailUser = process.env.GMAIL_USER;
+        const gmailUser = process.env.GMAIL_USER || 'artwithlifetaipei@gmail.com';
         const gmailAppPassword = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, '');
         if (gmailUser && gmailAppPassword) {
           const transporter = nodemailer.createTransport({
-            host: 'smtp.gmail.com',
-            port: 465,
-            secure: true,
+            service: 'gmail',
             auth: {
               user: gmailUser,
               pass: gmailAppPassword,
             },
-            connectionTimeout: 10000,
-            greetingTimeout: 10000,
-            socketTimeout: 15000,
           });
 
-          const tasks: Promise<any>[] = [];
-
-          // Send notification email to each admin
-          for (const adminEmail of adminEmails) {
-            tasks.push(
-              transporter.sendMail({
-                from: `"VIS System Notification" <${gmailUser}>`,
-                to: adminEmail,
-                subject,
-                html: htmlContent,
-              })
-            );
+          // 1. Send admin notification email (single dispatch delivering to all admins)
+          try {
+            const adminInfo = await transporter.sendMail({
+              from: `"VIS System Notification" <${gmailUser}>`,
+              to: adminEmails,
+              subject,
+              html: htmlContent,
+            });
+            console.log(`Notification email sent to admins (${adminEmails.join(', ')}):`, adminInfo.messageId);
+          } catch (err) {
+            console.error('Failed sending admin notification email:', err);
           }
 
-          // Send confirmation email to applicant
+          // 2. Send confirmation email to applicant
           if (contact_email) {
-            tasks.push(
-              transporter.sendMail({
+            try {
+              const confirmInfo = await transporter.sendMail({
                 from: `"VIS Contemporary Culture" <${gmailUser}>`,
                 to: contact_email,
                 subject: confirmSubject,
                 html: exhibitorConfirmHtml,
-              })
-            );
+              });
+              console.log(`Confirmation email sent to applicant (${contact_email}):`, confirmInfo.messageId);
+            } catch (err) {
+              console.error('Failed sending applicant confirmation email:', err);
+            }
           }
 
-          const results = await Promise.allSettled(tasks);
-          results.forEach((r, idx) => {
-            if (r.status === 'rejected') {
-              console.error(`Email delivery error for task ${idx}:`, r.reason);
-            } else {
-              console.log(`Notification/Confirmation email ${idx} sent successfully via Gmail.`);
-            }
-          });
           return;
         }
 
@@ -514,14 +506,12 @@ export async function POST(request: NextRequest) {
             },
           });
 
-          for (const adminEmail of adminEmails) {
-            await transporter.sendMail({
-              from: `"VIS System Notification" <${smtpUser}>`,
-              to: adminEmail,
-              subject,
-              html: htmlContent,
-            });
-          }
+          await transporter.sendMail({
+            from: `"VIS System Notification" <${smtpUser}>`,
+            to: adminEmails,
+            subject,
+            html: htmlContent,
+          });
 
           if (contact_email) {
             await transporter.sendMail({

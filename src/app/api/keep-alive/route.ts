@@ -19,6 +19,9 @@ export async function GET() {
         return NextResponse.json({ 
             success: true, 
             message: 'Database connection active.',
+            hasGmailUser: !!process.env.GMAIL_USER,
+            hasGmailPassword: !!process.env.GMAIL_APP_PASSWORD,
+            hasResendKey: !!process.env.RESEND_API_KEY,
             timestamp: new Date().toISOString() 
         });
     } catch (err: any) {
