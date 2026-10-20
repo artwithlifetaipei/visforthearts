@@ -3,7 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import nodemailer from 'nodemailer';
-import { formatBoothDisplay, normalizeBoothCode } from '@/lib/exhibitorConstants';
+import { formatBoothDisplay, normalizeBoothCode, getBoothPrice } from '@/lib/exhibitorConstants';
 
 const ADMIN_EMAILS = [
   'artwithlifetaipei@gmail.com',
@@ -214,6 +214,7 @@ export async function POST(req: Request) {
 
         const portalUrl = 'https://www.visforthearts.com/exhibitor/portal';
         const resetPasswordUrl = `https://www.visforthearts.com/exhibitor/reset-password?email=${encodeURIComponent(app.contact_email)}`;
+        const originalPrice = isMakingProject ? 12000 : getBoothPrice(finalBoothType, finalZoneId);
 
         let subject = '';
         let htmlContent = '';
@@ -223,6 +224,15 @@ export async function POST(req: Request) {
           subject = `【2027 VIS Contemporary Culture】「造物計畫」正式核准錄取通知 Official Admission Notice — ${app.brand_name_zh}`;
           
           const materialCategory = app.zone_preference_1?.match(/\((.*?)\)/)?.[1] || '原創造物類別';
+
+          let makingFeeHtml = '';
+          if (feeValue !== null && feeValue !== 12000) {
+            makingFeeHtml = `專案參展費用：<del style="color: #999999; text-decoration: line-through; margin-right: 5px;">NT$ 12,000</del><strong style="color: #2D6A4F; font-size: 14px;">NT$ ${feeValue.toLocaleString()}</strong>${noteValue ? ` <span style="color: #8C7853;">（${noteValue}）</span>` : ''}（費用憑證已核驗確認）`;
+          } else if (feeValue !== null) {
+            makingFeeHtml = `專案參展費用：<strong style="color: #1A1A1A;">NT$ ${feeValue.toLocaleString()}</strong>${noteValue ? ` <span style="color: #8C7853;">（${noteValue}）</span>` : ''}（費用憑證已核驗確認）`;
+          } else {
+            makingFeeHtml = `專案參展費用：<strong style="color: #1A1A1A;">NT$ 12,000</strong>（費用憑證已核驗確認）`;
+          }
 
           htmlContent = `
             <div style="max-width: 620px; margin: 0 auto; padding: 40px 20px; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #FAF9F6; color: #1A1A1A;">
@@ -254,8 +264,9 @@ export async function POST(req: Request) {
                   <div style="font-size: 15px; font-weight: 600; color: #1A1A1A; margin-bottom: 4px;">
                     入選專案：VIS 2027「造物計畫特展席位」
                   </div>
-                  <div style="font-size: 13px; color: #666666;">
-                    媒材分類：${materialCategory} ｜ 專案參展費用：NT$ ${feeValue !== null ? `${feeValue.toLocaleString()}${noteValue ? `（${noteValue}）` : ''}` : '12,000'}（費用憑證已核驗確認）
+                  <div style="font-size: 13px; color: #666666; line-height: 1.8;">
+                    <div>媒材分類：<strong style="color: #1A1A1A;">${materialCategory}</strong></div>
+                    <div style="margin-top: 4px;">${makingFeeHtml}</div>
                   </div>
                 </div>
 
@@ -313,6 +324,15 @@ export async function POST(req: Request) {
           // --- REGULAR EXHIBITOR ADMISSION EMAIL ---
           subject = `【2027 VIS Contemporary Culture】正式核准錄取通知 Official Admission Notice — ${app.brand_name_zh}`;
 
+          let regularFeeHtml = '';
+          if (feeValue !== null && feeValue !== originalPrice) {
+            regularFeeHtml = `專案特惠展位費：<del style="color: #999999; text-decoration: line-through; margin-right: 5px;">NT$ ${originalPrice.toLocaleString()}</del><strong style="color: #2D6A4F; font-size: 14px;">NT$ ${feeValue.toLocaleString()}</strong>${noteValue ? ` <span style="color: #8C7853;">（${noteValue}）</span>` : ''}`;
+          } else if (feeValue !== null) {
+            regularFeeHtml = `核定展位費：<strong style="color: #1A1A1A;">NT$ ${feeValue.toLocaleString()}</strong>${noteValue ? ` <span style="color: #8C7853;">（${noteValue}）</span>` : ''}`;
+          } else {
+            regularFeeHtml = `標準展位牌價：<strong style="color: #1A1A1A;">NT$ ${originalPrice.toLocaleString()}</strong>`;
+          }
+
           htmlContent = `
             <div style="max-width: 620px; margin: 0 auto; padding: 40px 20px; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #FAF9F6; color: #1A1A1A;">
               <div style="text-align: center; margin-bottom: 28px;">
@@ -343,8 +363,9 @@ export async function POST(req: Request) {
                   <div style="font-size: 15px; font-weight: 600; color: #1A1A1A; margin-bottom: 4px;">
                     核定展區：${finalZoneId === 'premier' ? '文化實體展區 Premier' : finalZoneId === 'atelier' ? '匠心藝藏展區 Atelier' : '明日經典展區 Artsy'}
                   </div>
-                  <div style="font-size: 13px; color: #666666;">
-                    核定規格：${formatBoothDisplay(finalBoothType, finalZoneId)} ｜ ${feeValue !== null ? `專案特惠展位費：NT$ ${feeValue.toLocaleString()}${noteValue ? `（${noteValue}）` : ''} ｜ ` : ''}履約保證金轉帳已核驗完成
+                  <div style="font-size: 13px; color: #666666; line-height: 1.8;">
+                    <div>核定規格：<strong style="color: #1A1A1A;">${formatBoothDisplay(finalBoothType, finalZoneId)}</strong></div>
+                    <div style="margin-top: 4px;">${regularFeeHtml} ｜ 履約保證金轉帳已核驗完成</div>
                   </div>
                 </div>
 

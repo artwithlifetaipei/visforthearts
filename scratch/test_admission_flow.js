@@ -1,11 +1,13 @@
 const nodemailer = require('nodemailer');
 require('dotenv').config({ path: '.env.local' });
+const formatBoothDisplay = (booth, zone) => 'L1 & L5 最大獨立展位';
+const getBoothPrice = (booth, zone) => 158000;
 
 async function runTest() {
   const gmailUser = process.env.GMAIL_USER || 'artwithlifetaipei@gmail.com';
   const gmailPass = process.env.GMAIL_APP_PASSWORD;
 
-  console.log('=== [TEST] 核准入選自動化流程驗證 ===');
+  console.log('=== [TEST] 一般參展商（匠心藝藏特惠劃線）核准通知信測試 ===');
   console.log(`1. 寄件信箱發信服務 (SMTP): ${gmailUser}`);
 
   const transporter = nodemailer.createTransport({
@@ -19,20 +21,32 @@ async function runTest() {
   });
 
   const testApp = {
-    contact_name: '郭小姐 / 測試審核代表',
-    brand_name_zh: 'Antigravity Studio',
-    brand_name_en: 'Antigravity Studio',
+    contact_name: '郭代表 / 品牌負責人',
+    brand_name_zh: '逐覓',
+    brand_name_en: 'to:me',
     contact_email: 'artwithlifetaipei@gmail.com',
-    zone_id: 'artsy',
-    booth_type: 'A01',
-    custom_fee: 35000,
-    discount_note: '早鳥評審特別專案價 (9折優惠)',
+    zone_id: 'atelier',
+    booth_type: 'L1 & L5',
+    custom_fee: 88000,
+    discount_note: 'VIS 官方育成專案',
   };
 
   const portalUrl = 'https://www.visforthearts.com/exhibitor/portal';
   const resetPasswordUrl = `https://www.visforthearts.com/exhibitor/reset-password?email=${encodeURIComponent(testApp.contact_email)}`;
   const feeValue = testApp.custom_fee;
   const noteValue = testApp.discount_note;
+  const finalZoneId = testApp.zone_id;
+  const finalBoothType = testApp.booth_type;
+  const originalPrice = getBoothPrice(finalBoothType, finalZoneId); // 158,000
+
+  let regularFeeHtml = '';
+  if (feeValue !== null && feeValue !== originalPrice) {
+    regularFeeHtml = `專案特惠展位費：<del style="color: #999999; text-decoration: line-through; margin-right: 5px;">NT$ ${originalPrice.toLocaleString()}</del><strong style="color: #2D6A4F; font-size: 14px;">NT$ ${feeValue.toLocaleString()}</strong>${noteValue ? ` <span style="color: #8C7853;">（${noteValue}）</span>` : ''}`;
+  } else if (feeValue !== null) {
+    regularFeeHtml = `核定展位費：<strong style="color: #1A1A1A;">NT$ ${feeValue.toLocaleString()}</strong>${noteValue ? ` <span style="color: #8C7853;">（${noteValue}）</span>` : ''}`;
+  } else {
+    regularFeeHtml = `標準展位牌價：<strong style="color: #1A1A1A;">NT$ ${originalPrice.toLocaleString()}</strong>`;
+  }
 
   const htmlContent = `
     <div style="max-width: 620px; margin: 0 auto; padding: 40px 20px; font-family: 'Helvetica Neue', Arial, sans-serif; background-color: #FAF9F6; color: #1A1A1A;">
@@ -62,10 +76,11 @@ async function runTest() {
             ✓ 官方正式核准錄取 APPROVED
           </span>
           <div style="font-size: 15px; font-weight: 600; color: #1A1A1A; margin-bottom: 4px;">
-            核定展區：明日經典展區 Artsy
+            核定展區：${finalZoneId === 'premier' ? '文化實體展區 Premier' : finalZoneId === 'atelier' ? '匠心藝藏展區 Atelier' : '明日經典展區 Artsy'}
           </div>
-          <div style="font-size: 13px; color: #666666;">
-            核定規格：A01 (3m × 2m) ｜ 專案特惠展位費：NT$ ${feeValue.toLocaleString()}（${noteValue}） ｜ 履約保證金轉帳已核驗完成
+          <div style="font-size: 13px; color: #666666; line-height: 1.8;">
+            <div>核定規格：<strong style="color: #1A1A1A;">${formatBoothDisplay(finalBoothType, finalZoneId)}</strong></div>
+            <div style="margin-top: 4px;">${regularFeeHtml} ｜ 履約保證金轉帳已核驗完成</div>
           </div>
         </div>
 
@@ -124,7 +139,7 @@ async function runTest() {
   const info = await transporter.sendMail({
     from: `"2027 VIS Contemporary Culture 大會策展組" <${gmailUser}>`,
     to: testApp.contact_email,
-    subject: `【2027 VIS Contemporary Culture】正式核准錄取通知 Official Admission Notice — ${testApp.brand_name_zh} (測試)`,
+    subject: `【2027 VIS Contemporary Culture】正式核准錄取通知 Official Admission Notice — ${testApp.brand_name_zh} (原價劃線特惠測試)`,
     html: htmlContent,
   });
 
