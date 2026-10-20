@@ -75,8 +75,13 @@ export async function POST(req: Request) {
     }
 
     // 2. Initialize privileged client
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    const adminDb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey);
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const clientKey = serviceKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const clientOptions: any = {};
+    if (!serviceKey && token) {
+      clientOptions.global = { headers: { Authorization: `Bearer ${token}` } };
+    }
+    const adminDb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, clientKey, clientOptions);
 
     const feeValue = (customFee === null || customFee === '' || customFee === undefined)
       ? null
@@ -86,13 +91,14 @@ export async function POST(req: Request) {
     // 3. Update exhibitor_applications
     let appUpdated = false;
     if (applicationId) {
-      const { error: appErr } = await adminDb
+      const { data: updatedApps, error: appErr } = await adminDb
         .from('exhibitor_applications')
         .update({
           custom_fee: feeValue,
           discount_note: noteValue,
         })
-        .eq('id', applicationId);
+        .eq('id', applicationId)
+        .select();
 
       if (appErr) {
         if (appErr.code === '42703') {

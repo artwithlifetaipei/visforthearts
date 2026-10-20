@@ -255,6 +255,10 @@ export default function ExhibitorAdminPage() {
           console.warn('Session client sync warning:', syncErr);
         }
 
+        if (typeof window !== 'undefined' && result.session.access_token) {
+          sessionStorage.setItem('vis_admin_token', result.session.access_token);
+        }
+
         setIsAuthorized(true);
         setCurrentUserEmail(email);
         loadAllAdminData();
@@ -279,6 +283,9 @@ export default function ExhibitorAdminPage() {
               : `登入失敗: ${error.message}` 
           });
         } else if (data.session) {
+          if (typeof window !== 'undefined' && data.session.access_token) {
+            sessionStorage.setItem('vis_admin_token', data.session.access_token);
+          }
           setIsAuthorized(true);
           setCurrentUserEmail(email);
           loadAllAdminData();
@@ -575,7 +582,7 @@ export default function ExhibitorAdminPage() {
 
       // 1. Get current admin session token
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
+      const token = session?.access_token || (typeof window !== 'undefined' ? sessionStorage.getItem('vis_admin_token') : undefined);
 
       // 2. Call backend approval API to update DB, activate brand, and dispatch admission email
       const res = await fetch('/api/exhibitor/approve', {
@@ -597,6 +604,20 @@ export default function ExhibitorAdminPage() {
       if (!res.ok) {
         throw new Error(result.error || '核准處理失敗');
       }
+
+      // Optimistically update local application state
+      setApplications(prev => prev.map(a => 
+        a.id === app.id 
+          ? { 
+              ...a, 
+              status: 'approved',
+              zone_id: chosenZoneId,
+              booth_type: chosenBoothType,
+              custom_fee: customFeeVal !== undefined ? customFeeVal : (app.custom_fee ?? null),
+              discount_note: discountNoteVal !== undefined ? discountNoteVal : (app.discount_note ?? null)
+            } 
+          : a
+      ));
 
       await loadAllAdminData();
       setFeeModalApp(null);
@@ -627,7 +648,14 @@ export default function ExhibitorAdminPage() {
     setIsSavingFee(true);
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      const token = session?.access_token;
+      const token = session?.access_token || (typeof window !== 'undefined' ? sessionStorage.getItem('vis_admin_token') : undefined);
+
+      // Optimistic state update so the table immediately updates in UI!
+      setApplications(prev => prev.map(a => 
+        a.id === app.id 
+          ? { ...a, custom_fee: customFeeVal, discount_note: discountNoteVal } 
+          : a
+      ));
 
       const res = await fetch('/api/exhibitor/update-fee', {
         method: 'POST',
@@ -651,11 +679,12 @@ export default function ExhibitorAdminPage() {
         throw new Error(result.error || '更新參展費失敗');
       }
 
-      alert(`✅「${app.brand_name_zh}」參展費用調整成功！\n${result.message}`);
       setFeeModalApp(null);
       await loadAllAdminData();
+      alert(`✅「${app.brand_name_zh}」參展費用調整成功！\n${result.message}`);
     } catch (err: any) {
       alert(`費用調整失敗: ${err.message}`);
+      await loadAllAdminData();
     } finally {
       setIsSavingFee(false);
     }
@@ -1601,6 +1630,22 @@ export default function ExhibitorAdminPage() {
                                 <span className="text-[10px] text-neutral-400">
                                   {app.zone_preference_1 || '原創造物類別'}
                                 </span>
+                                {app.custom_fee !== null && app.custom_fee !== undefined ? (
+                                  <div className="mt-1">
+                                    <span className="text-[11px] font-mono text-emerald-400 font-semibold block">
+                                      特惠 NT$ {Number(app.custom_fee).toLocaleString()}
+                                    </span>
+                                    {app.discount_note && (
+                                      <span className="text-[10px] text-neutral-400 block truncate max-w-[140px]" title={app.discount_note}>
+                                        ({app.discount_note})
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-[10px] text-neutral-500 font-mono block mt-0.5">
+                                    NT$ 12,000
+                                  </span>
+                                )}
                               </td>
                               <td className="p-4 font-light">
                                 <div className="flex items-center gap-2">

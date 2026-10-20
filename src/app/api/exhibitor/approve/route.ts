@@ -71,8 +71,13 @@ export async function POST(req: Request) {
     }
 
     // 2. Initialize privileged Supabase client for reliable updates
-    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
-    const adminDb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey);
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    const clientKey = serviceKey || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!;
+    const clientOptions: any = {};
+    if (!serviceKey && token) {
+      clientOptions.global = { headers: { Authorization: `Bearer ${token}` } };
+    }
+    const adminDb = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, clientKey, clientOptions);
 
     // 3. Fetch application
     const { data: app, error: appFetchErr } = await adminDb
