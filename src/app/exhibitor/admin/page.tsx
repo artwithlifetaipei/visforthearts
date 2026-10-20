@@ -233,28 +233,59 @@ export default function ExhibitorAdminPage() {
     }
 
     try {
-      // Clear any conflicting non-admin session first
-      await supabase.auth.signOut();
-
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password: adminPassword,
+      // 1. Direct Server-Side Auth API (immune to browser multi-tab lock contention)
+      const res = await fetch('/api/exhibitor/admin-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: adminPassword }),
       });
 
-      if (error) {
-        setLoginFeedback({ 
-          type: 'error', 
-          text: error.message === 'Invalid login credentials' 
-            ? '管理員密碼錯誤，請確認密碼或使用下方 Magic Link 一次性登入連結。' 
-            : `登入失敗: ${error.message}` 
-        });
-      } else if (data.session) {
+      const result = await res.json();
+
+      if (!res.ok) {
+        setLoginFeedback({ type: 'error', text: result.error || '登入失敗' });
+        return;
+      }
+
+      if (result.session) {
+        // Sync session into client Supabase
+        try {
+          await supabase.auth.setSession(result.session);
+        } catch (syncErr) {
+          console.warn('Session client sync warning:', syncErr);
+        }
+
         setIsAuthorized(true);
         setCurrentUserEmail(email);
         loadAllAdminData();
+        return;
       }
-    } catch (err: any) {
-      setLoginFeedback({ type: 'error', text: `系統連線異常: ${err.message || err}` });
+
+      setLoginFeedback({ type: 'error', text: '登入未取得有效授權，請重試' });
+    } catch (apiErr: any) {
+      console.warn('Server login API fallback to client auth:', apiErr);
+      // 2. Direct client auth fallback if server fetch fails
+      try {
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email,
+          password: adminPassword,
+        });
+
+        if (error) {
+          setLoginFeedback({ 
+            type: 'error', 
+            text: error.message === 'Invalid login credentials' 
+              ? '管理員密碼錯誤，請確認密碼或使用下方 Magic Link 一次性登入連結。' 
+              : `登入失敗: ${error.message}` 
+          });
+        } else if (data.session) {
+          setIsAuthorized(true);
+          setCurrentUserEmail(email);
+          loadAllAdminData();
+        }
+      } catch (clientErr: any) {
+        setLoginFeedback({ type: 'error', text: `系統連線異常: ${clientErr.message || clientErr}` });
+      }
     } finally {
       setIsLoggingIn(false);
     }
@@ -276,9 +307,6 @@ export default function ExhibitorAdminPage() {
     setLoginFeedback(null);
 
     try {
-      // Clear any conflicting non-admin session first
-      await supabase.auth.signOut();
-
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -303,7 +331,11 @@ export default function ExhibitorAdminPage() {
   };
 
   const handleAdminLogout = async () => {
-    await supabase.auth.signOut();
+    try {
+      await supabase.auth.signOut();
+    } catch (e) {
+      console.warn('Sign out error:', e);
+    }
     setIsAuthorized(false);
     setCurrentUserEmail('');
     setLoginFeedback(null);
