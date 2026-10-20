@@ -254,20 +254,9 @@ export async function POST(req: Request) {
                   </div>
                 </div>
 
-                <!-- Entitlements -->
-                <h3 style="font-size: 13px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #8C7853; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; margin-top: 28px;">
-                  01. 特展席位專屬權益 (Exhibition Entitlements)
-                </h3>
-                <ul style="font-size: 13px; color: #444444; line-height: 1.9; padding-left: 20px; margin: 12px 0;">
-                  <li><strong>大平面展示檯面席位</strong>：由 VIS 策展團隊統一規劃高品質展示空間與照明氛圍。</li>
-                  <li><strong>現場銷售 0% 抽成</strong>：四天展期內現場交易款項 100% 歸創作者所有。</li>
-                  <li><strong>參展者證 1 張</strong>：展期四天自由進出展場與工作通道。</li>
-                  <li><strong>專屬 VIP 貴賓票禮遇 (10 張)</strong>：本屆展會現場雖不另售一般門票，大會特別為創作者致贈 10 張專屬「VIP 貴賓票」；受邀之重要藏家、品牌夥伴或親友憑此票尊享<strong>全時段「免排隊優先入場」</strong>之快速通關禮遇，您可自主於協作後台指定專屬邀請對象。</li>
-                </ul>
-
                 <!-- Portal Access -->
                 <h3 style="font-size: 13px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #8C7853; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; margin-top: 28px;">
-                  02. 參展商專屬協作平台 (Brand Portal Access)
+                  參展商專屬協作平台啟用指南 (Brand Portal Access)
                 </h3>
                 <p style="font-size: 13px; color: #444444; line-height: 1.8; margin: 10px 0;">
                   大會已自動為您開通專屬協作後台。您可於後台<strong>簽署古蹟參展守則、指定 10 位貴賓並發送 VIP 貴賓票（全時段免排隊優先入場）、以及上傳品牌媒體宣傳素材</strong>。
