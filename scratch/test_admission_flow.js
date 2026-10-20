@@ -71,7 +71,7 @@ async function runTest() {
 
         <!-- Portal Access -->
         <h3 style="font-size: 13px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #8C7853; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; margin-top: 28px;">
-          參展商專屬協作平台啟用指南 (Brand Portal Access)
+          01. 參展商專屬協作平台啟用指南 (Brand Portal Access)
         </h3>
         <p style="font-size: 13px; color: #444444; line-height: 1.8; margin: 10px 0;">
           大會已為您開通專屬協作後台。請即刻登入以辦理後續參展手續（指定專屬 VIP 貴賓票受邀名單享全時段免排隊優先入場、簽署古蹟場地規範、上傳大會行銷視覺圖檔）。
@@ -88,6 +88,23 @@ async function runTest() {
           <a href="${resetPasswordUrl}" target="_blank" style="display: inline-block; background-color: #8C7853; color: #FFFFFF; text-decoration: none; padding: 14px 28px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; border-radius: 2px; margin: 4px;">
             設定/重設密碼 SET PASSWORD
           </a>
+        </div>
+
+        <!-- Line Support -->
+        <h3 style="font-size: 13px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #8C7853; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; margin-top: 28px;">
+          02. 官方 LINE 即時諮詢與群組協助 (LINE Fast Support)
+        </h3>
+        <p style="font-size: 13px; color: #444444; line-height: 1.8; margin: 10px 0;">
+          為提供入選品牌更即時、順暢的溝通與策展籌辦支援，大會特別成立【參展商專屬交流群組】。若您需要透過 LINE 進行快速諮詢或對接進度，請加入大會官方 LINE：
+        </p>
+        <div style="background-color: #FAF9F6; border: 1px solid #EAEAEA; border-left: 3px solid #06C755; border-radius: 4px; padding: 16px; margin: 14px 0; font-size: 13px;">
+          <div style="margin-bottom: 8px;">
+            <strong style="color: #1A1A1A;">官方 LINE ID：</strong> 
+            <span style="font-family: monospace; font-size: 15px; font-weight: 700; color: #06C755; background: rgba(6,199,85,0.08); padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(6,199,85,0.2);">vis_culture</span>
+          </div>
+          <div style="color: #555555; line-height: 1.7; font-size: 12.5px;">
+            ✦ <strong>加入說明：</strong> 添加好友後，<strong>請主動傳送訊息告知您的「品牌名稱」與「負責人姓名」</strong>，大會秘書處專員將即刻為您確認並邀請加入參展商官方專屬群組。
+          </div>
         </div>
 
         <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #EEEEEE; font-size: 12px; color: #777777; line-height: 1.8;">
