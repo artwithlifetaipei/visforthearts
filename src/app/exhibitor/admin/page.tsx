@@ -538,18 +538,38 @@ export default function ExhibitorAdminPage() {
     }
   };
 
-  const getStandardBoothPrice = (app: any) => {
-    if (!app) return 0;
-    if (isMakingProjectApp(app)) return 12000;
+  const getActiveBoothInfo = (app: any) => {
+    if (!app) return { zoneId: 'artsy' as const, boothType: 'A01', price: 40000, zoneName: '明日經典展區' };
+    if (isMakingProjectApp(app)) {
+      return { zoneId: 'artsy' as const, boothType: 'MAKING-PROJECT', price: 12000, zoneName: '造物計畫特展專區' };
+    }
     const selectedPrefNum = selectedPrefs[app.id] || getCurrentPreferenceNum(app);
     const prefStr = selectedPrefNum === 1 ? app.zone_preference_1 :
                     selectedPrefNum === 2 ? app.zone_preference_2 :
                     app.zone_preference_3;
     if (prefStr) {
       const parsed = parsePreference(prefStr);
-      if (parsed) return parsed.price;
+      if (parsed) {
+        const zoneName = parsed.zone_id === 'atelier' ? '匠心藝藏展區' : parsed.zone_id === 'premier' ? '文化實體展區' : '明日經典展區';
+        return {
+          zoneId: parsed.zone_id,
+          boothType: parsed.booth_type,
+          price: parsed.price,
+          zoneName,
+        };
+      }
     }
-    return getBoothPrice(app.booth_type, app.zone_id);
+    const zoneName = app.zone_id === 'atelier' ? '匠心藝藏展區' : app.zone_id === 'premier' ? '文化實體展區' : '明日經典展區';
+    return {
+      zoneId: (app.zone_id as any) || 'artsy',
+      boothType: app.booth_type || 'A01',
+      price: getBoothPrice(app.booth_type, app.zone_id),
+      zoneName,
+    };
+  };
+
+  const getStandardBoothPrice = (app: any) => {
+    return getActiveBoothInfo(app).price;
   };
 
   // Action: Approve Application with optional custom fee & discount note
@@ -650,10 +670,18 @@ export default function ExhibitorAdminPage() {
       const { data: { session } } = await supabase.auth.getSession();
       const token = session?.access_token || (typeof window !== 'undefined' ? sessionStorage.getItem('vis_admin_token') : undefined);
 
+      const activeBooth = getActiveBoothInfo(app);
+
       // Optimistic state update so the table immediately updates in UI!
       setApplications(prev => prev.map(a => 
         a.id === app.id 
-          ? { ...a, custom_fee: customFeeVal, discount_note: discountNoteVal } 
+          ? { 
+              ...a, 
+              custom_fee: customFeeVal, 
+              discount_note: discountNoteVal,
+              zone_id: activeBooth.zoneId,
+              booth_type: activeBooth.boothType
+            } 
           : a
       ));
 
@@ -667,6 +695,8 @@ export default function ExhibitorAdminPage() {
           applicationId: app.id,
           customFee: customFeeVal,
           discountNote: discountNoteVal,
+          zoneId: activeBooth.zoneId,
+          boothType: activeBooth.boothType,
         })
       });
 
@@ -2215,33 +2245,46 @@ export default function ExhibitorAdminPage() {
               </div>
 
               {/* Brand and Booth Specs Summary */}
-              <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 mb-5 space-y-2 text-xs">
-                <div className="flex justify-between">
-                  <span className="text-neutral-400">品牌名稱：</span>
-                  <span className="font-semibold text-white">{feeModalApp.brand_name_zh} ({feeModalApp.brand_name_en})</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-neutral-400">核定展位規格：</span>
-                  <span className="font-mono text-[#DFBA87] font-medium">
-                    {formatBoothDisplay(feeModalApp.booth_type, feeModalApp.zone_id)}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center border-t border-white/5 pt-2">
-                  <span className="text-neutral-400">官方標準公定牌價：</span>
-                  <span className="font-mono text-neutral-300 font-semibold">
-                    NT$ {getStandardBoothPrice(feeModalApp).toLocaleString()}
-                  </span>
-                </div>
-                {feeModalApp.status === 'approved' && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-neutral-400">目前平台應繳金額：</span>
-                    <span className="font-mono text-emerald-400 font-semibold">
-                      NT$ {(feeModalApp.custom_fee !== null && feeModalApp.custom_fee !== undefined ? Number(feeModalApp.custom_fee) : getStandardBoothPrice(feeModalApp)).toLocaleString()}
-                      {feeModalApp.custom_fee && <span className="ml-1 text-[10px] text-amber-400">(特惠)</span>}
-                    </span>
+              {(() => {
+                const activeBooth = getActiveBoothInfo(feeModalApp);
+                const currentFeeToPay = feeModalApp.custom_fee !== null && feeModalApp.custom_fee !== undefined 
+                  ? Number(feeModalApp.custom_fee) 
+                  : activeBooth.price;
+                return (
+                  <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 mb-5 space-y-2.5 text-xs">
+                    <div className="flex justify-between">
+                      <span className="text-neutral-400">品牌名稱：</span>
+                      <span className="font-semibold text-white">{feeModalApp.brand_name_zh} ({feeModalApp.brand_name_en})</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-neutral-400">核定展區與規格：</span>
+                      <div className="text-right">
+                        <span className="font-semibold text-amber-200/90 mr-1.5">{activeBooth.zoneName}</span>
+                        <span className="font-mono text-[#DFBA87] font-medium">
+                          {formatBoothDisplay(activeBooth.boothType, activeBooth.zoneId)}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex justify-between items-center border-t border-white/5 pt-2">
+                      <span className="text-neutral-400">官方標準公定牌價：</span>
+                      <span className="font-mono text-neutral-300 font-semibold">
+                        NT$ {activeBooth.price.toLocaleString()}
+                      </span>
+                    </div>
+                    {feeModalApp.status === 'approved' && (
+                      <div className="flex justify-between items-center">
+                        <span className="text-neutral-400">目前平台應繳金額：</span>
+                        <span className="font-mono text-emerald-400 font-semibold">
+                          NT$ {currentFeeToPay.toLocaleString()}
+                          {feeModalApp.custom_fee !== null && feeModalApp.custom_fee !== undefined && (
+                            <span className="ml-1 text-[10px] text-amber-400">(特惠)</span>
+                          )}
+                        </span>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
+                );
+              })()}
 
               {/* Fee Inputs */}
               <div className="space-y-4">

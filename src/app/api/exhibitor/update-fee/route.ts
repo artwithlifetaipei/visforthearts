@@ -37,7 +37,7 @@ async function createSupabaseServerClient() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { applicationId, brandId, customFee, discountNote } = body;
+    const { applicationId, brandId, customFee, discountNote, zoneId, boothType } = body;
 
     if (!applicationId && !brandId) {
       return NextResponse.json(
@@ -91,12 +91,16 @@ export async function POST(req: Request) {
     // 3. Update exhibitor_applications
     let appUpdated = false;
     if (applicationId) {
+      const appUpdateData: any = {
+        custom_fee: feeValue,
+        discount_note: noteValue,
+      };
+      if (zoneId) appUpdateData.zone_id = zoneId;
+      if (boothType) appUpdateData.booth_type = boothType;
+
       const { data: updatedApps, error: appErr } = await adminDb
         .from('exhibitor_applications')
-        .update({
-          custom_fee: feeValue,
-          discount_note: noteValue,
-        })
+        .update(appUpdateData)
         .eq('id', applicationId)
         .select();
 
@@ -119,10 +123,17 @@ export async function POST(req: Request) {
     }
 
     // 4. Update exhibitor_brands
-    let brandQuery = adminDb.from('exhibitor_brands').update({
+    const brandUpdateData: any = {
       custom_fee: feeValue,
       discount_note: noteValue,
-    });
+    };
+    if (zoneId) brandUpdateData.zone_id = zoneId;
+    if (boothType) {
+      brandUpdateData.booth_type = boothType;
+      brandUpdateData.is_micro_exposure = boothType === 'T';
+    }
+
+    let brandQuery = adminDb.from('exhibitor_brands').update(brandUpdateData);
 
     if (brandId) {
       brandQuery = brandQuery.eq('id', brandId);

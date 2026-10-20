@@ -245,7 +245,7 @@ export function normalizeBoothCode(boothType?: string | null, zoneId?: string | 
   if (!boothType || !boothType.trim()) {
     if (zoneId === 'artsy') return 'A01';
     if (zoneId === 'premier') return 'A04';
-    if (zoneId === 'atelier') return 'L3';
+    if (zoneId === 'atelier') return 'L2, L6, L7';
     return 'A01';
   }
 
@@ -264,8 +264,14 @@ export function normalizeBoothCode(boothType?: string | null, zoneId?: string | 
   if (raw === 'MAKING-PROJECT' || raw.includes('造物')) {
     return 'MAKING-PROJECT';
   }
-  if (raw.includes('L6') && raw.includes('L7')) {
-    return 'L6 & L7';
+  if (raw.includes('L2') && (raw.includes('L6') || raw.includes('L7'))) {
+    return 'L2, L6, L7';
+  }
+  if (raw.includes('L1') && raw.includes('L5')) {
+    return 'L1 & L5';
+  }
+  if (raw.includes('L3') && raw.includes('L4')) {
+    return 'L3&L4';
   }
 
   return raw;
@@ -301,6 +307,7 @@ export function formatBoothDisplay(boothType?: string | null, zoneId?: string | 
     case 'L4':
       return 'L4 獨立展位';
     case 'L3&L4':
+    case 'L3 & L4':
       return 'L3 & L4 獨立展位';
     case 'L5':
     case 'MAKING-PROJECT':
@@ -309,11 +316,16 @@ export function formatBoothDisplay(boothType?: string | null, zoneId?: string | 
       return 'L6 獨立展位';
     case 'L7':
       return 'L7 獨立展位';
+    case 'L2, L6, L7':
+    case 'L2,L6,L7':
+    case 'L2 & L6 & L7':
+      return 'L2, L6, L7 獨立展位';
     case 'L6 & L7':
     case 'L6, L7':
     case 'L6&L7':
-      return 'L6 & L7「凝時之藏」古董專區';
+      return 'L6 & L7 獨立展位';
     case 'L1 & L5':
+    case 'L1&L5':
       return 'L1 & L5 最大獨立展位';
     case 'T':
       return 'T區 微型曝光席位';
@@ -339,9 +351,10 @@ export function getBoothPrice(boothType?: string | null, zoneId?: string | null)
   if (code === 'A03') return 32000;
   if (code === 'A04') return 42000;
   if (code === 'A05') return 45000;
-  if (code === 'L3&L4' || code === 'L3' || code === 'L4') return 108000;
-  if (code === 'L2' || code === 'L6' || code === 'L7') return 88000;
-  if (code === 'L6 & L7' || code === 'L1 & L5' || code === 'L1') return 158000;
+  if (code === 'L3&L4' || code === 'L3 & L4' || code === 'L3' || code === 'L4') return 108000;
+  if (code === 'L2, L6, L7' || code === 'L2,L6,L7' || code === 'L2' || code === 'L6' || code === 'L7') return 88000;
+  if (code === 'L1 & L5' || code === 'L1&L5' || code === 'L1' || code === 'L5') return 158000;
+  if (code === 'L6 & L7' || code === 'L6, L7' || code === 'L6&L7') return 88000;
 
   // Fallback by zone
   if (zoneId === 'artsy') return 40000;
