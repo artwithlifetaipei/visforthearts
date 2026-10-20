@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, FileText, Users, Image as ImageIcon, CheckCircle, XCircle, 
   Download, Eye, Mail, Phone, Globe, Calendar, ExternalLink, Loader2, RefreshCw, ChevronDown, ChevronUp,
-  Signature, FileCheck, Sparkles, Lock, LogOut, ArrowRight, AlertTriangle
+  Signature, FileCheck, Sparkles, Lock, LogOut, ArrowRight, AlertTriangle, Tag, Edit3, DollarSign
 } from 'lucide-react';
 import { ZONE_MAP, ALL_ZONES, formatBoothDisplay, normalizeBoothCode, getBoothPrice } from '@/lib/exhibitorConstants';
 
@@ -133,6 +133,20 @@ export default function ExhibitorAdminPage() {
   const [lightboxApp, setLightboxApp] = useState<any | null>(null);
   const [mediaLightboxUrl, setMediaLightboxUrl] = useState<string | null>(null);
   const [selectedPrefs, setSelectedPrefs] = useState<Record<string, number>>({});
+
+  // Fee Adjustment Modal state
+  const [feeModalApp, setFeeModalApp] = useState<any | null>(null);
+  const [feeModalMode, setFeeModalMode] = useState<'approve' | 'edit'>('edit');
+  const [feeModalInput, setFeeModalInput] = useState<string>('');
+  const [feeModalNote, setFeeModalNote] = useState<string>('');
+  const [isSavingFee, setIsSavingFee] = useState(false);
+
+  const openFeeModal = (app: any, mode: 'approve' | 'edit') => {
+    setFeeModalApp(app);
+    setFeeModalMode(mode);
+    setFeeModalInput(app.custom_fee !== null && app.custom_fee !== undefined ? String(app.custom_fee) : '');
+    setFeeModalNote(app.discount_note || '');
+  };
 
   // Authenticate Admin
   useEffect(() => {
@@ -454,8 +468,22 @@ export default function ExhibitorAdminPage() {
     }
   };
 
-  // Action: Approve Application
-  const handleApproveApplication = async (app: any) => {
+  const getStandardBoothPrice = (app: any) => {
+    if (!app) return 0;
+    if (isMakingProjectApp(app)) return 12000;
+    const selectedPrefNum = selectedPrefs[app.id] || getCurrentPreferenceNum(app);
+    const prefStr = selectedPrefNum === 1 ? app.zone_preference_1 :
+                    selectedPrefNum === 2 ? app.zone_preference_2 :
+                    app.zone_preference_3;
+    if (prefStr) {
+      const parsed = parsePreference(prefStr);
+      if (parsed) return parsed.price;
+    }
+    return getBoothPrice(app.booth_type, app.zone_id);
+  };
+
+  // Action: Approve Application with optional custom fee & discount note
+  const handleApproveApplication = async (app: any, customFeeVal?: number | null, discountNoteVal?: string | null) => {
     if (actionLoadingId) return;
     setActionLoadingId(app.id);
 
@@ -496,7 +524,9 @@ export default function ExhibitorAdminPage() {
         body: JSON.stringify({
           applicationId: app.id,
           zoneId: chosenZoneId,
-          boothType: chosenBoothType
+          boothType: chosenBoothType,
+          customFee: customFeeVal !== undefined ? customFeeVal : (app.custom_fee ?? null),
+          discountNote: discountNoteVal !== undefined ? discountNoteVal : (app.discount_note ?? null),
         })
       });
 
@@ -506,21 +536,65 @@ export default function ExhibitorAdminPage() {
       }
 
       await loadAllAdminData();
+      setFeeModalApp(null);
+
+      const feeNotice = (customFeeVal !== undefined && customFeeVal !== null)
+        ? `\n💰 審定專案參展費: NT$ ${Number(customFeeVal).toLocaleString()}`
+        : '';
 
       const emailNote = result.emailSent 
         ? `\n\n✉️ 已成功寄送【正式入選核准通知電郵】至申請人信箱：\n${app.contact_email}`
         : (result.emailError ? `\n\n⚠️ 電郵發送異常: ${result.emailError}` : '');
 
       if (isMaking) {
-        alert(`🎉「${app.brand_name_zh}」造物計畫特展申請已審查通過！\n\n✅ 已核准特展席位\n✅ 已自動開通參展商協作平台權限${emailNote}`);
+        alert(`🎉「${app.brand_name_zh}」造物計畫特展申請已審查通過！\n\n✅ 已核准特展席位${feeNotice}\n✅ 已自動開通參展商協作平台權限${emailNote}`);
       } else {
-        alert(`🎉「${app.brand_name_zh}」申請已審查通過！\n\n✅ 已分配展位順位 (${chosenBoothType})\n✅ 已自動開通參展商協作平台權限${emailNote}`);
+        alert(`🎉「${app.brand_name_zh}」申請已審查通過！\n\n✅ 已分配展位順位 (${chosenBoothType})${feeNotice}\n✅ 已自動開通參展商協作平台權限${emailNote}`);
       }
 
     } catch (err: any) {
       alert(`審核操作失敗: ${err.message}`);
     } finally {
       setActionLoadingId(null);
+    }
+  };
+
+  // Action: Adjust Booth Fee / Special Discount directly
+  const handleSaveFeeAdjustment = async (app: any, customFeeVal: number | null, discountNoteVal: string | null) => {
+    setIsSavingFee(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token;
+
+      const res = await fetch('/api/exhibitor/update-fee', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          applicationId: app.id,
+          customFee: customFeeVal,
+          discountNote: discountNoteVal,
+        })
+      });
+
+      const result = await res.json();
+      if (!res.ok) {
+        if (result.needsMigration) {
+          alert(`⚠️ ${result.error}\n\nSQL 指令請見專案根目錄下的 supabase_custom_fee_update.sql`);
+          return;
+        }
+        throw new Error(result.error || '更新參展費失敗');
+      }
+
+      alert(`✅「${app.brand_name_zh}」參展費用調整成功！\n${result.message}`);
+      setFeeModalApp(null);
+      await loadAllAdminData();
+    } catch (err: any) {
+      alert(`費用調整失敗: ${err.message}`);
+    } finally {
+      setIsSavingFee(false);
     }
   };
 
@@ -1040,6 +1114,22 @@ export default function ExhibitorAdminPage() {
                               <td className="p-4 font-light">
                                 <span className="font-semibold block text-[#DFBA87]">{formatBoothDisplay(app.booth_type, app.zone_id)}</span>
                                 <span className="text-[10px] text-neutral-400">{zone?.nameZh}</span>
+                                {app.custom_fee !== null && app.custom_fee !== undefined ? (
+                                  <div className="mt-1">
+                                    <span className="text-[11px] font-mono text-emerald-400 font-semibold block">
+                                      特惠 NT$ {Number(app.custom_fee).toLocaleString()}
+                                    </span>
+                                    {app.discount_note && (
+                                      <span className="text-[10px] text-neutral-400 block truncate max-w-[140px]" title={app.discount_note}>
+                                        ({app.discount_note})
+                                      </span>
+                                    )}
+                                  </div>
+                                ) : (
+                                  <span className="text-[10px] text-neutral-500 font-mono block mt-0.5">
+                                    NT$ {getStandardBoothPrice(app).toLocaleString()}
+                                  </span>
+                                )}
                               </td>
                               <td className="p-4 font-light">
                                 <div className="flex items-center gap-2">
@@ -1161,6 +1251,42 @@ export default function ExhibitorAdminPage() {
                                             );
                                           })}
                                         </div>
+
+                                        {/* Fee & Discount Setting Card */}
+                                        <div className="bg-white/[0.02] border border-white/10 rounded-lg p-3.5 space-y-2 mt-4 max-w-2xl">
+                                          <div className="flex items-center justify-between">
+                                            <h5 className="text-[11px] font-semibold text-[#DFBA87] uppercase tracking-wider flex items-center gap-1.5">
+                                              <Tag className="w-3.5 h-3.5" /> 參展費款項 (尾款) 核定設定
+                                            </h5>
+                                            <button
+                                              type="button"
+                                              onClick={() => openFeeModal(app, 'edit')}
+                                              className="text-[11px] text-[#DFBA87] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 border border-[#DFBA87]/30 px-2.5 py-1 rounded transition-colors inline-flex items-center gap-1 font-medium"
+                                            >
+                                              <Edit3 className="w-3 h-3" /> 調整參展費 / 設定折扣
+                                            </button>
+                                          </div>
+                                          <div className="flex items-baseline gap-3 text-xs font-mono flex-wrap">
+                                            <span className="text-neutral-400">目前平台應繳：</span>
+                                            <span className="text-base font-bold text-white">
+                                              NT$ {(app.custom_fee !== null && app.custom_fee !== undefined ? Number(app.custom_fee) : getStandardBoothPrice(app)).toLocaleString()}
+                                            </span>
+                                            {app.custom_fee !== null && app.custom_fee !== undefined ? (
+                                              <span className="text-[10px] text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded font-sans">
+                                                已設定專案特惠 (原牌價 NT$ {getStandardBoothPrice(app).toLocaleString()})
+                                              </span>
+                                            ) : (
+                                              <span className="text-[10px] text-neutral-500 font-sans">
+                                                (依官方標準公定牌價)
+                                              </span>
+                                            )}
+                                          </div>
+                                          {app.discount_note && (
+                                            <div className="text-[11px] text-[#DFBA87] bg-black/40 border border-[#DFBA87]/15 rounded p-2">
+                                              優惠備註說明：{app.discount_note}
+                                            </div>
+                                          )}
+                                        </div>
                                       </div>
                                     </div>
 
@@ -1235,24 +1361,58 @@ export default function ExhibitorAdminPage() {
                                       </div>
 
                                       {/* Action Triggers */}
-                                      {app.status === 'pending' && (
-                                        <div className="flex gap-3 pt-2">
-                                          <button
-                                            onClick={() => handleApproveApplication(app)}
-                                            disabled={actionLoadingId !== null}
-                                            className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold tracking-wider px-4 py-2 rounded flex items-center gap-1"
-                                          >
-                                            {actionLoadingId === app.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '核准參展 (Approve)'}
-                                          </button>
-                                          <button
-                                            onClick={() => handleRejectApplication(app.id)}
-                                            disabled={actionLoadingId !== null}
-                                            className="border border-rose-500/30 hover:bg-rose-500/10 text-rose-400 font-semibold tracking-wider px-4 py-2 rounded"
-                                          >
-                                            駁回 (Reject)
-                                          </button>
-                                        </div>
-                                      )}
+                                      <div className="pt-2">
+                                        {app.status === 'pending' && (
+                                          <div className="flex gap-3">
+                                            <button
+                                              onClick={() => openFeeModal(app, 'approve')}
+                                              disabled={actionLoadingId !== null}
+                                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold tracking-wider px-4 py-2 rounded flex items-center gap-1 text-xs"
+                                            >
+                                              {actionLoadingId === app.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '核准參展 (Approve)'}
+                                            </button>
+                                            <button
+                                              onClick={() => handleRejectApplication(app.id)}
+                                              disabled={actionLoadingId !== null}
+                                              className="border border-rose-500/30 hover:bg-rose-500/10 text-rose-400 font-semibold tracking-wider px-4 py-2 rounded text-xs"
+                                            >
+                                              駁回 (Reject)
+                                            </button>
+                                          </div>
+                                        )}
+                                        {app.status === 'approved' && (
+                                          <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 p-3 rounded">
+                                            <span className="text-emerald-400 text-xs font-medium">✓ 已正式核准參展，協作平台帳號已開通就緒</span>
+                                            <div className="flex items-center gap-2">
+                                              <button
+                                                onClick={() => openFeeModal(app, 'edit')}
+                                                className="text-xs bg-[#DFBA87]/15 hover:bg-[#DFBA87]/25 text-[#DFBA87] border border-[#DFBA87]/30 px-3 py-1.5 rounded transition-colors inline-flex items-center gap-1 font-medium"
+                                              >
+                                                <Tag className="w-3 h-3" /> 修改參展費 / 折扣
+                                              </button>
+                                              <button
+                                                onClick={() => handleRejectApplication(app.id)}
+                                                disabled={actionLoadingId !== null}
+                                                className="text-[11px] text-rose-400 hover:underline px-1"
+                                              >
+                                                撤回/駁回
+                                              </button>
+                                            </div>
+                                          </div>
+                                        )}
+                                        {app.status === 'rejected' && (
+                                          <div className="flex items-center justify-between bg-rose-500/10 border border-rose-500/20 p-3 rounded">
+                                            <span className="text-rose-400 text-xs">✕ 已駁回此申請案</span>
+                                            <button
+                                              onClick={() => openFeeModal(app, 'approve')}
+                                              disabled={actionLoadingId !== null}
+                                              className="text-[11px] text-emerald-400 hover:underline font-medium"
+                                            >
+                                              重新核准
+                                            </button>
+                                          </div>
+                                        )}
+                                      </div>
                                     </div>
                                   </div>
                                 </td>
@@ -1531,16 +1691,16 @@ export default function ExhibitorAdminPage() {
                                         {app.status === 'pending' && (
                                           <div className="flex gap-3">
                                             <button
-                                              onClick={() => handleApproveApplication(app)}
+                                              onClick={() => openFeeModal(app, 'approve')}
                                               disabled={actionLoadingId !== null}
-                                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold tracking-wider px-4 py-2 rounded flex items-center gap-1"
+                                              className="bg-emerald-600 hover:bg-emerald-700 text-white font-semibold tracking-wider px-4 py-2 rounded flex items-center gap-1 text-xs"
                                             >
                                               {actionLoadingId === app.id ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : '核准錄取 (Approve)'}
                                             </button>
                                             <button
                                               onClick={() => handleRejectApplication(app.id)}
                                               disabled={actionLoadingId !== null}
-                                              className="border border-rose-500/30 hover:bg-rose-500/10 text-rose-400 font-semibold tracking-wider px-4 py-2 rounded"
+                                              className="border border-rose-500/30 hover:bg-rose-500/10 text-rose-400 font-semibold tracking-wider px-4 py-2 rounded text-xs"
                                             >
                                               婉拒 (Reject)
                                             </button>
@@ -1548,23 +1708,38 @@ export default function ExhibitorAdminPage() {
                                         )}
                                         {app.status === 'approved' && (
                                           <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 p-3 rounded">
-                                            <span className="text-emerald-400 text-xs font-medium">✓ 已核准「造物計畫特展席位」，協作帳號已就緒</span>
-                                            <button
-                                              onClick={() => handleRejectApplication(app.id)}
-                                              disabled={actionLoadingId !== null}
-                                              className="text-[11px] text-rose-400 hover:underline"
-                                            >
-                                              撤回/駁回
-                                            </button>
+                                            <div className="flex items-center gap-3">
+                                              <span className="text-emerald-400 text-xs font-medium">✓ 已核准「造物計畫特展席位」，協作帳號已就緒</span>
+                                              {app.custom_fee !== null && app.custom_fee !== undefined && (
+                                                <span className="text-[11px] font-mono text-[#DFBA87] bg-black/40 px-2 py-0.5 rounded border border-[#DFBA87]/20">
+                                                  專案價 NT$ {Number(app.custom_fee).toLocaleString()}
+                                                </span>
+                                              )}
+                                            </div>
+                                            <div className="flex items-center gap-2">
+                                              <button
+                                                onClick={() => openFeeModal(app, 'edit')}
+                                                className="text-xs bg-[#DFBA87]/15 hover:bg-[#DFBA87]/25 text-[#DFBA87] border border-[#DFBA87]/30 px-3 py-1.5 rounded transition-colors inline-flex items-center gap-1 font-medium"
+                                              >
+                                                <Tag className="w-3 h-3" /> 調整費用 / 折扣
+                                              </button>
+                                              <button
+                                                onClick={() => handleRejectApplication(app.id)}
+                                                disabled={actionLoadingId !== null}
+                                                className="text-[11px] text-rose-400 hover:underline px-1"
+                                              >
+                                                撤回/駁回
+                                              </button>
+                                            </div>
                                           </div>
                                         )}
                                         {app.status === 'rejected' && (
                                           <div className="flex items-center justify-between bg-rose-500/10 border border-rose-500/20 p-3 rounded">
                                             <span className="text-rose-400 text-xs">✕ 已駁回此申請案</span>
                                             <button
-                                              onClick={() => handleApproveApplication(app)}
+                                              onClick={() => openFeeModal(app, 'approve')}
                                               disabled={actionLoadingId !== null}
-                                              className="text-[11px] text-emerald-400 hover:underline"
+                                              className="text-[11px] text-emerald-400 hover:underline font-medium"
                                             >
                                               重新核准
                                             </button>
@@ -1884,6 +2059,162 @@ export default function ExhibitorAdminPage() {
               className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl border border-white/10"
               onClick={(e) => e.stopPropagation()}
             />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Booth Fee & Special Discount Modal */}
+      <AnimatePresence>
+        {feeModalApp && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto"
+            onClick={() => setFeeModalApp(null)}
+          >
+            <motion.div 
+              initial={{ scale: 0.95, opacity: 0, y: 10 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 10 }}
+              className="bg-[#141414] border border-[#DFBA87]/40 rounded-xl p-6 max-w-lg w-full text-white shadow-2xl relative my-8"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button 
+                onClick={() => setFeeModalApp(null)}
+                className="absolute top-4 right-4 text-neutral-400 hover:text-white p-1 text-sm rounded transition-colors"
+                title="關閉"
+              >
+                ✕
+              </button>
+
+              <div className="flex items-center gap-2 mb-4 text-[#DFBA87]">
+                <Tag className="w-5 h-5 flex-shrink-0" />
+                <h3 className="text-base font-semibold tracking-wide">
+                  {feeModalMode === 'approve' ? '核准參展 & 核定參展費用' : '調整參展費 / 設定專案優惠'}
+                </h3>
+              </div>
+
+              {/* Brand and Booth Specs Summary */}
+              <div className="bg-[#0A0A0A] border border-white/10 rounded-lg p-4 mb-5 space-y-2 text-xs">
+                <div className="flex justify-between">
+                  <span className="text-neutral-400">品牌名稱：</span>
+                  <span className="font-semibold text-white">{feeModalApp.brand_name_zh} ({feeModalApp.brand_name_en})</span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-neutral-400">核定展位規格：</span>
+                  <span className="font-mono text-[#DFBA87] font-medium">
+                    {formatBoothDisplay(feeModalApp.booth_type, feeModalApp.zone_id)}
+                  </span>
+                </div>
+                <div className="flex justify-between items-center border-t border-white/5 pt-2">
+                  <span className="text-neutral-400">官方標準公定牌價：</span>
+                  <span className="font-mono text-neutral-300 font-semibold">
+                    NT$ {getStandardBoothPrice(feeModalApp).toLocaleString()}
+                  </span>
+                </div>
+                {feeModalApp.status === 'approved' && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-neutral-400">目前平台應繳金額：</span>
+                    <span className="font-mono text-emerald-400 font-semibold">
+                      NT$ {(feeModalApp.custom_fee !== null && feeModalApp.custom_fee !== undefined ? Number(feeModalApp.custom_fee) : getStandardBoothPrice(feeModalApp)).toLocaleString()}
+                      {feeModalApp.custom_fee && <span className="ml-1 text-[10px] text-amber-400">(特惠)</span>}
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Fee Inputs */}
+              <div className="space-y-4">
+                <div>
+                  <div className="flex justify-between items-center mb-1.5">
+                    <label className="text-xs font-medium text-neutral-300">
+                      實收參展費用 (尾款 NT$)
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setFeeModalInput('')}
+                      className="text-[11px] text-[#DFBA87] hover:underline"
+                    >
+                      設為標準牌價 (留空)
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 font-mono text-xs">NT$</span>
+                    <input
+                      type="number"
+                      placeholder={`留空即依標準牌價 NT$ ${getStandardBoothPrice(feeModalApp).toLocaleString()}`}
+                      value={feeModalInput}
+                      onChange={(e) => setFeeModalInput(e.target.value)}
+                      className="w-full bg-[#0D0D0D] border border-white/15 focus:border-[#DFBA87] rounded-lg pl-12 pr-4 py-2.5 text-white font-mono text-sm outline-none transition-colors"
+                    />
+                  </div>
+                  <p className="text-[11px] text-neutral-400 mt-1.5 leading-relaxed">
+                    💡 若有品牌享有折扣或贊助價，請在此輸入最終實付金額。協作平台將優先以特惠金額顯示。若留空則自動帶入官方標準牌價。
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                    專案折扣 / 優惠備註說明（選填，將呈現在參展商後台）
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="例如：策略夥伴專案特惠、早鳥評審特惠價"
+                    value={feeModalNote}
+                    onChange={(e) => setFeeModalNote(e.target.value)}
+                    className="w-full bg-[#0D0D0D] border border-white/15 focus:border-[#DFBA87] rounded-lg px-3 py-2 text-white text-xs outline-none transition-colors"
+                  />
+                </div>
+
+                {/* Submit Actions */}
+                <div className="pt-3 flex gap-3 border-t border-white/10">
+                  {feeModalMode === 'approve' ? (
+                    <>
+                      <button
+                        type="button"
+                        disabled={actionLoadingId !== null}
+                        onClick={() => {
+                          const customVal = feeModalInput.trim() === '' ? null : Number(feeModalInput);
+                          handleApproveApplication(feeModalApp, customVal, feeModalNote.trim() || null);
+                        }}
+                        className="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs tracking-wider py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        {actionLoadingId === feeModalApp.id ? <Loader2 className="w-4 h-4 animate-spin" /> : '✓ 確認核准並寄送入選電郵'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFeeModalApp(null)}
+                        className="px-4 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 text-neutral-400 text-xs transition-colors"
+                      >
+                        取消
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        type="button"
+                        disabled={isSavingFee}
+                        onClick={() => {
+                          const customVal = feeModalInput.trim() === '' ? null : Number(feeModalInput);
+                          handleSaveFeeAdjustment(feeModalApp, customVal, feeModalNote.trim() || null);
+                        }}
+                        className="flex-1 bg-[#DFBA87] hover:bg-[#DFBA87]/90 text-black font-semibold text-xs tracking-wider py-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-colors"
+                      >
+                        {isSavingFee ? <Loader2 className="w-4 h-4 animate-spin" /> : '✓ 儲存費用變更 (即時生效)'}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFeeModalApp(null)}
+                        className="px-4 py-2.5 rounded-lg border border-white/10 hover:bg-white/5 text-neutral-400 text-xs transition-colors"
+                      >
+                        取消
+                      </button>
+                    </>
+                  )}
+                </div>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>

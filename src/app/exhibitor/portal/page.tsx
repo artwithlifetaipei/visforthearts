@@ -149,6 +149,13 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   );
   const boothPrice = boothInfo?.price || getBoothPrice(brand.booth_type, brand.zone_id);
 
+  // Check if brand has an approved custom fee or discount
+  const rawCustomFee = brand.custom_fee ?? (app as any)?.custom_fee;
+  const discountNote = brand.discount_note || (app as any)?.discount_note;
+  const isCustomFeeSet = rawCustomFee !== null && rawCustomFee !== undefined && rawCustomFee !== '';
+  const finalPayablePrice = isCustomFeeSet ? Number(rawCustomFee) : boothPrice;
+  const hasDiscount = isCustomFeeSet && finalPayablePrice < boothPrice;
+
   // Determine current active timeline phase
   const getTimelineStatus = (dateStr: string) => {
     const today = new Date();
@@ -334,8 +341,28 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   待確認 Verifying
                 </span>
               </div>
-              <div className="text-2xl font-bold font-mono text-white mb-2">
-                NT$ {boothPrice.toLocaleString()}
+              <div className="mb-2">
+                <div className="flex items-baseline gap-2.5 flex-wrap">
+                  <div className="text-2xl font-bold font-mono text-[#DFBA87]">
+                    NT$ {finalPayablePrice.toLocaleString()}
+                  </div>
+                  {hasDiscount && (
+                    <span className="text-xs text-neutral-500 line-through font-mono">
+                      原牌價 NT$ {boothPrice.toLocaleString()}
+                    </span>
+                  )}
+                  {isCustomFeeSet && (
+                    <span className="text-[10px] bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded font-medium">
+                      {hasDiscount ? '專案特惠價 Special Rate' : '大會核定金額 Approved'}
+                    </span>
+                  )}
+                </div>
+                {discountNote && (
+                  <div className="mt-2 text-xs text-[#DFBA87] bg-[#DFBA87]/10 border border-[#DFBA87]/20 rounded-md px-2.5 py-1.5 flex items-center gap-1.5">
+                    <span className="font-semibold text-neutral-300">優惠備註：</span>
+                    <span>{discountNote}</span>
+                  </div>
+                )}
               </div>
               <p className="text-[11px] text-neutral-400 font-light leading-relaxed">
                 展位規格為 <strong className="text-[#DFBA87]">{formatBoothDisplay(brand.booth_type, brand.zone_id)}</strong>。尾款請於大會指定截止日前完成匯付，並提供水單以開立電子發票。

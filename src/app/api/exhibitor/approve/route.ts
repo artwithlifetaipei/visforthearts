@@ -39,7 +39,7 @@ async function createSupabaseServerClient() {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { applicationId, zoneId, boothType } = body;
+    const { applicationId, zoneId, boothType, customFee, discountNote } = body;
 
     if (!applicationId) {
       return NextResponse.json({ error: '缺少申請案號 (applicationId is required)' }, { status: 400 });
@@ -100,16 +100,39 @@ export async function POST(req: Request) {
     const rawBoothType = boothType || app.booth_type || 'A01';
     const finalBoothType = isMakingProject ? 'MAKING-PROJECT' : normalizeBoothCode(rawBoothType, finalZoneId);
 
+    const feeValue = (customFee === null || customFee === '' || customFee === undefined)
+      ? null
+      : Number(customFee);
+    const noteValue = discountNote ? String(discountNote).trim() : null;
+
     // 4. Update status in exhibitor_applications
-    const { error: appUpdateErr } = await adminDb
+    const appUpdateData: any = {
+      status: 'approved',
+      deposit_paid: true,
+      zone_id: finalZoneId,
+      booth_type: finalBoothType,
+    };
+    if (feeValue !== null) appUpdateData.custom_fee = feeValue;
+    if (noteValue !== null) appUpdateData.discount_note = noteValue;
+
+    let { error: appUpdateErr } = await adminDb
       .from('exhibitor_applications')
-      .update({
-        status: 'approved',
-        deposit_paid: true,
-        zone_id: finalZoneId,
-        booth_type: finalBoothType,
-      })
+      .update(appUpdateData)
       .eq('id', applicationId);
+
+    if (appUpdateErr && appUpdateErr.code === '42703') {
+      console.warn('custom_fee or discount_note column missing on exhibitor_applications, falling back to base fields');
+      const fallback = await adminDb
+        .from('exhibitor_applications')
+        .update({
+          status: 'approved',
+          deposit_paid: true,
+          zone_id: finalZoneId,
+          booth_type: finalBoothType,
+        })
+        .eq('id', applicationId);
+      appUpdateErr = fallback.error;
+    }
 
     if (appUpdateErr) {
       console.error('Update exhibitor_applications error:', appUpdateErr);
@@ -124,7 +147,7 @@ export async function POST(req: Request) {
       .maybeSingle();
 
     const isMicro = finalBoothType === 'T';
-    const brandPayload = {
+    const brandPayload: any = {
       application_id: applicationId,
       brand_name_zh: app.brand_name_zh,
       brand_name_en: app.brand_name_en,
@@ -133,19 +156,33 @@ export async function POST(req: Request) {
       is_micro_exposure: isMicro,
       portal_email: app.contact_email.toLowerCase().trim(),
     };
+    if (feeValue !== null) brandPayload.custom_fee = feeValue;
+    if (noteValue !== null) brandPayload.discount_note = noteValue;
 
     if (!existingBrand) {
-      const { error: brandInsertErr } = await adminDb
+      let { error: brandInsertErr } = await adminDb
         .from('exhibitor_brands')
         .insert(brandPayload);
+      if (brandInsertErr && brandInsertErr.code === '42703') {
+        delete brandPayload.custom_fee;
+        delete brandPayload.discount_note;
+        const fallback = await adminDb.from('exhibitor_brands').insert(brandPayload);
+        brandInsertErr = fallback.error;
+      }
       if (brandInsertErr) {
         console.error('Insert exhibitor_brands error:', brandInsertErr);
       }
     } else {
-      const { error: brandUpdateErr } = await adminDb
+      let { error: brandUpdateErr } = await adminDb
         .from('exhibitor_brands')
         .update(brandPayload)
         .eq('application_id', applicationId);
+      if (brandUpdateErr && brandUpdateErr.code === '42703') {
+        delete brandPayload.custom_fee;
+        delete brandPayload.discount_note;
+        const fallback = await adminDb.from('exhibitor_brands').update(brandPayload).eq('application_id', applicationId);
+        brandUpdateErr = fallback.error;
+      }
       if (brandUpdateErr) {
         console.error('Update exhibitor_brands error:', brandUpdateErr);
       }
@@ -211,7 +248,7 @@ export async function POST(req: Request) {
                     入選專案：VIS 2027「造物計畫特展席位」
                   </div>
                   <div style="font-size: 13px; color: #666666;">
-                    媒材分類：${materialCategory} ｜ 專案參展費用：NT$ 12,000（費用憑證已核驗確認）
+                    媒材分類：${materialCategory} ｜ 專案參展費用：NT$ ${feeValue !== null ? `${feeValue.toLocaleString()}${noteValue ? `（${noteValue}）` : ''}` : '12,000'}（費用憑證已核驗確認）
                   </div>
                 </div>
 
@@ -294,7 +331,7 @@ export async function POST(req: Request) {
                     核定展區：${finalZoneId === 'premier' ? '文化實體展區 Premier' : finalZoneId === 'atelier' ? '匠心藝藏展區 Atelier' : '明日經典展區 Artsy'}
                   </div>
                   <div style="font-size: 13px; color: #666666;">
-                    核定規格：${formatBoothDisplay(finalBoothType, finalZoneId)} ｜ 履約保證金轉帳已核驗完成
+                    核定規格：${formatBoothDisplay(finalBoothType, finalZoneId)} ｜ ${feeValue !== null ? `專案特惠展位費：NT$ ${feeValue.toLocaleString()}${noteValue ? `（${noteValue}）` : ''} ｜ ` : ''}履約保證金轉帳已核驗完成
                   </div>
                 </div>
 
