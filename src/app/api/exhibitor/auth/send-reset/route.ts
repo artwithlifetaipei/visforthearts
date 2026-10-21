@@ -71,13 +71,13 @@ export async function POST(req: NextRequest) {
 
       if (gmailUser && gmailPass) {
         const transporter = nodemailer.createTransport({
-          host: 'smtp.gmail.com',
-          port: 465,
-          secure: true,
+          service: 'gmail',
           auth: {
             user: gmailUser,
             pass: gmailPass,
           },
+          connectionTimeout: 10000,
+          socketTimeout: 15000,
         });
 
         const resetPageUrl = `https://www.visforthearts.com/exhibitor/reset-password?email=${encodeURIComponent(normalizedEmail)}`;
