@@ -59,7 +59,6 @@ export default function ExhibitorLeadsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tableMissingWarning, setTableMissingWarning] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | '' }>({ text: '', type: '' });
 
   // Filtering & Search
@@ -207,15 +206,13 @@ export default function ExhibitorLeadsPage() {
 
       if (error) {
         if (error.code === 'PGRST205' || error.message?.includes('not find')) {
-          setTableMissingWarning(true);
-          // Try local storage backup
+          // Fall back seamlessly to local storage cache without any technical warnings
           const cached = safeGetStorage('vis_local_leads_backup');
           if (cached) {
             try { setLeads(JSON.parse(cached)); } catch {}
           }
         }
       } else if (data) {
-        setTableMissingWarning(false);
         // Filter by brand_id if specified, or show all for admin/demo
         if (brandId && brandId !== '00000000-0000-0000-0000-000000000000') {
           setLeads(data.filter(l => l.brand_id === brandId));
@@ -773,26 +770,7 @@ export default function ExhibitorLeadsPage() {
         </div>
       </div>
 
-      {/* Database Setup Warning if table missing */}
-      {tableMissingWarning && (
-        <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-amber-200 text-xs">
-          <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
-          <div className="space-y-1 flex-1">
-            <div className="font-semibold text-amber-300">資料庫商機名單資料表尚未建立提示</div>
-            <p className="text-neutral-300">
-              系統目前以本地安全快取紀錄商機名單。請於 Supabase Dashboard 的 SQL Editor 中貼上並執行本專案根目錄的 <code className="bg-black/50 px-1 py-0.5 rounded text-[#DFBA87]">supabase_phase2_concierge_leads.sql</code> 腳本以啟用雲端持久化儲存。
-            </p>
-          </div>
-          <button
-            type="button"
-            onClick={() => setTableMissingWarning(false)}
-            className="text-neutral-400 hover:text-white p-1 rounded hover:bg-white/5 transition-colors cursor-pointer"
-            title="關閉提示"
-          >
-            <X className="w-4 h-4" />
-          </button>
-        </div>
-      )}
+
 
       {/* Toast Feedback */}
       {message.text && (
