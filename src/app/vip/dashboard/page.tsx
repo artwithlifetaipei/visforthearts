@@ -593,7 +593,7 @@ export default function VIPDashboard() {
                                             </div>
                                             <span className="text-[8px] opacity-60 uppercase tracking-wider font-mono block">VIP Preview & Vernissage</span>
                                         </div>
-                                        <span className={`text-right font-mono font-medium ${isSVIP ? goldText : 'opacity-50'}`}>1/6 (三) 18:00 - 21:30</span>
+                                        <span className={`text-right font-mono font-medium ${isSVIP ? goldText : 'opacity-50'}`}>1/6 (三) 18:00 - 21:00</span>
                                     </div>
                                     
                                     <div className="flex justify-between items-start gap-4 border-t border-current/5 pt-2.5">

@@ -647,7 +647,7 @@ export default function StaffScannerPage() {
                 status: 'invalid',
                 name: guest.name || guest.email.split('@')[0],
                 tier: 'none',
-                message: `⚠️ 此證為【VIP 展期觀展卡】（適用 1/7 至 1/9）。\n今晚 1/6 預展暨開幕晚會僅限特邀【SVIP 專屬席位】入場，期待明日 1/7 起隨時為您開通優先入場！`
+                message: `⚠️ 此證為【VIP 展期觀展卡】（適用 1/7 至 1/9）。\n今晚 1/6 預展暨開幕晚會（18:00–21:00）僅限特邀【SVIP 專屬通行資格】入場，期待明日 1/7 起隨時為您開通優先入場！`
             });
             setTimeout(() => {
                 setFeedback(f => f.status === 'invalid' ? { status: 'none', name: '', tier: 'none', message: '' } : f);
@@ -662,7 +662,7 @@ export default function StaffScannerPage() {
             name: guest.name || guest.email.split('@')[0],
             tier: guest.tier,
             message: guest.tier === 'SVIP'
-                ? `歡迎 SVIP 榮譽貴賓！1/6 開幕晚會專屬席位與展期通行驗證成功。`
+                ? `歡迎 SVIP 榮譽貴賓！1/6 開幕晚會（18:00–21:00）專屬通行資格與展期通行驗證成功。`
                 : `歡迎 VIP 貴賓！1/7 - 1/9 展期優先快速通行驗證成功。`
         });
 
@@ -1135,7 +1135,7 @@ export default function StaffScannerPage() {
                                 <h2 className="text-3xl font-serif tracking-widest font-bold text-white mb-2 drop-shadow-lg">{feedback.name}</h2>
                                 
                                 <div className="px-8 py-2.5 bg-gradient-to-r from-[#1E1D1A] via-[#2F2C24] to-[#1E1D1A] border border-[#DFBA87] text-[#DFBA87] text-[10px] tracking-[0.3em] font-mono font-bold uppercase mb-8 shadow-inner">
-                                    SVIP 榮譽貴賓 ✦ 1/6 開幕晚會專屬席位
+                                    SVIP 榮譽貴賓 ✦ 1/6 開幕晚會（18:00–21:00）專屬通行資格
                                 </div>
                                 <p className="text-[11px] tracking-widest text-[#E5E5E5] font-light leading-relaxed max-w-sm">{feedback.message}</p>
                             </div>

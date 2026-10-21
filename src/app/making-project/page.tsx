@@ -890,7 +890,7 @@ export default function MakingProjectPage() {
                 <div className="space-y-1.5 text-[#0D0D0D]/80">
                   <p>• <strong>10:00 – 17:00</strong>｜{lang === 'zh' ? '佈展' : 'Installation'}</p>
                   <p>• <strong>18:00</strong>｜{lang === 'zh' ? '開幕酒會（僅限邀請）' : 'Vernissage (by invitation only)'}</p>
-                  <p>• <strong>18:00 – 21:30</strong>｜{lang === 'zh' ? 'VIP 預展（僅限邀請）' : 'VIP Preview (by invitation only)'}</p>
+                  <p>• <strong>18:00 – 21:00</strong>｜{lang === 'zh' ? 'VIP 預展（僅限邀請）' : 'VIP Preview (by invitation only)'}</p>
                 </div>
               </div>
 
