@@ -8,7 +8,8 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { 
   ShieldCheck, FileText, Users, Image as ImageIcon, CheckCircle, XCircle, 
   Download, Eye, Mail, Phone, Globe, Calendar, ExternalLink, Loader2, RefreshCw, ChevronDown, ChevronUp,
-  Signature, FileCheck, Sparkles, Lock, LogOut, ArrowRight, AlertTriangle, Tag, Edit3, DollarSign
+  Signature, FileCheck, Sparkles, Lock, LogOut, ArrowRight, AlertTriangle, Tag, Edit3, DollarSign,
+  Copy
 } from 'lucide-react';
 import { ZONE_MAP, ALL_ZONES, formatBoothDisplay, normalizeBoothCode, getBoothPrice } from '@/lib/exhibitorConstants';
 
@@ -133,6 +134,8 @@ export default function ExhibitorAdminPage() {
   const [lightboxApp, setLightboxApp] = useState<any | null>(null);
   const [mediaLightboxUrl, setMediaLightboxUrl] = useState<string | null>(null);
   const [selectedPrefs, setSelectedPrefs] = useState<Record<string, number>>({});
+  const [expandedQaId, setExpandedQaId] = useState<string | null>(null);
+  const [copiedQaId, setCopiedQaId] = useState<string | null>(null);
 
   // Fee Adjustment Modal state
   const [feeModalApp, setFeeModalApp] = useState<any | null>(null);
@@ -2067,40 +2070,191 @@ export default function ExhibitorAdminPage() {
             </div>
           )}
 
-          {/* TAB 4: MEDIA ASSETS GRID */}
-          {activeTab === 'media' && (
-            <div className="space-y-6">
-              <span className="text-xs text-neutral-400 font-light block">瀏覽所有品牌提交的高解析宣傳素材，大會公關小組下載編輯用。</span>
+          {/* TAB 4: MEDIA ASSETS & PR Q&A */}
+          {activeTab === 'media' && (() => {
+            const imageAssets = mediaAssets.filter((a) => a.file_type !== 'pr_qa_submission');
+            const qaSubmissions = mediaAssets.filter((a) => a.file_type === 'pr_qa_submission');
 
-              {mediaAssets.length === 0 ? (
-                <div className="text-center py-12 text-neutral-500 text-xs font-light">
-                  目前尚無任何品牌上傳宣傳素材。
-                </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-6">
-                  {mediaAssets.map((asset) => (
-                    <div 
-                      key={asset.id} 
-                      className="border border-white/5 bg-white/[0.01] rounded-lg overflow-hidden group hover:border-[#C9A96E]/30 transition-all cursor-pointer"
-                      onClick={() => setMediaLightboxUrl(asset.file_url)}
-                    >
-                      <div className="aspect-[4/3] overflow-hidden bg-neutral-900">
-                        <img 
-                          src={asset.file_url} 
-                          alt={asset.file_name} 
-                          className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
-                        />
-                      </div>
-                      <div className="p-3 text-[10px]">
-                        <div className="font-semibold text-white truncate">{asset.exhibitor_brands?.brand_name_zh || '測試品牌'}</div>
-                        <div className="text-neutral-500 truncate mt-0.5 font-mono">{asset.file_name}</div>
-                      </div>
+            const handleCopyQaText = (brandName: string, parsed: any, id: string) => {
+              const text = `【VIS 2027 參展品牌深度專訪回稿 — ${brandName}】\n\n` +
+                `Q1. 透過這個品牌，你最想讓大家重新重視哪一件事？為什麼它在今天容易被忽略？\n${parsed.q1 || '（未填寫）'}\n\n` +
+                `Q2. 如果希望下一代生活在更有美感的台灣，你認為大人現在可以先改變哪一個習慣？\n${parsed.q2 || '（未填寫）'}\n\n` +
+                `Q3. 透過這個品牌，你最想讓大家重新重視、重新思考哪一件被現代社會忽略的事？以及你認為為什麼它在今天容易被忽略？\n${parsed.q3 || '（未填寫）'}\n\n` +
+                `Q4. 現在消費者經常問：「網路上也有很像的，為什麼要買你的？」面對這個問題，你最希望他們理解什麼？\n${parsed.q4 || '（未填寫）'}\n\n` +
+                `Q5. 如果未來我們每天看到的圖片、商品，都是依照喜好被推薦的，你擔心大家會越來越少接觸不同的美感嗎？你的品牌希望讓人看見什麼不同的選擇？\n${parsed.q5 || '（未填寫）'}\n`;
+
+              if (typeof navigator !== 'undefined' && navigator.clipboard) {
+                navigator.clipboard.writeText(text);
+                setCopiedQaId(id);
+                setTimeout(() => setCopiedQaId(null), 3000);
+              }
+            };
+
+            return (
+              <div className="space-y-10">
+                {/* 1. PR Q&A Editorial Submissions */}
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-white tracking-wider flex items-center gap-2">
+                        <FileText className="w-4 h-4 text-[#DFBA87]" />
+                        品牌深度專題回稿審閱 ({qaSubmissions.length} 家品牌已回稿)
+                      </h3>
+                      <span className="text-xs text-neutral-400 font-light mt-0.5 block">
+                        參展品牌針對大會 5 大核心專題提問之文字回覆，可一鍵複製作為社群發文、媒體專訪推薦與大會專刊編輯素材。
+                      </span>
                     </div>
-                  ))}
+                    <span className="text-xs font-mono text-[#DFBA87] bg-[#DFBA87]/10 px-3 py-1 rounded-full border border-[#DFBA87]/20 self-start">
+                      回稿期限: 11/15
+                    </span>
+                  </div>
+
+                  {qaSubmissions.length === 0 ? (
+                    <div className="text-center py-8 text-neutral-500 text-xs font-light border border-dashed border-white/5 rounded-xl">
+                      目前尚無品牌提交專題提問回稿。
+                    </div>
+                  ) : (
+                    <div className="space-y-3">
+                      {qaSubmissions.map((sub) => {
+                        let parsed: any = {};
+                        try { parsed = JSON.parse(sub.file_url || '{}'); } catch {}
+                        const brandName = sub.exhibitor_brands?.brand_name_zh || '參展品牌';
+                        const isExpanded = expandedQaId === sub.id;
+                        let filledCount = 0;
+                        ['q1', 'q2', 'q3', 'q4', 'q5'].forEach(k => {
+                          if ((parsed[k] || '').trim().length > 0) filledCount += 1;
+                        });
+
+                        return (
+                          <div 
+                            key={sub.id} 
+                            className="bg-[#111111] border border-white/5 rounded-xl overflow-hidden hover:border-[#DFBA87]/30 transition-all"
+                          >
+                            <div 
+                              onClick={() => setExpandedQaId(isExpanded ? null : sub.id)}
+                              className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer bg-white/[0.01] hover:bg-white/[0.03]"
+                            >
+                              <div className="flex items-center gap-3">
+                                <span className="w-7 h-7 rounded-lg bg-[#DFBA87]/15 border border-[#DFBA87]/30 text-[#DFBA87] text-xs font-mono font-bold flex items-center justify-center">
+                                  {filledCount}/5
+                                </span>
+                                <div>
+                                  <div className="text-sm font-semibold text-white tracking-wide">
+                                    {brandName}
+                                  </div>
+                                  <div className="text-[10px] text-neutral-500 font-mono mt-0.5">
+                                    更新時間：{parsed.lastSavedAt ? new Date(parsed.lastSavedAt).toLocaleString('zh-TW', { hour12: false }) : new Date(sub.created_at).toLocaleString('zh-TW', { hour12: false })}
+                                  </div>
+                                </div>
+                              </div>
+
+                              <div className="flex items-center gap-3 self-end sm:self-center">
+                                <button
+                                  type="button"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleCopyQaText(brandName, parsed, sub.id);
+                                  }}
+                                  className="px-3 py-1.5 rounded bg-white/10 hover:bg-[#DFBA87] hover:text-black text-neutral-300 text-xs font-medium transition-colors flex items-center gap-1.5 cursor-pointer"
+                                  title="複製全數題目與回答文案"
+                                >
+                                  {copiedQaId === sub.id ? (
+                                    <>
+                                      <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />
+                                      <span className="text-emerald-400">已複製！</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Copy className="w-3.5 h-3.5" />
+                                      <span>複製專題文案</span>
+                                    </>
+                                  )}
+                                </button>
+                                <span className="text-xs text-neutral-400 font-mono">
+                                  {isExpanded ? '收合 ▲' : '展開詳情 ▼'}
+                                </span>
+                              </div>
+                            </div>
+
+                            {/* Expanded Q&A content */}
+                            {isExpanded && (
+                              <div className="border-t border-white/5 p-5 bg-black/40 space-y-4 text-xs font-light">
+                                <div className="space-y-1.5 border-l-2 border-[#DFBA87]/40 pl-3">
+                                  <div className="font-semibold text-[#DFBA87] text-[11px]">Q1. 透過這個品牌，你最想讓大家重新重視哪一件事？為什麼它在今天容易被忽略？</div>
+                                  <div className="text-neutral-200 whitespace-pre-wrap leading-relaxed">{parsed.q1 || '（尚未填寫）'}</div>
+                                </div>
+
+                                <div className="space-y-1.5 border-l-2 border-[#DFBA87]/40 pl-3">
+                                  <div className="font-semibold text-[#DFBA87] text-[11px]">Q2. 如果希望下一代生活在更有美感的台灣，你認為大人現在可以先改變哪一個習慣？</div>
+                                  <div className="text-neutral-200 whitespace-pre-wrap leading-relaxed">{parsed.q2 || '（尚未填寫）'}</div>
+                                </div>
+
+                                <div className="space-y-1.5 border-l-2 border-[#DFBA87]/40 pl-3">
+                                  <div className="font-semibold text-[#DFBA87] text-[11px]">Q3. 透過這個品牌，你最想讓大家重新重視、重新思考哪一件被現代社會忽略的事？以及你認為為什麼它在今天容易被忽略？</div>
+                                  <div className="text-neutral-200 whitespace-pre-wrap leading-relaxed">{parsed.q3 || '（尚未填寫）'}</div>
+                                </div>
+
+                                <div className="space-y-1.5 border-l-2 border-[#DFBA87]/40 pl-3">
+                                  <div className="font-semibold text-[#DFBA87] text-[11px]">Q4. 現在消費者經常問：「網路上也有很像的，為什麼要買你的？」面對這個問題，你最希望他們理解什麼？</div>
+                                  <div className="text-neutral-200 whitespace-pre-wrap leading-relaxed">{parsed.q4 || '（尚未填寫）'}</div>
+                                </div>
+
+                                <div className="space-y-1.5 border-l-2 border-[#DFBA87]/40 pl-3">
+                                  <div className="font-semibold text-[#DFBA87] text-[11px]">Q5. 如果未來我們每天看到的圖片、商品，都是依照喜好被推薦的，你擔心大家會越來越少接觸不同的美感嗎？你的品牌希望讓人看見什麼不同的選擇？</div>
+                                  <div className="text-neutral-200 whitespace-pre-wrap leading-relaxed">{parsed.q5 || '（尚未填寫）'}</div>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
-              )}
-            </div>
-          )}
+
+                {/* 2. Visual Image Assets Grid */}
+                <div className="space-y-4">
+                  <div className="border-b border-white/5 pb-3">
+                    <h3 className="text-sm font-semibold text-white tracking-wider flex items-center gap-2">
+                      <ImageIcon className="w-4 h-4 text-[#DFBA87]" />
+                      品牌高解析視覺圖檔素材 ({imageAssets.length} 張)
+                    </h3>
+                    <span className="text-xs text-neutral-400 font-light mt-0.5 block">
+                      瀏覽所有品牌提交的高解析宣傳素材，大會公關小組下載編輯用。點擊圖片可放大檢視。
+                    </span>
+                  </div>
+
+                  {imageAssets.length === 0 ? (
+                    <div className="text-center py-12 text-neutral-500 text-xs font-light border border-dashed border-white/5 rounded-xl">
+                      目前尚無任何品牌上傳視覺素材圖檔。
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-6">
+                      {imageAssets.map((asset) => (
+                        <div 
+                          key={asset.id} 
+                          className="border border-white/5 bg-white/[0.01] rounded-lg overflow-hidden group hover:border-[#C9A96E]/30 transition-all cursor-pointer"
+                          onClick={() => setMediaLightboxUrl(asset.file_url)}
+                        >
+                          <div className="aspect-[4/3] overflow-hidden bg-neutral-900">
+                            <img 
+                              src={asset.file_url} 
+                              alt={asset.file_name} 
+                              className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                            />
+                          </div>
+                          <div className="p-3 text-[10px]">
+                            <div className="font-semibold text-white truncate">{asset.exhibitor_brands?.brand_name_zh || '測試品牌'}</div>
+                            <div className="text-neutral-500 truncate mt-0.5 font-mono">{asset.file_name}</div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
 
         </div>
 

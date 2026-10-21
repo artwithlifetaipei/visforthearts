@@ -214,36 +214,70 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
     setSuccessNotice('');
 
     try {
+      const { data: { session: authSession } } = await supabase.auth.getSession();
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (authSession?.access_token) {
+        headers['Authorization'] = `Bearer ${authSession.access_token}`;
+      }
+
       // Call dedicated backend invite API for instant auto-activation & branded email dispatch
-      const res = await fetch('/api/exhibitor/vip/invite', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
+      let result: any = null;
+      let emailSent = false;
+      try {
+        const res = await fetch('/api/exhibitor/vip/invite', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({
+            brand_id: brand.id,
+            brand_name_zh: brand.brand_name_zh,
+            vip_email: trimmedEmail,
+            vip_surname: surname.trim(),
+            tier: selectedTier,
+          }),
+        });
+        result = await res.json();
+        emailSent = !!result.emailSent;
+      } catch (apiErr) {
+        console.warn('API invite fetch warning, using client fallback:', apiErr);
+      }
+
+      let newRecord: any = null;
+      if (result && !result.error && result.submission) {
+        newRecord = result.submission;
+      } else {
+        // Direct Client Fallback via authenticated Supabase client
+        const fallbackSurname = selectedTier === 'SVIP' ? `${surname.trim()} (SVIP)` : surname.trim();
+        const { data: directData, error: directErr } = await supabase
+          .from('exhibitor_vip_submissions')
+          .insert({
+            brand_id: brand.id,
+            brand_name_zh: brand.brand_name_zh,
+            vip_email: trimmedEmail,
+            vip_surname: fallbackSurname,
+          })
+          .select()
+          .maybeSingle();
+
+        if (directErr) {
+          if (directErr.code === '23505') {
+            setFormError(t('該電子信箱已在貴品牌的專屬邀請名單中。', 'This email is already in your guest list.'));
+          } else {
+            setFormError(result?.error || directErr.message || t('名單登記失敗，請稍後再試。', 'Failed to add guest. Please try again.'));
+          }
+          setAdding(false);
+          return;
+        }
+
+        newRecord = directData ? { ...directData, tier: selectedTier } : {
+          id: `temp-${Date.now()}`,
           brand_id: brand.id,
           brand_name_zh: brand.brand_name_zh,
           vip_email: trimmedEmail,
-          vip_surname: surname.trim(),
+          vip_surname: fallbackSurname,
           tier: selectedTier,
-        }),
-      });
-
-      const result = await res.json();
-
-      if (!res.ok || result.error) {
-        setFormError(result.error || t('名單登記失敗，請稍後再試。', 'Failed to add guest. Please try again.'));
-        setAdding(false);
-        return;
+          created_at: new Date().toISOString(),
+        };
       }
-
-      const newRecord = result.submission || {
-        id: `temp-${Date.now()}`,
-        brand_id: brand.id,
-        brand_name_zh: brand.brand_name_zh,
-        vip_email: trimmedEmail,
-        vip_surname: surname.trim(),
-        tier: selectedTier,
-        created_at: new Date().toISOString(),
-      };
 
       const updated = [newRecord, ...vips];
       setVips(updated);

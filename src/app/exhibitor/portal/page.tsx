@@ -56,6 +56,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   const [complianceSigned, setComplianceSigned] = useState(false);
   const [vipCount, setVipCount] = useState(0);
   const [mediaCount, setMediaCount] = useState(0);
+  const [qaCount, setQaCount] = useState(0);
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -137,13 +138,35 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             .from('exhibitor_media_assets')
             .select('*', { count: 'exact', head: true })
             .eq('brand_id', currentBrand.id)
+            .neq('file_type', 'pr_qa_submission')
             .then(res => res.count || 0);
 
-          const [app, compliance, vipC, mediaC] = await Promise.all([
+          const qaPromise = supabase
+            .from('exhibitor_media_assets')
+            .select('file_url')
+            .eq('brand_id', currentBrand.id)
+            .eq('file_type', 'pr_qa_submission')
+            .maybeSingle()
+            .then(res => {
+              if (res.data?.file_url) {
+                try {
+                  const parsed = JSON.parse(res.data.file_url);
+                  let filled = 0;
+                  ['q1', 'q2', 'q3', 'q4', 'q5'].forEach(k => {
+                    if ((parsed[k] || '').trim().length > 0) filled += 1;
+                  });
+                  return filled;
+                } catch { return 0; }
+              }
+              return 0;
+            });
+
+          const [app, compliance, vipC, mediaC, qCount] = await Promise.all([
             appPromise,
             compliancePromise,
             vipPromise,
-            mediaPromise
+            mediaPromise,
+            qaPromise
           ]);
 
           if (app) {
@@ -153,6 +176,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
           setComplianceSigned(!!compliance);
           setVipCount(vipC);
           setMediaCount(mediaC);
+          setQaCount(qCount);
         }
       } catch (err) {
         console.error('Error fetching dashboard data:', err);
@@ -250,7 +274,8 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
     if (complianceSigned) completed += 1;
     if (!isMicro) {
       if (vipCount > 0) completed += 1;
-      if (mediaCount >= 3) completed += 1; // standard requires 3-5 images
+      if (mediaCount >= 3 && qaCount === 5) completed += 1;
+      else if (mediaCount >= 3 || qaCount > 0) completed += 0.5;
     }
 
     return {
@@ -313,9 +338,9 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                 <span className={`w-1.5 h-1.5 rounded-full ${vipCount > 0 ? 'bg-emerald-400' : 'bg-amber-400'}`} />
                 <span>模組 C：專屬貴賓禮遇 ({vipCount}位)</span>
               </div>
-              <div className={`flex items-center gap-2 p-2.5 rounded border ${mediaCount >= 3 ? 'bg-white/5 border-white/5 text-neutral-300' : 'bg-transparent border-dashed border-amber-500/20 text-neutral-500'}`}>
-                <span className={`w-1.5 h-1.5 rounded-full ${mediaCount >= 3 ? 'bg-emerald-400' : 'bg-amber-400'}`} />
-                <span>模組 D：媒體公關 ({mediaCount}/5張)</span>
+              <div className={`flex items-center gap-2 p-2.5 rounded border ${(mediaCount >= 3 || qaCount > 0) ? 'bg-white/5 border-white/5 text-neutral-300' : 'bg-transparent border-dashed border-amber-500/20 text-neutral-500'}`}>
+                <span className={`w-1.5 h-1.5 rounded-full ${(mediaCount >= 3 && qaCount === 5) ? 'bg-emerald-400' : 'bg-amber-400'}`} />
+                <span>模組 D：媒體公關 ({mediaCount}/5張圖・回稿 {qaCount}/5題)</span>
               </div>
             </>
           ) : (

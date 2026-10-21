@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import nodemailer from 'nodemailer';
 
@@ -56,7 +57,24 @@ export async function POST(req: Request) {
         const normalizedEmail = vip_email.toLowerCase().trim();
         const cleanSurname = vip_surname.replace(/\s*\((S?VIP)\)/gi, '').replace(/\s*\[(S?VIP)\]/gi, '').trim();
         const selectedTier = tier === 'SVIP' ? 'SVIP' : 'VIP';
-        const supabase = await createSupabaseServerClient();
+        const authHeader = req.headers.get('Authorization');
+        const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
+        let supabase;
+        if (token) {
+            supabase = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+                {
+                    global: {
+                        headers: {
+                            Authorization: `Bearer ${token}`
+                        }
+                    }
+                }
+            );
+        } else {
+            supabase = await createSupabaseServerClient();
+        }
 
         // 1. Save submission into exhibitor_vip_submissions
         let submissionRecord: any = null;
@@ -75,8 +93,12 @@ export async function POST(req: Request) {
             .maybeSingle();
 
         if (subErr) {
-            // Fallback if column 'tier' does not exist yet in database table
-            if (subErr.message && subErr.message.includes('column "tier"')) {
+            // Fallback if column 'tier' does not exist yet in database table (PostgREST PGRST204 or PostgreSQL error)
+            const isMissingTier = 
+                subErr.code === 'PGRST204' || 
+                (subErr.message && (subErr.message.includes('tier') || subErr.message.includes('column')));
+
+            if (isMissingTier) {
                 const fallbackSurname = selectedTier === 'SVIP' ? `${cleanSurname} (SVIP)` : cleanSurname;
                 const { data: retryData, error: retryErr } = await supabase
                     .from('exhibitor_vip_submissions')
