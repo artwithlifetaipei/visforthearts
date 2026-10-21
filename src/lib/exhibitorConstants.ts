@@ -157,6 +157,15 @@ export const ZONE_III: Zone = {
       note: '獨立展位空間',
     },
     {
+      label: '500*460cm 獨立展位 L6 & L7',
+      code: 'L6 & L7',
+      dimensions: '500*460cm',
+      price: 88000,
+      qty: 2,
+      hasStorage: true,
+      note: '獨立展位空間',
+    },
+    {
       label: '1000*500cm 最大獨立展位 L1 & L5 - 兩展位打通',
       code: 'L1 & L5',
       dimensions: '1000*500cm',
@@ -285,6 +294,9 @@ export function normalizeBoothCode(boothType?: string | null, zoneId?: string | 
   if (raw.includes('L2') && (raw.includes('L6') || raw.includes('L7'))) {
     return 'L2, L6, L7';
   }
+  if (raw.includes('L6') && raw.includes('L7')) {
+    return 'L6 & L7';
+  }
   if (raw.includes('L1') && raw.includes('L5')) {
     return 'L1 & L5';
   }
@@ -341,6 +353,7 @@ export function formatBoothDisplay(boothType?: string | null, zoneId?: string | 
     case 'L6 & L7':
     case 'L6, L7':
     case 'L6&L7':
+    case 'L6 & L7 獨立展位':
       return 'L6 & L7 獨立展位';
     case 'L1 & L5':
     case 'L1&L5':
@@ -372,7 +385,7 @@ export function getBoothPrice(boothType?: string | null, zoneId?: string | null)
   if (code === 'L3&L4' || code === 'L3 & L4' || code === 'L3' || code === 'L4') return 108000;
   if (code === 'L2, L6, L7' || code === 'L2,L6,L7' || code === 'L2' || code === 'L6' || code === 'L7') return 88000;
   if (code === 'L1 & L5' || code === 'L1&L5' || code === 'L1' || code === 'L5') return 158000;
-  if (code === 'L6 & L7' || code === 'L6, L7' || code === 'L6&L7') return 88000;
+  if (code === 'L6 & L7' || code === 'L6, L7' || code === 'L6&L7' || code === 'L6 & L7 獨立展位') return 88000;
 
   // Fallback by zone
   if (zoneId === 'artsy') return 40000;
