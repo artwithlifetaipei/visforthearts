@@ -413,10 +413,10 @@ export default function ArtworkDetailPage() {
             </div>
           )}
 
-          {/* Social Proof badge */}
-          <div className="inline-flex items-center gap-2 text-[11px] text-neutral-500 pt-2 font-light">
+          {/* Private Luxury Concierge Reassurance */}
+          <div className="inline-flex items-center gap-2 text-[11px] text-[#8C7853] pt-2 font-light">
             <Sparkles className="w-3.5 h-3.5 text-[#DFBA87]" />
-            <span>已有 <strong>{product.save_count || 1}</strong> 位貴賓將此作品加入個人典藏清單</span>
+            <span>VIS 2027 專屬現場私洽作品 ｜ 展後隨時透過貴賓卡回顧規格與品牌直洽通道</span>
           </div>
         </div>
 
@@ -620,17 +620,43 @@ export default function ArtworkDetailPage() {
                     <button
                       type="button"
                       onClick={() => setShowInquiryModal(false)}
-                      className="px-3 py-2 text-neutral-500 hover:text-black text-xs"
+                      className="px-3 py-2 text-neutral-500 hover:text-black text-xs cursor-pointer"
                     >
                       取消
                     </button>
                     <button
                       type="button"
-                      onClick={() => {
+                      onClick={async () => {
+                        const email = userEmail || inputEmail || safeGetStorage('vis_vip_email');
+                        if (!email) {
+                          setShowInquiryModal(false);
+                          setShowEmailModal(true);
+                          return;
+                        }
                         setInquirySent(true);
-                        showToast('洽詢意向已成功記錄！');
+                        showToast('✓ 洽詢已送出！品牌專員將盡快為您服務。');
+
+                        try {
+                          await fetch('/api/exhibitor/concierge', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                              brand_id: product.brand_id,
+                              brand_name_zh: product.brand_name_zh,
+                              booth_number: product.booth_number,
+                              vip_email: email,
+                              vip_name: inputName || null,
+                              intent_level: 'high',
+                              follow_up_actions: [inquiryType],
+                              interested_product_ids: [product.id],
+                              notes: `貴賓於展品頁主動提出洽詢【${inquiryType}】：${inquiryNote || '無特定留言'}`
+                            })
+                          });
+                        } catch (err) {
+                          console.warn('Inquiry lead dispatch failed:', err);
+                        }
                       }}
-                      className="px-4 py-2 bg-[#DFBA87] hover:bg-[#c9a96e] text-black font-semibold rounded text-xs tracking-wider"
+                      className="px-4 py-2 bg-[#DFBA87] hover:bg-[#c9a96e] text-black font-semibold rounded text-xs tracking-wider cursor-pointer"
                     >
                       確認送出洽詢
                     </button>

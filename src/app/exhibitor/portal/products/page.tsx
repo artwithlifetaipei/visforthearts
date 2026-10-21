@@ -391,11 +391,11 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
         </div>
 
         <div className="bg-white/[0.02] border border-white/5 p-5 rounded space-y-1">
-          <span className="text-[9px] uppercase tracking-widest text-[#DFBA87] font-mono">Total VIP Saves</span>
-          <div className="text-2xl font-serif-garamond text-[#DFBA87] font-medium">
-            {totalSaves} <span className="text-xs font-sans text-[#DFBA87]/70 font-normal">次貴賓收藏</span>
+          <span className="text-[9px] uppercase tracking-widest text-[#DFBA87] font-mono">Sales Channel Status</span>
+          <div className="text-xl font-serif-garamond text-[#DFBA87] font-medium">
+            雙軌銷售就緒
           </div>
-          <p className="text-[10px] text-neutral-500 font-light">代表展後高意向購買與詢價潛在名單</p>
+          <p className="text-[10px] text-neutral-400 font-light">現場桌立牌掃碼 ＋ 品牌商城官網直購</p>
         </div>
 
         <div className="bg-white/[0.02] border border-white/5 p-5 rounded space-y-1">
@@ -460,10 +460,10 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
                       {p.category}
                     </div>
 
-                    {/* Saves badge */}
-                    <div className="absolute bottom-3 left-3 bg-black/80 backdrop-blur-md px-2.5 py-1 rounded text-[9.5px] text-white tracking-wide font-light flex items-center gap-1.5 border border-white/10">
-                      <Heart className="w-3 h-3 text-rose-400 fill-rose-400" />
-                      <span>{p.save_count || 0} 位貴賓收藏</span>
+                    {/* Sales Ready Badge */}
+                    <div className="absolute bottom-3 left-3 bg-black/85 backdrop-blur-md px-2.5 py-1 rounded text-[9.5px] text-[#DFBA87] tracking-wide font-light flex items-center gap-1.5 border border-white/10">
+                      <QrCode className="w-3 h-3 text-[#DFBA87]" />
+                      <span>{p.buy_url ? '✦ 現場立牌＋官網直購已就緒' : '✦ 現場立牌私洽通道已啟用'}</span>
                     </div>
                   </div>
 

@@ -96,6 +96,7 @@ export default function ExhibitorLeadsPage() {
   const [notes, setNotes] = useState('');
   const [submitting, setSubmitting] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [copiedScriptId, setCopiedScriptId] = useState<string | null>(null);
 
   // Audio synthesizer for feedback
   const playChime = (type: 'success' | 'beep') => {
@@ -548,6 +549,31 @@ export default function ExhibitorLeadsPage() {
     setTimeout(() => setCopiedId(null), 2500);
   };
 
+  // 8.5 Copy Tailored Luxury Sales Follow-Up Script (LINE / WeChat / SMS)
+  const handleCopySalesScript = (lead: any) => {
+    const brandName = lead.brand_name_zh || brand?.brand_name_zh || '本品牌';
+    const guestName = lead.vip_name ? `${lead.vip_name} 貴賓` : '貴賓';
+    const matched = products.filter(p => lead.interested_product_ids?.includes(p.id));
+    const productTitles = matched.map(p => `《${p.title_zh}》`).join('、') || '現場鑑賞作品';
+    const actions = (lead.follow_up_actions || []).join('、');
+
+    const text = `您好 ${guestName}！\n感謝您今日蒞臨 VIS 2027 博覽會【${brandName}】展位鑑賞交流。\n\n現場專員已為您將剛才討論的 ${productTitles} 收錄至您的專屬貴賓卡中。\n\n${actions ? `針對您現場提及的【${actions}】` : '關於作品的客製細節與正式報價'}，我們已為您備妥高解析細節型錄與方案。如需安排展後工作室鑑賞或確認規格，隨時歡迎直接以此訊息與我們私洽！\n\n✦ 您的專屬典藏回看：https://www.visforthearts.com/vip/dashboard\n\n期待展後能再次為您服務！\n— ${brandName} 敬上`;
+
+    navigator.clipboard.writeText(text);
+    setCopiedScriptId(lead.id);
+    setTimeout(() => setCopiedScriptId(null), 3500);
+  };
+
+  // 8.6 Update Lead Sales Pipeline Stage
+  const handleUpdateStatus = async (leadId: string, newStatus: string) => {
+    setLeads(prev => prev.map(l => l.id === leadId ? { ...l, status: newStatus } : l));
+    try {
+      await supabase.from('exhibitor_leads').update({ status: newStatus }).eq('id', leadId);
+    } catch {
+      // Non-blocking
+    }
+  };
+
   // 9. Export CSV
   const handleExportCSV = () => {
     if (leads.length === 0) return;
@@ -608,15 +634,15 @@ export default function ExhibitorLeadsPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-[10px] font-mono tracking-[0.2em] uppercase text-[#DFBA87] bg-[#DFBA87]/10 px-2 py-0.5 rounded border border-[#DFBA87]/20">
-              MODULE F ｜ VIP CONCIERGE & LEADS
+              MODULE F ｜ VIP SALES ENABLEMENT & LEADS
             </span>
-            <span className="text-xs text-neutral-400">現場雙向賦能</span>
+            <span className="text-xs text-neutral-400">品牌專屬銷售賦能系統</span>
           </div>
           <h1 className="text-2xl md:text-3xl font-serif-garamond text-white font-normal tracking-wide">
-            現場貴賓接待與商機名單
+            現場貴賓接待與私洽成交系統
           </h1>
-          <p className="text-xs text-neutral-400 mt-1">
-            以尊榮管家服務延續展後商機 — 取得貴賓同意後掃描 VIS 貴賓卡，為顧客直接收錄心儀款式並記錄客製細節與意向
+          <p className="text-xs text-neutral-400 mt-1 max-w-2xl leading-relaxed">
+            【助參展商促成實質銷售】現場迅速記錄試戴與心儀款式，將短暫參觀轉化為展後可持續成交的名單；本名單為貴品牌獨立私享管理，保障大額交易隱私。
           </p>
         </div>
 
@@ -639,6 +665,14 @@ export default function ExhibitorLeadsPage() {
             <span>現場掃描貴賓卡</span>
           </button>
         </div>
+      </div>
+
+      {/* Privacy & Discretion Guarantee Banner */}
+      <div className="flex items-center gap-2.5 text-xs text-[#DFBA87] bg-[#DFBA87]/5 border border-[#DFBA87]/25 px-4 py-2.5 rounded-lg">
+        <Sparkles className="w-4 h-4 text-[#DFBA87] shrink-0" />
+        <span className="leading-relaxed">
+          <strong>🔒 品牌專屬私密資料庫</strong>：本系統為貴品牌之獨立私享成交工具，所有接待紀錄、客戶聯絡資訊與對話僅貴品牌後台可見，不對外公開或展示於公共前端。
+        </span>
       </div>
 
       {/* 2. Staff Pitch Golden Banner (接待禮儀話術引導) */}
@@ -700,45 +734,45 @@ export default function ExhibitorLeadsPage() {
         </motion.div>
       )}
 
-      {/* 3. Performance Stats Row */}
+      {/* 3. Sales Pipeline Stats Row */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
         <div className="bg-[#141414] border border-white/5 p-4 rounded-lg relative overflow-hidden group hover:border-[#DFBA87]/30 transition-all">
-          <span className="text-[10px] font-mono tracking-wider text-neutral-400 uppercase">總接待貴賓數</span>
+          <span className="text-[10px] font-mono tracking-wider text-neutral-400 uppercase">現場接待貴賓</span>
           <div className="text-2xl md:text-3xl font-serif text-white mt-1">
             {totalLeadsCount} <span className="text-xs font-sans text-neutral-500">位</span>
           </div>
-          <div className="mt-2 text-[10px] text-neutral-500 flex items-center gap-1">
-            <span>現場即時同步</span>
+          <div className="mt-2 text-[10px] text-neutral-500">
+            已直接對接貴賓手機
           </div>
         </div>
 
         <div className="bg-[#141414] border border-white/5 p-4 rounded-lg relative overflow-hidden group hover:border-[#DFBA87]/30 transition-all">
-          <span className="text-[10px] font-mono tracking-wider text-[#DFBA87] uppercase">🔥 高度意向客群</span>
+          <span className="text-[10px] font-mono tracking-wider text-[#DFBA87] uppercase">🔥 高度購買意向</span>
           <div className="text-2xl md:text-3xl font-serif text-[#DFBA87] mt-1">
             {highIntentCount} <span className="text-xs font-sans text-neutral-500">位</span>
           </div>
           <div className="mt-2 text-[10px] text-neutral-500">
-            {totalLeadsCount > 0 ? `${Math.round((highIntentCount / totalLeadsCount) * 100)}% 轉換率` : '預備下單客群'}
+            偏好明確・展後預備下單
           </div>
         </div>
 
         <div className="bg-[#141414] border border-white/5 p-4 rounded-lg relative overflow-hidden group hover:border-[#DFBA87]/30 transition-all">
-          <span className="text-[10px] font-mono tracking-wider text-neutral-400 uppercase">💎 已收錄作品次數</span>
-          <div className="text-2xl md:text-3xl font-serif text-white mt-1">
-            {totalSavedArtworksCount} <span className="text-xs font-sans text-neutral-500">件</span>
-          </div>
-          <div className="mt-2 text-[10px] text-neutral-500">
-            同步進貴賓手機 Collection
-          </div>
-        </div>
-
-        <div className="bg-[#141414] border border-white/5 p-4 rounded-lg relative overflow-hidden group hover:border-[#DFBA87]/30 transition-all">
-          <span className="text-[10px] font-mono tracking-wider text-neutral-400 uppercase">⏳ 待後續聯繫事項</span>
+          <span className="text-[10px] font-mono tracking-wider text-neutral-400 uppercase">⏳ 待跟進聯繫事項</span>
           <div className="text-2xl md:text-3xl font-serif text-white mt-1">
             {pendingActionsCount} <span className="text-xs font-sans text-neutral-500">項</span>
           </div>
           <div className="mt-2 text-[10px] text-neutral-500">
-            報價／戒圍／展後工作室預約
+            報價單／戒圍確認／預約鑑賞
+          </div>
+        </div>
+
+        <div className="bg-[#141414] border border-white/5 p-4 rounded-lg relative overflow-hidden group hover:border-[#DFBA87]/30 transition-all">
+          <span className="text-[10px] font-mono tracking-wider text-emerald-400 uppercase">🎉 成功成交 / 推進中</span>
+          <div className="text-2xl md:text-3xl font-serif text-emerald-400 mt-1">
+            {leads.filter(l => l.status === 'closed' || l.status === 'contacted').length} <span className="text-xs font-sans text-neutral-500">筆</span>
+          </div>
+          <div className="mt-2 text-[10px] text-neutral-500">
+            展後高單價實質訂單
           </div>
         </div>
       </div>
@@ -965,6 +999,57 @@ export default function ExhibitorLeadsPage() {
                     備註：{lead.notes}
                   </div>
                 )}
+
+                {/* Sales Follow-up & Closing Toolbar */}
+                <div className="pt-2 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  {/* Pipeline Stage Buttons */}
+                  <div className="flex items-center gap-1.5 flex-wrap">
+                    <span className="text-[10px] text-neutral-400 font-mono uppercase mr-1">成交推進:</span>
+                    {[
+                      { key: 'new', label: '現場已接待', color: 'bg-white/10 text-neutral-300' },
+                      { key: 'contacted', label: '已發送報價/聯繫', color: 'bg-sky-500/20 text-sky-300 border border-sky-500/40' },
+                      { key: 'closed', label: '展後成功成交 🎉', color: 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' },
+                    ].map(st => {
+                      const isCurrent = (lead.status || 'new') === st.key;
+                      return (
+                        <button
+                          key={st.key}
+                          type="button"
+                          onClick={() => handleUpdateStatus(lead.id, st.key)}
+                          className={`px-2 py-0.5 rounded text-[10px] transition-all cursor-pointer ${
+                            isCurrent
+                              ? `${st.color} font-semibold ring-1 ring-white/20`
+                              : 'bg-black/30 text-neutral-500 hover:text-neutral-300 hover:bg-white/5'
+                          }`}
+                        >
+                          {st.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* One-Click Sales Script Copy */}
+                  <div className="flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={() => handleCopySalesScript(lead)}
+                      className="px-3 py-1.5 bg-[#DFBA87]/15 hover:bg-[#DFBA87]/25 text-[#DFBA87] border border-[#DFBA87]/30 rounded text-xs transition-all flex items-center gap-1.5 cursor-pointer font-medium"
+                      title="一鍵生成專屬尊榮話術，可直接貼入 LINE / 微信私洽"
+                    >
+                      {copiedScriptId === lead.id ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-300">✓ 已複製私洽話術 (直接貼上即可)</span>
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-3.5 h-3.5 text-[#DFBA87]" />
+                          <span>一鍵複製私洽話術 (LINE/微信)</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
             );
           })}
