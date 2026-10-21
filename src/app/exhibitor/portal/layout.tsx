@@ -98,8 +98,32 @@ function ExhibitorPortalLayoutContent({ children }: { children: React.ReactNode 
   const [loginSent, setLoginSent] = useState(false);
   const [loginMessage, setLoginMessage] = useState('');
 
-  // Check auth on mount
+  // Check auth on mount & purge stale PWA / SW caches
   useEffect(() => {
+    // Purge outdated Service Worker caches and check for updates
+    if (typeof window !== 'undefined') {
+      try {
+        if ('caches' in window) {
+          caches.keys().then((keys) => {
+            keys.forEach((key) => {
+              if (key === 'others' || key === 'start-url' || key === 'next-data' || key.includes('precache')) {
+                caches.delete(key);
+              }
+            });
+          });
+        }
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.getRegistrations().then((registrations) => {
+            registrations.forEach((registration) => {
+              registration.update();
+            });
+          });
+        }
+      } catch {
+        // ignore
+      }
+    }
+
     // Fallback timeout: if auth checks take more than 2.5 seconds, force setIsLoading(false) to prevent infinite spinner
     const fallbackTimeout = setTimeout(() => {
       setIsLoading(false);

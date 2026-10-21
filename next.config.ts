@@ -6,6 +6,7 @@ const withPWA = withPWAInit({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === "development",
+  buildExcludes: [/chunks\/app\/exhibitor\/.*$/],
 });
 
 const nextConfig: NextConfig = {
