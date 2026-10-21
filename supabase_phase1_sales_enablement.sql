@@ -83,3 +83,8 @@ CREATE POLICY "Anyone can delete own vip_collections"
 ON vip_collections FOR DELETE
 TO anon, authenticated
 USING (true);
+
+-- 4. 授予資料表權限 (Grant table permissions to anon & authenticated)
+GRANT ALL ON TABLE exhibitor_products TO anon, authenticated, service_role;
+GRANT ALL ON TABLE vip_collections TO anon, authenticated, service_role;
+
