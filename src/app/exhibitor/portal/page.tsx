@@ -378,11 +378,11 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                 NT$ {DEPOSIT_AMOUNT.toLocaleString()}
               </div>
               <p className="text-[11px] text-neutral-400 font-light leading-relaxed">
-                您的保證金匯款憑證已被大會秘書處核對確認。該保證金將作為您履行參展規範的擔保。
+                您的保證金匯款憑證已被大會秘書處核對確認。參展保證金主要是為了確保展場設施及場地於佈撤展期間受到妥善維護。展覽結束並完成撤場後，經大會確認場地及設施完整還原、無損壞情形，即會全額退還保證金，可以放心！
               </p>
             </div>
             <div className="border-t border-white/5 pt-4 mt-6 text-[10px] text-neutral-500 italic">
-              * 大會經核對後，將於展覽圓滿結束後 14 個工作天內原帳戶全額退還。
+              * 展覽結束並完成撤場後，經大會確認場地及設施完整還原無損，保證金將於 14 個工作天內全額無息退還至原帳戶。
             </div>
           </div>
 
@@ -435,8 +435,8 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
         <div className="bg-amber-500/5 border border-amber-500/15 rounded-xl p-4 mt-6 flex gap-3 text-xs leading-relaxed text-amber-200/80 font-light">
           <HelpCircle className="w-5 h-5 text-amber-400 flex-shrink-0" />
           <p>
-            <strong className="text-amber-400 block font-semibold mb-0.5">展位費透明條款 & 退款須知</strong>
-            參展品牌因故於評選通過後退出展位，大會將全額沒收保證金 NT$20,000；如履約參展並恪守大會行為守則，保證金將於展後全額退還。退款所產生之銀行跨行手續費將由品牌自行承擔。
+            <strong className="text-amber-400 block font-semibold mb-0.5">場地維護保障與保證金退款說明</strong>
+            參展保證金主要是為了確保展場設施及古蹟場地於佈撤展期間受到妥善維護。展覽結束並完成撤場後，經大會確認場地及設施完整還原、無損壞情形，即會全額退還保證金，可以放心！若因特殊因素需更動展位或參展規程，大會將依參展手冊及相關規程竭誠協助品牌辦理。
           </p>
         </div>
       </div>

@@ -358,7 +358,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
       }
 
       if (!specialDeposit || !specialDamage || !specialRefund) {
-        setErrorMessage('請詳閱並勾選同意「保證金沒收機制」、「古蹟場地毀損賠償」與「參展費退費與展位取消規範」三項特別重大條款。');
+        setErrorMessage('請詳閱並勾選同意「場地設施維護與保證金規範」、「古蹟場地毀損賠償」與「參展費退費與展位取消規範」三項特別重大條款。');
         return;
       }
 
@@ -435,27 +435,27 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
   const sections = [
     {
       id: 'rule_booth' as const,
-      title: '一、保證金繳交與展位設計規範 Deposit & Booth Design Regulations',
-      summary: '規範保證金新台幣 20,000 元之匯款繳交、未錄取退款、履約退還，以及展位搭建安全規範與基本場地限制。',
+      title: '一、保證金制度與展位設計規範 Deposit & Booth Design Regulations',
+      summary: '規範參展保證金新台幣 20,000 元之維護設施宗旨、退款保障機制，以及展位搭建安全規範與基本場地限制。',
       content: (
         <div className="space-y-4 text-neutral-300 text-xs font-light leading-relaxed">
           <div>
             <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
               <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
-              保證金繳交與退款規範
+              保證金制度與退款保障承諾
             </h4>
             <ul className="list-decimal pl-5 space-y-2 text-neutral-400">
               <li>
-                <strong className="text-white">保證金繳交：</strong>
-                為維護大展申請公正秩序，申請單位須於提交申請表之同時，匯款繳交保證金新台幣 20,000 元整，並提供匯款證明。未依規定或逾期繳納者，視同未完成申請手續，主辦單位將不予受理審查。
+                <strong className="text-white">保證金宗旨與繳交：</strong>
+                參展保證金主要是為了確保展場設施及場地於佈撤展期間受到妥善維護。申請單位須於提交申請表之同時，匯款繳交保證金新台幣 20,000 元整，並提供匯款證明，作為共同愛護文化資產及展場設備之誠信擔保。
               </li>
               <li>
                 <strong className="text-white">未錄取單位之退款：</strong>
-                經審查未獲錄取之單位，主辦單位將於公告錄取名單後之 <span className="text-[#DFBA87] font-semibold border-b border-[#DFBA87]/40 px-1">14</span> 個工作日內，將保證金無息退還至申請單位之原匯款帳戶。退款所產生之銀行跨行匯款手續費，將由退款金額中逕行扣除。
+                經審查未獲錄取之單位，主辦單位將於公告錄取名單後之 <span className="text-[#DFBA87] font-semibold border-b border-[#DFBA87]/40 px-1">14</span> 個工作日內，將保證金無息全額退還至申請單位之原匯款帳戶。退款所產生之銀行跨行匯款手續費，將由退款金額中逕行扣除。
               </li>
               <li>
-                <strong className="text-white">錄取單位之退款：</strong>
-                入選單位若依約完成參展/進駐，且經主辦單位確認無違反活動規範或造成場地損害等情事，保證金將於活動結束後7個工作日內全額無息退還。
+                <strong className="text-white">展後保證金全額退還：</strong>
+                展覽結束並完成撤場後，經大會確認場地及設施完整還原、無損壞情形，即會全額無息退還保證金至原帳戶，請品牌夥伴完全放心！退款款項將於展覽圓滿結束撤場核驗後 7 至 14 個工作日內撥付。
               </li>
             </ul>
           </div>
@@ -878,10 +878,10 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
               </p>
             </div>
             
-            {/* Special Clause A: Deposit forfeiture */}
+            {/* Special Clause A: Facility Care & Deposit Refund */}
             <div className="space-y-2.5">
               <div className="flex justify-between items-center">
-                <span className="text-xs font-semibold text-neutral-200">特別條款 A：保證金沒收機制 Deposit Forfeiture Mechanism</span>
+                <span className="text-xs font-semibold text-neutral-200">特別條款 A：場地設施維護與保證金規範 Facility Care & Deposit Terms</span>
                 <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${scrolledDeposit ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25' : 'bg-neutral-800 text-neutral-400'}`}>
                   {scrolledDeposit ? '✓ 已解鎖 Unlocked' : '請向下滾動閱讀至底部'}
                 </span>
@@ -891,9 +891,9 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                 onScroll={(e) => handleScroll('deposit', e)}
                 className="max-h-36 overflow-y-auto bg-black/40 border border-white/5 rounded-lg p-3.5 text-xs text-neutral-400 font-light leading-relaxed space-y-2 custom-scrollbar"
               >
-                <p className="text-[#DFBA87] font-semibold">重要提示：本條款攸關您的保證金權益，請務必詳閱。</p>
-                <p>1. <strong>錄取放棄沒收：</strong>參展品牌於大會公告入選錄取名單後，若因品牌方自身因素放棄參展資格、要求退出，或未於大會規定的期限內完成後續簽約與付費手續者，視同違約，主辦單位將全額沒收保證金新台幣 20,000 元整，不予退還。</p>
-                <p>2. <strong>撤展違規與未復原沒收：</strong>大會活動結束撤展時，品牌方需將展位空間回復至使用前原狀（無污損、殘膠、垃圾、廢棄包材）。若經大會檢查發現遺留垃圾、包材廢棄物，或牆面、地面留有殘膠、污漬、破壞等未完成復原之情形，大會得不經催告，直接沒收全額保證金新台幣 20,000 元整。若保證金金額不足以支應實際清潔或古蹟修復費用，品牌方仍應就不足部分負完全損害賠償責任。</p>
+                <p className="text-[#DFBA87] font-semibold">安心承諾：參展保證金主要是為了確保展場設施及場地於佈撤展期間受到妥善維護。展覽結束並完成撤場後，經大會確認場地及設施完整還原、無損壞情形，即會全額退還保證金，可以放心！</p>
+                <p>1. <strong>設施完整還原與全額退款：</strong>大會活動結束撤展時，參展品牌應依規定完成撤場並將展位空間恢復原狀。經大會點交確認場地及設施完整還原、無留置廢棄物或損壞情形，大會即全額無息退還保證金新台幣 20,000 元整至原匯款帳戶。</p>
+                <p>2. <strong>設施維護與損害修復抵扣：</strong>若撤場點交時發現展位設施有未復原之殘膠、污漬、垃圾遺留或設施受損，大會將先行通知品牌改善；若需由大會委託專業團隊進行清潔或古蹟修復，所需費用將自保證金中核實扣抵，餘額仍全數退還。如評選通過公告後無故放棄參展資格導致大會空攤損失，保證金將作為展位重組與行政處置補償手續費。</p>
               </div>
               <div className="flex items-center gap-3 pt-1">
                 <div 
@@ -910,7 +910,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                   {specialDeposit && <Check className="w-3.5 h-3.5 stroke-[3px]" />}
                 </div>
                 <label className={`text-xs select-none ${!scrolledDeposit ? 'text-neutral-500 cursor-not-allowed' : 'text-neutral-300 cursor-pointer'}`}>
-                  本人已詳閱並同意「特別條款 A：保證金沒收機制」 *
+                  本人已詳閱並同意「特別條款 A：場地設施維護與保證金規範」 *
                 </label>
               </div>
             </div>
