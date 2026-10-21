@@ -18,14 +18,33 @@ import {
   Download
 } from 'lucide-react';
 
+function safeGetStorage(key: string): string | null {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      return window.sessionStorage.getItem(key);
+    }
+  } catch {
+    // Ignore storage restriction errors
+  }
+  return null;
+}
+
+function safeSetStorage(key: string, value: string): void {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.setItem(key, value);
+    }
+  } catch {
+    // Ignore storage restriction errors
+  }
+}
+
 export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?: any }) {
   const [brand, setBrand] = useState<any>(() => {
     if (parentBrand) return parentBrand;
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = sessionStorage.getItem('vis_portal_brand_data');
-        return saved ? JSON.parse(saved) : null;
-      } catch { return null; }
+    const saved = safeGetStorage('vis_portal_brand_data');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { return null; }
     }
     return null;
   });
@@ -36,11 +55,9 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
 
   const [submitting, setSubmitting] = useState(false);
   const [signedData, setSignedData] = useState<any>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = sessionStorage.getItem(`vis_portal_compliance_${brand?.id}`);
-        return saved ? JSON.parse(saved) : null;
-      } catch { return null; }
+    const saved = brand?.id ? safeGetStorage(`vis_portal_compliance_${brand.id}`) : null;
+    if (saved) {
+      try { return JSON.parse(saved); } catch { return null; }
     }
     return null;
   });
@@ -141,18 +158,44 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
         if (!currentBrand) {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user?.email) {
+            const userEmail = session.user.email.toLowerCase().trim();
             const { data } = await supabase
               .from('exhibitor_brands')
               .select('*')
-              .eq('portal_email', session.user.email.toLowerCase().trim())
+              .eq('portal_email', userEmail)
               .maybeSingle();
             currentBrand = data;
+
+            if (!currentBrand) {
+              const { data: app } = await supabase
+                .from('exhibitor_applications')
+                .select('*')
+                .eq('contact_email', userEmail)
+                .eq('status', 'approved')
+                .maybeSingle();
+              if (app) {
+                currentBrand = {
+                  id: app.id,
+                  application_id: app.id,
+                  brand_name_zh: app.brand_name_zh,
+                  brand_name_en: app.brand_name_en || app.brand_name_zh,
+                  zone_id: app.zone_id,
+                  booth_type: app.booth_type,
+                  is_micro_exposure: app.booth_type === 'T',
+                  portal_email: userEmail,
+                  created_at: app.created_at,
+                  custom_fee: app.custom_fee ?? null,
+                  discount_note: app.discount_note ?? null,
+                  _fallback: true,
+                };
+              }
+            }
           }
         }
 
         if (currentBrand) {
           setBrand(currentBrand);
-          sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(currentBrand));
+          safeSetStorage('vis_portal_brand_data', JSON.stringify(currentBrand));
 
           const { data: compliance } = await supabase
             .from('exhibitor_compliance')
@@ -162,7 +205,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
           
           if (compliance) {
             setSignedData(compliance);
-            sessionStorage.setItem(`vis_portal_compliance_${currentBrand.id}`, JSON.stringify(compliance));
+            safeSetStorage(`vis_portal_compliance_${currentBrand.id}`, JSON.stringify(compliance));
             setRules({
               rule_booth: compliance.rule_booth,
               rule_conduct: compliance.rule_conduct,

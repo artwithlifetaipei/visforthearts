@@ -18,51 +18,72 @@ const ADMIN_EMAILS = [
   'visvipteam@gmail.com',
 ];
 
+function safeGetStorage(key: string): string | null {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      return window.sessionStorage.getItem(key);
+    }
+  } catch {
+    // Ignore storage restriction errors in private / in-app browsers
+  }
+  return null;
+}
+
+function safeSetStorage(key: string, value: string): void {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.setItem(key, value);
+    }
+  } catch {
+    // Ignore storage restriction errors
+  }
+}
+
+function safeRemoveStorage(key: string): void {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.removeItem(key);
+    }
+  } catch {
+    // Ignore storage restriction errors
+  }
+}
+
 export default function ExhibitorPortalLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   
-  // Auth state with sessionStorage caching for instant loads (<3s)
+  // Auth state with safe storage caching for instant loads (<3s)
   const [session, setSession] = useState<any>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = sessionStorage.getItem('vis_portal_session');
-        return saved ? JSON.parse(saved) : null;
-      } catch { return null; }
+    const saved = safeGetStorage('vis_portal_session');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { return null; }
     }
     return null;
   });
   
   const [userEmail, setUserEmail] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      return sessionStorage.getItem('vis_portal_user_email') || '';
-    }
-    return '';
+    return safeGetStorage('vis_portal_user_email') || '';
   });
 
   const [brandData, setBrandData] = useState<any>(() => {
-    if (typeof window !== 'undefined') {
+    const saved = safeGetStorage('vis_portal_brand_data');
+    if (saved) {
       try {
-        const saved = sessionStorage.getItem('vis_portal_brand_data');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed && typeof parsed.booth_type === 'string' && (parsed.booth_type.includes('S01') || parsed.booth_type.includes('S06') || parsed.booth_type === 'S-2x2')) {
-            parsed.booth_type = 'A01';
-            sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(parsed));
-          }
-          return parsed;
+        const parsed = JSON.parse(saved);
+        if (parsed && typeof parsed.booth_type === 'string' && (parsed.booth_type.includes('S01') || parsed.booth_type.includes('S06') || parsed.booth_type === 'S-2x2')) {
+          parsed.booth_type = 'A01';
+          safeSetStorage('vis_portal_brand_data', JSON.stringify(parsed));
         }
-        return null;
+        return parsed;
       } catch { return null; }
     }
     return null;
   });
 
   const [isLoading, setIsLoading] = useState(() => {
-    if (typeof window !== 'undefined') {
-      const cached = sessionStorage.getItem('vis_portal_brand_data');
-      if (cached) return false; // bypass initial load screen if cache exists
-    }
+    const cached = safeGetStorage('vis_portal_brand_data');
+    if (cached) return false; // bypass initial load screen if cache exists
     return true;
   });
 
@@ -88,17 +109,17 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         
         if (currentSession) {
           setSession(currentSession);
-          sessionStorage.setItem('vis_portal_session', JSON.stringify(currentSession));
+          safeSetStorage('vis_portal_session', JSON.stringify(currentSession));
           const email = currentSession.user?.email || '';
           setUserEmail(email);
-          sessionStorage.setItem('vis_portal_user_email', email);
+          safeSetStorage('vis_portal_user_email', email);
           await fetchBrandInfo(email);
         } else {
           setSession(null);
           setBrandData(null);
-          sessionStorage.removeItem('vis_portal_session');
-          sessionStorage.removeItem('vis_portal_user_email');
-          sessionStorage.removeItem('vis_portal_brand_data');
+          safeRemoveStorage('vis_portal_session');
+          safeRemoveStorage('vis_portal_user_email');
+          safeRemoveStorage('vis_portal_brand_data');
           setIsLoading(false);
         }
       } catch (err) {
@@ -113,17 +134,17 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
       try {
         if (event === 'SIGNED_IN' && currentSession) {
           setSession(currentSession);
-          sessionStorage.setItem('vis_portal_session', JSON.stringify(currentSession));
+          safeSetStorage('vis_portal_session', JSON.stringify(currentSession));
           const email = currentSession.user?.email || '';
           setUserEmail(email);
-          sessionStorage.setItem('vis_portal_user_email', email);
+          safeSetStorage('vis_portal_user_email', email);
           await fetchBrandInfo(email);
         } else if (event === 'SIGNED_OUT') {
           setSession(null);
           setBrandData(null);
-          sessionStorage.removeItem('vis_portal_session');
-          sessionStorage.removeItem('vis_portal_user_email');
-          sessionStorage.removeItem('vis_portal_brand_data');
+          safeRemoveStorage('vis_portal_session');
+          safeRemoveStorage('vis_portal_user_email');
+          safeRemoveStorage('vis_portal_brand_data');
           setIsLoading(false);
         }
       } catch (err) {
@@ -159,18 +180,20 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
           .maybeSingle();
 
         if (approvedApp) {
-          // Auto-heal: try to insert brand record
+          // Auto-heal: try to insert brand record using authenticated session
           const isMicro = approvedApp.booth_type === 'T';
           const { data: newBrand } = await supabase
             .from('exhibitor_brands')
             .insert({
               application_id: approvedApp.id,
               brand_name_zh: approvedApp.brand_name_zh,
-              brand_name_en: approvedApp.brand_name_en,
+              brand_name_en: approvedApp.brand_name_en || approvedApp.brand_name_zh,
               zone_id: approvedApp.zone_id,
               booth_type: approvedApp.booth_type,
               is_micro_exposure: isMicro,
               portal_email: formattedEmail,
+              custom_fee: approvedApp.custom_fee ?? null,
+              discount_note: approvedApp.discount_note ?? null,
             })
             .select()
             .maybeSingle();
@@ -178,7 +201,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
           if (newBrand) {
             data = newBrand;
           } else {
-            // Insert may have failed due to RLS or duplicate — try upsert or fetch again
+            // Insert may have failed or already exists — try refetch
             const { data: refetch } = await supabase
               .from('exhibitor_brands')
               .select('*')
@@ -188,17 +211,19 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
             if (refetch) {
               data = refetch;
             } else {
-              // Final fallback: build in-memory brand from approved application so portal renders
+              // Final fallback: build complete in-memory brand from approved application so portal renders immediately
               data = {
                 id: approvedApp.id,
                 application_id: approvedApp.id,
                 brand_name_zh: approvedApp.brand_name_zh,
-                brand_name_en: approvedApp.brand_name_en,
+                brand_name_en: approvedApp.brand_name_en || approvedApp.brand_name_zh,
                 zone_id: approvedApp.zone_id,
                 booth_type: approvedApp.booth_type,
                 is_micro_exposure: isMicro,
                 portal_email: formattedEmail,
                 created_at: approvedApp.created_at,
+                custom_fee: approvedApp.custom_fee ?? null,
+                discount_note: approvedApp.discount_note ?? null,
                 _fallback: true,
               };
             }
@@ -211,7 +236,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
           data.booth_type = 'A01';
         }
         setBrandData(data);
-        sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(data));
+        safeSetStorage('vis_portal_brand_data', JSON.stringify(data));
       } else {
         // Admin bypass: auto-create mock brand in DB
         if (ADMIN_EMAILS.includes(formattedEmail)) {
@@ -230,7 +255,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
           
           if (newBrand) {
             setBrandData(newBrand);
-            sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(newBrand));
+            safeSetStorage('vis_portal_brand_data', JSON.stringify(newBrand));
           } else {
             const fallbackBrand = {
               id: '00000000-0000-0000-0000-000000000000',
@@ -242,11 +267,11 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               portal_email: formattedEmail,
             };
             setBrandData(fallbackBrand);
-            sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(fallbackBrand));
+            safeSetStorage('vis_portal_brand_data', JSON.stringify(fallbackBrand));
           }
         } else {
           setBrandData(null);
-          sessionStorage.removeItem('vis_portal_brand_data');
+          safeRemoveStorage('vis_portal_brand_data');
         }
       }
     } catch (e) {
@@ -271,7 +296,11 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
       });
 
       if (error) {
-        setLoginMessage(error.message === 'Invalid login credentials' ? '帳號或密碼輸入錯誤，請確認參展商權限。' : `登入失敗: ${error.message}`);
+        if (error.message === 'Invalid login credentials') {
+          setLoginMessage('帳號或密碼輸入錯誤。若您尚未設定過登入密碼，請點擊下方「首次登入或設定密碼」自訂密碼以開通後台。');
+        } else {
+          setLoginMessage(`登入失敗: ${error.message}`);
+        }
         setLoginLoading(false);
         return;
       }
@@ -408,9 +437,9 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
-    sessionStorage.removeItem('vis_portal_session');
-    sessionStorage.removeItem('vis_portal_user_email');
-    sessionStorage.removeItem('vis_portal_brand_data');
+    safeRemoveStorage('vis_portal_session');
+    safeRemoveStorage('vis_portal_user_email');
+    safeRemoveStorage('vis_portal_brand_data');
     router.push('/exhibitor');
   };
 
@@ -484,7 +513,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
             <motion.form 
               key="login-form"
               onSubmit={handleLoginSubmit}
-              className="space-y-6"
+              className="space-y-5"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -523,13 +552,23 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
                 {loginLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : '登入協作平台 LOGIN TO PORTAL'}
               </button>
 
-              <div className="text-center pt-1">
+              {/* First-time setup & Forgot password prominent buttons */}
+              <div className="pt-2 flex flex-col gap-2">
                 <Link 
                   href={`/exhibitor/reset-password${loginEmail ? `?email=${encodeURIComponent(loginEmail)}` : ''}`}
-                  className="text-[10px] text-[#DFBA87]/80 hover:text-[#DFBA87] underline underline-offset-4 tracking-wider transition-colors inline-block"
+                  className="w-full inline-flex items-center justify-center gap-2 border border-[#DFBA87]/40 hover:border-[#DFBA87] hover:bg-[#DFBA87]/10 text-[#DFBA87] py-2.5 rounded text-xs font-medium tracking-wider transition-all"
                 >
-                  忘記密碼或首次設定？點此重設密碼 Reset Password →
+                  <Sparkles className="w-3.5 h-3.5" /> 首次登入或設定密碼？點此立即啟用帳號 →
                 </Link>
+
+                <div className="text-center">
+                  <Link 
+                    href={`/exhibitor/reset-password${loginEmail ? `?email=${encodeURIComponent(loginEmail)}` : ''}`}
+                    className="text-[10px] text-neutral-400 hover:text-[#DFBA87] underline underline-offset-4 tracking-wider transition-colors inline-block"
+                  >
+                    忘記密碼？以安全驗證碼重設密碼 Reset Password
+                  </Link>
+                </div>
               </div>
 
               <div className="relative flex py-2 items-center">

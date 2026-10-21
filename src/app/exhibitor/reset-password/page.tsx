@@ -5,28 +5,31 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Loader2, ShieldCheck, Mail, ArrowLeft, KeyRound, CheckCircle2 } from 'lucide-react';
+import { Loader2, ShieldCheck, Mail, ArrowLeft, KeyRound, CheckCircle2, AlertCircle, Sparkles } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 function ResetPasswordContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialEmail = searchParams.get('email') || '';
+  const initialEmail = (searchParams.get('email') || '').toLowerCase().trim();
 
-  const [mode, setMode] = useState<'checking' | 'set_password' | 'request_link'>('checking');
+  // Mode:
+  // 'checking': initial auth detection
+  // 'direct_setup': first-time setup or direct password entry
+  // 'otp_verify': 6-digit OTP verification for password reset
+  // 'set_password': active session / recovery token detected
+  const [mode, setMode] = useState<'checking' | 'direct_setup' | 'otp_verify' | 'set_password'>('checking');
   
-  // Request Link Form States
+  // Form states
   const [email, setEmail] = useState(initialEmail);
-  const [requestLoading, setRequestLoading] = useState(false);
-  const [requestSent, setRequestSent] = useState(false);
-  const [requestMessage, setRequestMessage] = useState({ text: '', type: '' });
-
-  // Set Password Form States
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [setLoading, setSetLoading] = useState(false);
-  const [setMessage, setSetMessage] = useState({ text: '', type: '' });
+  const [otpCode, setOtpCode] = useState('');
+  
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState({ text: '', type: '' });
+  const [isOtpSent, setIsOtpSent] = useState(false);
 
   useEffect(() => {
     let hasRecoveryIntent = false;
@@ -45,17 +48,16 @@ function ResetPasswordContent() {
         if (session || hasRecoveryIntent) {
           setMode('set_password');
         } else {
-          setMode('request_link');
+          setMode('direct_setup');
         }
       } catch (err) {
         console.error('Session check error:', err);
-        setMode('request_link');
+        setMode('direct_setup');
       }
     };
 
     checkInitialSession();
 
-    // Listen for auth state changes (e.g. recovery link clicked and tokens exchanged)
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
         setMode('set_password');
@@ -67,76 +69,262 @@ function ResetPasswordContent() {
     };
   }, [searchParams]);
 
-  // Handler: Request verification / reset link
-  const handleRequestLink = async (e: React.FormEvent) => {
+  // Handler 1: Direct First-time Password Setup / Account Activation
+  const handleDirectSetup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setRequestLoading(true);
-    setRequestMessage({ text: '', type: '' });
+    setLoading(true);
+    setMessage({ text: '', type: '' });
 
     const formattedEmail = email.toLowerCase().trim();
 
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(formattedEmail, {
-        redirectTo: `${window.location.origin}/exhibitor/reset-password`,
-      });
-
-      if (error) {
-        // Fallback to OTP if SMTP recovery error occurs
-        if (error.message.includes('Error sending recovery email') || error.message.includes('unable to send')) {
-          const { error: otpErr } = await supabase.auth.signInWithOtp({
-            email: formattedEmail,
-            options: {
-              emailRedirectTo: `${window.location.origin}/exhibitor/reset-password`,
-              shouldCreateUser: true,
-            },
-          });
-
-          if (!otpErr) {
-            setRequestSent(true);
-            setRequestMessage({
-              text: '✓ 已發送一次性安全驗證連結至您的信箱！請前往收信並點擊連結完成登入與密碼設定。',
-              type: 'success',
-            });
-            return;
-          }
-        }
-
-        setRequestMessage({
-          text: `發送失敗: ${error.message === 'Email rate limit exceeded' ? '發送過於頻繁，請於 60 秒後再試。' : error.message}`,
-          type: 'error',
-        });
-      } else {
-        setRequestSent(true);
-        setRequestMessage({
-          text: '✓ 驗證信件已寄出！請至您的信箱收取郵件，點擊信中的安全連結即可直接設定新密碼。（若未收到請檢查垃圾郵件匣）',
-          type: 'success',
-        });
-      }
-    } catch (err: any) {
-      setRequestMessage({
-        text: `發送異常: ${err.message || String(err)}`,
-        type: 'error',
-      });
-    } finally {
-      setRequestLoading(false);
+    if (!formattedEmail || !formattedEmail.includes('@')) {
+      setMessage({ text: '請輸入有效的參展商電子信箱。', type: 'error' });
+      setLoading(false);
+      return;
     }
-  };
-
-  // Handler: Set new password
-  const handleSetPassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setSetLoading(true);
-    setSetMessage({ text: '', type: '' });
 
     if (password.length < 6) {
-      setSetMessage({ text: '密碼長度至少需為 6 碼。', type: 'error' });
-      setSetLoading(false);
+      setMessage({ text: '密碼長度至少需為 6 碼。', type: 'error' });
+      setLoading(false);
       return;
     }
 
     if (password !== confirmPassword) {
-      setSetMessage({ text: '兩次輸入的密碼不相符，請重新確認。', type: 'error' });
-      setSetLoading(false);
+      setMessage({ text: '兩次輸入的密碼不相符，請重新確認。', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // 1. Verify eligibility: check if this email is an approved exhibitor
+      const { data: approvedApp } = await supabase
+        .from('exhibitor_applications')
+        .select('id, brand_name_zh, brand_name_en, zone_id, booth_type, status')
+        .eq('contact_email', formattedEmail)
+        .eq('status', 'approved')
+        .maybeSingle();
+
+      const { data: existingBrand } = await supabase
+        .from('exhibitor_brands')
+        .select('id, portal_email')
+        .eq('portal_email', formattedEmail)
+        .maybeSingle();
+
+      const ADMIN_EMAILS = [
+        'artwithlifetaipei@gmail.com',
+        'ameliecykuo@gmail.com',
+        'amelie@theartpressasia.com',
+        'visvipteam@gmail.com',
+      ];
+
+      if (!approvedApp && !existingBrand && !ADMIN_EMAILS.includes(formattedEmail)) {
+        setMessage({
+          text: '查無此信箱的入選核准記錄。請確認此信箱是否為申請參展時填寫的「聯絡人電子信箱」；若有疑問請洽大會 LINE: vis_culture。',
+          type: 'error',
+        });
+        setLoading(false);
+        return;
+      }
+
+      // 2. Attempt signUp: creates user and auto-confirms session
+      const signUpRes = await supabase.auth.signUp({
+        email: formattedEmail,
+        password: password,
+      });
+
+      if (signUpRes.data?.session) {
+        // Success: New user registered and authenticated!
+        setMessage({
+          text: '✓ 參展商帳號啟用成功！正在為您安全導向參展商協作平台...',
+          type: 'success',
+        });
+
+        // Auto-heal exhibitor_brands if needed
+        if (approvedApp && !existingBrand) {
+          try {
+            await supabase.from('exhibitor_brands').insert({
+              application_id: approvedApp.id,
+              brand_name_zh: approvedApp.brand_name_zh,
+              brand_name_en: approvedApp.brand_name_en || approvedApp.brand_name_zh,
+              zone_id: approvedApp.zone_id,
+              booth_type: approvedApp.booth_type,
+              is_micro_exposure: approvedApp.booth_type === 'T',
+              portal_email: formattedEmail,
+            });
+          } catch (e) {
+            console.warn('Auto-heal brand insert failed:', e);
+          }
+        }
+
+        setTimeout(() => {
+          router.push('/exhibitor/portal');
+        }, 1200);
+        return;
+      }
+
+      // If user is already registered in Auth:
+      if (signUpRes.error?.message?.toLowerCase().includes('already registered')) {
+        // Try sign in with entered password
+        const signInRes = await supabase.auth.signInWithPassword({
+          email: formattedEmail,
+          password: password,
+        });
+
+        if (signInRes.data?.session) {
+          setMessage({
+            text: '✓ 驗證成功！正在為您安全導向參展商協作平台...',
+            type: 'success',
+          });
+          setTimeout(() => {
+            router.push('/exhibitor/portal');
+          }, 1000);
+          return;
+        }
+
+        // If password does not match, guide to OTP reset
+        setMessage({
+          text: '此信箱已註冊過密碼，但密碼不相符。若您忘記舊密碼，請點擊下方「以安全驗證碼重設密碼」以獲取 6 位數驗證碼。',
+          type: 'error',
+        });
+        setLoading(false);
+        return;
+      }
+
+      if (signUpRes.error) {
+        setMessage({
+          text: `設定失敗: ${signUpRes.error.message}`,
+          type: 'error',
+        });
+      }
+    } catch (err: any) {
+      setMessage({
+        text: `處理異常: ${err.message || String(err)}`,
+        type: 'error',
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handler 2: Send 6-digit OTP code to email
+  const handleSendOtp = async () => {
+    const formattedEmail = email.toLowerCase().trim();
+    if (!formattedEmail || !formattedEmail.includes('@')) {
+      setMessage({ text: '請先輸入有效的參展商電子信箱。', type: 'error' });
+      return;
+    }
+
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: formattedEmail,
+        options: {
+          shouldCreateUser: true,
+        },
+      });
+
+      if (error) {
+        setMessage({
+          text: `發送驗證碼失敗: ${error.message === 'Email rate limit exceeded' ? '發送過於頻繁，請於 60 秒後再試。' : error.message}`,
+          type: 'error',
+        });
+      } else {
+        setIsOtpSent(true);
+        setMode('otp_verify');
+        setMessage({
+          text: '✓ 已發送 6 位數安全驗證碼至您的信箱！請收信並於下方輸入驗證碼與新密碼。',
+          type: 'success',
+        });
+      }
+    } catch (err: any) {
+      setMessage({ text: `發送異常: ${err.message || String(err)}`, type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handler 3: Verify OTP code and set new password
+  const handleVerifyOtpAndSetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+
+    const formattedEmail = email.toLowerCase().trim();
+    const cleanOtp = otpCode.trim();
+
+    if (!cleanOtp) {
+      setMessage({ text: '請輸入信箱收到的 6 位數安全驗證碼。', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    if (password.length < 6) {
+      setMessage({ text: '新密碼長度至少需為 6 碼。', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setMessage({ text: '兩次輸入的密碼不相符，請重新確認。', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    try {
+      // 1. Verify OTP token
+      const { data: verifyData, error: verifyError } = await supabase.auth.verifyOtp({
+        email: formattedEmail,
+        token: cleanOtp,
+        type: 'email',
+      });
+
+      if (verifyError || !verifyData?.session) {
+        setMessage({
+          text: `驗證碼不正確或已過期: ${verifyError?.message || '請重新獲取驗證碼'}`,
+          type: 'error',
+        });
+        setLoading(false);
+        return;
+      }
+
+      // 2. Update password for authenticated user
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+
+      if (updateError) {
+        setMessage({ text: `密碼更新失敗: ${updateError.message}`, type: 'error' });
+      } else {
+        setMessage({
+          text: '✓ 密碼設定成功！正在為您安全導向參展商協作平台...',
+          type: 'success',
+        });
+        setTimeout(() => {
+          router.push('/exhibitor/portal');
+        }, 1200);
+      }
+    } catch (err: any) {
+      setMessage({ text: `驗證異常: ${err.message || String(err)}`, type: 'error' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handler 4: Update password for active recovery session
+  const handleUpdatePassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setMessage({ text: '', type: '' });
+
+    if (password.length < 6) {
+      setMessage({ text: '密碼長度至少需為 6 碼。', type: 'error' });
+      setLoading(false);
+      return;
+    }
+
+    if (password !== confirmPassword) {
+      setMessage({ text: '兩次輸入的密碼不相符，請重新確認。', type: 'error' });
+      setLoading(false);
       return;
     }
 
@@ -144,28 +332,25 @@ function ResetPasswordContent() {
       const { error } = await supabase.auth.updateUser({ password });
 
       if (error) {
-        setSetMessage({
+        setMessage({
           text: error.message.includes('Auth session missing')
-            ? '驗證憑證已過期或無效，請點選下方切換為「發送驗證信」以重新獲取連結。'
+            ? '驗證憑證已過期，請點選下方返回重新輸入信箱設定。'
             : `密碼更新失敗: ${error.message}`,
           type: 'error',
         });
       } else {
-        setSetMessage({
-          text: '✓ 密碼設定成功！正在為您安全導向參展商協作平台...',
+        setMessage({
+          text: '✓ 密碼更新成功！正在為您安全導向參展商協作平台...',
           type: 'success',
         });
         setTimeout(() => {
           router.push('/exhibitor/portal');
-        }, 1500);
+        }, 1200);
       }
     } catch (err: any) {
-      setSetMessage({
-        text: `發生非預期錯誤: ${err.message || String(err)}`,
-        type: 'error',
-      });
+      setMessage({ text: `發生非預期錯誤: ${err.message || String(err)}`, type: 'error' });
     } finally {
-      setSetLoading(false);
+      setLoading(false);
     }
   };
 
@@ -188,29 +373,29 @@ function ResetPasswordContent() {
         initial={{ opacity: 0, y: 25 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
-        className="w-full max-w-md border border-neutral-200/80 bg-white/95 p-8 py-10 relative backdrop-blur-xl shadow-2xl flex flex-col gap-6"
+        className="w-full max-w-md border border-neutral-200/80 bg-white/95 p-8 py-10 relative backdrop-blur-xl shadow-2xl flex flex-col gap-6 rounded-none"
       >
         {/* Top Header */}
         <div className="text-center">
-          <div className="w-10 h-10 rounded-full border border-[#C9A96E]/30 flex items-center justify-center bg-[#C9A96E]/5 mx-auto text-[#C9A96E] mb-4">
-            {mode === 'set_password' ? <KeyRound className="w-5 h-5" /> : <Mail className="w-5 h-5" />}
+          <div className="w-11 h-11 rounded-full border border-[#C9A96E]/30 flex items-center justify-center bg-[#C9A96E]/5 mx-auto text-[#C9A96E] mb-4">
+            <KeyRound className="w-5 h-5" />
           </div>
           <h2 className="text-[17px] font-light tracking-[0.25em] uppercase text-[#1a1a1a] mb-1">
-            {mode === 'set_password' ? '設定參展商密碼' : '參展商密碼設定與驗證'}
+            {mode === 'otp_verify' ? '輸入驗證碼並設定密碼' : '參展商帳號啟用與密碼設定'}
           </h2>
           <p className="text-[10px] tracking-[0.25em] text-[#C9A96E] uppercase font-mono">
-            {mode === 'set_password' ? 'Set exhibitor password' : 'Password setup & recovery'}
+            Brand Portal Password Setup
           </p>
         </div>
 
-        {/* ── MODE 1: Request Reset / Setup Link ── */}
-        {mode === 'request_link' && (
+        {/* ── MODE 1: Direct First-Time Setup ── */}
+        {mode === 'direct_setup' && (
           <div className="space-y-6">
             <p className="text-xs text-neutral-600 font-light leading-relaxed text-center">
-              若您是首次登入或忘記密碼，請確認您的參展商電子信箱。大會系統將立即寄送<strong>專屬安全驗證連結</strong>至您的信箱，點擊信中連結即可直接設定新密碼。
+              歡迎入選 2027 VIS！請輸入您的<strong>參展商電子信箱</strong>並自訂登入密碼（至少 6 碼），確認後將立即為您開通專屬協作後台。
             </p>
 
-            <form onSubmit={handleRequestLink} className="space-y-5">
+            <form onSubmit={handleDirectSetup} className="space-y-5">
               <div className="flex flex-col border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
                 <label className="text-[9px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">
                   參展商電子信箱 Registered Email
@@ -221,54 +406,110 @@ function ResetPasswordContent() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="brand@example.com"
-                  disabled={requestLoading || requestSent}
+                  disabled={loading}
+                  className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-[#0D0D0D] transition-all placeholder:text-neutral-300"
+                />
+              </div>
+
+              <div className="flex flex-col border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
+                <label className="text-[9px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">
+                  設定登入密碼 Set Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="請輸入新密碼 (至少 6 碼)"
+                  minLength={6}
+                  disabled={loading}
+                  className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-[#0D0D0D] transition-all placeholder:text-neutral-300"
+                />
+              </div>
+
+              <div className="flex flex-col border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
+                <label className="text-[9px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">
+                  再次確認密碼 Confirm Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="請再次輸入新密碼"
+                  minLength={6}
+                  disabled={loading}
                   className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-[#0D0D0D] transition-all placeholder:text-neutral-300"
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={requestLoading || requestSent}
+                disabled={loading}
                 className="w-full bg-[#0D0D0D] hover:bg-[#C9A96E] text-white py-3.5 rounded-none text-xs font-semibold tracking-[0.25em] uppercase transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 mt-4 cursor-pointer active:scale-[0.99] shadow-md border-0"
               >
-                {requestLoading ? (
+                {loading ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                    發送中 SENDING...
-                  </span>
-                ) : requestSent ? (
-                  <span className="flex items-center gap-2">
-                    <CheckCircle2 className="w-3.5 h-3.5" />
-                    已發送驗證信 SENT
+                    啟用處理中 ACTIVATING...
                   </span>
                 ) : (
-                  '發送密碼設定驗證信 SEND VERIFICATION LINK'
+                  '確認設定並進入平台 CONFIRM & LOGIN'
                 )}
               </button>
 
-              {requestMessage.text && (
+              {message.text && (
                 <div
                   className={`text-[11px] font-light leading-relaxed p-4 border text-center ${
-                    requestMessage.type === 'error'
+                    message.type === 'error'
                       ? 'text-rose-600 bg-rose-50 border-rose-200'
                       : 'text-[#8C7853] bg-[#C9A96E]/10 border-[#C9A96E]/30'
                   }`}
                 >
-                  {requestMessage.text}
+                  {message.text}
                 </div>
               )}
+
+              {/* Forgot Password Alternative */}
+              <div className="text-center pt-2">
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={loading}
+                  className="text-[11px] text-[#8C7853] hover:text-[#0D0D0D] underline underline-offset-4 cursor-pointer bg-transparent border-0 tracking-wide transition-colors"
+                >
+                  已設定過密碼但忘記了？點此發送 6 位數驗證碼重設 →
+                </button>
+              </div>
             </form>
           </div>
         )}
 
-        {/* ── MODE 2: Set New Password Form ── */}
-        {mode === 'set_password' && (
+        {/* ── MODE 2: 6-Digit OTP Verification Form ── */}
+        {mode === 'otp_verify' && (
           <div className="space-y-6">
             <p className="text-xs text-neutral-600 font-light leading-relaxed text-center">
-              安全驗證通過！請為您的參展商帳號輸入新密碼（至少 6 碼）。
+              安全驗證信已發送至 <strong>{email}</strong>。<br />
+              請至您的電子信箱收取 <strong>6 位數安全驗證碼</strong>，並於下方輸入以完成密碼設定。
             </p>
 
-            <form onSubmit={handleSetPassword} className="space-y-5">
+            <form onSubmit={handleVerifyOtpAndSetPassword} className="space-y-5">
+              <div className="flex flex-col border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
+                <label className="text-[9px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">
+                  6 位數驗證碼 OTP Code
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={otpCode}
+                  onChange={(e) => setOtpCode(e.target.value)}
+                  placeholder="例如: 123456"
+                  maxLength={6}
+                  disabled={loading}
+                  className="w-full text-center text-sm font-mono tracking-[0.3em] border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-[#0D0D0D] transition-all placeholder:text-neutral-300 placeholder:tracking-normal placeholder:font-sans"
+                />
+              </div>
+
               <div className="flex flex-col border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
                 <label className="text-[9px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">
                   新密碼 New Password
@@ -280,7 +521,95 @@ function ResetPasswordContent() {
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="請輸入新密碼 (至少 6 碼)"
                   minLength={6}
-                  disabled={setLoading}
+                  disabled={loading}
+                  className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-[#0D0D0D] transition-all placeholder:text-neutral-300"
+                />
+              </div>
+
+              <div className="flex flex-col border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
+                <label className="text-[9px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">
+                  再次確認新密碼 Confirm Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="請再次輸入新密碼"
+                  minLength={6}
+                  disabled={loading}
+                  className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-[#0D0D0D] transition-all placeholder:text-neutral-300"
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={loading}
+                className="w-full bg-[#0D0D0D] hover:bg-[#C9A96E] text-white py-3.5 rounded-none text-xs font-semibold tracking-[0.25em] uppercase transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 mt-4 cursor-pointer active:scale-[0.99] shadow-md border-0"
+              >
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    驗證儲存中 SAVING...
+                  </span>
+                ) : (
+                  '驗證並完成設定 VERIFY & LOGIN'
+                )}
+              </button>
+
+              {message.text && (
+                <div
+                  className={`text-[11px] font-light leading-relaxed p-4 border text-center ${
+                    message.type === 'error'
+                      ? 'text-rose-600 bg-rose-50 border-rose-200'
+                      : 'text-[#8C7853] bg-[#C9A96E]/10 border-[#C9A96E]/30'
+                  }`}
+                >
+                  {message.text}
+                </div>
+              )}
+
+              <div className="flex items-center justify-between pt-2 text-[11px]">
+                <button
+                  type="button"
+                  onClick={handleSendOtp}
+                  disabled={loading}
+                  className="text-[#8C7853] hover:underline cursor-pointer bg-transparent border-0"
+                >
+                  重新發送驗證碼
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setMode('direct_setup')}
+                  className="text-neutral-400 hover:text-neutral-700 cursor-pointer bg-transparent border-0"
+                >
+                  返回直接設定
+                </button>
+              </div>
+            </form>
+          </div>
+        )}
+
+        {/* ── MODE 3: Set Password via Active Recovery Session ── */}
+        {mode === 'set_password' && (
+          <div className="space-y-6">
+            <p className="text-xs text-neutral-600 font-light leading-relaxed text-center">
+              安全驗證通過！請為您的參展商帳號輸入新密碼（至少 6 碼）。
+            </p>
+
+            <form onSubmit={handleUpdatePassword} className="space-y-5">
+              <div className="flex flex-col border-b border-[#0D0D0D]/10 focus-within:border-[#C9A96E] transition-colors duration-300">
+                <label className="text-[9px] font-semibold tracking-[0.25em] text-[#C9A96E] uppercase mb-1">
+                  新密碼 New Password
+                </label>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="請輸入新密碼 (至少 6 碼)"
+                  minLength={6}
+                  disabled={loading}
                   className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-[#0D0D0D] transition-all placeholder:text-neutral-300"
                 />
               </div>
@@ -296,17 +625,17 @@ function ResetPasswordContent() {
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   placeholder="請再次輸入新密碼"
                   minLength={6}
-                  disabled={setLoading}
+                  disabled={loading}
                   className="w-full text-xs tracking-wider border-0 bg-transparent rounded-none px-0 py-2.5 outline-none text-[#0D0D0D] transition-all placeholder:text-neutral-300"
                 />
               </div>
 
               <button
                 type="submit"
-                disabled={setLoading}
+                disabled={loading}
                 className="w-full bg-[#0D0D0D] hover:bg-[#C9A96E] text-white py-3.5 rounded-none text-xs font-semibold tracking-[0.25em] uppercase transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-50 mt-4 cursor-pointer active:scale-[0.99] shadow-md border-0"
               >
-                {setLoading ? (
+                {loading ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="w-3.5 h-3.5 animate-spin" />
                     儲存中 SAVING...
@@ -316,40 +645,46 @@ function ResetPasswordContent() {
                 )}
               </button>
 
-              {setMessage.text && (
+              {message.text && (
                 <div
                   className={`text-[11px] font-light leading-relaxed p-4 border text-center ${
-                    setMessage.type === 'error'
+                    message.type === 'error'
                       ? 'text-rose-600 bg-rose-50 border-rose-200'
                       : 'text-[#8C7853] bg-[#C9A96E]/10 border-[#C9A96E]/30'
                   }`}
                 >
-                  {setMessage.text}
+                  {message.text}
                 </div>
               )}
             </form>
           </div>
         )}
 
-        {/* Footer Navigation */}
-        <div className="pt-4 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-400">
-          <Link
-            href="/exhibitor/portal"
-            className="flex items-center gap-1.5 hover:text-[#C9A96E] transition-colors"
-          >
-            <ArrowLeft className="w-3.5 h-3.5" />
-            返回協作平台登入
-          </Link>
-
-          {mode === 'set_password' && (
-            <button
-              type="button"
-              onClick={() => setMode('request_link')}
-              className="text-[#8C7853] hover:underline cursor-pointer bg-transparent border-0 text-[11px]"
+        {/* Footer Navigation & Immediate Support */}
+        <div className="pt-4 border-t border-neutral-100 flex flex-col gap-3 text-[11px] text-neutral-400">
+          <div className="flex items-center justify-between">
+            <Link
+              href="/exhibitor/portal"
+              className="flex items-center gap-1.5 hover:text-[#C9A96E] transition-colors"
             >
-              重新發送驗證信
-            </button>
-          )}
+              <ArrowLeft className="w-3.5 h-3.5" />
+              已有密碼？返回登入協作平台
+            </Link>
+
+            {mode !== 'direct_setup' && (
+              <button
+                type="button"
+                onClick={() => setMode('direct_setup')}
+                className="text-[#8C7853] hover:underline cursor-pointer bg-transparent border-0 text-[11px]"
+              >
+                返回直接設定
+              </button>
+            )}
+          </div>
+
+          <div className="bg-[#FAF9F6] border border-neutral-200/60 p-2.5 rounded text-[10.5px] text-neutral-500 leading-relaxed text-center">
+            若登入有任何疑問，歡迎隨時添加大會官方 LINE ID: <strong className="text-[#06C755] font-mono">vis_culture</strong> 由專人為您快速核對。
+          </div>
         </div>
       </motion.div>
     </div>

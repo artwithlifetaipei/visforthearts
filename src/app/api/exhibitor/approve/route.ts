@@ -279,15 +279,15 @@ export async function POST(req: Request) {
                 </p>
                 <div style="background-color: #FAF9F6; border: 1px solid #EAEAEA; border-radius: 4px; padding: 16px; margin: 14px 0; font-size: 13px;">
                   <div><strong>登入帳號 Login Email：</strong> <span style="color: #8C7853; font-family: monospace;">${app.contact_email}</span></div>
-                  <div style="margin-top: 6px;"><strong>首次登入說明：</strong> 若您尚未設定過登入密碼，請點擊下方「設定密碼」按鈕接收一次性安全驗證連結完成密碼設定，日後即可憑帳號密碼登入。</div>
+                  <div style="margin-top: 6px;"><strong>首次登入說明：</strong> 若您尚未設定過登入密碼，請點擊下方「首次設定密碼」按鈕自訂密碼以開通後台；完成後日後憑帳號密碼即可隨時登入。</div>
                 </div>
 
                 <div style="text-align: center; margin-top: 24px; margin-bottom: 10px;">
-                  <a href="${portalUrl}" target="_blank" style="display: inline-block; background-color: #0D0D0D; color: #FFFFFF; text-decoration: none; padding: 14px 28px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; border-radius: 2px; margin: 4px;">
-                    登入參展商協作平台 BRAND LOGIN
-                  </a>
                   <a href="${resetPasswordUrl}" target="_blank" style="display: inline-block; background-color: #8C7853; color: #FFFFFF; text-decoration: none; padding: 14px 28px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; border-radius: 2px; margin: 4px;">
-                    設定/重設密碼 SET PASSWORD
+                    首次設定密碼開通後台 SET PASSWORD
+                  </a>
+                  <a href="${portalUrl}" target="_blank" style="display: inline-block; background-color: #0D0D0D; color: #FFFFFF; text-decoration: none; padding: 14px 28px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; border-radius: 2px; margin: 4px;">
+                    已有密碼直接登入 BRAND LOGIN
                   </a>
                 </div>
 
@@ -378,15 +378,15 @@ export async function POST(req: Request) {
                 </p>
                 <div style="background-color: #FAF9F6; border: 1px solid #EAEAEA; border-radius: 4px; padding: 16px; margin: 14px 0; font-size: 13px;">
                   <div><strong>登入帳號 Login Email：</strong> <span style="color: #8C7853; font-family: monospace;">${app.contact_email}</span></div>
-                  <div style="margin-top: 6px;"><strong>首次登入說明：</strong> 若您尚未設定過登入密碼，請點擊下方「設定密碼」按鈕接收一次性安全驗證連結完成密碼設定，日後即可憑帳號密碼登入。</div>
+                  <div style="margin-top: 6px;"><strong>首次登入說明：</strong> 若您尚未設定過登入密碼，請點擊下方「首次設定密碼」按鈕自訂密碼以開通後台；完成後日後憑帳號密碼即可隨時登入。</div>
                 </div>
 
                 <div style="text-align: center; margin-top: 24px; margin-bottom: 10px;">
-                  <a href="${portalUrl}" target="_blank" style="display: inline-block; background-color: #0D0D0D; color: #FFFFFF; text-decoration: none; padding: 14px 28px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; border-radius: 2px; margin: 4px;">
-                    登入參展商協作平台 BRAND LOGIN
-                  </a>
                   <a href="${resetPasswordUrl}" target="_blank" style="display: inline-block; background-color: #8C7853; color: #FFFFFF; text-decoration: none; padding: 14px 28px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; border-radius: 2px; margin: 4px;">
-                    設定/重設密碼 SET PASSWORD
+                    首次設定密碼開通後台 SET PASSWORD
+                  </a>
+                  <a href="${portalUrl}" target="_blank" style="display: inline-block; background-color: #0D0D0D; color: #FFFFFF; text-decoration: none; padding: 14px 28px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; border-radius: 2px; margin: 4px;">
+                    已有密碼直接登入 BRAND LOGIN
                   </a>
                 </div>
 

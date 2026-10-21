@@ -9,24 +9,41 @@ import {
   Image as ImageIcon, HelpCircle, Check, Clock, AlertTriangle 
 } from 'lucide-react';
 
+function safeGetStorage(key: string): string | null {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      return window.sessionStorage.getItem(key);
+    }
+  } catch {
+    // Ignore storage restriction errors
+  }
+  return null;
+}
+
+function safeSetStorage(key: string, value: string): void {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      window.sessionStorage.setItem(key, value);
+    }
+  } catch {
+    // Ignore storage restriction errors
+  }
+}
+
 export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?: any }) {
   const [brand, setBrand] = useState<any>(() => {
     if (parentBrand) return parentBrand;
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = sessionStorage.getItem('vis_portal_brand_data');
-        return saved ? JSON.parse(saved) : null;
-      } catch { return null; }
+    const saved = safeGetStorage('vis_portal_brand_data');
+    if (saved) {
+      try { return JSON.parse(saved); } catch { return null; }
     }
     return null;
   });
 
   const [appData, setAppData] = useState<any>(() => {
-    if (typeof window !== 'undefined') {
-      try {
-        const saved = sessionStorage.getItem(`vis_portal_app_data_${brand?.id}`);
-        return saved ? JSON.parse(saved) : null;
-      } catch { return null; }
+    const saved = brand?.id ? safeGetStorage(`vis_portal_app_data_${brand.id}`) : null;
+    if (saved) {
+      try { return JSON.parse(saved); } catch { return null; }
     }
     return null;
   });
@@ -48,12 +65,40 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
         // Fetch brand from current session to ensure we have the absolute latest data from DB
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user?.email) {
+          const email = session.user.email.toLowerCase().trim();
           const { data } = await supabase
             .from('exhibitor_brands')
             .select('*')
-            .eq('portal_email', session.user.email.toLowerCase().trim())
+            .eq('portal_email', email)
             .maybeSingle();
           currentBrand = data;
+
+          // If exhibitor_brands has no row yet, fallback to exhibitor_applications
+          if (!currentBrand) {
+            const { data: approvedApp } = await supabase
+              .from('exhibitor_applications')
+              .select('*')
+              .eq('contact_email', email)
+              .eq('status', 'approved')
+              .maybeSingle();
+
+            if (approvedApp) {
+              currentBrand = {
+                id: approvedApp.id,
+                application_id: approvedApp.id,
+                brand_name_zh: approvedApp.brand_name_zh,
+                brand_name_en: approvedApp.brand_name_en || approvedApp.brand_name_zh,
+                zone_id: approvedApp.zone_id,
+                booth_type: approvedApp.booth_type,
+                is_micro_exposure: approvedApp.booth_type === 'T',
+                portal_email: email,
+                created_at: approvedApp.created_at,
+                custom_fee: approvedApp.custom_fee ?? null,
+                discount_note: approvedApp.discount_note ?? null,
+                _fallback: true,
+              };
+            }
+          }
         }
 
         // Fallback to cached state if session fetch fails (e.g. offline)
@@ -63,7 +108,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
 
         if (currentBrand) {
           setBrand(currentBrand);
-          sessionStorage.setItem('vis_portal_brand_data', JSON.stringify(currentBrand));
+          safeSetStorage('vis_portal_brand_data', JSON.stringify(currentBrand));
 
           // Fetch all sub-module data in parallel to resolve waterfall
           const appPromise = currentBrand.application_id
@@ -103,7 +148,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
 
           if (app) {
             setAppData(app);
-            sessionStorage.setItem(`vis_portal_app_data_${currentBrand.id}`, JSON.stringify(app));
+            safeSetStorage(`vis_portal_app_data_${currentBrand.id}`, JSON.stringify(app));
           }
           setComplianceSigned(!!compliance);
           setVipCount(vipC);
