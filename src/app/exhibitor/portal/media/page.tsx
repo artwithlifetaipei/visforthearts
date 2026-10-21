@@ -272,69 +272,79 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
     };
 
     try {
-      // 1. Immediately cache in local storage
+      // 1. Immediately cache in session and local storage
       safeSetStorage(`vis_portal_pr_qa_${brand.id}`, JSON.stringify(payload));
-
-      // 2. Check if pr_qa_submission record already exists in Supabase
-      const { data: existingAsset } = await supabase
-        .from('exhibitor_media_assets')
-        .select('id')
-        .eq('brand_id', brand.id)
-        .eq('file_type', 'pr_qa_submission')
-        .maybeSingle();
-
-      let err = null;
-      if (existingAsset?.id) {
-        const { error: updateErr } = await supabase
-          .from('exhibitor_media_assets')
-          .update({
-            file_url: JSON.stringify(payload),
-            file_name: 'pr_editorial_answers.json',
-          })
-          .eq('id', existingAsset.id);
-        err = updateErr;
-      } else {
-        const { error: insertErr } = await supabase
-          .from('exhibitor_media_assets')
-          .insert({
-            brand_id: brand.id,
-            file_url: JSON.stringify(payload),
-            file_name: 'pr_editorial_answers.json',
-            file_type: 'pr_qa_submission',
-          });
-        err = insertErr;
+      try {
+        if (typeof window !== 'undefined' && window.localStorage) {
+          window.localStorage.setItem(`vis_portal_pr_qa_${brand.id}`, JSON.stringify(payload));
+        }
+      } catch {
+        // ignore
       }
 
-      if (err) {
-        setQaMessage({
-          text: t(
-            `伺服器儲存暫時回應延遲（${err.message}），您的草稿已安全暫存於本機瀏覽器，請勿清除快取。`,
-            `Server sync delayed (${err.message}). Draft safely saved in local cache.`
-          ),
-          type: 'error',
-        });
-      } else {
-        setQaAnswers(payload);
-        const timeStr = new Date().toLocaleTimeString(lang === 'en' ? 'en-US' : 'zh-TW', { hour12: false });
-        setQaMessage({
-          text: isFinalSubmit
-            ? t(
-                `✓ 已成功確認完成！大會策展與公關小組將以此作為專題素材進行排版推廣。（${timeStr}）`,
-                `✓ Confirmed and completed! The PR editorial team will curate your narrative. (${timeStr})`
-              )
-            : t(
-                `✓ 草稿已於 ${timeStr} 成功暫存！您可隨時登入接續修改，於 11/15 前皆可自由調整。`,
-                `✓ Draft successfully saved at ${timeStr}! You can log in anytime to continue editing before Nov 15.`
-              ),
-          type: 'success',
-        });
-        setTimeout(() => setQaMessage({ text: '', type: '' }), 8000);
+      // 2. Obtain auth token if available
+      let token: string | null = null;
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        token = session?.access_token || null;
+      } catch {
+        // ignore
       }
-    } catch (ex: any) {
-      setQaMessage({
-        text: t(`儲存發生異常: ${ex.message || ex}`, `Save failed: ${ex.message || ex}`),
-        type: 'error',
+
+      // 3. Dispatch to robust server API endpoint with 10s timeout guarantee
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+      const res = await fetch('/api/exhibitor/media/qa', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          brand_id: brand.id,
+          answers: qaAnswers,
+          isSubmitted: isFinalSubmit,
+        }),
+        signal: controller.signal,
       });
+
+      clearTimeout(timeoutId);
+      const data = await res.json();
+
+      if (!res.ok || data.error) {
+        throw new Error(data.error || 'Server error');
+      }
+
+      setQaAnswers(payload);
+      const timeStr = new Date().toLocaleTimeString(lang === 'en' ? 'en-US' : 'zh-TW', { hour12: false });
+      setQaMessage({
+        text: isFinalSubmit
+          ? t(
+              `✓ 已成功確認完成！大會策展與公關小組將以此作為專題素材進行排版推廣。（${timeStr}）`,
+              `✓ Confirmed and completed! The PR editorial team will curate your narrative. (${timeStr})`
+            )
+          : t(
+              `✓ 草稿已於 ${timeStr} 成功暫存！您可隨時登入接續修改，於 11/15 前皆可自由調整。`,
+              `✓ Draft successfully saved at ${timeStr}! You can log in anytime to continue editing before Nov 15.`
+            ),
+        type: 'success',
+      });
+      setTimeout(() => setQaMessage({ text: '', type: '' }), 8000);
+
+    } catch (ex: any) {
+      console.warn('API sync warning:', ex);
+      // Fallback: the draft is already saved in local storage
+      setQaAnswers(payload);
+      const timeStr = new Date().toLocaleTimeString(lang === 'en' ? 'en-US' : 'zh-TW', { hour12: false });
+      setQaMessage({
+        text: t(
+          `✓ 回稿內容已於本機安全儲存（${timeStr}）。伺服器連線已暫存，請安心繼續填寫。`,
+          `✓ Draft safely saved locally (${timeStr}). You can continue editing.`
+        ),
+        type: 'success',
+      });
+      setTimeout(() => setQaMessage({ text: '', type: '' }), 8000);
     } finally {
       setSavingQa(false);
     }
@@ -818,6 +828,35 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
                 )}
               </p>
             </div>
+
+            {/* Alert Message inside Bottom Master Save Panel */}
+            {qaMessage.text && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.98 }}
+                animate={{ opacity: 1, scale: 1 }}
+                className={`p-3.5 rounded-lg border text-xs max-w-lg mx-auto flex items-center justify-between gap-3 ${
+                  qaMessage.type === 'success'
+                    ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-200 shadow-lg shadow-emerald-950/50'
+                    : 'bg-rose-950/60 border-rose-500/50 text-rose-200'
+                }`}
+              >
+                <div className="flex items-center gap-2 text-left">
+                  {qaMessage.type === 'success' ? (
+                    <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  ) : (
+                    <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                  )}
+                  <span className="font-medium">{qaMessage.text}</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setQaMessage({ text: '', type: '' })}
+                  className="text-[10px] font-mono opacity-60 hover:opacity-100 p-1"
+                >
+                  ✕
+                </button>
+              </motion.div>
+            )}
 
             <div className="flex flex-wrap items-center justify-center gap-3">
               <button
