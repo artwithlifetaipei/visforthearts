@@ -8,7 +8,7 @@ import { formatBoothDisplay } from '@/lib/exhibitorConstants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu, X, Calendar, FileCheck, Users, Image as ImageIcon, LogOut, ShieldCheck, 
-  HelpCircle, ArrowRight, Sparkles, Loader2, CheckCircle2 
+  HelpCircle, ArrowRight, Sparkles, Loader2, CheckCircle2, QrCode 
 } from 'lucide-react';
 
 const ADMIN_EMAILS = [
@@ -470,6 +470,12 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         icon: ImageIcon,
         badge: isMicro ? '限一般展商' : null,
         disabled: isMicro,
+      },
+      {
+        name: '模組 E — 展品與立牌標籤',
+        href: '/exhibitor/portal/products',
+        icon: QrCode,
+        badge: '新功能',
       },
     ];
   };

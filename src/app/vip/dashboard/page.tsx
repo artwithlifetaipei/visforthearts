@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
@@ -15,6 +16,7 @@ export default function VIPDashboard() {
     const [qrValue, setQrValue] = useState('');
     const [userEmail, setUserEmail] = useState('');
     const [isWalletOpen, setIsWalletOpen] = useState(false);
+    const [myCollections, setMyCollections] = useState<any[]>([]);
 
     useEffect(() => {
         let isMounted = true;
@@ -78,6 +80,25 @@ export default function VIPDashboard() {
                 setProfile({ ...data, tier: allowlistData?.tier || 'VIP' });
                 setQrValue(`${data.id}:${Date.now()}`);
                 setIsLoading(false);
+
+                // Fetch user's VIS Collection
+                try {
+                    const { data: cols } = await supabase
+                        .from('vip_collections')
+                        .select('*, exhibitor_products(*)')
+                        .eq('vip_email', email)
+                        .order('created_at', { ascending: false });
+
+                    if (cols && isMounted) {
+                        setMyCollections(cols.map((c: any) => ({
+                            ...c.exhibitor_products,
+                            saved_at: c.created_at,
+                            collection_id: c.id
+                        })).filter((item: any) => !!item?.id));
+                    }
+                } catch {
+                    // Non-blocking
+                }
             } catch (err) {
                 console.error('Error loading dashboard profile:', err);
                 router.push('/vip');
@@ -344,6 +365,73 @@ export default function VIPDashboard() {
                             </div>
                         </div>
                     </div>
+                </motion.div>
+
+                {/* My VIS Collection Section */}
+                <motion.div
+                    initial={{ opacity: 0, y: 15 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 1, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                    className={`w-full max-w-sm border-[0.5px] p-6 space-y-4 rounded-none backdrop-blur-md mt-6 shadow-xl text-left ${
+                        isSVIP 
+                            ? 'border-[#DFBA87]/25 bg-[#DFBA87]/5 text-white/90' 
+                            : 'border-[#1A1A1A]/10 bg-white/40 text-[#1A1A1A]/90'
+                    }`}
+                >
+                    <div className="flex justify-between items-baseline border-b border-current/10 pb-3">
+                        <div>
+                            <p className="text-[9.5px] tracking-[0.25em] uppercase text-[#DFBA87] font-semibold">
+                                MY COLLECTION / 我的展會典藏
+                            </p>
+                            <p className="text-[9px] opacity-60 font-light mt-0.5">
+                                現場掃碼收藏的作品清單，展後可隨時回看
+                            </p>
+                        </div>
+                        <span className="text-[10px] font-mono font-medium text-[#DFBA87] shrink-0">
+                            {myCollections.length} 件收藏
+                        </span>
+                    </div>
+
+                    {myCollections.length === 0 ? (
+                        <div className="py-4 text-center space-y-2">
+                            <p className="text-[11px] leading-relaxed opacity-75 font-light">
+                                於展覽現場掃描展位上的【作品立牌 QR Code】，即可將心儀作品收錄至此，離場後隨時回看並前往品牌官網購買！
+                            </p>
+                            <p className="text-[9px] font-mono text-[#DFBA87] tracking-wider pt-1 opacity-90">
+                                ✦ Scan & Save 現場一鍵收藏
+                            </p>
+                        </div>
+                    ) : (
+                        <div className="space-y-2.5">
+                            {myCollections.map((item) => (
+                                <Link
+                                    key={item.id}
+                                    href={`/vip/product/${item.id}`}
+                                    className="flex items-center gap-3 p-2 rounded bg-current/5 hover:bg-current/10 transition-colors border border-current/5 group"
+                                >
+                                    <div className="w-12 h-12 rounded-sm bg-neutral-200 overflow-hidden shrink-0 border border-current/10">
+                                        {item.images && item.images[0] ? (
+                                            <img src={item.images[0]} alt={item.title_zh} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                        ) : (
+                                            <div className="w-full h-full flex items-center justify-center text-[9px] text-neutral-400">VIS</div>
+                                        )}
+                                    </div>
+                                    <div className="flex-1 min-w-0 text-left">
+                                        <span className="text-[9px] font-mono text-[#DFBA87] block truncate">
+                                            {item.brand_name_zh} {item.booth_number ? `｜ 展位 ${item.booth_number}` : ''}
+                                        </span>
+                                        <h4 className="text-xs font-serif font-medium truncate">
+                                            {item.title_zh}
+                                        </h4>
+                                        <span className="text-[10px] opacity-75 block font-mono">
+                                            {item.price_display || '私洽 / Inquire'}
+                                        </span>
+                                    </div>
+                                    <span className="text-[12px] text-[#DFBA87] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">→</span>
+                                </Link>
+                            ))}
+                        </div>
+                    )}
                 </motion.div>
             </main>
 
