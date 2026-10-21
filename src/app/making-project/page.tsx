@@ -618,6 +618,83 @@ export default function MakingProjectPage() {
           </div>
         </section>
 
+        {/* ── Audience Metrics & Value Proposition (精準客群 · 關係延續) ── */}
+        <section className="pt-6 pb-2">
+          <div className="w-full bg-white/70 backdrop-blur-md border border-[#C9A96E]/20 p-6 sm:p-8 md:p-10 lg:p-12 shadow-[0_15px_40px_rgba(201,169,110,0.04)] relative text-left">
+            {/* Top & Bottom Accent Lines */}
+            <div className="absolute inset-x-8 top-0 h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/40 to-transparent pointer-events-none" />
+            <div className="absolute inset-x-8 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/40 to-transparent pointer-events-none" />
+
+            <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative">
+              {/* Left Column: 5 Metrics Cards Grid */}
+              <div className="w-full lg:w-1/2 grid grid-cols-2 gap-3.5 md:gap-4">
+                {/* Metric 1 */}
+                <div className="bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">71%</span>
+                  <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
+                    {lang === 'zh' ? '具高消費力與品味貴賓' : 'Discerning VIPs & High Net Worth'}
+                  </span>
+                </div>
+
+                {/* Metric 2 */}
+                <div className="bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">21%</span>
+                  <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
+                    {lang === 'zh' ? '收藏人士' : 'Art & Craft Collectors'}
+                  </span>
+                </div>
+
+                {/* Metric 3 */}
+                <div className="bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">34%</span>
+                  <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
+                    {lang === 'zh' ? '企業主' : 'Business Owners & Founders'}
+                  </span>
+                </div>
+
+                {/* Metric 4 */}
+                <div className="bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">13%</span>
+                  <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
+                    {lang === 'zh' ? '媒體/意見領袖' : 'Press & Cultural KOLs'}
+                  </span>
+                </div>
+
+                {/* Metric 5 (Full Width) */}
+                <div className="col-span-2 bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">67%</span>
+                  <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
+                    {lang === 'zh' ? '一年購買預算80萬以上' : 'Annual Purchase Budget > NT$800k'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Vertical Divider Line for Desktop */}
+              <div className="hidden lg:block w-[1px] h-[340px] bg-[#C9A96E]/25 flex-shrink-0" />
+
+              {/* Right Column: Title, Intro Paragraph & Golden Highlight Box */}
+              <div className="w-full lg:w-1/2 flex flex-col justify-center text-left relative">
+                {/* Delicate Circle Decoration (top right) */}
+                <div className="hidden lg:block absolute -top-2 right-0 w-5 h-5 rounded-full border border-[#C9A96E]/50 pointer-events-none" />
+
+                <h3 className="font-serif-garamond text-2xl sm:text-3xl font-light tracking-wide text-[#0D0D0D] mb-4">
+                  {lang === 'zh' ? '精準客群 ‧ 關係延續' : 'Discerning Audience · Deep Connection'}
+                </h3>
+                <p className="text-xs sm:text-[13px] md:text-sm text-[#555555] leading-relaxed text-justify mb-5 tracking-wide font-sans-outfit font-light">
+                  {lang === 'zh' 
+                    ? '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，篩選出適合品牌深度交流與展後延續的客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。' 
+                    : 'Unlike conventional craft markets focused on sheer foot traffic and immediate on-the-spot transactions, VIS places paramount importance on the caliber of our audience, curating a targeted collector base ideal for profound dialogues and lasting post-fair relationships. Participation benefits extend from live encounters into boutique visits, bespoke commissions, media exposure, cross-disciplinary collaborations, and enduring patron networks—making it the ideal platform for quality-focused, high-value artisanal brands.'}
+                </p>
+                <div className="border-l-2 border-[#C9A96E] pl-4 py-1 italic font-serif-garamond text-sm sm:text-base text-[#C9A96E] leading-relaxed">
+                  {lang === 'zh' 
+                    ? 'VIS 提供的 不只是一個展位，而是一套從客群導入到關係延續的品牌成長機制。' 
+                    : 'VIS offers more than an exhibition stall—it is an end-to-end brand growth mechanism, from client acquisition to enduring collector relationships.'}
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
         {/* ── Key Highlights & Operational Framework ── */}
         <section className="space-y-6 pt-4">
           {/* Exhibition Highlights Grid */}
