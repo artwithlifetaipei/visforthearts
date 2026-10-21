@@ -995,7 +995,7 @@ export default function ExhibitorLeadsPage() {
                 : 'text-neutral-400 hover:text-neutral-200 hover:bg-white/5'
             }`}
           >
-            全部名單 ({leads.length})
+            已掃碼貴賓 ({leads.length})
           </button>
           <button
             onClick={() => setSelectedIntentFilter('high')}
