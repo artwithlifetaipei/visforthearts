@@ -195,8 +195,8 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   const boothPrice = boothInfo?.price || getBoothPrice(brand.booth_type, brand.zone_id);
 
   // Check if brand has an approved custom fee or discount
-  const rawCustomFee = brand.custom_fee ?? (app as any)?.custom_fee;
-  const discountNote = brand.discount_note || (app as any)?.discount_note;
+  const rawCustomFee = brand.custom_fee ?? (appData as any)?.custom_fee;
+  const discountNote = brand.discount_note || (appData as any)?.discount_note;
   const isCustomFeeSet = rawCustomFee !== null && rawCustomFee !== undefined && rawCustomFee !== '';
   const finalPayablePrice = isCustomFeeSet ? Number(rawCustomFee) : boothPrice;
   const hasDiscount = isCustomFeeSet && finalPayablePrice < boothPrice;
