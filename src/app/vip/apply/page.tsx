@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Calendar, MapPin } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -31,10 +30,10 @@ export default function VIPApplyPage() {
     const dict = {
         zh: {
             title: "貴賓席位申請登記",
-            dateLabel: "展期日程",
+            dateLabel: "日期",
             dateValue: "2027 年 1 月 6 日（三）– 1 月 9 日（六）",
-            vipPreviewNote: "✦ 1/6 (三) 18:00–21:30 VIP 預展酒會（持貴賓卡全展期享優先通行）",
-            venueLabel: "展覽地點",
+            vipPreviewNote: "1/6 (三) 18:00–21:30 開幕晚會（僅限受邀貴賓）",
+            venueLabel: "地點",
             venueValue: "台北中山堂 光復廳",
             addressValue: "台北市中正區延平南路 98 號",
             nameLabel: "您的完整姓名 (Full Name)",
@@ -56,12 +55,12 @@ export default function VIPApplyPage() {
         },
         en: {
             title: "VIP Seat Request",
-            dateLabel: "DATES",
+            dateLabel: "DATE",
             dateValue: "Jan 6 (Wed) – Jan 9 (Sat), 2027",
-            vipPreviewNote: "✦ Jan 6, 18:00–21:30 VIP Vernissage (Priority Fast-Track Access)",
+            vipPreviewNote: "Jan 6 (Wed) 18:00–21:30 Opening Gala (By Invitation Only)",
             venueLabel: "VENUE",
-            venueValue: "Taipei Zhongshan Hall — Guangfu Hall",
-            addressValue: "No. 98, Yanping S. Rd., Zhongzheng Dist., Taipei City",
+            venueValue: "Guangfu Hall, Taipei Zhongshan Hall",
+            addressValue: "No. 98, Yanping S. Rd., Zhongzheng Dist., Taipei",
             nameLabel: "Your Full Name",
             namePlaceholder: "Enter your first and last name",
             emailLabel: "Email Address",
@@ -210,39 +209,35 @@ export default function VIPApplyPage() {
                     <h2 className="text-sm tracking-[0.25em] font-serif uppercase font-light text-neutral-800">{dict[lang].title}</h2>
                 </div>
 
-                {/* Exhibition Date & Venue Information Card */}
-                <div className="bg-[#FAF9F6] border border-[#C9A96E]/25 p-3.5 sm:p-4 text-left text-xs space-y-2.5 relative">
-                    <div className="flex items-start gap-2.5">
-                        <Calendar className="w-3.5 h-3.5 text-[#C9A96E] shrink-0 mt-0.5" />
-                        <div className="space-y-0.5 text-[#1A1A1A]">
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-[9px] font-mono tracking-widest text-[#8C7853] uppercase font-semibold">
-                                    {dict[lang].dateLabel}
-                                </span>
-                                <span className="text-[11.5px] font-medium tracking-wide">
-                                    {dict[lang].dateValue}
-                                </span>
+                {/* Exhibition Date & Venue Section — Luxury Editorial Layout */}
+                <div className="border-t border-neutral-200/70 border-b border-dashed border-neutral-200/90 py-4 my-0.5 text-left space-y-3.5 select-none">
+                    {/* Date */}
+                    <div className="grid grid-cols-[46px_1fr] gap-2.5 items-baseline">
+                        <span className="text-[9.5px] font-mono tracking-widest text-neutral-400 uppercase select-none">
+                            {dict[lang].dateLabel}
+                        </span>
+                        <div className="space-y-1">
+                            <div className="text-[12px] font-medium text-neutral-800 tracking-wide font-sans">
+                                {dict[lang].dateValue}
                             </div>
-                            <p className="text-[10px] text-[#8C7853] font-light leading-relaxed">
+                            <div className="text-[10.5px] text-[#A68042] font-normal tracking-wide">
                                 {dict[lang].vipPreviewNote}
-                            </p>
+                            </div>
                         </div>
                     </div>
 
-                    <div className="border-t border-[#C9A96E]/15 pt-2 flex items-start gap-2.5">
-                        <MapPin className="w-3.5 h-3.5 text-[#C9A96E] shrink-0 mt-0.5" />
-                        <div className="space-y-0.5 text-[#1A1A1A]">
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-[9px] font-mono tracking-widest text-[#8C7853] uppercase font-semibold">
-                                    {dict[lang].venueLabel}
-                                </span>
-                                <span className="text-[11.5px] font-medium tracking-wide">
-                                    {dict[lang].venueValue}
-                                </span>
+                    {/* Venue */}
+                    <div className="grid grid-cols-[46px_1fr] gap-2.5 items-baseline">
+                        <span className="text-[9.5px] font-mono tracking-widest text-neutral-400 uppercase select-none">
+                            {dict[lang].venueLabel}
+                        </span>
+                        <div className="space-y-0.5">
+                            <div className="text-[12px] font-medium text-neutral-800 tracking-wide font-sans">
+                                {dict[lang].venueValue}
                             </div>
-                            <p className="text-[10px] text-neutral-500 font-light leading-relaxed">
+                            <div className="text-[10.5px] text-neutral-400 font-light tracking-wide">
                                 {dict[lang].addressValue}
-                            </p>
+                            </div>
                         </div>
                     </div>
                 </div>
