@@ -477,6 +477,12 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         icon: QrCode,
         badge: '新功能',
       },
+      {
+        name: '模組 F — 現場貴賓接待與商機',
+        href: '/exhibitor/portal/leads',
+        icon: Sparkles,
+        badge: 'VIP管家',
+      },
     ];
   };
 
@@ -653,12 +659,22 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
             className="h-7 filter invert brightness-200"
           />
         </Link>
-        <button 
-          onClick={() => setIsSidebarOpen(prev => !prev)}
-          className="text-[#DFBA87] hover:text-white transition-colors"
-        >
-          {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-        </button>
+        <div className="flex items-center gap-3">
+          <Link
+            href="/exhibitor/portal/leads?scan=true"
+            className="p-1.5 bg-[#DFBA87] text-black rounded text-xs flex items-center gap-1 font-semibold shadow-md shadow-[#DFBA87]/20"
+            title="現場接待掃碼"
+          >
+            <QrCode className="w-4 h-4" />
+            <span className="text-[11px]">接待掃碼</span>
+          </Link>
+          <button 
+            onClick={() => setIsSidebarOpen(prev => !prev)}
+            className="text-[#DFBA87] hover:text-white transition-colors"
+          >
+            {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
       </div>
 
       {/* Sidebar Navigation */}
@@ -691,6 +707,16 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               <span>展位規格: {formatBoothDisplay(brandData?.booth_type, brandData?.zone_id)}</span>
             </div>
           </div>
+
+          {/* Quick Concierge Scan Action Button */}
+          <Link
+            href="/exhibitor/portal/leads?scan=true"
+            onClick={() => setIsSidebarOpen(false)}
+            className="flex items-center justify-center gap-2 w-full py-2.5 px-3 bg-[#DFBA87] hover:bg-[#c9a370] text-black font-semibold text-xs rounded transition-all shadow-md shadow-[#DFBA87]/20 cursor-pointer"
+          >
+            <QrCode className="w-4 h-4" />
+            <span>📷 現場貴賓接待掃碼</span>
+          </Link>
 
           {/* Navigation Links */}
           <nav className="space-y-2">

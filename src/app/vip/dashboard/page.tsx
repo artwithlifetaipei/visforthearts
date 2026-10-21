@@ -102,7 +102,8 @@ export default function VIPDashboard() {
                         setMyCollections(cols.map((c: any) => ({
                             ...c.exhibitor_products,
                             saved_at: c.created_at,
-                            collection_id: c.id
+                            collection_id: c.id,
+                            collection_notes: c.notes
                         })).filter((item: any) => !!item?.id));
                     }
                 } catch {
@@ -533,6 +534,11 @@ export default function VIPDashboard() {
                                 <p className="text-[8.5px] opacity-60 font-light">規格售價存入此清單</p>
                             </div>
                         </div>
+
+                        {/* Reverse Concierge Scan Hint */}
+                        <p className="text-[9.5px] opacity-75 font-light pt-1 border-t border-current/10 leading-relaxed">
+                            ✦ 雙向尊榮管家：於展位鑑賞試戴時，亦可出示上方貴賓 QR Code 由品牌管家直接為您將心儀款式收錄至此！
+                        </p>
                     </div>
 
                     {/* Primary Action Buttons */}
@@ -560,7 +566,7 @@ export default function VIPDashboard() {
                     {myCollections.length === 0 ? (
                         <div className="border border-dashed border-current/15 rounded p-4 text-center space-y-2">
                             <p className="text-[11px] leading-relaxed opacity-70 font-light">
-                                目前尚無收藏紀錄。於展會現場掃描各展位上的【作品桌立牌 QR Code】，作品資訊即會自動收錄在此！
+                                目前尚無收藏紀錄。於展會現場掃描各展位上的【作品桌立牌 QR Code】，或出示貴賓卡由品牌管家為您收錄，作品即會自動在此呈現！
                             </p>
                             <button
                                 type="button"
@@ -599,9 +605,16 @@ export default function VIPDashboard() {
                                             <h4 className="text-xs font-serif font-medium truncate">
                                                 {item.title_zh}
                                             </h4>
-                                            <span className="text-[10.5px] opacity-75 block font-mono text-[#DFBA87]/90 font-medium">
-                                                {item.price_display || '私洽 / Inquire'}
-                                            </span>
+                                            <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                                                <span className="text-[10.5px] opacity-75 font-mono text-[#DFBA87]/90 font-medium">
+                                                    {item.price_display || '私洽 / Inquire'}
+                                                </span>
+                                                {item.collection_notes && (
+                                                    <span className="text-[8.5px] font-mono text-[#DFBA87] bg-[#DFBA87]/15 px-1.5 py-0.2 rounded border border-[#DFBA87]/25">
+                                                        ✦ 品牌管家收錄
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
                                     </Link>
 
