@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, UserPlus, Trash2, Mail, ShieldAlert, Lock, Info, 
-  Loader2, Sparkles, CheckCircle2 
+  Loader2, Sparkles, CheckCircle2, Copy, Check, MessageSquare, Share2
 } from 'lucide-react';
 import { useExhibitorLanguage } from '@/lib/ExhibitorLanguageContext';
 
@@ -62,6 +62,8 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
   const [adding, setAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [formError, setFormError] = useState('');
+  const [successNotice, setSuccessNotice] = useState('');
+  const [copiedId, setCopiedId] = useState<string | null>(null);
 
   // Helper to extract tier cleanly
   const getVipTier = (vip: any): 'VIP' | 'SVIP' => {
@@ -156,6 +158,36 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
     loadBrandAndVips();
   }, [parentBrand]);
 
+  // Generates polished, personalized LINE invitation message
+  const getLineInviteText = (vip: any) => {
+    const tier = getVipTier(vip);
+    const cleanName = cleanSurname(vip.vip_surname);
+    const brandName = brand?.brand_name_zh || '參展品牌';
+    const passUrl = `https://www.visforthearts.com/vip?email=${encodeURIComponent(vip.vip_email)}`;
+    const isSvip = tier === 'SVIP';
+
+    if (lang === 'en') {
+      return `[${brand?.brand_name_en || brandName} Exclusive Invitation]\nDear ${cleanName},\n\nWe have reserved a "${isSvip ? 'SVIP Vernissage & Opening Gala Seat (with Full Fair Fast-Track)' : 'VIP Priority Fast-Track Pass'}" for you at the 2027 VIS Contemporary Culture Fair.\n\nClaim and view your digital VIP pass here:\n${passUrl}\n\n✦ Venue: Taipei Zhongshan Hall (98 Yanping S. Rd.)\n✦ Opening Gala: Jan 6, 2027 (Wed) 18:00 - 21:30\n✦ Public Days: Jan 7-9, 2027\nWe warmly look forward to welcoming you in person!`;
+    }
+
+    return `【${brandName} 敬邀】\n親愛的 ${cleanName} 氏 貴賓您好：\n\n我們已為您預留 2027 VIS 當代文化博覽會「${isSvip ? 'SVIP 尊榮預展暨開幕晚會專屬席位（含全展期優先快速通行）' : 'VIP 展期尊榮通行證（全時段免排隊優先快速通行）'}」。\n\n誠摯邀請您蒞臨鑑賞！點擊下方專屬連結即可直接領取您的數位貴賓憑證：\n${passUrl}\n\n✦ 展會地點：台北市中正區延平南路98號（中山堂）\n✦ 開幕晚會：2027/1/6 (三) 18:00 - 21:30\n✦ 公眾展期：2027/1/7 - 1/9\n期待於展會現場親自接待您！`;
+  };
+
+  const handleCopyLineInvite = (vip: any) => {
+    const text = getLineInviteText(vip);
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedId(vip.id);
+      setTimeout(() => setCopiedId(null), 3000);
+    }
+  };
+
+  const handleShareToLine = (vip: any) => {
+    const text = getLineInviteText(vip);
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+    window.open(lineUrl, '_blank', 'noopener,noreferrer');
+  };
+
   const handleAddVip = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!brand || adding) return;
@@ -179,56 +211,56 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
 
     setAdding(true);
     setFormError('');
+    setSuccessNotice('');
 
     try {
-      // 1. Attempt insert with tier column
-      let insertPayload: any = {
+      // Call dedicated backend invite API for instant auto-activation & branded email dispatch
+      const res = await fetch('/api/exhibitor/vip/invite', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand_id: brand.id,
+          brand_name_zh: brand.brand_name_zh,
+          vip_email: trimmedEmail,
+          vip_surname: surname.trim(),
+          tier: selectedTier,
+        }),
+      });
+
+      const result = await res.json();
+
+      if (!res.ok || result.error) {
+        setFormError(result.error || t('名單登記失敗，請稍後再試。', 'Failed to add guest. Please try again.'));
+        setAdding(false);
+        return;
+      }
+
+      const newRecord = result.submission || {
+        id: `temp-${Date.now()}`,
         brand_id: brand.id,
         brand_name_zh: brand.brand_name_zh,
         vip_email: trimmedEmail,
         vip_surname: surname.trim(),
         tier: selectedTier,
+        created_at: new Date().toISOString(),
       };
 
-      let { data, error } = await supabase
-        .from('exhibitor_vip_submissions')
-        .insert(insertPayload)
-        .select()
-        .single();
+      const updated = [newRecord, ...vips];
+      setVips(updated);
+      safeSetStorage(`vis_portal_vip_list_${brand.id}`, JSON.stringify(updated));
+      setSurname('');
+      setEmail('');
+      setSelectedTier('VIP');
+      
+      const emailNotice = result.emailSent 
+        ? t('官方邀請函已即時發送至貴賓信箱！', 'Official invitation email sent immediately!')
+        : t('已成功開通貴賓通行證！', 'VIP Pass successfully activated!');
+      
+      setSuccessNotice(`✓ ${emailNotice} ${t('您可點擊右側「複製 LINE 文案」直接傳送給貴賓。', 'You can also click "Copy LINE Invite" to share via LINE directly.')}`);
 
-      // 2. If 'tier' column does not exist yet in database table, fallback gracefully by embedding tier
-      if (error && error.message && error.message.includes('column "tier"')) {
-        const fallbackSurname = selectedTier === 'SVIP' ? `${surname.trim()} (SVIP)` : surname.trim();
-        const retryResult = await supabase
-          .from('exhibitor_vip_submissions')
-          .insert({
-            brand_id: brand.id,
-            brand_name_zh: brand.brand_name_zh,
-            vip_email: trimmedEmail,
-            vip_surname: fallbackSurname,
-          })
-          .select()
-          .single();
+      // Auto dismiss success notice after 8 seconds
+      setTimeout(() => setSuccessNotice(''), 8000);
 
-        data = retryResult.data ? { ...retryResult.data, tier: selectedTier } : null;
-        error = retryResult.error;
-      }
-
-      if (error) {
-        if (error.code === '23505') { // unique constraint violation
-          setFormError(t('該電子信箱已在貴品牌的專屬邀請名單中。', 'This email is already in your invited list.'));
-        } else {
-          setFormError(t(`邀請設定失敗: ${error.message}`, `Failed to add VIP: ${error.message}`));
-        }
-      } else if (data) {
-        const finalItem = { ...data, tier: selectedTier };
-        const updated = [finalItem, ...vips];
-        setVips(updated);
-        safeSetStorage(`vis_portal_vip_list_${brand.id}`, JSON.stringify(updated));
-        setSurname('');
-        setEmail('');
-        setSelectedTier('VIP');
-      }
     } catch (err: any) {
       setFormError(t('網路異常，請稍後再試。', 'Network error. Please try again.'));
     } finally {
@@ -317,15 +349,15 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
             {isMakingProject ? (
               <>
                 {t(
-                  '大會特別致贈「造物計畫」特展創作者 10 張專屬貴賓票。可自由指定分配為【VIP 展期通行】或【SVIP 開幕晚會】專屬禮遇。',
-                  'Organizer complimentary 10 VIP passes for Making Project creators. You may freely allocate between Public Days VIP and Vernissage SVIP.'
+                  '大會特別致贈「造物計畫」特展創作者 10 張專屬貴賓票。系統支援即時自動開通與發信，並提供一鍵 LINE 分享專屬領卡連結。',
+                  'Organizer complimentary 10 VIP passes for Making Project creators. Instant activation, branded email dispatch, and one-click LINE sharing are supported.'
                 )}
               </>
             ) : (
               <>
                 {t(
-                  `大會特別致贈參展品牌專屬 ${vipLimit} 張貴賓票。受邀貴賓享優先入場禮遇，可依需求指定為【VIP 展期通行】或【SVIP 開幕晚會】席位。`,
-                  `Organizer complimentary ${vipLimit} guest passes for your brand. You can allocate between Public Days VIP and Opening Gala SVIP.`
+                  `大會特別致贈參展品牌專屬 ${vipLimit} 張貴賓票。輸入後即時自動開通權益，並支援一鍵複製專屬 LINE 邀請文案私訊貴賓！`,
+                  `Organizer complimentary ${vipLimit} passes for your brand. Instant activation and one-click LINE personalized invitation sharing included!`
                 )}
               </>
             )}
@@ -342,6 +374,26 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
           </div>
         </div>
       </div>
+
+      {/* Success Banner */}
+      {successNotice && (
+        <motion.div 
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-3.5 bg-emerald-500/10 border border-emerald-500/30 rounded-lg text-xs text-emerald-300 flex items-center justify-between"
+        >
+          <div className="flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{successNotice}</span>
+          </div>
+          <button 
+            onClick={() => setSuccessNotice('')}
+            className="text-emerald-400 hover:text-white text-xs underline ml-4 cursor-pointer"
+          >
+            關閉
+          </button>
+        </motion.div>
+      )}
 
       <div className="grid lg:grid-cols-3 gap-8">
         
@@ -447,12 +499,12 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
               {adding ? (
                 <>
                   <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  {t('儲存邀請名單中...', 'Saving Invitation...')}
+                  {t('開通並發送專屬邀請函...', 'Activating & Sending Invite...')}
                 </>
               ) : (
                 <>
                   <UserPlus className="w-3.5 h-3.5" /> 
-                  {selectedTier === 'SVIP' ? t('發送 SVIP 開幕晚會邀請', 'Invite as SVIP Gala Guest') : t('發送 VIP 展期貴賓邀請', 'Invite as VIP Fair Guest')}
+                  {selectedTier === 'SVIP' ? t('開通並發送 SVIP 開幕晚會邀請', 'Activate & Send SVIP Gala Pass') : t('開通並發送 VIP 展期邀請', 'Activate & Send VIP Pass')}
                 </>
               )}
             </button>
@@ -462,8 +514,8 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
             <Info className="w-3.5 h-3.5 flex-shrink-0 text-[#DFBA87]" />
             <p>
               {t(
-                '大會將依您指定的等級（VIP / SVIP）向獲准的貴賓寄送專屬 QR code 電子邀請卡，無需品牌方重複寄送。',
-                'The organizer will dispatch exclusive QR code digital passes based on the tier (VIP / SVIP) you selected.'
+                '送出後系統將自動為該貴賓開通權益，並以【貴品牌名稱】敬邀名義寄送官方專屬電子邀請卡；送出後亦可於右側一鍵複製 LINE 私訊文案。',
+                'Upon submission, the pass will be activated immediately and an invitation email will be dispatched in your brand name.'
               )}
             </p>
           </div>
@@ -491,6 +543,7 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
                 {vips.map((vip) => {
                   const tier = getVipTier(vip);
                   const isSvip = tier === 'SVIP';
+                  const isCopied = copiedId === vip.id;
 
                   return (
                     <motion.div
@@ -498,22 +551,23 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0, x: -20 }}
-                      className={`border rounded p-3 flex justify-between items-center text-xs transition-colors ${
+                      className={`border rounded p-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs transition-colors ${
                         isSvip 
                           ? 'bg-amber-500/[0.04] border-amber-500/25 hover:border-amber-500/40' 
                           : 'bg-white/[0.02] border-white/5 hover:border-white/10'
                       }`}
                     >
-                      <div className="flex items-center gap-4">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold font-serif-garamond text-base ${
+                      {/* Left: Guest info & tier badge */}
+                      <div className="flex items-center gap-3.5">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold font-serif-garamond text-base shrink-0 ${
                           isSvip 
                             ? 'bg-[#DFBA87]/20 text-[#DFBA87] ring-1 ring-[#DFBA87]/40' 
                             : 'bg-[#C9A96E]/10 text-[#DFBA87]'
                         }`}>
                           {cleanSurname(vip.vip_surname).substring(0, 1)}
                         </div>
-                        <div>
-                          <div className="flex items-center gap-2">
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-2 flex-wrap">
                             <span className="font-medium text-white">{cleanSurname(vip.vip_surname)} 氏</span>
                             {isSvip ? (
                               <span className="text-[9px] font-mono px-2 py-0.5 rounded border border-amber-500/40 bg-amber-500/15 text-[#DFBA87] font-semibold flex items-center gap-1 shadow-sm">
@@ -526,18 +580,52 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
                               </span>
                             )}
                           </div>
-                          <div className="text-[10px] text-neutral-400 font-mono mt-0.5">{vip.vip_email}</div>
+                          <div className="text-[10px] text-neutral-400 font-mono mt-0.5 truncate">{vip.vip_email}</div>
                         </div>
                       </div>
                       
-                      <div className="flex items-center gap-4">
-                        <span className="text-[9px] text-neutral-500 font-mono">
-                          {new Date(vip.created_at).toLocaleDateString()}
-                        </span>
+                      {/* Right: Actions (Copy LINE text, direct LINE share, delete) */}
+                      <div className="flex items-center gap-1.5 shrink-0 self-end sm:self-auto">
+                        {/* One-Click Copy LINE Invitation Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleCopyLineInvite(vip)}
+                          className={`px-2.5 py-1.5 rounded text-[11px] font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                            isCopied
+                              ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 font-bold'
+                              : 'bg-white/5 hover:bg-[#DFBA87]/20 text-[#DFBA87] border border-[#DFBA87]/35 hover:border-[#DFBA87]'
+                          }`}
+                          title={t('一鍵複製專屬 LINE 私訊邀請文案', 'Copy personalized LINE invite message')}
+                        >
+                          {isCopied ? (
+                            <>
+                              <Check className="w-3.5 h-3.5 text-emerald-400" />
+                              <span>{t('已複製！', 'Copied!')}</span>
+                            </>
+                          ) : (
+                            <>
+                              <Copy className="w-3.5 h-3.5" />
+                              <span>{t('複製 LINE 文案', 'Copy LINE Text')}</span>
+                            </>
+                          )}
+                        </button>
+
+                        {/* Direct Share to LINE Button */}
+                        <button
+                          type="button"
+                          onClick={() => handleShareToLine(vip)}
+                          className="px-2 py-1.5 text-[#06C755] hover:bg-[#06C755]/15 border border-[#06C755]/30 hover:border-[#06C755] rounded transition-all cursor-pointer flex items-center gap-1"
+                          title={t('直接開啟 LINE 分享', 'Open LINE to share')}
+                        >
+                          <MessageSquare className="w-3.5 h-3.5 fill-[#06C755]/20" />
+                          <span className="text-[10px] font-bold">LINE</span>
+                        </button>
+
+                        {/* Remove VIP Button */}
                         <button
                           onClick={() => handleDeleteVip(vip.id)}
                           disabled={deletingId === vip.id}
-                          className="text-neutral-500 hover:text-rose-400 p-1.5 rounded hover:bg-rose-500/10 transition-colors cursor-pointer"
+                          className="text-neutral-500 hover:text-rose-400 p-1.5 rounded hover:bg-rose-500/10 transition-colors cursor-pointer ml-1"
                           title={t('移除邀請', 'Remove invitation')}
                         >
                           {deletingId === vip.id ? (

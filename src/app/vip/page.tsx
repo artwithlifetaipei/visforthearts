@@ -26,6 +26,19 @@ export default function VIPLoginPage() {
     // Auto-redirect if already logged in or landing with hash
     useEffect(() => {
         setIsMounted(true);
+
+        // Pre-fill email from URL parameter if available (e.g. from LINE or direct invitation link)
+        if (typeof window !== 'undefined') {
+            try {
+                const params = new URLSearchParams(window.location.search);
+                const queryEmail = params.get('email');
+                if (queryEmail) {
+                    setEmail(queryEmail.toLowerCase().trim());
+                }
+            } catch {
+                // Ignore URL parsing errors
+            }
+        }
         const checkVipSession = async (currentSession: any) => {
             if (!currentSession?.user?.email) return;
             const email = currentSession.user.email.toLowerCase().trim();
