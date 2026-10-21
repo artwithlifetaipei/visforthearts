@@ -430,7 +430,7 @@ export default function VIPDashboard() {
             </div>
 
             {/* Header */}
-            <header className="px-6 py-10 flex justify-between items-start relative z-10">
+            <header className="px-6 py-6 md:py-8 lg:py-10 max-w-6xl xl:max-w-7xl mx-auto flex justify-between items-start relative z-10 w-full">
                 <div className="flex flex-col">
                     <span className={`text-[8px] tracking-[0.4em] uppercase mb-2 font-light ${isSVIP ? 'text-white/40' : 'text-[#1A1A1A]/50'}`}>
                         Digital Pass
@@ -467,305 +467,325 @@ export default function VIPDashboard() {
                 </div>
             </header>
 
-            {/* Main Pass Section */}
-            <main className="px-6 pt-2 pb-12 flex flex-col items-center relative z-10">
-                <motion.div 
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
-                    className={`relative w-full max-w-sm rounded-none overflow-hidden flex flex-col items-center justify-between shadow-2xl border-[0.5px] backdrop-blur-xl p-8 py-12 ${cardClass}`}
-                    style={{ minHeight: '520px', boxShadow: isSVIP ? '0 25px 60px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(223,186,135,0.1)' : '0 25px 60px rgba(0,0,0,0.25)' }}
-                >
-                    {/* Corner Accents */}
-                    <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
-                    <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
-                    <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
-                    <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
-
-                    {/* VIP Invitation / Event details */}
-                    <div className="text-center mb-6 space-y-2.5 w-full">
-                        <h2 className={`text-[12px] tracking-[0.2em] uppercase font-semibold leading-relaxed ${goldText}`}>
-                            VIS Contemporary Culture Fair
-                            <span className="text-[10.5px] tracking-[0.3em] font-light block mt-1.5 font-sans normal-case">當代文化博覽會</span>
-                        </h2>
-                        <p className="text-[10px] tracking-[0.2em] font-mono opacity-80">2027/1/6 - 1/9</p>
-                        <p className="text-[9.5px] tracking-widest opacity-60">台北市中正區延平南路98號</p>
-                        <p className="text-[8.5px] tracking-wider opacity-60 mt-3 border-t border-current/10 pt-3 px-2 leading-relaxed">
-                            如需貴賓服務，請聯絡VIP辦公室<br/>
-                            <a href="mailto:visvipteam@gmail.com" className={`underline ${goldText} ${isSVIP ? 'hover:text-white' : 'hover:text-black'} transition-colors duration-300`}>visvipteam@gmail.com</a>
-                        </p>
-                    </div>
-
-                    {/* QR Code Container */}
-                    <div className={`p-4 bg-white shadow-xl`}>
-                        <QRCodeSVG 
-                            value={qrValue} 
-                            size={160}
-                            level="H"
-                            includeMargin={false}
-                            fgColor="#1A1A1A"
-                        />
-                    </div>
-
-                    <div className="mt-6 text-center space-y-2">
-                        <p className={`text-[9px] tracking-[0.6em] uppercase font-light opacity-60`}>
-                            Scan for Access
-                        </p>
-                        <p className={`text-[10px] tracking-[0.3em] font-mono opacity-30`}>
-                            {new Date().toLocaleTimeString([], { hour12: false })}
-                        </p>
-                    </div>
-
-                    {/* Apple Wallet Button - Minimalist */}
-                    <button 
-                        onClick={() => setIsWalletOpen(true)}
-                        className="mt-6 flex items-center gap-2 group cursor-pointer"
+            {/* Main Pass Section — Responsive Horizontal Tri-Column on Desktop */}
+            <main className="px-4 sm:px-6 pt-2 pb-16 relative z-10 max-w-6xl xl:max-w-7xl mx-auto w-full">
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8 items-start w-full">
+                    
+                    {/* Block 1: Digital VIP Access Pass */}
+                    <motion.div 
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
+                        className={`relative w-full mx-auto max-w-sm lg:max-w-none rounded-none overflow-hidden flex flex-col items-center justify-between shadow-2xl border-[0.5px] backdrop-blur-xl p-8 py-10 lg:py-12 ${cardClass}`}
+                        style={{ minHeight: '520px', boxShadow: isSVIP ? '0 25px 60px rgba(0,0,0,0.7), 0 0 0 0.5px rgba(223,186,135,0.1)' : '0 25px 60px rgba(0,0,0,0.25)' }}
                     >
-                        <span className="w-6 h-[1px] bg-current opacity-30 group-hover:w-8 transition-all duration-300"></span>
-                        <span className="text-[8px] tracking-[0.3em] uppercase opacity-50 group-hover:opacity-100 transition-opacity">
-                            加入行事曆 Add to calendar
-                        </span>
-                        <span className="w-6 h-[1px] bg-current opacity-30 group-hover:w-8 transition-all duration-300"></span>
-                    </button>
-                </motion.div>
+                        {/* Corner Accents */}
+                        <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
+                        <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
+                        <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
+                        <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
 
-                {/* VIP Timetable & Privileges Callout */}
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                    className={`w-full max-w-sm border-[0.5px] p-6 space-y-5 rounded-none backdrop-blur-md mt-6 shadow-xl ${
-                        isSVIP 
-                            ? 'border-[#DFBA87]/25 bg-[#DFBA87]/5 text-white/90' 
-                            : 'border-[#1A1A1A]/10 bg-white/40 text-[#1A1A1A]/90'
-                    }`}
-                >
-                    {/* Privilege Highlight */}
-                    <div className="border-b border-current/10 pb-4 text-left">
-                        <p className={`text-[9.5px] tracking-[0.25em] uppercase font-semibold mb-2 ${goldText}`}>
-                            {isSVIP ? 'SVIP PRIVILEGES / 榮譽貴賓專屬權益' : 'VIP PRIVILEGES / 展期貴賓權益'}
-                        </p>
-                        {isSVIP ? (
-                            <>
-                                <p className="text-[11px] leading-relaxed tracking-wide font-normal">
-                                    憑此 SVIP 尊榮數位卡，您享有 **1/6 (三) 尊榮預展暨開幕晚會專屬席位**，以及全展期時段 **尊榮優先快速通行**。
-                                </p>
-                                <p className="text-[9px] leading-relaxed tracking-wide opacity-60 font-light mt-1">
-                                    This SVIP pass grants you exclusive admission to the **Jan 6 Vernissage & Opening Gala** and **priority fast-track admission** throughout all fair days.
-                                </p>
-                            </>
-                        ) : (
-                            <>
-                                <p className="text-[11px] leading-relaxed tracking-wide font-normal">
-                                    憑此數位禮賓卡，您於 **1/7 至 1/9 公眾展期皆享尊榮優先快速通行**。（1/6 開幕晚會席位有限，僅限特邀 SVIP 憑證出席）
-                                </p>
-                                <p className="text-[9px] leading-relaxed tracking-wide opacity-60 font-light mt-1">
-                                    This digital pass grants you **priority fast-track admission for public days (Jan 7-9)**. (Jan 6 Opening Gala is reserved for SVIP honorees).
-                                </p>
-                            </>
-                        )}
-                    </div>
-
-                    {/* Complete Timetable */}
-                    <div className="space-y-3.5 text-left">
-                        <p className={`text-[9.5px] tracking-[0.25em] uppercase font-semibold ${goldText}`}>
-                            TIMETABLE / 展會日程
-                        </p>
-                        
-                        <div className="space-y-3 text-[10.5px] leading-relaxed font-light">
-                            <div className="flex justify-between items-start gap-4">
-                                <div className="shrink-0 space-y-0.5">
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="font-medium">VIP 預展 & 開幕晚會</span>
-                                        {isSVIP ? (
-                                            <span className="text-[8.5px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-[#DFBA87] border border-amber-500/30 font-semibold">
-                                                ✦ 專屬席位
-                                            </span>
-                                        ) : (
-                                            <span className="text-[8.5px] font-mono px-1.5 py-0.2 rounded bg-neutral-200/80 text-neutral-600 border border-neutral-300">
-                                                特邀 SVIP 專屬
-                                            </span>
-                                        )}
-                                    </div>
-                                    <span className="text-[8px] opacity-60 uppercase tracking-wider font-mono block">VIP Preview & Vernissage</span>
-                                </div>
-                                <span className={`text-right font-mono font-medium ${isSVIP ? goldText : 'opacity-50'}`}>1/6 (三) 18:00 - 21:30</span>
-                            </div>
-                            
-                            <div className="flex justify-between items-start gap-4 border-t border-current/5 pt-2.5">
-                                <div className="shrink-0 space-y-0.5">
-                                    <div className="flex items-center gap-1.5">
-                                        <span className="font-medium">公眾展期</span>
-                                        <span className={`text-[8.5px] font-mono px-1.5 py-0.2 rounded font-semibold ${goldBadge}`}>
-                                            ✦ 優先快速通行
-                                        </span>
-                                    </div>
-                                    <span className="text-[8px] opacity-60 uppercase tracking-wider font-mono block">Public Days (Fast-Track)</span>
-                                </div>
-                                <div className="text-right font-mono font-medium space-y-0.5">
-                                    <p>1/7 (四) 12:00 - 18:00</p>
-                                    <p>1/8 (五) 12:00 - 18:00</p>
-                                    <p>1/9 (六) 12:00 - 19:00</p>
-                                </div>
-                            </div>
+                        {/* VIP Invitation / Event details */}
+                        <div className="text-center mb-6 space-y-2.5 w-full">
+                            <h2 className={`text-[12px] tracking-[0.2em] uppercase font-semibold leading-relaxed ${goldText}`}>
+                                VIS Contemporary Culture Fair
+                                <span className="text-[10.5px] tracking-[0.3em] font-light block mt-1.5 font-sans normal-case">當代文化博覽會</span>
+                            </h2>
+                            <p className="text-[10px] tracking-[0.2em] font-mono opacity-80">2027/1/6 - 1/9</p>
+                            <p className="text-[9.5px] tracking-widest opacity-60">台北市中正區延平南路98號</p>
+                            <p className="text-[8.5px] tracking-wider opacity-60 mt-3 border-t border-current/10 pt-3 px-2 leading-relaxed">
+                                如需貴賓服務，請聯絡VIP辦公室<br/>
+                                <a href="mailto:visvipteam@gmail.com" className={`underline ${goldText} ${isSVIP ? 'hover:text-white' : 'hover:text-black'} transition-colors duration-300`}>visvipteam@gmail.com</a>
+                            </p>
                         </div>
-                    </div>
-                </motion.div>
 
-                {/* My VIS Collection Section — User-Centric Re-architecture */}
-                <motion.div
-                    initial={{ opacity: 0, y: 15 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                    className={`w-full max-w-sm border-[0.5px] p-6 space-y-5 rounded-none backdrop-blur-md mt-6 shadow-xl text-left ${
-                        isSVIP 
-                            ? 'border-[#DFBA87]/25 bg-[#DFBA87]/5 text-white/90' 
-                            : 'border-[#1A1A1A]/10 bg-white/40 text-[#1A1A1A]/90'
-                    }`}
-                >
-                    {/* Header */}
-                    <div className="flex justify-between items-start border-b border-current/10 pb-3">
-                        <div className="space-y-0.5">
-                            <span className={`text-[8px] font-mono tracking-[0.3em] uppercase block font-semibold ${goldText}`}>
-                                Scan & Save Service
+                        {/* QR Code Container */}
+                        <div className={`p-4 bg-white shadow-xl`}>
+                            <QRCodeSVG 
+                                value={qrValue} 
+                                size={160}
+                                level="H"
+                                includeMargin={false}
+                                fgColor="#1A1A1A"
+                            />
+                        </div>
+
+                        <div className="mt-6 text-center space-y-2">
+                            <p className={`text-[9px] tracking-[0.6em] uppercase font-light opacity-60`}>
+                                Scan for Access
+                            </p>
+                            <p className={`text-[10px] tracking-[0.3em] font-mono opacity-30`}>
+                                {new Date().toLocaleTimeString([], { hour12: false })}
+                            </p>
+                        </div>
+
+                        {/* Apple Wallet Button - Minimalist */}
+                        <button 
+                            onClick={() => setIsWalletOpen(true)}
+                            className="mt-6 flex items-center gap-2 group cursor-pointer"
+                        >
+                            <span className="w-6 h-[1px] bg-current opacity-30 group-hover:w-8 transition-all duration-300"></span>
+                            <span className="text-[8px] tracking-[0.3em] uppercase opacity-50 group-hover:opacity-100 transition-opacity">
+                                加入行事曆 Add to calendar
                             </span>
-                            <h3 className="text-sm font-serif font-medium tracking-wide">
-                                MY COLLECTION / 我的展會典藏
-                            </h3>
-                        </div>
-                        <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded border ${goldBadge}`}>
-                            {myCollections.length} 件收藏
-                        </span>
-                    </div>
-
-                    {/* 3-Step Visual User Flow (How It Works) */}
-                    <div className="bg-current/[0.03] border border-current/5 p-3 rounded space-y-2">
-                        <p className={`text-[8.5px] font-mono uppercase tracking-widest font-semibold ${goldText}`}>
-                            HOW TO USE / 現場收藏三步驟
-                        </p>
-                        <div className="grid grid-cols-3 gap-2 text-[10px] leading-tight">
-                            <div className="space-y-1">
-                                <span className={`inline-block w-4 h-4 rounded-full font-mono text-[9px] text-center leading-4 ${stepCircle}`}>1</span>
-                                <p className="font-medium">逛展遇見心動</p>
-                                <p className="text-[8.5px] opacity-60 font-light">於展位欣賞實體作品</p>
-                            </div>
-                            <div className="space-y-1 border-l border-current/10 pl-2">
-                                <span className={`inline-block w-4 h-4 rounded-full font-mono text-[9px] text-center leading-4 ${stepCircle}`}>2</span>
-                                <p className="font-medium">對準立牌掃碼</p>
-                                <p className="text-[8.5px] opacity-60 font-light">開啟鏡頭掃描立牌 QR</p>
-                            </div>
-                            <div className="space-y-1 border-l border-current/10 pl-2">
-                                <span className={`inline-block w-4 h-4 rounded-full font-mono text-[9px] text-center leading-4 ${stepCircle}`}>3</span>
-                                <p className="font-medium">離場隨時回看</p>
-                                <p className="text-[8.5px] opacity-60 font-light">規格售價存入此清單</p>
-                            </div>
-                        </div>
-
-                        {/* Reverse Concierge Scan Hint */}
-                        <p className="text-[9.5px] opacity-75 font-light pt-1 border-t border-current/10 leading-relaxed">
-                            ✦ 雙向尊榮管家：於展位鑑賞試戴時，亦可出示上方貴賓 QR Code 由品牌管家直接為您將心儀款式收錄至此！
-                        </p>
-                    </div>
-
-                    {/* Primary Action Buttons */}
-                    <div className="grid grid-cols-2 gap-2.5 pt-1">
-                        <button
-                            type="button"
-                            onClick={handleStartScanner}
-                            className="inline-flex items-center justify-center gap-1.5 py-3 px-3 bg-[#DFBA87] hover:bg-[#c9a96e] text-black font-semibold rounded text-[11px] tracking-wider uppercase transition-all shadow-md cursor-pointer"
-                        >
-                            <Camera className="w-3.5 h-3.5 shrink-0" />
-                            <span>開啟相機掃碼</span>
+                            <span className="w-6 h-[1px] bg-current opacity-30 group-hover:w-8 transition-all duration-300"></span>
                         </button>
+                    </motion.div>
 
-                        <button
-                            type="button"
-                            onClick={() => setShowExploreModal(true)}
-                            className="inline-flex items-center justify-center gap-1.5 py-3 px-3 bg-current/5 hover:bg-current/10 border border-current/15 rounded text-[11px] font-medium tracking-wider transition-all cursor-pointer"
-                        >
-                            <Compass className={`w-3.5 h-3.5 shrink-0 ${goldText}`} />
-                            <span>探索現場展品</span>
-                        </button>
-                    </div>
+                    {/* Block 2: VIP Timetable & Privileges Callout */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 0.15, ease: [0.16, 1, 0.3, 1] }}
+                        className={`w-full mx-auto max-w-sm lg:max-w-none border-[0.5px] p-6 lg:p-7 space-y-5 rounded-none backdrop-blur-md shadow-xl text-left flex flex-col justify-between ${
+                            isSVIP 
+                                ? 'border-[#DFBA87]/25 bg-[#DFBA87]/5 text-white/90' 
+                                : 'border-[#1A1A1A]/10 bg-white/40 text-[#1A1A1A]/90'
+                        }`}
+                        style={{ minHeight: '520px' }}
+                    >
+                        <div className="space-y-5">
+                            {/* Privilege Highlight */}
+                            <div className="border-b border-current/10 pb-4 text-left">
+                                <p className={`text-[9.5px] tracking-[0.25em] uppercase font-semibold mb-2 ${goldText}`}>
+                                    {isSVIP ? 'SVIP PRIVILEGES / 榮譽貴賓專屬權益' : 'VIP PRIVILEGES / 展期貴賓權益'}
+                                </p>
+                                {isSVIP ? (
+                                    <>
+                                        <p className="text-[11px] leading-relaxed tracking-wide font-normal">
+                                            憑此 SVIP 尊榮數位卡，您享有 **1/6 (三) 尊榮預展暨開幕晚會專屬席位**，以及全展期時段 **尊榮優先快速通行**。
+                                        </p>
+                                        <p className="text-[9px] leading-relaxed tracking-wide opacity-60 font-light mt-1">
+                                            This SVIP pass grants you exclusive admission to the **Jan 6 Vernissage & Opening Gala** and **priority fast-track admission** throughout all fair days.
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <p className="text-[11px] leading-relaxed tracking-wide font-normal">
+                                            憑此數位禮賓卡，您於 **1/7 至 1/9 公眾展期皆享尊榮優先快速通行**。（1/6 開幕晚會席位有限，僅限特邀 SVIP 憑證出席）
+                                        </p>
+                                        <p className="text-[9px] leading-relaxed tracking-wide opacity-60 font-light mt-1">
+                                            This digital pass grants you **priority fast-track admission for public days (Jan 7-9)**. (Jan 6 Opening Gala is reserved for SVIP honorees).
+                                        </p>
+                                    </>
+                                )}
+                            </div>
 
-                    {/* Saved Collection List */}
-                    {myCollections.length === 0 ? (
-                        <div className="border border-dashed border-current/15 rounded p-4 text-center space-y-2">
-                            <p className="text-[11px] leading-relaxed opacity-70 font-light">
-                                目前尚無收藏紀錄。於展會現場掃描各展位上的【作品桌立牌 QR Code】，或出示貴賓卡由品牌管家為您收錄，作品即會自動在此呈現！
-                            </p>
-                            <button
-                                type="button"
-                                onClick={() => setShowExploreModal(true)}
-                                className={`text-[10px] underline hover:opacity-100 transition-opacity font-mono tracking-wider cursor-pointer inline-flex items-center gap-1 ${goldText}`}
-                            >
-                                <Sparkles className="w-3 h-3" />
-                                <span>點此搶先預覽並體驗加入示範作品 →</span>
-                            </button>
-                        </div>
-                    ) : (
-                        <div className="space-y-2.5 pt-1">
-                            <p className={`text-[9px] uppercase font-mono tracking-widest font-semibold ${goldText}`}>
-                                SAVED ARTWORKS / 已收藏的作品
-                            </p>
-                            {myCollections.map((item) => (
-                                <div
-                                    key={item.id}
-                                    className="flex items-center justify-between gap-3 p-2.5 rounded bg-current/5 hover:bg-current/10 transition-colors border border-current/5 group"
-                                >
-                                    <Link
-                                        href={`/vip/product/${item.id}`}
-                                        className="flex items-center gap-3 flex-1 min-w-0"
-                                    >
-                                        <div className="w-12 h-12 rounded-sm bg-neutral-200 overflow-hidden shrink-0 border border-current/10">
-                                            {item.images && item.images[0] ? (
-                                                <img src={item.images[0]} alt={item.title_zh} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                            ) : (
-                                                <div className="w-full h-full flex items-center justify-center text-[9px] text-neutral-400">VIS</div>
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0 text-left">
-                                            <span className={`text-[9.5px] font-mono block truncate font-medium ${goldText}`}>
-                                                {item.brand_name_zh} {item.booth_number ? `｜ ${item.booth_number}` : ''}
-                                            </span>
-                                            <h4 className="text-xs font-serif font-medium truncate">
-                                                {item.title_zh}
-                                            </h4>
-                                            <div className="flex items-center gap-2 flex-wrap mt-0.5">
-                                                <span className={`text-[10.5px] font-mono font-medium ${goldText}`}>
-                                                    {item.price_display || '私洽 / Inquire'}
-                                                </span>
-                                                {item.collection_notes && (
-                                                    <span className={`text-[8.5px] font-mono px-1.5 py-0.5 rounded border ${goldBadge}`}>
-                                                        ✦ 品牌管家收錄
+                            {/* Complete Timetable */}
+                            <div className="space-y-3.5 text-left">
+                                <p className={`text-[9.5px] tracking-[0.25em] uppercase font-semibold ${goldText}`}>
+                                    TIMETABLE / 展會日程
+                                </p>
+                                
+                                <div className="space-y-3 text-[10.5px] leading-relaxed font-light">
+                                    <div className="flex justify-between items-start gap-4">
+                                        <div className="shrink-0 space-y-0.5">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="font-medium">VIP 預展 & 開幕晚會</span>
+                                                {isSVIP ? (
+                                                    <span className="text-[8.5px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-[#DFBA87] border border-amber-500/30 font-semibold">
+                                                        ✦ 專屬席位
+                                                    </span>
+                                                ) : (
+                                                    <span className="text-[8.5px] font-mono px-1.5 py-0.2 rounded bg-neutral-200/80 text-neutral-600 border border-neutral-300">
+                                                        特邀 SVIP 專屬
                                                     </span>
                                                 )}
                                             </div>
+                                            <span className="text-[8px] opacity-60 uppercase tracking-wider font-mono block">VIP Preview & Vernissage</span>
                                         </div>
-                                    </Link>
-
-                                    <div className="flex items-center gap-1 shrink-0">
-                                        <Link
-                                            href={`/vip/product/${item.id}`}
-                                            className="p-1.5 text-current/60 hover:text-current transition-colors"
-                                            title="查看作品頁面"
-                                        >
-                                            <Eye className="w-3.5 h-3.5" />
-                                        </Link>
-                                        <button
-                                            type="button"
-                                            onClick={(e) => handleRemoveCollection(item.id, e)}
-                                            className="p-1.5 text-current/40 hover:text-rose-400 transition-colors cursor-pointer"
-                                            title="從收藏中移除"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
+                                        <span className={`text-right font-mono font-medium ${isSVIP ? goldText : 'opacity-50'}`}>1/6 (三) 18:00 - 21:30</span>
+                                    </div>
+                                    
+                                    <div className="flex justify-between items-start gap-4 border-t border-current/5 pt-2.5">
+                                        <div className="shrink-0 space-y-0.5">
+                                            <div className="flex items-center gap-1.5">
+                                                <span className="font-medium">公眾展期</span>
+                                                <span className={`text-[8.5px] font-mono px-1.5 py-0.2 rounded font-semibold ${goldBadge}`}>
+                                                    ✦ 優先快速通行
+                                                </span>
+                                            </div>
+                                            <span className="text-[8px] opacity-60 uppercase tracking-wider font-mono block">Public Days (Fast-Track)</span>
+                                        </div>
+                                        <div className="text-right font-mono font-medium space-y-0.5">
+                                            <p>1/7 (四) 12:00 - 18:00</p>
+                                            <p>1/8 (五) 12:00 - 18:00</p>
+                                            <p>1/9 (六) 12:00 - 19:00</p>
+                                        </div>
                                     </div>
                                 </div>
-                            ))}
+                            </div>
                         </div>
-                    )}
-                </motion.div>
+
+                        {/* Venue & Location Notes for balanced layout */}
+                        <div className="border-t border-current/10 pt-4 text-[9.5px] opacity-75 space-y-1.5 font-light">
+                            <div className="flex items-center gap-1.5 font-mono">
+                                <MapPin className={`w-3.5 h-3.5 shrink-0 ${goldText}`} />
+                                <span className="font-medium">展會地點：台北市中正區延平南路98號（中山堂）</span>
+                            </div>
+                            <p className="text-[8.5px] opacity-65 leading-relaxed pl-5">
+                                捷運西門站 5 號出口步行約 1 分鐘。入場請至貴賓專屬櫃檯出示本數位憑證核銷快速通行。
+                            </p>
+                        </div>
+                    </motion.div>
+
+                    {/* Block 3: My VIS Collection Section — User-Centric Re-architecture */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 15 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 1, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+                        className={`w-full mx-auto max-w-sm lg:max-w-none border-[0.5px] p-6 lg:p-7 space-y-5 rounded-none backdrop-blur-md shadow-xl text-left ${
+                            isSVIP 
+                                ? 'border-[#DFBA87]/25 bg-[#DFBA87]/5 text-white/90' 
+                                : 'border-[#1A1A1A]/10 bg-white/40 text-[#1A1A1A]/90'
+                        }`}
+                        style={{ minHeight: '520px' }}
+                    >
+                        {/* Header */}
+                        <div className="flex justify-between items-start border-b border-current/10 pb-3">
+                            <div className="space-y-0.5">
+                                <span className={`text-[8px] font-mono tracking-[0.3em] uppercase block font-semibold ${goldText}`}>
+                                    Scan & Save Service
+                                </span>
+                                <h3 className="text-sm font-serif font-medium tracking-wide">
+                                    MY COLLECTION / 我的展會典藏
+                                </h3>
+                            </div>
+                            <span className={`text-[10px] font-mono px-2.5 py-0.5 rounded border ${goldBadge}`}>
+                                {myCollections.length} 件收藏
+                            </span>
+                        </div>
+
+                        {/* 3-Step Visual User Flow (How It Works) */}
+                        <div className="bg-current/[0.03] border border-current/5 p-3 rounded space-y-2">
+                            <p className={`text-[8.5px] font-mono uppercase tracking-widest font-semibold ${goldText}`}>
+                                HOW TO USE / 現場收藏三步驟
+                            </p>
+                            <div className="grid grid-cols-3 gap-2 text-[10px] leading-tight">
+                                <div className="space-y-1">
+                                    <span className={`inline-block w-4 h-4 rounded-full font-mono text-[9px] text-center leading-4 ${stepCircle}`}>1</span>
+                                    <p className="font-medium">逛展遇見心動</p>
+                                    <p className="text-[8.5px] opacity-60 font-light">於展位欣賞實體作品</p>
+                                </div>
+                                <div className="space-y-1 border-l border-current/10 pl-2">
+                                    <span className={`inline-block w-4 h-4 rounded-full font-mono text-[9px] text-center leading-4 ${stepCircle}`}>2</span>
+                                    <p className="font-medium">對準立牌掃碼</p>
+                                    <p className="text-[8.5px] opacity-60 font-light">開啟鏡頭掃描立牌 QR</p>
+                                </div>
+                                <div className="space-y-1 border-l border-current/10 pl-2">
+                                    <span className={`inline-block w-4 h-4 rounded-full font-mono text-[9px] text-center leading-4 ${stepCircle}`}>3</span>
+                                    <p className="font-medium">離場隨時回看</p>
+                                    <p className="text-[8.5px] opacity-60 font-light">規格售價存入此清單</p>
+                                </div>
+                            </div>
+
+                            {/* Reverse Concierge Scan Hint */}
+                            <p className="text-[9.5px] opacity-75 font-light pt-1 border-t border-current/10 leading-relaxed">
+                                ✦ 雙向尊榮管家：於展位鑑賞試戴時，亦可出示上方貴賓 QR Code 由品牌管家直接為您將心儀款式收錄至此！
+                            </p>
+                        </div>
+
+                        {/* Primary Action Buttons */}
+                        <div className="grid grid-cols-2 gap-2.5 pt-1">
+                            <button
+                                type="button"
+                                onClick={handleStartScanner}
+                                className="inline-flex items-center justify-center gap-1.5 py-3 px-3 bg-[#DFBA87] hover:bg-[#c9a96e] text-black font-semibold rounded text-[11px] tracking-wider uppercase transition-all shadow-md cursor-pointer"
+                            >
+                                <Camera className="w-3.5 h-3.5 shrink-0" />
+                                <span>開啟相機掃碼</span>
+                            </button>
+
+                            <button
+                                type="button"
+                                onClick={() => setShowExploreModal(true)}
+                                className="inline-flex items-center justify-center gap-1.5 py-3 px-3 bg-current/5 hover:bg-current/10 border border-current/15 rounded text-[11px] font-medium tracking-wider transition-all cursor-pointer"
+                            >
+                                <Compass className={`w-3.5 h-3.5 shrink-0 ${goldText}`} />
+                                <span>探索現場展品</span>
+                            </button>
+                        </div>
+
+                        {/* Saved Collection List */}
+                        {myCollections.length === 0 ? (
+                            <div className="border border-dashed border-current/15 rounded p-4 text-center space-y-2">
+                                <p className="text-[11px] leading-relaxed opacity-70 font-light">
+                                    目前尚無收藏紀錄。於展會現場掃描各展位上的【作品桌立牌 QR Code】，或出示貴賓卡由品牌管家為您收錄，作品即會自動在此呈現！
+                                </p>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowExploreModal(true)}
+                                    className={`text-[10px] underline hover:opacity-100 transition-opacity font-mono tracking-wider cursor-pointer inline-flex items-center gap-1 ${goldText}`}
+                                >
+                                    <Sparkles className="w-3 h-3" />
+                                    <span>點此搶先預覽並體驗加入示範作品 →</span>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="space-y-2.5 pt-1">
+                                <p className={`text-[9px] uppercase font-mono tracking-widest font-semibold ${goldText}`}>
+                                    SAVED ARTWORKS / 已收藏的作品
+                                </p>
+                                {myCollections.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="flex items-center justify-between gap-3 p-2.5 rounded bg-current/5 hover:bg-current/10 transition-colors border border-current/5 group"
+                                    >
+                                        <Link
+                                            href={`/vip/product/${item.id}`}
+                                            className="flex items-center gap-3 flex-1 min-w-0"
+                                        >
+                                            <div className="w-12 h-12 rounded-sm bg-neutral-200 overflow-hidden shrink-0 border border-current/10">
+                                                {item.images && item.images[0] ? (
+                                                    <img src={item.images[0]} alt={item.title_zh} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-[9px] text-neutral-400">VIS</div>
+                                                )}
+                                            </div>
+                                            <div className="flex-1 min-w-0 text-left">
+                                                <span className={`text-[9.5px] font-mono block truncate font-medium ${goldText}`}>
+                                                    {item.brand_name_zh} {item.booth_number ? `｜ ${item.booth_number}` : ''}
+                                                </span>
+                                                <h4 className="text-xs font-serif font-medium truncate">
+                                                    {item.title_zh}
+                                                </h4>
+                                                <div className="flex items-center gap-2 flex-wrap mt-0.5">
+                                                    <span className={`text-[10.5px] font-mono font-medium ${goldText}`}>
+                                                        {item.price_display || '私洽 / Inquire'}
+                                                    </span>
+                                                    {item.collection_notes && (
+                                                        <span className={`text-[8.5px] font-mono px-1.5 py-0.5 rounded border ${goldBadge}`}>
+                                                            ✦ 品牌管家收錄
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </Link>
+
+                                        <div className="flex items-center gap-1 shrink-0">
+                                            <Link
+                                                href={`/vip/product/${item.id}`}
+                                                className="p-1.5 text-current/60 hover:text-current transition-colors"
+                                                title="查看作品頁面"
+                                            >
+                                                <Eye className="w-3.5 h-3.5" />
+                                            </Link>
+                                            <button
+                                                type="button"
+                                                onClick={(e) => handleRemoveCollection(item.id, e)}
+                                                className="p-1.5 text-current/40 hover:text-rose-400 transition-colors cursor-pointer"
+                                                title="從收藏中移除"
+                                            >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </motion.div>
+
+                </div>
             </main>
 
             {/* Modal: Camera QR Code Scanner */}
