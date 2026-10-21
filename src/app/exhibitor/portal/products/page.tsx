@@ -398,7 +398,7 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
           <div className="text-lg font-serif-garamond text-white font-medium truncate">
             {boothDisplay}
           </div>
-          <p className="text-[10px] text-neutral-500 font-light">立牌將自動印製此展位編號以便導航</p>
+          <p className="text-[10px] text-neutral-500 font-light">大會已分配專屬展位展出</p>
         </div>
       </div>
 

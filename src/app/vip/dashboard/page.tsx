@@ -426,15 +426,28 @@ export default function VIPDashboard() {
                         {profile.first_name || profile.email.split('@')[0]}
                     </span>
                 </div>
-                <div className="text-right flex flex-col items-end gap-1.5">
-                    <div className={`inline-block px-4 py-1.5 border-[0.5px] ${isSVIP ? 'border-[#DFBA87] text-[#DFBA87]' : 'border-[#1A1A1A]/60 text-[#1A1A1A]'}`}>
-                        <span className="text-[9px] tracking-[0.4em] uppercase font-light">
-                            {profile.tier}
-                        </span>
+                <div className="text-right flex flex-col items-end gap-2">
+                    <div className="flex items-center gap-2">
+                        {/* Top-Right One-Click Artwork Scanner Button */}
+                        <button 
+                            type="button"
+                            onClick={handleStartScanner}
+                            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#DFBA87] hover:bg-[#c9a96e] text-black font-semibold rounded-full text-[11px] shadow-md shadow-[#DFBA87]/25 transition-all cursor-pointer active:scale-95"
+                            title="現場掃描作品立牌"
+                        >
+                            <Camera className="w-3.5 h-3.5 shrink-0 text-black" />
+                            <span className="font-mono tracking-wider font-semibold">掃描立牌</span>
+                        </button>
+
+                        <div className={`inline-block px-3.5 py-1.5 border-[0.5px] rounded-sm ${isSVIP ? 'border-[#DFBA87] text-[#DFBA87]' : 'border-[#1A1A1A]/60 text-[#1A1A1A]'}`}>
+                            <span className="text-[9px] tracking-[0.3em] uppercase font-light">
+                                {profile.tier}
+                            </span>
+                        </div>
                     </div>
                     <button 
                         onClick={handleSignOut}
-                        className={`text-[8px] tracking-[0.3em] uppercase transition-opacity cursor-pointer border-b border-transparent hover:border-current mt-0.5 ${isSVIP ? 'text-white/40 hover:text-white/100' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/100'}`}
+                        className={`text-[8px] tracking-[0.3em] uppercase transition-opacity cursor-pointer border-b border-transparent hover:border-current ${isSVIP ? 'text-white/40 hover:text-white/100' : 'text-[#1A1A1A]/40 hover:text-[#1A1A1A]/100'}`}
                     >
                         Sign Out / 登出
                     </button>
@@ -1069,6 +1082,18 @@ export default function VIPDashboard() {
                     </motion.div>
                 )}
             </AnimatePresence>
+
+            {/* Floating Quick Scan Action Pill for Mobile */}
+            <div className="fixed bottom-6 right-5 z-40 md:hidden">
+                <button
+                    type="button"
+                    onClick={handleStartScanner}
+                    className="flex items-center gap-2 bg-[#141414]/90 backdrop-blur-md text-[#DFBA87] border border-[#DFBA87]/40 px-4 py-3 rounded-full shadow-2xl shadow-black/80 active:scale-95 transition-all cursor-pointer hover:bg-[#1a1a1a]"
+                >
+                    <Camera className="w-4 h-4 text-[#DFBA87]" />
+                    <span className="text-xs font-mono tracking-widest font-semibold uppercase">掃描展品立牌</span>
+                </button>
+            </div>
         </div>
     );
 }
