@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Calendar, MapPin } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -30,6 +31,12 @@ export default function VIPApplyPage() {
     const dict = {
         zh: {
             title: "貴賓席位申請登記",
+            dateLabel: "展期日程",
+            dateValue: "2027 年 1 月 6 日（三）– 1 月 9 日（六）",
+            vipPreviewNote: "✦ 1/6 (三) 18:00–21:30 VIP 預展酒會（持貴賓卡全展期享優先通行）",
+            venueLabel: "展覽地點",
+            venueValue: "台北中山堂 光復廳",
+            addressValue: "台北市中正區延平南路 98 號",
             nameLabel: "您的完整姓名 (Full Name)",
             namePlaceholder: "請輸入中文或英文姓名",
             emailLabel: "電子信箱 (Email Address)",
@@ -49,6 +56,12 @@ export default function VIPApplyPage() {
         },
         en: {
             title: "VIP Seat Request",
+            dateLabel: "DATES",
+            dateValue: "Jan 6 (Wed) – Jan 9 (Sat), 2027",
+            vipPreviewNote: "✦ Jan 6, 18:00–21:30 VIP Vernissage (Priority Fast-Track Access)",
+            venueLabel: "VENUE",
+            venueValue: "Taipei Zhongshan Hall — Guangfu Hall",
+            addressValue: "No. 98, Yanping S. Rd., Zhongzheng Dist., Taipei City",
             nameLabel: "Your Full Name",
             namePlaceholder: "Enter your first and last name",
             emailLabel: "Email Address",
@@ -168,7 +181,7 @@ export default function VIPApplyPage() {
                 initial={{ opacity: 0, y: 25 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8 }}
-                className="w-full max-w-sm border border-neutral-200/60 bg-white/80 p-8 py-10 relative backdrop-blur-xl shadow-2xl flex flex-col gap-8"
+                className="w-full max-w-sm sm:max-w-md border border-neutral-200/60 bg-white/90 p-6 sm:p-8 py-8 sm:py-9 relative backdrop-blur-xl shadow-2xl flex flex-col gap-5"
             >
                 {/* Language Switch Button */}
                 <div className="absolute top-4 right-10 flex gap-1 z-20">
@@ -187,17 +200,54 @@ export default function VIPApplyPage() {
                 <div className="absolute bottom-4 left-4 w-2.5 h-2.5 border-b-[0.5px] border-l-[0.5px] border-[#DFBA87]"></div>
                 <div className="absolute bottom-4 right-4 w-2.5 h-2.5 border-b-[0.5px] border-r-[0.5px] border-[#DFBA87]"></div>
 
-                <div className="text-center space-y-3">
+                <div className="text-center space-y-2">
                     <img 
                         src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
                         alt="VIS Logo" 
-                        className="h-10 mx-auto brightness-95 opacity-90"
+                        className="h-9 mx-auto brightness-95 opacity-90"
                     />
-                    <p className="text-[7.5px] tracking-[0.5em] text-[#DFBA87] uppercase font-mono mt-4 font-medium">VIP Request Portal</p>
+                    <p className="text-[7.5px] tracking-[0.5em] text-[#DFBA87] uppercase font-mono mt-3 font-medium">VIP Request Portal</p>
                     <h2 className="text-sm tracking-[0.25em] font-serif uppercase font-light text-neutral-800">{dict[lang].title}</h2>
                 </div>
 
-                <form onSubmit={handleSubmit} className="space-y-6">
+                {/* Exhibition Date & Venue Information Card */}
+                <div className="bg-[#FAF9F6] border border-[#C9A96E]/25 p-3.5 sm:p-4 text-left text-xs space-y-2.5 relative">
+                    <div className="flex items-start gap-2.5">
+                        <Calendar className="w-3.5 h-3.5 text-[#C9A96E] shrink-0 mt-0.5" />
+                        <div className="space-y-0.5 text-[#1A1A1A]">
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-[9px] font-mono tracking-widest text-[#8C7853] uppercase font-semibold">
+                                    {dict[lang].dateLabel}
+                                </span>
+                                <span className="text-[11.5px] font-medium tracking-wide">
+                                    {dict[lang].dateValue}
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-[#8C7853] font-light leading-relaxed">
+                                {dict[lang].vipPreviewNote}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="border-t border-[#C9A96E]/15 pt-2 flex items-start gap-2.5">
+                        <MapPin className="w-3.5 h-3.5 text-[#C9A96E] shrink-0 mt-0.5" />
+                        <div className="space-y-0.5 text-[#1A1A1A]">
+                            <div className="flex items-baseline gap-2">
+                                <span className="text-[9px] font-mono tracking-widest text-[#8C7853] uppercase font-semibold">
+                                    {dict[lang].venueLabel}
+                                </span>
+                                <span className="text-[11.5px] font-medium tracking-wide">
+                                    {dict[lang].venueValue}
+                                </span>
+                            </div>
+                            <p className="text-[10px] text-neutral-500 font-light leading-relaxed">
+                                {dict[lang].addressValue}
+                            </p>
+                        </div>
+                    </div>
+                </div>
+
+                <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-4">
                         <div className="border-b border-neutral-200 focus-within:border-[#DFBA87] transition-all py-1">
                             <label className="block text-[7px] tracking-widest text-neutral-500 uppercase mb-1">{dict[lang].nameLabel}</label>
