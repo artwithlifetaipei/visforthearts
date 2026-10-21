@@ -319,8 +319,8 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
         setQaMessage({
           text: isFinalSubmit
             ? t(
-                `✓ 已成功正式送審全數回稿！大會策展與公關小組將以此作為專題素材進行排版推廣。（${timeStr}）`,
-                `✓ All answers submitted successfully! The PR editorial team will curate your narrative. (${timeStr})`
+                `✓ 已成功確認完成！大會策展與公關小組將以此作為專題素材進行排版推廣。（${timeStr}）`,
+                `✓ Confirmed and completed! The PR editorial team will curate your narrative. (${timeStr})`
               )
             : t(
                 `✓ 草稿已於 ${timeStr} 成功暫存！您可隨時登入接續修改，於 11/15 前皆可自由調整。`,
@@ -695,7 +695,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
                 className="px-5 py-2 rounded-lg bg-[#DFBA87] hover:bg-[#c9a370] text-black text-xs font-bold tracking-wider transition-all shadow-md flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
                 {savingQa ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                <span>{t('確認完成送審回稿', 'Submit Answers')}</span>
+                <span>{t('確認完成', 'Confirm Complete')}</span>
               </button>
             </div>
           </div>
@@ -801,12 +801,12 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
           <div className="bg-[#14120E] border border-[#DFBA87]/40 rounded-xl p-6 text-center space-y-4 shadow-xl">
             <div className="max-w-md mx-auto">
               <h4 className="text-sm font-serif-garamond text-white font-semibold tracking-wider">
-                {t('回稿進度確認與送審', 'Review & Submit Editorial Answers')}
+                {t('回稿進度確認', 'Review & Confirm Editorial Answers')}
               </h4>
               <p className="text-xs text-neutral-400 font-light mt-1">
                 {isAllAnswered ? (
                   <span className="text-emerald-400">
-                    {t('🎉 恭喜！您已全數完成 5 大專案回稿，可直接點擊下方按鈕正式送審。', 'All 5 questions answered. Ready for final submission.')}
+                    {t('🎉 恭喜！您已全數完成 5 大專案回稿，可直接點擊下方按鈕確認完成。', 'All 5 questions answered. Ready to confirm and complete.')}
                   </span>
                 ) : (
                   <span>
@@ -837,7 +837,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
                 className="px-8 py-2.5 rounded-lg bg-[#DFBA87] hover:bg-[#c9a370] text-black text-xs font-bold tracking-widest uppercase transition-all shadow-lg flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
                 {savingQa ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                <span>{t('確認送出全部回稿', 'Submit All Answers')}</span>
+                <span>{t('確認完成', 'Confirm Complete')}</span>
               </button>
             </div>
 
