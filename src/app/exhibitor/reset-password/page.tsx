@@ -32,27 +32,36 @@ function ResetPasswordContent() {
   const [isOtpSent, setIsOtpSent] = useState(false);
 
   useEffect(() => {
-    let hasRecoveryIntent = false;
-
-    if (typeof window !== 'undefined') {
-      const hash = window.location.hash || '';
-      const code = searchParams.get('code');
-      if (hash.includes('type=recovery') || hash.includes('access_token=') || code) {
-        hasRecoveryIntent = true;
-      }
-    }
+    let isMounted = true;
 
     const checkInitialSession = async () => {
       try {
+        let code = searchParams.get('code');
+        if (!code && typeof window !== 'undefined') {
+          const params = new URLSearchParams(window.location.search);
+          code = params.get('code');
+        }
+
+        if (code) {
+          const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+          if (data?.session && isMounted) {
+            setMode('set_password');
+            return;
+          }
+        }
+
+        const hash = typeof window !== 'undefined' ? window.location.hash || '' : '';
+        const hasRecoveryIntent = hash.includes('type=recovery') || hash.includes('access_token=') || !!code;
+
         const { data: { session } } = await supabase.auth.getSession();
-        if (session || hasRecoveryIntent) {
+        if ((session || hasRecoveryIntent) && isMounted) {
           setMode('set_password');
-        } else {
+        } else if (isMounted) {
           setMode('direct_setup');
         }
       } catch (err) {
         console.error('Session check error:', err);
-        setMode('direct_setup');
+        if (isMounted) setMode('direct_setup');
       }
     };
 
@@ -60,11 +69,12 @@ function ResetPasswordContent() {
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
       if (event === 'PASSWORD_RECOVERY' || (event === 'SIGNED_IN' && session)) {
-        setMode('set_password');
+        if (isMounted) setMode('set_password');
       }
     });
 
     return () => {
+      isMounted = false;
       subscription.unsubscribe();
     };
   }, [searchParams]);
@@ -181,10 +191,31 @@ function ResetPasswordContent() {
           return;
         }
 
-        // If password does not match, guide to OTP reset
+        // Auto-send password recovery email directly to mailbox
+        try {
+          const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.visforthearts.com';
+          await supabase.auth.resetPasswordForEmail(formattedEmail, {
+            redirectTo: `${origin}/exhibitor/reset-password`,
+          });
+        } catch (resetErr) {
+          console.warn('Auto reset trigger error:', resetErr);
+        }
+
+        // Also trigger backup Gmail notification to ensure 100% inbox delivery
+        try {
+          fetch('/api/exhibitor/auth/send-reset', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: formattedEmail }),
+          }).catch(() => {});
+        } catch {
+          // Non-blocking
+        }
+
+        const brandName = approvedApp?.brand_name_zh || existingBrand?.brand_name_zh || '參展品牌';
         setMessage({
-          text: '此信箱已註冊過密碼，但密碼不相符。若您忘記舊密碼，請點擊下方「以安全驗證碼重設密碼」以獲取 6 位數驗證碼。',
-          type: 'error',
+          text: `✦ 帳號已建立提示：\n親愛的 ${brandName} 您好，此信箱先前已建立過帳號。\n\n大會系統已自動發送「重設密碼專屬連結」至您的電子信箱：${formattedEmail}。\n\n👉 請前往您的信箱查收【Reset Password】官方安全驗證信，點擊信中的專屬連結即可直接自訂新密碼並直接登入後台！（若未看到請檢查垃圾郵件匣）`,
+          type: 'info',
         });
         setLoading(false);
         return;
@@ -206,8 +237,8 @@ function ResetPasswordContent() {
     }
   };
 
-  // Handler 2: Send 6-digit OTP code to email
-  const handleSendOtp = async () => {
+  // Handler 2: Send password reset link to email
+  const handleSendResetLink = async () => {
     const formattedEmail = email.toLowerCase().trim();
     if (!formattedEmail || !formattedEmail.includes('@')) {
       setMessage({ text: '請先輸入有效的參展商電子信箱。', type: 'error' });
@@ -218,23 +249,37 @@ function ResetPasswordContent() {
     setMessage({ text: '', type: '' });
 
     try {
-      const { error } = await supabase.auth.signInWithOtp({
-        email: formattedEmail,
-        options: {
-          shouldCreateUser: true,
-        },
+      const origin = typeof window !== 'undefined' ? window.location.origin : 'https://www.visforthearts.com';
+      const { error } = await supabase.auth.resetPasswordForEmail(formattedEmail, {
+        redirectTo: `${origin}/exhibitor/reset-password`,
       });
 
+      // Also trigger backup Gmail notification
+      try {
+        fetch('/api/exhibitor/auth/send-reset', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ email: formattedEmail }),
+        }).catch(() => {});
+      } catch {
+        // Non-blocking
+      }
+
       if (error) {
-        setMessage({
-          text: `發送驗證碼失敗: ${error.message === 'Email rate limit exceeded' ? '發送過於頻繁，請於 60 秒後再試。' : error.message}`,
-          type: 'error',
-        });
+        if (error.message.includes('rate limit') || (error as any).status === 429) {
+          setMessage({
+            text: '驗證信發送過於頻繁，請於 60 秒後再試，或先檢查您的信箱是否已收到稍早的重設信件。',
+            type: 'error',
+          });
+        } else {
+          setMessage({
+            text: `發送失敗: ${error.message}`,
+            type: 'error',
+          });
+        }
       } else {
-        setIsOtpSent(true);
-        setMode('otp_verify');
         setMessage({
-          text: '✓ 已發送 6 位數安全驗證碼至您的信箱！請收信並於下方輸入驗證碼與新密碼。',
+          text: `✓ 重設密碼安全信件已發送至 ${formattedEmail}！\n\n請至您的電子信箱查收【Reset Password】官方驗證信，點擊信中的專屬連結即可直接設定新密碼並進入平台。（若未收到請確認垃圾郵件匣）`,
           type: 'success',
         });
       }
@@ -329,18 +374,48 @@ function ResetPasswordContent() {
     }
 
     try {
-      const { error } = await supabase.auth.updateUser({ password });
+      const { data, error } = await supabase.auth.updateUser({ password });
 
       if (error) {
         setMessage({
           text: error.message.includes('Auth session missing')
-            ? '驗證憑證已過期，請點選下方返回重新輸入信箱設定。'
+            ? '驗證憑證已過期或無效，請點選下方返回重新輸入信箱發送重設信件。'
             : `密碼更新失敗: ${error.message}`,
           type: 'error',
         });
       } else {
+        // Auto-heal exhibitor_brands if email is available
+        const targetEmail = data?.user?.email || email;
+        if (targetEmail) {
+          try {
+            const formatted = targetEmail.toLowerCase().trim();
+            const { data: approvedApp } = await supabase
+              .from('exhibitor_applications')
+              .select('id, brand_name_zh, brand_name_en, zone_id, booth_type, status, custom_fee, discount_note')
+              .eq('contact_email', formatted)
+              .eq('status', 'approved')
+              .maybeSingle();
+
+            if (approvedApp) {
+              await supabase.from('exhibitor_brands').insert({
+                application_id: approvedApp.id,
+                brand_name_zh: approvedApp.brand_name_zh,
+                brand_name_en: approvedApp.brand_name_en || approvedApp.brand_name_zh,
+                zone_id: approvedApp.zone_id,
+                booth_type: approvedApp.booth_type,
+                is_micro_exposure: approvedApp.booth_type === 'T',
+                portal_email: formatted,
+                custom_fee: approvedApp.custom_fee ?? null,
+                discount_note: approvedApp.discount_note ?? null,
+              });
+            }
+          } catch (healErr) {
+            console.warn('Auto heal failed:', healErr);
+          }
+        }
+
         setMessage({
-          text: '✓ 密碼更新成功！正在為您安全導向參展商協作平台...',
+          text: '✓ 密碼設定成功！正在為您安全導向參展商協作平台...',
           type: 'success',
         });
         setTimeout(() => {
@@ -381,7 +456,7 @@ function ResetPasswordContent() {
             <KeyRound className="w-5 h-5" />
           </div>
           <h2 className="text-[17px] font-light tracking-[0.25em] uppercase text-[#1a1a1a] mb-1">
-            {mode === 'otp_verify' ? '輸入驗證碼並設定密碼' : '參展商帳號啟用與密碼設定'}
+            {mode === 'otp_verify' ? '輸入驗證碼並設定密碼' : mode === 'set_password' ? '設定您的新登入密碼' : '參展商帳號啟用與密碼設定'}
           </h2>
           <p className="text-[10px] tracking-[0.25em] text-[#C9A96E] uppercase font-mono">
             Brand Portal Password Setup
@@ -460,10 +535,12 @@ function ResetPasswordContent() {
 
               {message.text && (
                 <div
-                  className={`text-[11px] font-light leading-relaxed p-4 border text-center ${
+                  className={`text-[11.5px] font-light leading-relaxed p-4 border whitespace-pre-wrap ${
                     message.type === 'error'
-                      ? 'text-rose-600 bg-rose-50 border-rose-200'
-                      : 'text-[#8C7853] bg-[#C9A96E]/10 border-[#C9A96E]/30'
+                      ? 'text-rose-600 bg-rose-50 border-rose-200 text-center'
+                      : message.type === 'info'
+                      ? 'text-[#8C7853] bg-amber-50/90 border-[#C9A96E]/40 text-left'
+                      : 'text-[#8C7853] bg-[#C9A96E]/10 border-[#C9A96E]/30 text-center'
                   }`}
                 >
                   {message.text}
@@ -474,11 +551,11 @@ function ResetPasswordContent() {
               <div className="text-center pt-2">
                 <button
                   type="button"
-                  onClick={handleSendOtp}
+                  onClick={handleSendResetLink}
                   disabled={loading}
                   className="text-[11px] text-[#8C7853] hover:text-[#0D0D0D] underline underline-offset-4 cursor-pointer bg-transparent border-0 tracking-wide transition-colors"
                 >
-                  已設定過密碼但忘記了？點此發送 6 位數驗證碼重設 →
+                  已有帳號或忘記舊密碼？點此發送專屬重設密碼連結至信箱 →
                 </button>
               </div>
             </form>
@@ -647,7 +724,7 @@ function ResetPasswordContent() {
 
               {message.text && (
                 <div
-                  className={`text-[11px] font-light leading-relaxed p-4 border text-center ${
+                  className={`text-[11.5px] font-light leading-relaxed p-4 border text-center whitespace-pre-wrap ${
                     message.type === 'error'
                       ? 'text-rose-600 bg-rose-50 border-rose-200'
                       : 'text-[#8C7853] bg-[#C9A96E]/10 border-[#C9A96E]/30'
