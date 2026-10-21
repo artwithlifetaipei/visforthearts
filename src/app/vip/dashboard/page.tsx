@@ -1,11 +1,15 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
+import { 
+  Camera, Sparkles, Heart, Check, Trash2, X, Compass, 
+  ExternalLink, QrCode, MapPin, Eye, ArrowRight, Info, Plus
+} from 'lucide-react';
 
 const ADMIN_EMAILS = ['artwithlifetaipei@gmail.com', 'ameliecykuo@gmail.com'];
 
@@ -17,6 +21,11 @@ export default function VIPDashboard() {
     const [userEmail, setUserEmail] = useState('');
     const [isWalletOpen, setIsWalletOpen] = useState(false);
     const [myCollections, setMyCollections] = useState<any[]>([]);
+    const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+    const [showExploreModal, setShowExploreModal] = useState(false);
+    const [isScannerOpen, setIsScannerOpen] = useState(false);
+    const scannerRef = useRef<any>(null);
+    const [scannerError, setScannerError] = useState<string | null>(null);
 
     useEffect(() => {
         let isMounted = true;
@@ -99,6 +108,22 @@ export default function VIPDashboard() {
                 } catch {
                     // Non-blocking
                 }
+
+                // Fetch featured fair products for live exploration
+                try {
+                    const { data: prods } = await supabase
+                        .from('exhibitor_products')
+                        .select('*')
+                        .eq('is_published', true)
+                        .order('save_count', { ascending: false })
+                        .limit(6);
+
+                    if (prods && isMounted) {
+                        setFeaturedProducts(prods);
+                    }
+                } catch {
+                    // Non-blocking
+                }
             } catch (err) {
                 console.error('Error loading dashboard profile:', err);
                 router.push('/vip');
@@ -171,6 +196,99 @@ export default function VIPDashboard() {
     const handleSignOut = async () => {
         await supabase.auth.signOut();
         router.push('/vip');
+    };
+
+    const handleToggleSaveProduct = async (prod: any, e?: React.MouseEvent) => {
+        if (e) e.preventDefault();
+        const email = profile?.email?.toLowerCase().trim() || userEmail;
+        if (!email) return;
+
+        const isAlreadySaved = myCollections.some(c => c.id === prod.id);
+
+        try {
+            if (isAlreadySaved) {
+                await supabase
+                    .from('vip_collections')
+                    .delete()
+                    .eq('vip_email', email)
+                    .eq('product_id', prod.id);
+
+                setMyCollections(prev => prev.filter(c => c.id !== prod.id));
+            } else {
+                await supabase
+                    .from('vip_collections')
+                    .insert({
+                        vip_email: email,
+                        product_id: prod.id,
+                        brand_id: prod.brand_id || null,
+                    });
+
+                setMyCollections(prev => [{ ...prod, saved_at: new Date().toISOString() }, ...prev]);
+            }
+        } catch (err) {
+            console.error('Toggle save error:', err);
+        }
+    };
+
+    const handleRemoveCollection = async (productId: string, e?: React.MouseEvent) => {
+        if (e) e.preventDefault();
+        const email = profile?.email?.toLowerCase().trim() || userEmail;
+        if (!email) return;
+
+        try {
+            await supabase
+                .from('vip_collections')
+                .delete()
+                .eq('vip_email', email)
+                .eq('product_id', productId);
+
+            setMyCollections(prev => prev.filter(c => c.id !== productId));
+        } catch (err) {
+            console.error('Remove error:', err);
+        }
+    };
+
+    const handleStartScanner = () => {
+        setIsScannerOpen(true);
+        setScannerError(null);
+        setTimeout(() => {
+            import('html5-qrcode').then((module) => {
+                const Html5Qrcode = module.Html5Qrcode;
+                const scanner = new Html5Qrcode('vip-artwork-scanner-view');
+                scannerRef.current = scanner;
+                scanner.start(
+                    { facingMode: 'environment' },
+                    { fps: 10, qrbox: { width: 220, height: 220 } },
+                    (decodedText: string) => {
+                        if (decodedText.includes('/vip/product/')) {
+                            const parts = decodedText.split('/vip/product/');
+                            const prodId = parts[1].split('?')[0].split('#')[0];
+                            scanner.stop().then(() => {
+                                setIsScannerOpen(false);
+                                router.push(`/vip/product/${prodId}`);
+                            }).catch(() => {
+                                router.push(`/vip/product/${prodId}`);
+                            });
+                        } else if (decodedText.startsWith('http')) {
+                            window.location.href = decodedText;
+                        }
+                    },
+                    () => {}
+                ).catch((err) => {
+                    console.warn('Camera failed to start:', err);
+                    setScannerError('無法啟動相機鏡頭，請確認瀏覽器已允許相機權限，或直接使用手機內建相機掃碼。');
+                });
+            });
+        }, 300);
+    };
+
+    const handleCloseScanner = () => {
+        if (scannerRef.current) {
+            try {
+                scannerRef.current.stop().catch(() => {});
+            } catch {}
+        }
+        setIsScannerOpen(false);
     };
 
     const generateICS = () => {
@@ -367,73 +485,303 @@ export default function VIPDashboard() {
                     </div>
                 </motion.div>
 
-                {/* My VIS Collection Section */}
+                {/* My VIS Collection Section — User-Centric Re-architecture */}
                 <motion.div
                     initial={{ opacity: 0, y: 15 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 1, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
-                    className={`w-full max-w-sm border-[0.5px] p-6 space-y-4 rounded-none backdrop-blur-md mt-6 shadow-xl text-left ${
+                    className={`w-full max-w-sm border-[0.5px] p-6 space-y-5 rounded-none backdrop-blur-md mt-6 shadow-xl text-left ${
                         isSVIP 
                             ? 'border-[#DFBA87]/25 bg-[#DFBA87]/5 text-white/90' 
                             : 'border-[#1A1A1A]/10 bg-white/40 text-[#1A1A1A]/90'
                     }`}
                 >
-                    <div className="flex justify-between items-baseline border-b border-current/10 pb-3">
-                        <div>
-                            <p className="text-[9.5px] tracking-[0.25em] uppercase text-[#DFBA87] font-semibold">
+                    {/* Header */}
+                    <div className="flex justify-between items-start border-b border-current/10 pb-3">
+                        <div className="space-y-0.5">
+                            <span className="text-[8px] font-mono tracking-[0.3em] uppercase text-[#DFBA87] block font-semibold">
+                                Scan & Save Service
+                            </span>
+                            <h3 className="text-sm font-serif font-medium tracking-wide">
                                 MY COLLECTION / 我的展會典藏
-                            </p>
-                            <p className="text-[9px] opacity-60 font-light mt-0.5">
-                                現場掃碼收藏的作品清單，展後可隨時回看
-                            </p>
+                            </h3>
                         </div>
-                        <span className="text-[10px] font-mono font-medium text-[#DFBA87] shrink-0">
+                        <span className="text-[10px] font-mono font-medium text-[#DFBA87] px-2 py-0.5 rounded bg-[#DFBA87]/10 border border-[#DFBA87]/20">
                             {myCollections.length} 件收藏
                         </span>
                     </div>
 
+                    {/* 3-Step Visual User Flow (How It Works) */}
+                    <div className="bg-current/[0.03] border border-current/5 p-3 rounded space-y-2">
+                        <p className="text-[8.5px] font-mono uppercase tracking-widest text-[#DFBA87] font-semibold">
+                            HOW TO USE / 現場收藏三步驟
+                        </p>
+                        <div className="grid grid-cols-3 gap-2 text-[10px] leading-tight">
+                            <div className="space-y-1">
+                                <span className="inline-block w-4 h-4 rounded-full bg-[#DFBA87]/20 text-[#DFBA87] font-mono text-[9px] text-center leading-4 font-bold">1</span>
+                                <p className="font-medium">逛展遇見心動</p>
+                                <p className="text-[8.5px] opacity-60 font-light">於展位欣賞實體作品</p>
+                            </div>
+                            <div className="space-y-1 border-l border-current/10 pl-2">
+                                <span className="inline-block w-4 h-4 rounded-full bg-[#DFBA87]/20 text-[#DFBA87] font-mono text-[9px] text-center leading-4 font-bold">2</span>
+                                <p className="font-medium">對準立牌掃碼</p>
+                                <p className="text-[8.5px] opacity-60 font-light">開啟鏡頭掃描立牌 QR</p>
+                            </div>
+                            <div className="space-y-1 border-l border-current/10 pl-2">
+                                <span className="inline-block w-4 h-4 rounded-full bg-[#DFBA87]/20 text-[#DFBA87] font-mono text-[9px] text-center leading-4 font-bold">3</span>
+                                <p className="font-medium">離場隨時回看</p>
+                                <p className="text-[8.5px] opacity-60 font-light">規格售價存入此清單</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Primary Action Buttons */}
+                    <div className="grid grid-cols-2 gap-2.5 pt-1">
+                        <button
+                            type="button"
+                            onClick={handleStartScanner}
+                            className="inline-flex items-center justify-center gap-1.5 py-3 px-3 bg-[#DFBA87] hover:bg-[#c9a96e] text-black font-semibold rounded text-[11px] tracking-wider uppercase transition-all shadow-md cursor-pointer"
+                        >
+                            <Camera className="w-3.5 h-3.5 shrink-0" />
+                            <span>開啟相機掃碼</span>
+                        </button>
+
+                        <button
+                            type="button"
+                            onClick={() => setShowExploreModal(true)}
+                            className="inline-flex items-center justify-center gap-1.5 py-3 px-3 bg-current/5 hover:bg-current/10 border border-current/15 rounded text-[11px] font-medium tracking-wider transition-all cursor-pointer"
+                        >
+                            <Compass className="w-3.5 h-3.5 text-[#DFBA87] shrink-0" />
+                            <span>探索現場展品</span>
+                        </button>
+                    </div>
+
+                    {/* Saved Collection List */}
                     {myCollections.length === 0 ? (
-                        <div className="py-4 text-center space-y-2">
-                            <p className="text-[11px] leading-relaxed opacity-75 font-light">
-                                於展覽現場掃描展位上的【作品立牌 QR Code】，即可將心儀作品收錄至此，離場後隨時回看並前往品牌官網購買！
+                        <div className="border border-dashed border-current/15 rounded p-4 text-center space-y-2">
+                            <p className="text-[11px] leading-relaxed opacity-70 font-light">
+                                目前尚無收藏紀錄。於展會現場掃描各展位上的【作品桌立牌 QR Code】，作品資訊即會自動收錄在此！
                             </p>
-                            <p className="text-[9px] font-mono text-[#DFBA87] tracking-wider pt-1 opacity-90">
-                                ✦ Scan & Save 現場一鍵收藏
-                            </p>
+                            <button
+                                type="button"
+                                onClick={() => setShowExploreModal(true)}
+                                className="text-[10px] text-[#DFBA87] underline hover:opacity-100 transition-opacity font-mono tracking-wider cursor-pointer inline-flex items-center gap-1"
+                            >
+                                <Sparkles className="w-3 h-3" />
+                                <span>點此搶先預覽並體驗加入示範作品 →</span>
+                            </button>
                         </div>
                     ) : (
-                        <div className="space-y-2.5">
+                        <div className="space-y-2.5 pt-1">
+                            <p className="text-[9px] uppercase font-mono tracking-widest text-[#DFBA87] font-semibold">
+                                SAVED ARTWORKS / 已收藏的作品
+                            </p>
                             {myCollections.map((item) => (
-                                <Link
+                                <div
                                     key={item.id}
-                                    href={`/vip/product/${item.id}`}
-                                    className="flex items-center gap-3 p-2 rounded bg-current/5 hover:bg-current/10 transition-colors border border-current/5 group"
+                                    className="flex items-center justify-between gap-3 p-2.5 rounded bg-current/5 hover:bg-current/10 transition-colors border border-current/5 group"
                                 >
-                                    <div className="w-12 h-12 rounded-sm bg-neutral-200 overflow-hidden shrink-0 border border-current/10">
-                                        {item.images && item.images[0] ? (
-                                            <img src={item.images[0]} alt={item.title_zh} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center text-[9px] text-neutral-400">VIS</div>
-                                        )}
+                                    <Link
+                                        href={`/vip/product/${item.id}`}
+                                        className="flex items-center gap-3 flex-1 min-w-0"
+                                    >
+                                        <div className="w-12 h-12 rounded-sm bg-neutral-200 overflow-hidden shrink-0 border border-current/10">
+                                            {item.images && item.images[0] ? (
+                                                <img src={item.images[0]} alt={item.title_zh} className="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-[9px] text-neutral-400">VIS</div>
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0 text-left">
+                                            <span className="text-[9px] font-mono text-[#DFBA87] block truncate">
+                                                {item.brand_name_zh} {item.booth_number ? `｜ ${item.booth_number}` : ''}
+                                            </span>
+                                            <h4 className="text-xs font-serif font-medium truncate">
+                                                {item.title_zh}
+                                            </h4>
+                                            <span className="text-[10.5px] opacity-75 block font-mono text-[#DFBA87]/90 font-medium">
+                                                {item.price_display || '私洽 / Inquire'}
+                                            </span>
+                                        </div>
+                                    </Link>
+
+                                    <div className="flex items-center gap-1 shrink-0">
+                                        <Link
+                                            href={`/vip/product/${item.id}`}
+                                            className="p-1.5 text-current/60 hover:text-current transition-colors"
+                                            title="查看作品頁面"
+                                        >
+                                            <Eye className="w-3.5 h-3.5" />
+                                        </Link>
+                                        <button
+                                            type="button"
+                                            onClick={(e) => handleRemoveCollection(item.id, e)}
+                                            className="p-1.5 text-current/40 hover:text-rose-400 transition-colors cursor-pointer"
+                                            title="從收藏中移除"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
                                     </div>
-                                    <div className="flex-1 min-w-0 text-left">
-                                        <span className="text-[9px] font-mono text-[#DFBA87] block truncate">
-                                            {item.brand_name_zh} {item.booth_number ? `｜ 展位 ${item.booth_number}` : ''}
-                                        </span>
-                                        <h4 className="text-xs font-serif font-medium truncate">
-                                            {item.title_zh}
-                                        </h4>
-                                        <span className="text-[10px] opacity-75 block font-mono">
-                                            {item.price_display || '私洽 / Inquire'}
-                                        </span>
-                                    </div>
-                                    <span className="text-[12px] text-[#DFBA87] opacity-60 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all">→</span>
-                                </Link>
+                                </div>
                             ))}
                         </div>
                     )}
                 </motion.div>
             </main>
+
+            {/* Modal: Camera QR Code Scanner */}
+            <AnimatePresence>
+                {isScannerOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-[#141414] border border-[#DFBA87]/30 rounded-lg max-w-sm w-full p-6 text-center space-y-4 shadow-2xl relative"
+                        >
+                            <div className="flex justify-between items-center border-b border-white/10 pb-3">
+                                <div>
+                                    <span className="text-[9px] font-mono tracking-widest text-[#DFBA87] uppercase">Artwork QR Scanner</span>
+                                    <h3 className="text-sm font-serif text-white font-medium">掃描展位作品立牌</h3>
+                                </div>
+                                <button
+                                    onClick={handleCloseScanner}
+                                    className="p-1.5 text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Camera Viewfinder */}
+                            <div className="relative aspect-square w-full bg-black rounded-lg overflow-hidden border border-white/10 flex items-center justify-center">
+                                <div id="vip-artwork-scanner-view" className="w-full h-full" />
+                                {scannerError && (
+                                    <div className="absolute inset-0 p-6 flex flex-col items-center justify-center bg-black/85 text-xs text-rose-300 space-y-2">
+                                        <p>{scannerError}</p>
+                                        <button
+                                            onClick={handleCloseScanner}
+                                            className="px-4 py-1.5 bg-white/10 hover:bg-white/20 rounded text-white text-[11px]"
+                                        >
+                                            關閉
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <p className="text-[10px] text-neutral-400 font-light leading-relaxed">
+                                請將鏡頭對準展位桌上的【作品專屬立牌 QR Code】，系統將自動識別並帶您進入該作品的典藏頁面。
+                            </p>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
+
+            {/* Modal: Explore Featured Fair Artworks */}
+            <AnimatePresence>
+                {showExploreModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            className="bg-[#171717] border border-white/15 rounded-lg max-w-md w-full p-6 space-y-5 shadow-2xl relative my-8"
+                        >
+                            <div className="flex justify-between items-start border-b border-white/10 pb-3">
+                                <div className="text-left">
+                                    <span className="text-[9px] tracking-widest text-[#DFBA87] uppercase font-mono">Fair Showcase</span>
+                                    <h3 className="text-base font-serif text-white font-medium">
+                                        大會精選參展作品巡禮
+                                    </h3>
+                                    <p className="text-[10.5px] text-neutral-400 font-light mt-0.5">
+                                        點擊【✦ 收藏】即可直接模擬現場掃碼，存入您的個人典藏清單！
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowExploreModal(false)}
+                                    className="text-neutral-400 hover:text-white transition-colors cursor-pointer"
+                                >
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            {/* Featured Artworks List */}
+                            <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 text-left">
+                                {featuredProducts.map((p) => {
+                                    const isSaved = myCollections.some(c => c.id === p.id);
+                                    return (
+                                        <div
+                                            key={p.id}
+                                            className="flex items-center gap-3.5 p-3 rounded bg-white/[0.03] border border-white/10 hover:border-[#DFBA87]/40 transition-all"
+                                        >
+                                            <div className="w-16 h-16 rounded overflow-hidden bg-neutral-900 shrink-0 border border-white/10">
+                                                {p.images && p.images[0] ? (
+                                                    <img src={p.images[0]} alt={p.title_zh} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    <div className="w-full h-full flex items-center justify-center text-xs text-neutral-600">VIS</div>
+                                                )}
+                                            </div>
+
+                                            <div className="flex-1 min-w-0 space-y-1">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <span className="text-[9.5px] font-mono text-[#DFBA87] truncate">
+                                                        {p.brand_name_zh}
+                                                    </span>
+                                                    {p.booth_number && (
+                                                        <span className="text-[9px] text-neutral-400 font-mono shrink-0">
+                                                            {p.booth_number}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <h4 className="text-xs font-serif text-white font-medium truncate">
+                                                    {p.title_zh}
+                                                </h4>
+                                                <div className="flex items-center justify-between pt-1">
+                                                    <span className="text-[10px] font-mono text-neutral-300 font-medium">
+                                                        {p.price_display || '私洽 / Inquire'}
+                                                    </span>
+                                                    <button
+                                                        type="button"
+                                                        onClick={(e) => handleToggleSaveProduct(p, e)}
+                                                        className={`px-2.5 py-1 rounded text-[10px] font-medium tracking-wider uppercase transition-all flex items-center gap-1 cursor-pointer ${
+                                                            isSaved
+                                                                ? 'bg-[#DFBA87]/20 border border-[#DFBA87] text-[#DFBA87]'
+                                                                : 'bg-white/10 hover:bg-white/20 text-white'
+                                                        }`}
+                                                    >
+                                                        {isSaved ? (
+                                                            <>
+                                                                <Check className="w-3 h-3" />
+                                                                <span>已收藏</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <Heart className="w-3 h-3" />
+                                                                <span>+ 收藏</span>
+                                                            </>
+                                                        )}
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="pt-2 border-t border-white/10 flex justify-between items-center text-xs">
+                                <span className="text-[10px] text-neutral-500 font-light">
+                                    現場於各展位掃描 QR Code 立牌，亦會即時同步存入此處。
+                                </span>
+                                <button
+                                    onClick={() => setShowExploreModal(false)}
+                                    className="px-4 py-2 bg-[#DFBA87] hover:bg-[#c9a96e] text-black font-semibold rounded text-[11px] uppercase tracking-wider"
+                                >
+                                    完成體驗
+                                </button>
+                            </div>
+                        </motion.div>
+                    </div>
+                )}
+            </AnimatePresence>
 
             {/* Aesthetic Entrances */}
             <section className="px-6 grid grid-cols-2 gap-4 relative z-10">
