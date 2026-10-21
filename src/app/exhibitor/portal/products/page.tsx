@@ -9,7 +9,8 @@ import { formatBoothDisplay } from '@/lib/exhibitorConstants';
 import { 
   Package, Plus, Printer, ExternalLink, Trash2, Edit3, 
   Sparkles, Image as ImageIcon, CheckCircle2, AlertCircle, 
-  Loader2, ArrowRight, X, Eye, Heart, QrCode, Tag
+  Loader2, ArrowRight, X, Eye, Heart, QrCode, Tag,
+  Camera, ChevronDown, ChevronUp, UploadCloud
 } from 'lucide-react';
 
 function safeGetStorage(key: string): string | null {
@@ -62,6 +63,7 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
   const [uploadingImage, setUploadingImage] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | '' }>({ text: '', type: '' });
   const [tableMissingWarning, setTableMissingWarning] = useState(false);
+  const [showAdvanced, setShowAdvanced] = useState(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -172,11 +174,15 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
       buy_url: '',
       image_url: '',
     });
+    setShowAdvanced(false);
     setMessage({ text: '', type: '' });
     setIsModalOpen(true);
   };
 
   const handleOpenEditModal = (p: any) => {
+    const hasExtraDetails = Boolean(
+      p.price_display || p.materials || p.dimensions || p.description || p.buy_url || p.title_en
+    );
     setFormData({
       id: p.id,
       title_zh: p.title_zh || '',
@@ -190,6 +196,7 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
       buy_url: p.buy_url || '',
       image_url: (p.images && p.images[0]) || '',
     });
+    setShowAdvanced(hasExtraDetails);
     setMessage({ text: '', type: '' });
     setIsModalOpen(true);
   };
@@ -367,18 +374,6 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
         </button>
       </div>
 
-      {/* Database Setup Notice if table not created yet */}
-      {tableMissingWarning && (
-        <div className="bg-amber-500/10 border border-amber-500/30 p-4 rounded text-xs text-amber-200 space-y-2">
-          <div className="flex items-center gap-2 font-semibold">
-            <AlertCircle className="w-4 h-4 text-amber-400" />
-            <span>資料庫表格建立提示 (Database Setup Required)</span>
-          </div>
-          <p className="text-[11px] text-amber-200/80 leading-relaxed font-light">
-            大會技術團隊已為您準備好 Phase 1 資料庫遷移指令檔 <code className="bg-black/40 px-1.5 py-0.5 rounded text-amber-300">supabase_phase1_sales_enablement.sql</code>。請大會管理員在 Supabase Dashboard 的 SQL Editor 中執行該腳本，即可立即啟用展品庫與貴賓收藏資料表！
-          </p>
-        </div>
-      )}
 
       {/* Summary KPI Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -480,24 +475,33 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
                       )}
                     </div>
 
-                    <div className="text-xs space-y-1 border-t border-white/5 pt-2 text-neutral-300">
-                      <div className="flex justify-between items-baseline">
-                        <span className="text-[10px] font-mono text-neutral-500 uppercase">Price 售價</span>
-                        <span className="font-medium text-[#DFBA87]">{p.price_display || '私洽 / Inquire'}</span>
+                    {(p.price_display || p.materials || p.dimensions) ? (
+                      <div className="text-xs space-y-1 border-t border-white/5 pt-2 text-neutral-300">
+                        {p.price_display && (
+                          <div className="flex justify-between items-baseline">
+                            <span className="text-[10px] font-mono text-neutral-500 uppercase">Price</span>
+                            <span className="font-medium text-[#DFBA87]">{p.price_display}</span>
+                          </div>
+                        )}
+                        {p.materials && (
+                          <div className="flex justify-between items-baseline text-[11px] text-neutral-400">
+                            <span className="text-[10px] font-mono text-neutral-500 uppercase">Materials</span>
+                            <span className="truncate max-w-[160px]">{p.materials}</span>
+                          </div>
+                        )}
+                        {p.dimensions && (
+                          <div className="flex justify-between items-baseline text-[11px] text-neutral-400">
+                            <span className="text-[10px] font-mono text-neutral-500 uppercase">Dimensions</span>
+                            <span className="truncate max-w-[160px]">{p.dimensions}</span>
+                          </div>
+                        )}
                       </div>
-                      {p.materials && (
-                        <div className="flex justify-between items-baseline text-[11px] text-neutral-400">
-                          <span className="text-[10px] font-mono text-neutral-500 uppercase">Materials 材質</span>
-                          <span className="truncate max-w-[160px]">{p.materials}</span>
-                        </div>
-                      )}
-                      {p.dimensions && (
-                        <div className="flex justify-between items-baseline text-[11px] text-neutral-400">
-                          <span className="text-[10px] font-mono text-neutral-500 uppercase">Dimensions 規格</span>
-                          <span className="truncate max-w-[160px]">{p.dimensions}</span>
-                        </div>
-                      )}
-                    </div>
+                    ) : (
+                      <div className="text-[10.5px] border-t border-white/5 pt-2 text-neutral-500 font-light flex items-center justify-between">
+                        <span>專屬 QR Code 立牌已就緒</span>
+                        <span className="font-mono text-[9px] text-[#DFBA87]">READY TO PRINT</span>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -542,19 +546,19 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
         </div>
       )}
 
-      {/* Modal 1: Add/Edit Product */}
+      {/* Modal 1: Add/Edit Product (Lightweight & Rapid for Busy Exhibitors) */}
       <AnimatePresence>
         {isModalOpen && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm overflow-y-auto">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-[#141414] border border-white/10 rounded-lg max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-8"
+              className="bg-[#141414] border border-white/10 rounded-lg max-w-lg w-full p-6 sm:p-7 space-y-5 shadow-2xl relative my-8"
             >
-              <div className="flex justify-between items-start border-b border-white/5 pb-4">
+              <div className="flex justify-between items-start border-b border-white/5 pb-3">
                 <div>
-                  <span className="text-[9px] tracking-[0.25em] text-[#DFBA87] uppercase font-mono">Exhibition Artwork</span>
+                  <span className="text-[9px] tracking-[0.25em] text-[#DFBA87] uppercase font-mono">Quick Artwork Setup</span>
                   <h2 className="text-xl font-serif-garamond text-white font-medium">
                     {formData.id ? '編輯參展作品' : '新增參展作品'}
                   </h2>
@@ -567,135 +571,212 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
                 </button>
               </div>
 
+              {/* Light touch reassurance banner */}
+              <div className="bg-[#DFBA87]/10 border border-[#DFBA87]/20 rounded-md p-3 flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-[#DFBA87] shrink-0 mt-0.5" />
+                <div className="text-[11.5px] text-neutral-300 leading-relaxed font-light">
+                  <span className="font-medium text-white block mb-0.5">極速上架 ｜ 專為展會現場設計</span>
+                  只需上傳「作品相片」並填寫「品項名稱」，即可在 5 秒內生成專屬立牌 QR Code！售價、規格等細節皆為選填，展後亦可隨時補充。
+                </div>
+              </div>
+
               <form onSubmit={handleSaveProduct} className="space-y-4 text-xs">
-                {/* Titles */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-neutral-300 font-medium">作品中文名稱 (Title ZH) *</label>
-                    <input
-                      type="text"
-                      value={formData.title_zh}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title_zh: e.target.value }))}
-                      placeholder="例：靜默之石 No. 3"
-                      required
-                      className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-2 text-white outline-none"
-                    />
+                {/* 1. Image Upload (Hero Placement) */}
+                <div className="space-y-1.5">
+                  <div className="flex justify-between items-baseline">
+                    <label className="text-neutral-200 font-medium">1. 作品相片 (Featured Photo)</label>
+                    <span className="text-[10px] text-neutral-400 font-mono">方便現場對照辨識</span>
                   </div>
-                  <div className="space-y-1.5">
-                    <label className="text-neutral-400">英文名稱 (Title EN)</label>
-                    <input
-                      type="text"
-                      value={formData.title_en}
-                      onChange={(e) => setFormData(prev => ({ ...prev, title_en: e.target.value }))}
-                      placeholder="e.g. Silent Stone No. 3"
-                      className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-2 text-white outline-none italic"
-                    />
-                  </div>
-                </div>
 
-                {/* Category & Price Type */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-neutral-300 font-medium">作品類別 (Category)</label>
-                    <select
-                      value={formData.category}
-                      onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
-                      className="w-full bg-neutral-900 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-2 text-white outline-none"
-                    >
-                      {CATEGORIES.map(c => (
-                        <option key={c} value={c}>{c}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-neutral-300 font-medium">定價顯示 (Price Display)</label>
-                    <input
-                      type="text"
-                      value={formData.price_display}
-                      onChange={(e) => setFormData(prev => ({ ...prev, price_display: e.target.value }))}
-                      placeholder="例：NT$ 48,000 或 私洽"
-                      className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-2 text-white outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Materials & Dimensions */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-1.5">
-                    <label className="text-neutral-300">材質規格 (Materials)</label>
-                    <input
-                      type="text"
-                      value={formData.materials}
-                      onChange={(e) => setFormData(prev => ({ ...prev, materials: e.target.value }))}
-                      placeholder="例：手工拉胚白瓷、24K描金"
-                      className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-2 text-white outline-none"
-                    />
-                  </div>
-                  <div className="space-y-1.5">
-                    <label className="text-neutral-300">尺寸規格 (Dimensions)</label>
-                    <input
-                      type="text"
-                      value={formData.dimensions}
-                      onChange={(e) => setFormData(prev => ({ ...prev, dimensions: e.target.value }))}
-                      placeholder="例：28 x 20 x 14 cm"
-                      className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-2 text-white outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Image Upload */}
-                <div className="space-y-2">
-                  <label className="text-neutral-300 font-medium block">作品代表圖片 (Featured Image)</label>
-                  <div className="flex gap-4 items-center">
-                    {formData.image_url ? (
-                      <div className="w-16 h-16 rounded overflow-hidden border border-white/20 shrink-0 bg-neutral-900">
-                        <img src={formData.image_url} alt="Preview" className="w-full h-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="w-16 h-16 rounded border border-dashed border-white/20 flex items-center justify-center text-neutral-600 shrink-0">
-                        <ImageIcon className="w-6 h-6" />
-                      </div>
-                    )}
-                    <div className="flex-1 space-y-1.5">
-                      <label className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white px-3 py-1.5 rounded cursor-pointer transition-colors text-[11px]">
-                        {uploadingImage ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <ImageIcon className="w-3.5 h-3.5" />}
-                        <span>{uploadingImage ? '上傳中...' : '上傳圖片 (建議小於 5MB)'}</span>
-                        <input type="file" accept="image/*" onChange={handleImageUpload} className="hidden" disabled={uploadingImage} />
-                      </label>
-                      <input
-                        type="url"
-                        value={formData.image_url}
-                        onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
-                        placeholder="或直接貼上圖片網址 https://..."
-                        className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-1.5 text-neutral-300 text-[11px] outline-none"
+                  {formData.image_url ? (
+                    <div className="relative aspect-video sm:aspect-[21/9] w-full rounded-md overflow-hidden border border-white/15 bg-neutral-900 group">
+                      <img 
+                        src={formData.image_url} 
+                        alt="Preview" 
+                        className="w-full h-full object-contain bg-black/40" 
                       />
+                      <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                        <label className="px-3 py-1.5 bg-white/20 hover:bg-white/30 text-white rounded text-xs cursor-pointer transition-colors flex items-center gap-1.5">
+                          <Camera className="w-3.5 h-3.5" />
+                          <span>更換相片</span>
+                          <input type="file" accept="image/*" capture="environment" onChange={handleImageUpload} className="hidden" disabled={uploadingImage} />
+                        </label>
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, image_url: '' }))}
+                          className="px-3 py-1.5 bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 rounded text-xs transition-colors flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>移除</span>
+                        </button>
+                      </div>
                     </div>
+                  ) : (
+                    <label className="border-2 border-dashed border-white/15 hover:border-[#DFBA87]/50 bg-white/[0.02] hover:bg-white/[0.04] transition-all rounded-md p-5 flex flex-col items-center justify-center gap-2 cursor-pointer group text-center">
+                      {uploadingImage ? (
+                        <Loader2 className="w-6 h-6 animate-spin text-[#DFBA87]" />
+                      ) : (
+                        <div className="w-10 h-10 rounded-full bg-white/5 flex items-center justify-center text-neutral-400 group-hover:text-[#DFBA87] group-hover:bg-[#DFBA87]/10 transition-colors">
+                          <Camera className="w-5 h-5" />
+                        </div>
+                      )}
+                      <div className="space-y-0.5">
+                        <p className="text-xs font-medium text-white group-hover:text-[#DFBA87] transition-colors">
+                          {uploadingImage ? '相片上傳處理中...' : '點擊拍攝或上傳作品相片'}
+                        </p>
+                        <p className="text-[10px] text-neutral-500 font-light">
+                          支援手機即時拍照、相簿選取 (JPG, PNG)
+                        </p>
+                      </div>
+                      <input 
+                        type="file" 
+                        accept="image/*" 
+                        capture="environment"
+                        onChange={handleImageUpload} 
+                        className="hidden" 
+                        disabled={uploadingImage} 
+                      />
+                    </label>
+                  )}
+
+                  {/* Fallback image URL input */}
+                  <div className="pt-0.5">
+                    <input
+                      type="url"
+                      value={formData.image_url}
+                      onChange={(e) => setFormData(prev => ({ ...prev, image_url: e.target.value }))}
+                      placeholder="或直接貼上圖片網址 https://..."
+                      className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-1.5 text-neutral-300 text-[11px] outline-none"
+                    />
                   </div>
                 </div>
 
-                {/* Description */}
+                {/* 2. Product Title (Hero Placement) */}
                 <div className="space-y-1.5">
-                  <label className="text-neutral-300">創作理念與介紹 (Description)</label>
-                  <textarea
-                    rows={3}
-                    value={formData.description}
-                    onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-                    placeholder="簡要描述此件作品的創作理念、工法細節或故事（將於觀眾掃描後展示）..."
-                    className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-2 text-white outline-none resize-none leading-relaxed"
+                  <div className="flex justify-between items-baseline">
+                    <label className="text-neutral-200 font-medium">2. 作品 / 品項名稱 (Artwork Title) *</label>
+                    <span className="text-[10px] text-[#DFBA87] font-mono">必填 ｜ 印製於立牌</span>
+                  </div>
+                  <input
+                    type="text"
+                    value={formData.title_zh}
+                    onChange={(e) => setFormData(prev => ({ ...prev, title_zh: e.target.value }))}
+                    placeholder="例：粉引灰釉圓融茶席提梁壺、純銀天然珍珠手鍊..."
+                    required
+                    className="w-full bg-white/5 border border-white/15 focus:border-[#C9A96E] rounded px-3.5 py-2.5 text-white text-sm outline-none transition-colors font-serif placeholder:font-sans placeholder:text-neutral-500"
                   />
                 </div>
 
-                {/* Buy URL */}
-                <div className="space-y-1.5">
-                  <label className="text-neutral-300">外部購買 / 官方商城連結 (Online Buy Link - 選填)</label>
-                  <input
-                    type="url"
-                    value={formData.buy_url}
-                    onChange={(e) => setFormData(prev => ({ ...prev, buy_url: e.target.value }))}
-                    placeholder="https://yourbrand.com/products/item-1"
-                    className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-2 text-white outline-none font-mono"
-                  />
-                  <p className="text-[10px] text-neutral-500">觀眾收藏後，可由個人收藏夾直接點擊此連結完成線上結帳購買。</p>
+                {/* 3. Collapsible Advanced Details */}
+                <div className="pt-1 border-t border-white/5">
+                  <button
+                    type="button"
+                    onClick={() => setShowAdvanced(!showAdvanced)}
+                    className="w-full py-2 px-3 bg-white/[0.03] hover:bg-white/[0.06] border border-white/10 rounded text-xs text-neutral-300 hover:text-white flex items-center justify-between transition-colors cursor-pointer"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Tag className="w-3.5 h-3.5 text-[#DFBA87]" />
+                      <span>{showAdvanced ? '收合進階選填資訊' : '＋ 展開進階選填（參考售價、材質尺寸、理念介紹、購買連結）'}</span>
+                    </span>
+                    {showAdvanced ? <ChevronUp className="w-4 h-4 text-neutral-400" /> : <ChevronDown className="w-4 h-4 text-neutral-400" />}
+                  </button>
+
+                  <AnimatePresence>
+                    {showAdvanced && (
+                      <motion.div
+                        initial={{ opacity: 0, height: 0 }}
+                        animate={{ opacity: 1, height: 'auto' }}
+                        exit={{ opacity: 0, height: 0 }}
+                        className="space-y-3.5 pt-3 overflow-hidden"
+                      >
+                        {/* Price & English Title */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-neutral-300 text-[11px]">參考售價 (Price Display)</label>
+                            <input
+                              type="text"
+                              value={formData.price_display}
+                              onChange={(e) => setFormData(prev => ({ ...prev, price_display: e.target.value }))}
+                              placeholder="例：NT$ 48,000 或 私洽"
+                              className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-1.5 text-white outline-none"
+                            />
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-neutral-400 text-[11px]">英文名稱 (Title EN)</label>
+                            <input
+                              type="text"
+                              value={formData.title_en}
+                              onChange={(e) => setFormData(prev => ({ ...prev, title_en: e.target.value }))}
+                              placeholder="e.g. Teapot No. 1"
+                              className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-1.5 text-white outline-none italic"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Category & Materials */}
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <div className="space-y-1">
+                            <label className="text-neutral-300 text-[11px]">作品類別 (Category)</label>
+                            <select
+                              value={formData.category}
+                              onChange={(e) => setFormData(prev => ({ ...prev, category: e.target.value }))}
+                              className="w-full bg-neutral-900 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-1.5 text-white outline-none"
+                            >
+                              {CATEGORIES.map(c => (
+                                <option key={c} value={c}>{c}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div className="space-y-1">
+                            <label className="text-neutral-300 text-[11px]">材質規格 (Materials)</label>
+                            <input
+                              type="text"
+                              value={formData.materials}
+                              onChange={(e) => setFormData(prev => ({ ...prev, materials: e.target.value }))}
+                              placeholder="例：白瓷灰釉、純銀"
+                              className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-1.5 text-white outline-none"
+                            />
+                          </div>
+                        </div>
+
+                        {/* Dimensions */}
+                        <div className="space-y-1">
+                          <label className="text-neutral-300 text-[11px]">尺寸規格 (Dimensions)</label>
+                          <input
+                            type="text"
+                            value={formData.dimensions}
+                            onChange={(e) => setFormData(prev => ({ ...prev, dimensions: e.target.value }))}
+                            placeholder="例：20 x 14 x 18 cm"
+                            className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-1.5 text-white outline-none"
+                          />
+                        </div>
+
+                        {/* Description */}
+                        <div className="space-y-1">
+                          <label className="text-neutral-300 text-[11px]">創作理念與介紹 (Description)</label>
+                          <textarea
+                            rows={2}
+                            value={formData.description}
+                            onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
+                            placeholder="簡要描述作品創作理念（觀眾掃碼後可於手機查看）..."
+                            className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-1.5 text-white outline-none resize-none leading-relaxed"
+                          />
+                        </div>
+
+                        {/* Buy URL */}
+                        <div className="space-y-1">
+                          <label className="text-neutral-300 text-[11px]">官方商城購買連結 (Online Buy Link)</label>
+                          <input
+                            type="url"
+                            value={formData.buy_url}
+                            onChange={(e) => setFormData(prev => ({ ...prev, buy_url: e.target.value }))}
+                            placeholder="https://yourbrand.com/products/item-1"
+                            className="w-full bg-white/5 border border-white/10 focus:border-[#C9A96E] rounded px-3 py-1.5 text-white outline-none font-mono"
+                          />
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
 
                 {message.text && (
@@ -708,21 +789,21 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
                   </p>
                 )}
 
-                <div className="pt-4 flex justify-end gap-3 border-t border-white/5">
+                <div className="pt-3 flex justify-end gap-3 border-t border-white/5">
                   <button
                     type="button"
                     onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2.5 rounded text-neutral-400 hover:text-white text-xs transition-colors cursor-pointer"
+                    className="px-4 py-2 rounded text-neutral-400 hover:text-white text-xs transition-colors cursor-pointer"
                   >
                     取消
                   </button>
                   <button
                     type="submit"
                     disabled={formSubmitting || uploadingImage}
-                    className="inline-flex items-center gap-2 bg-[#C9A96E] hover:bg-[#B39359] text-white px-5 py-2.5 rounded text-xs font-semibold tracking-wider uppercase transition-all disabled:opacity-50 cursor-pointer"
+                    className="inline-flex items-center gap-2 bg-[#DFBA87] hover:bg-[#c9a96e] text-neutral-900 px-6 py-2.5 rounded text-xs font-semibold tracking-wider uppercase transition-all shadow-lg disabled:opacity-50 cursor-pointer"
                   >
                     {formSubmitting ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                    <span>{formData.id ? '儲存修改' : '確認上架展品'}</span>
+                    <span>{formData.id ? '儲存修改' : '一鍵生成專屬立牌 (SAVE)'}</span>
                   </button>
                 </div>
               </form>
@@ -731,7 +812,7 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
         )}
       </AnimatePresence>
 
-      {/* Modal 2: Printable Table Tent Modal */}
+      {/* Modal 2: Printable Table Tent Modal (Gallery-grade Minimalism, No Booth Number) */}
       <AnimatePresence>
         {isPrintModalOpen && selectedProduct && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/85 backdrop-blur-md overflow-y-auto">
@@ -739,9 +820,9 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#171717] border border-white/15 rounded-lg max-w-xl w-full p-6 sm:p-8 space-y-6 shadow-2xl relative my-8"
+              className="bg-[#171717] border border-white/15 rounded-lg max-w-xl w-full p-6 sm:p-7 space-y-5 shadow-2xl relative my-8"
             >
-              <div className="flex justify-between items-start border-b border-white/5 pb-4 print:hidden">
+              <div className="flex justify-between items-start border-b border-white/5 pb-3.5 print:hidden">
                 <div>
                   <span className="text-[9px] tracking-[0.25em] text-[#DFBA87] uppercase font-mono">Print Table Tent</span>
                   <h2 className="text-xl font-serif-garamond text-white font-medium">
@@ -759,84 +840,97 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
               {/* The Actual Printable Table Tent Card */}
               <div 
                 id="printable-table-tent"
-                className="bg-[#FAF9F6] text-[#1A1A1A] p-6 sm:p-8 border border-[#C9A96E]/30 rounded shadow-xl relative overflow-hidden select-none"
+                className="bg-[#FAF9F6] text-[#1A1A1A] p-6 sm:p-7 border border-[#C9A96E]/40 rounded-sm shadow-xl relative overflow-hidden select-none"
               >
-                {/* Gold corner ornaments */}
-                <div className="absolute top-3 left-3 w-3 h-3 border-t border-l border-[#C9A96E]" />
-                <div className="absolute top-3 right-3 w-3 h-3 border-t border-r border-[#C9A96E]" />
-                <div className="absolute bottom-3 left-3 w-3 h-3 border-b border-l border-[#C9A96E]" />
-                <div className="absolute bottom-3 right-3 w-3 h-3 border-b border-r border-[#C9A96E]" />
+                {/* Museum Gold corner ornaments */}
+                <div className="absolute top-2.5 left-2.5 w-3.5 h-3.5 border-t border-l border-[#C9A96E]" />
+                <div className="absolute top-2.5 right-2.5 w-3.5 h-3.5 border-t border-r border-[#C9A96E]" />
+                <div className="absolute bottom-2.5 left-2.5 w-3.5 h-3.5 border-b border-l border-[#C9A96E]" />
+                <div className="absolute bottom-2.5 right-2.5 w-3.5 h-3.5 border-b border-r border-[#C9A96E]" />
 
-                {/* Fair Branding Header */}
-                <div className="flex justify-between items-end border-b border-[#C9A96E]/20 pb-3 mb-5">
-                  <div>
-                    <span className="text-[8px] tracking-[0.4em] uppercase text-[#8C7853] font-mono block">
-                      VIS Contemporary Culture Fair 2027
-                    </span>
-                    <h4 className="text-[13px] font-serif font-semibold tracking-wide text-neutral-800">
-                      當代文化博覽會 ｜ 展位典藏標籤
-                    </h4>
-                  </div>
-                  <div className="text-right">
-                    <span className="text-[8px] uppercase tracking-widest text-neutral-500 block font-mono">BOOTH / 展位</span>
-                    <span className="text-xs font-semibold text-[#8C7853] font-mono tracking-wider">
-                      {boothDisplay}
-                    </span>
-                  </div>
+                {/* Fair Branding Header (Booth Number Removed as Requested) */}
+                <div className="flex justify-between items-center border-b border-[#C9A96E]/20 pb-2.5 mb-4">
+                  <span className="text-[8.5px] tracking-[0.35em] uppercase text-[#8C7853] font-mono font-medium">
+                    VIS CONTEMPORARY CULTURE FAIR 2027
+                  </span>
+                  <span className="text-[8px] uppercase tracking-widest text-neutral-400 font-mono">
+                    EXHIBITION ARTWORK
+                  </span>
                 </div>
 
-                {/* Content Body: Left Details, Right QR Code */}
-                <div className="grid grid-cols-[1fr_120px] gap-6 items-center">
-                  <div className="space-y-2 text-left">
-                    <span className="text-[9px] font-mono uppercase tracking-widest text-[#8C7853] block">
+                {/* Content Body: Left Details & Artwork Image, Right QR Code */}
+                <div className="grid grid-cols-[1fr_auto] gap-5 items-center">
+                  <div className="space-y-1.5 text-left">
+                    <span className="text-[10px] font-mono uppercase tracking-[0.22em] text-[#8C7853] font-semibold block truncate">
                       {brand?.brand_name_zh} {brand?.brand_name_en ? `| ${brand.brand_name_en}` : ''}
                     </span>
-                    <h3 className="text-lg font-serif font-medium text-neutral-900 leading-snug">
+
+                    <h3 className="text-xl sm:text-2xl font-serif text-neutral-900 leading-snug font-normal tracking-wide break-words">
                       {selectedProduct.title_zh}
                     </h3>
+
                     {selectedProduct.title_en && (
-                      <p className="text-xs text-neutral-500 italic">
+                      <p className="text-xs text-neutral-500 font-serif italic">
                         {selectedProduct.title_en}
                       </p>
                     )}
 
-                    <div className="text-[10px] text-neutral-600 space-y-0.5 pt-1.5 font-light">
-                      {selectedProduct.materials && <p>材質：{selectedProduct.materials}</p>}
-                      {selectedProduct.dimensions && <p>尺寸：{selectedProduct.dimensions}</p>}
-                      <p className="font-medium text-[#8C7853] pt-0.5">
-                        {selectedProduct.price_display || '私洽 / Inquire'}
+                    {/* Artwork Photo for visual confirmation on table */}
+                    {selectedProduct.images && selectedProduct.images[0] && (
+                      <div className="flex items-center gap-2.5 pt-1.5">
+                        <div className="w-14 h-14 rounded-sm bg-neutral-100 border border-neutral-300/80 overflow-hidden shrink-0 shadow-xs">
+                          <img 
+                            src={selectedProduct.images[0]} 
+                            alt={selectedProduct.title_zh} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                        <span className="text-[8.5px] text-neutral-400 font-light font-mono leading-tight">
+                          現場展品對照<br />
+                          Item Reference
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Optional Price only if entered */}
+                    {selectedProduct.price_display && (
+                      <p className="text-xs font-mono font-medium text-[#8C7853] pt-0.5">
+                        {selectedProduct.price_display}
                       </p>
-                    </div>
+                    )}
                   </div>
 
-                  {/* QR Code Container */}
-                  <div className="flex flex-col items-center justify-center p-2.5 bg-white border border-neutral-200 shadow-sm rounded">
+                  {/* Elevated QR Code Pedestal */}
+                  <div className="flex flex-col items-center justify-center p-2.5 bg-white border border-[#C9A96E]/30 shadow-sm rounded-sm shrink-0">
                     <QRCodeSVG
                       value={`https://www.visforthearts.com/vip/product/${selectedProduct.id}`}
                       size={105}
                       level="H"
                       includeMargin={false}
                     />
-                    <span className="text-[7.5px] tracking-wider text-neutral-500 font-mono mt-1.5 uppercase font-medium">
+                    <span className="text-[7.5px] tracking-[0.2em] text-neutral-600 font-mono mt-1.5 uppercase font-medium">
                       Scan to Save
+                    </span>
+                    <span className="text-[7px] text-[#8C7853] font-light">
+                      現場一鍵典藏
                     </span>
                   </div>
                 </div>
 
                 {/* Bottom Call to action bar */}
-                <div className="border-t border-dashed border-[#C9A96E]/30 pt-3 mt-5 flex justify-between items-center text-[8.5px] text-neutral-500 font-light tracking-wider">
-                  <span>✦ 現場手機掃碼即可加入個人 VIS Collection 收藏夾</span>
+                <div className="border-t border-dashed border-[#C9A96E]/30 pt-2.5 mt-4 flex justify-between items-center text-[8.5px] text-neutral-500 font-light tracking-wider">
+                  <span>✦ 現場手機掃碼即可加入個人 VIS Collection 典藏清單，離場後隨時回看</span>
                   <span className="font-mono text-[8px] text-[#8C7853]">visforthearts.com</span>
                 </div>
               </div>
 
               {/* Action Buttons */}
-              <div className="flex justify-between items-center pt-2 print:hidden">
+              <div className="flex flex-col sm:flex-row justify-between items-center gap-3 pt-1.5 print:hidden">
                 <span className="text-xs text-neutral-400 font-light">
-                  建議使用 A6 或 A7 厚磅西卡紙（250-300g）列印，折疊或夾於金屬立牌中展示。
+                  建議使用 A6 或 A7 厚磅西卡紙（250-300g）列印，折疊或夾於金屬/壓克力立牌中展示。
                 </span>
 
-                <div className="flex gap-3">
+                <div className="flex gap-3 shrink-0">
                   <button
                     onClick={() => setIsPrintModalOpen(false)}
                     className="px-4 py-2 rounded text-neutral-400 hover:text-white text-xs transition-colors cursor-pointer"
