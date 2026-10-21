@@ -749,13 +749,14 @@ export default function ExhibitorAdminPage() {
     if (vipList.length === 0) return;
 
     // Header row
-    const headers = ['參展品牌 (Brand Name)', '貴賓信箱 (VIP Email)', '貴賓姓氏 (VIP Surname)', '提報時間 (Timestamp)'];
+    const headers = ['參展品牌 (Brand Name)', '禮遇等級 (Tier)', '貴賓信箱 (VIP Email)', '貴賓姓氏 (VIP Surname)', '提報時間 (Timestamp)'];
     
     // Rows mapping
     const rows = vipList.map(v => [
       v.brand_name_zh,
+      (v.tier === 'SVIP' || v.vip_surname?.includes('SVIP')) ? 'SVIP 開幕晚會' : 'VIP 展期通行',
       v.vip_email,
-      v.vip_surname,
+      (v.vip_surname || '').replace(/\s*\((S?VIP)\)/gi, '').replace(/\s*\[(S?VIP)\]/gi, '').trim(),
       new Date(v.created_at).toLocaleString()
     ]);
 
@@ -1934,22 +1935,39 @@ export default function ExhibitorAdminPage() {
                     <thead>
                       <tr className="bg-white/[0.02] border-b border-white/5 text-neutral-400">
                         <th className="p-4 font-semibold tracking-wide">參展品牌 (Brand)</th>
+                        <th className="p-4 font-semibold tracking-wide">禮遇等級 (Tier)</th>
                         <th className="p-4 font-semibold tracking-wide">貴賓姓氏 (Surname)</th>
                         <th className="p-4 font-semibold tracking-wide">貴賓信箱 (Email)</th>
                         <th className="p-4 font-semibold tracking-wide">提報時間</th>
                       </tr>
                     </thead>
                     <tbody>
-                      {vipList.map((vip) => (
-                        <tr key={vip.id} className="border-b border-white/5 hover:bg-white/[0.005]">
-                          <td className="p-4 font-medium text-[#DFBA87]">{vip.brand_name_zh}</td>
-                          <td className="p-4 font-medium">{vip.vip_surname} 氏</td>
-                          <td className="p-4 font-mono text-neutral-300">{vip.vip_email}</td>
-                          <td className="p-4 text-neutral-400 font-mono">
-                            {new Date(vip.created_at).toLocaleString()}
-                          </td>
-                        </tr>
-                      ))}
+                      {vipList.map((vip) => {
+                        const isSvip = vip.tier === 'SVIP' || (vip.vip_surname && vip.vip_surname.includes('SVIP'));
+                        const cleanName = (vip.vip_surname || '').replace(/\s*\((S?VIP)\)/gi, '').replace(/\s*\[(S?VIP)\]/gi, '').trim();
+
+                        return (
+                          <tr key={vip.id} className="border-b border-white/5 hover:bg-white/[0.005]">
+                            <td className="p-4 font-medium text-[#DFBA87]">{vip.brand_name_zh}</td>
+                            <td className="p-4">
+                              {isSvip ? (
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-amber-500/40 bg-amber-500/15 text-[#DFBA87] font-semibold inline-flex items-center gap-1 shadow-sm">
+                                  <Sparkles className="w-2.5 h-2.5" /> SVIP 開幕晚會
+                                </span>
+                              ) : (
+                                <span className="text-[10px] font-mono px-2 py-0.5 rounded border border-white/10 bg-white/5 text-neutral-400">
+                                  VIP 展期通行
+                                </span>
+                              )}
+                            </td>
+                            <td className="p-4 font-medium">{cleanName} 氏</td>
+                            <td className="p-4 font-mono text-neutral-300">{vip.vip_email}</td>
+                            <td className="p-4 text-neutral-400 font-mono">
+                              {new Date(vip.created_at).toLocaleString()}
+                            </td>
+                          </tr>
+                        );
+                      })}
                     </tbody>
                   </table>
                 </div>
