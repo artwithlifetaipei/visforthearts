@@ -167,10 +167,10 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
     const isSvip = tier === 'SVIP';
 
     if (lang === 'en') {
-      return `[${brand?.brand_name_en || brandName} Exclusive Invitation]\nDear ${cleanName},\n\nWe have reserved a "${isSvip ? 'SVIP Vernissage & Opening Gala Seat (with Full Fair Fast-Track)' : 'VIP Priority Fast-Track Pass'}" for you at the 2027 VIS Contemporary Culture Fair.\n\nClaim and view your digital VIP pass here:\n${passUrl}\n\n✦ Venue: Taipei Zhongshan Hall (98 Yanping S. Rd.)\n✦ Opening Gala: Jan 6, 2027 (Wed) 18:00 - 21:30\n✦ Public Days: Jan 7-9, 2027\nWe warmly look forward to welcoming you in person!`;
+      return `[${brand?.brand_name_en || brandName} Exclusive Invitation]\nDear ${cleanName},\n\nWe have reserved a "${isSvip ? 'SVIP Vernissage & Opening Gala Pass (with Full Fair Fast-Track)' : 'VIP Priority Fast-Track Pass'}" for you at VIS Contemporary Culture.\n\nClaim and view your digital VIP pass here:\n${passUrl}\n\n✦ Dates: Jan 6 (Wed) – Jan 9 (Sat), 2027\n✦ Venue: Guangfu Hall, Taipei Zhongshan Hall (98 Yanping S. Rd.)\n\nWe warmly look forward to welcoming you in person!`;
     }
 
-    return `【${brandName} 敬邀】\n親愛的 ${cleanName} 氏 貴賓您好：\n\n我們已為您預留 2027 VIS 當代文化博覽會「${isSvip ? 'SVIP 尊榮預展暨開幕晚會專屬席位（含全展期優先快速通行）' : 'VIP 展期尊榮通行證（全時段免排隊優先快速通行）'}」。\n\n誠摯邀請您蒞臨鑑賞！點擊下方專屬連結即可直接領取您的數位貴賓憑證：\n${passUrl}\n\n✦ 展會地點：台北市中正區延平南路98號（中山堂）\n✦ 開幕晚會：2027/1/6 (三) 18:00 - 21:30\n✦ 公眾展期：2027/1/7 - 1/9\n期待於展會現場親自接待您！`;
+    return `【${brandName} 敬邀】\n親愛的 ${cleanName} 氏 貴賓您好：\n\n我們已為您預留 VIS Contemporary Culture「${isSvip ? 'SVIP 尊榮預展暨開幕晚會專屬通行資格（含全展期優先快速通行）' : 'VIP 展期尊榮通行證（全時段免排隊優先快速通行）'}」。\n\n誠摯邀請您蒞臨鑑賞！點擊下方專屬連結即可直接於手機領取您的數位貴賓憑證：\n${passUrl}\n\n✦ 展期：2027 年 1 月 6 日 (三) – 1 月 9 日 (六)\n✦ 地點：台北中山堂 光復廳（台北市中正區延平南路 98 號）\n\n期待於展會現場親自接待您！`;
   };
 
   const handleCopyLineInvite = (vip: any) => {
@@ -506,7 +506,7 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
                     {selectedTier === 'SVIP' && <CheckCircle2 className="w-3.5 h-3.5 text-[#DFBA87]" />}
                   </div>
                   <p className="text-[10px] text-neutral-300 font-light leading-snug">
-                    {t('1/6 尊榮預展暨開幕晚會席位 + 全展期通行', 'Jan 6 Opening Gala Vernissage + Full Fair')}
+                    {t('1/6 尊榮預展暨開幕晚會專屬資格 + 全展期通行', 'Jan 6 Opening Gala Vernissage + Full Fair')}
                   </p>
                 </button>
               </div>
@@ -700,8 +700,8 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
               <p>
                 <strong className="text-neutral-400">{t('VIP / SVIP 貴賓權益說明：', 'VIP / SVIP Pass Privileges: ')}</strong>
                 {t(
-                  '本屆展會現場不另售一般門票。【VIP 展期貴賓票】享 1/7 - 1/9 公眾展期全時段免排隊優先入場；【SVIP 開幕晚會票】享有 1/6 (三) 尊榮預展暨開幕晚會專屬席位與全展期快速通行。',
-                  'Fair admission is invitation-only. VIP Pass grants priority fast-track for Jan 7-9. SVIP Pass includes Jan 6 Vernissage & Gala seat plus full fair priority.'
+                  '本屆展會現場不另售一般門票。【VIP 展期貴賓票】享 1/7 - 1/9 公眾展期全時段免排隊優先入場；【SVIP 開幕晚會票】享有 1/6 (三) 尊榮預展暨開幕晚會專屬通行資格與全展期快速通行。',
+                  'Fair admission is invitation-only. VIP Pass grants priority fast-track for Jan 7-9. SVIP Pass includes Jan 6 Vernissage & Gala access plus full fair priority.'
                 )}
               </p>
               <p>

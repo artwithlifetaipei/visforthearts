@@ -454,7 +454,7 @@ export default function VIPDashboard() {
 
                         <div className={`inline-block px-3.5 py-1.5 border-[0.5px] rounded-sm ${isSVIP ? 'border-[#DFBA87] text-[#DFBA87] bg-[#DFBA87]/10' : 'border-[#73531E]/40 text-[#73531E] bg-[#73531E]/5'}`}>
                             <span className="text-[9px] tracking-[0.25em] uppercase font-semibold">
-                                {isSVIP ? 'SVIP 開幕晚會席位' : 'VIP 展期通行證'}
+                                {isSVIP ? 'SVIP 開幕晚會通行證' : 'VIP 展期通行證'}
                             </span>
                         </div>
                     </div>
@@ -488,8 +488,7 @@ export default function VIPDashboard() {
                         {/* VIP Invitation / Event details */}
                         <div className="text-center mb-6 space-y-2.5 w-full">
                             <h2 className={`text-[12px] tracking-[0.2em] uppercase font-semibold leading-relaxed ${goldText}`}>
-                                VIS Contemporary Culture Fair
-                                <span className="text-[10.5px] tracking-[0.3em] font-light block mt-1.5 font-sans normal-case">當代文化博覽會</span>
+                                VIS Contemporary Culture
                             </h2>
                             <p className="text-[10px] tracking-[0.2em] font-mono opacity-80">2027/1/6 - 1/9</p>
                             <p className="text-[9.5px] tracking-widest opacity-60">台北市中正區延平南路98號</p>
@@ -553,7 +552,7 @@ export default function VIPDashboard() {
                                 {isSVIP ? (
                                     <>
                                         <p className="text-[11px] leading-relaxed tracking-wide font-normal">
-                                            憑此 SVIP 尊榮數位卡，您享有 **1/6 (三) 尊榮預展暨開幕晚會專屬席位**，以及全展期時段 **尊榮優先快速通行**。
+                                            憑此 SVIP 尊榮數位卡，您享有 **1/6 (三) 尊榮預展暨開幕晚會專屬入場資格**，以及全展期時段 **尊榮優先快速通行**。
                                         </p>
                                         <p className="text-[9px] leading-relaxed tracking-wide opacity-60 font-light mt-1">
                                             This SVIP pass grants you exclusive admission to the **Jan 6 Vernissage & Opening Gala** and **priority fast-track admission** throughout all fair days.
@@ -562,7 +561,7 @@ export default function VIPDashboard() {
                                 ) : (
                                     <>
                                         <p className="text-[11px] leading-relaxed tracking-wide font-normal">
-                                            憑此數位禮賓卡，您於 **1/7 至 1/9 公眾展期皆享尊榮優先快速通行**。（1/6 開幕晚會席位有限，僅限特邀 SVIP 憑證出席）
+                                            憑此數位禮賓卡，您於 **1/7 至 1/9 公眾展期皆享尊榮優先快速通行**。（1/6 開幕晚會名額有限，僅限特邀 SVIP 憑證出席）
                                         </p>
                                         <p className="text-[9px] leading-relaxed tracking-wide opacity-60 font-light mt-1">
                                             This digital pass grants you **priority fast-track admission for public days (Jan 7-9)**. (Jan 6 Opening Gala is reserved for SVIP honorees).
@@ -584,7 +583,7 @@ export default function VIPDashboard() {
                                                 <span className="font-medium">VIP 預展 & 開幕晚會</span>
                                                 {isSVIP ? (
                                                     <span className="text-[8.5px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-[#DFBA87] border border-amber-500/30 font-semibold">
-                                                        ✦ 專屬席位
+                                                        ✦ 專屬入場資格
                                                     </span>
                                                 ) : (
                                                     <span className="text-[8.5px] font-mono px-1.5 py-0.2 rounded bg-neutral-200/80 text-neutral-600 border border-neutral-300">

@@ -142,7 +142,7 @@ export default function VIPAdminPage() {
                 alert(data.error || '操作審核失敗');
             } else {
                 alert(action === 'approve' 
-                    ? (tier === 'SVIP' ? '✓ 已核准為【SVIP 榮譽貴賓 (含 1/6 開幕晚會席位)】並成功發送專屬邀請！' : '✓ 已核准為【VIP 展期觀展貴賓 (1/7-1/9 通行)】並成功發送專屬邀請！') 
+                    ? (tier === 'SVIP' ? '✓ 已核准為【SVIP 榮譽貴賓 (含 1/6 開幕晚會通行資格)】並成功發送專屬邀請！' : '✓ 已核准為【VIP 展期觀展貴賓 (1/7-1/9 通行)】並成功發送專屬邀請！') 
                     : '✓ 已拒絕該貴賓申請。');
                 await fetchList();
             }
@@ -857,7 +857,7 @@ export default function VIPAdminPage() {
                             {/* Pending VIP Requests List */}
                             <div className="mb-12">
                                 <div className="flex items-baseline justify-between mb-6">
-                                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-[#DFBA87] font-semibold">待審核貴賓席位申請名單</h2>
+                                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-[#DFBA87] font-semibold">待審核貴賓通行申請名單</h2>
                                     <span className="text-[10px] tracking-widest text-neutral-600">
                                         {vipList.filter(vip => vip.status === 'Pending').length} 筆待審核
                                     </span>
@@ -902,7 +902,7 @@ export default function VIPAdminPage() {
                                                         onClick={() => handleApproveStatus(vip.email, 'approve', 'SVIP')}
                                                         disabled={approvingEmail === vip.email}
                                                         className="px-3.5 py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black font-bold text-[9px] tracking-wider uppercase transition-all duration-300 cursor-pointer shadow-md rounded-sm"
-                                                        title="核准為 SVIP 榮譽貴賓（含 1/6 開幕晚會與預展專屬席位）"
+                                                        title="核准為 SVIP 榮譽貴賓（含 1/6 開幕晚會與預展專屬通行資格）"
                                                     >
                                                         {approvingEmail === vip.email ? '處理中...' : '✦ 核准 SVIP (含晚會)'}
                                                     </button>

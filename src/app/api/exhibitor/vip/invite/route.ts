@@ -180,8 +180,8 @@ export async function POST(req: Request) {
         if (transporter) {
             const passUrl = `https://www.visforthearts.com/vip?email=${encodeURIComponent(normalizedEmail)}`;
             const isSvip = selectedTier === 'SVIP';
-            const tierBadgeText = isSvip ? '✦ SVIP 尊榮預展暨開幕晚會專屬席位' : '✦ VIP 展期尊榮通行證';
-            const subject = `【${brand_name_zh} 敬邀】您獲邀出席 2027 VIS 當代文化博覽會（${isSvip ? '專屬 SVIP 開幕晚會席位' : '專屬 VIP 展期通行證'}）`;
+            const tierBadgeText = isSvip ? '✦ SVIP 尊榮預展暨開幕晚會專屬通行資格' : '✦ VIP 展期尊榮通行證';
+            const subject = `【${brand_name_zh} 敬邀】您獲邀出席 VIS Contemporary Culture（${isSvip ? '專屬 SVIP 開幕晚會通行禮遇' : '專屬 VIP 展期尊榮通行證'}）`;
 
             const htmlContent = `
 <!DOCTYPE html>
@@ -193,10 +193,10 @@ export async function POST(req: Request) {
     .container { max-width: 600px; margin: 0 auto; background-color: #121212; border: 1px solid rgba(223, 186, 135, 0.25); border-radius: 8px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.6); }
     .header { padding: 40px 30px 25px; text-align: center; border-bottom: 1px solid rgba(255,255,255,0.06); background: radial-gradient(circle at center top, rgba(223, 186, 135, 0.08) 0%, transparent 70%); }
     .content { padding: 35px 35px; line-height: 1.8; color: #D1D1D1; font-size: 14px; }
-    .brand-callout { background: rgba(223, 186, 135, 0.08); border-left: 3px solid #DFBA87; padding: 16px 20px; border-radius: 4px; margin: 24px 0; }
     .tier-card { background: #181818; border: 1px solid rgba(223, 186, 135, 0.35); padding: 22px; border-radius: 6px; text-align: center; margin: 26px 0; }
-    .btn-container { text-align: center; margin: 35px 0 20px; }
+    .btn-container { text-align: center; margin: 35px 0 25px; }
     .btn { display: inline-block; background-color: #DFBA87; color: #000000 !important; font-weight: 700; font-size: 13px; letter-spacing: 0.15em; text-transform: uppercase; text-decoration: none; padding: 15px 36px; border-radius: 4px; box-shadow: 0 4px 20px rgba(223, 186, 135, 0.3); }
+    .fair-info-card { background: rgba(223, 186, 135, 0.05); border: 1px solid rgba(223, 186, 135, 0.22); border-radius: 8px; padding: 22px 24px; margin: 28px 0; }
     .footer { padding: 25px 30px; font-size: 11px; color: #777777; text-align: center; border-top: 1px solid rgba(255,255,255,0.06); background-color: #0E0E0E; }
   </style>
 </head>
@@ -204,7 +204,7 @@ export async function POST(req: Request) {
   <div class="container">
     <div class="header">
       <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" alt="VIS" style="height: 36px; filter: invert(1) brightness(200); margin-bottom: 16px;">
-      <div style="font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: #DFBA87; font-family: monospace;">Contemporary Culture Fair 2027</div>
+      <div style="font-size: 11px; letter-spacing: 0.3em; text-transform: uppercase; color: #DFBA87; font-family: monospace;">VIS Contemporary Culture</div>
     </div>
     <div class="content">
       <p style="font-size: 16px; color: #FFFFFF; font-weight: 600; margin-bottom: 20px;">
@@ -212,7 +212,7 @@ export async function POST(req: Request) {
       </p>
       
       <p>
-        我們非常榮幸地通知您，參展品牌 <strong style="color: #DFBA87; font-size: 15px;">【${brand_name_zh}】</strong> 已特別為您專屬預留了 <strong>2027 VIS 台北當代文化博覽會</strong> 的尊榮貴賓席位。
+        我們非常榮幸地通知您，參展品牌 <strong style="color: #DFBA87; font-size: 15px;">【${brand_name_zh}】</strong> 已特別為您專屬預留了 <strong>VIS Contemporary Culture</strong> 的尊榮貴賓入場資格。
       </p>
 
       <div class="tier-card">
@@ -221,28 +221,37 @@ export async function POST(req: Request) {
         </div>
         <div style="font-size: 12px; color: #CCCCCC; line-height: 1.6;">
           ${isSvip 
-            ? '包含 <strong>2027/1/6 (三) 18:00 - 21:30 尊榮預展暨開幕晚會專屬席位</strong>，以及展期全時段優先快速通行禮遇。' 
+            ? '包含 <strong>2027/1/6 (三) 尊榮預展暨開幕晚會專屬資格</strong>，以及展期全時段優先快速通行禮遇。' 
             : '享有 <strong>2027/1/7 (四) 至 1/9 (六) 公眾展期全時段免排隊優先快速通行</strong> 禮遇。'
           }
         </div>
       </div>
 
       <p style="font-size: 13px;">
-        本屆博覽會現場不另售一般票券，受邀貴賓憑專屬數位卡通行。請點擊下方按鈕，即可直接於手機上領取並查閱您的專屬數位貴賓憑證：
+        VIS Contemporary Culture 現場不另售一般票券，受邀貴賓憑專屬數位卡通行。請點擊下方按鈕，即可直接於手機上領取並查閱您的專屬數位貴賓憑證：
       </p>
 
       <div class="btn-container">
         <a href="${passUrl}" class="btn">立即領取我的數位貴賓卡 →</a>
       </div>
 
-      <div class="brand-callout">
-        <p style="margin: 0; font-size: 12px; color: #E5E5E5;">
-          <strong>【展會資訊】</strong><br>
-          • 展會地點：台北市中正區延平南路98號（台北市中山堂，捷運西門站 5 號出口步行 1 分鐘）<br>
-          • 開幕晚會：2027/1/6 (三) 18:00 - 21:30<br>
-          • 公眾展期：2027/1/7 (四) - 1/9 (六)<br>
-          • 接待方式：現場設有貴賓專屬接待櫃檯，出示手機數位卡即可核銷快速入場。
-        </p>
+      <div class="fair-info-card">
+        <table style="width: 100%; border-collapse: collapse; font-size: 13px; color: #D1D1D1; line-height: 1.7;">
+          <tr>
+            <td style="width: 55px; vertical-align: top; color: #DFBA87; font-weight: 600; padding: 4px 0;">展期</td>
+            <td style="vertical-align: top; color: #FFFFFF; padding: 4px 0;">
+              <div style="font-weight: 600; font-size: 14px;">2027 年 1 月 6 日 (三) – 1 月 9 日 (六)</div>
+              <div style="font-size: 11px; color: #DFBA87; margin-top: 2px;">✦ ${isSvip ? '尊榮預展暨開幕晚會（1/6）與展期專屬貴賓通行' : '本憑證預設為 1/7–1/9 展期專屬貴賓通行證'}</div>
+            </td>
+          </tr>
+          <tr>
+            <td style="width: 55px; vertical-align: top; color: #DFBA87; font-weight: 600; padding: 12px 0 4px;">地點</td>
+            <td style="vertical-align: top; padding: 12px 0 4px;">
+              <div style="color: #FFFFFF; font-weight: 600; font-size: 14px;">台北中山堂 光復廳</div>
+              <div style="font-size: 11.5px; color: #888888; margin-top: 2px;">台北市中正區延平南路 98 號</div>
+            </td>
+          </tr>
+        </table>
       </div>
 
       <p style="font-size: 12px; color: #999999; margin-top: 25px;">
@@ -251,7 +260,7 @@ export async function POST(req: Request) {
     </div>
 
     <div class="footer">
-      <p style="margin: 0 0 6px 0;">VIS 当代文化博覽會 貴賓禮賓辦公室</p>
+      <p style="margin: 0 0 6px 0;">VIS Contemporary Culture 貴賓禮賓處</p>
       <p style="margin: 0;">如需任何協助，歡迎隨時聯繫大會秘書處：<a href="mailto:visvipteam@gmail.com" style="color: #DFBA87; text-decoration: none;">visvipteam@gmail.com</a></p>
     </div>
   </div>
@@ -261,7 +270,7 @@ export async function POST(req: Request) {
 
             try {
                 await transporter.sendMail({
-                    from: `"VIS 當代文化博覽會" <${gmailUser}>`,
+                    from: `"VIS Contemporary Culture" <${gmailUser}>`,
                     to: normalizedEmail,
                     subject: subject,
                     html: htmlContent

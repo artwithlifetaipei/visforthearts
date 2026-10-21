@@ -33,11 +33,11 @@ function VIPApplyForm() {
     // Bilingual Dictionary
     const dict = {
         zh: {
-            title: "貴賓席位申請登記",
+            title: "貴賓通行申請登記",
             dateLabel: "展期",
             dateValue: "2027 年 1 月 6 日（三）– 1 月 9 日（六）",
             vipPreviewNote: "✦ 本登記預設為 1/7–1/9 展期專屬貴賓通行證",
-            galaDisclaimer: "💡 本申請表為【VIS 2027 展期貴賓通行證】專屬登記。1/6 (三) 尊榮預展暨開幕晚會（18:00–21:30）因席位有限，採大會專屬特邀或經大會審核通過之 SVIP 資格出席。",
+            galaDisclaimer: "💡 本申請表為【VIS 2027 展期貴賓通行證】專屬登記。1/6 (三) 尊榮預展暨開幕晚會因名額有限，採大會專屬特邀或經大會審核通過之 SVIP 資格出席。",
             venueLabel: "地點",
             venueValue: "台北中山堂 光復廳",
             addressValue: "台北市中正區延平南路 98 號",
@@ -47,7 +47,7 @@ function VIPApplyForm() {
             emailPlaceholder: "attendant@example.com",
             codeLabel: "受邀代碼 / 推薦參展品牌或單位（選填）",
             codePlaceholder: "例如：受邀代碼、參展藝廊名稱或推薦人",
-            submitBtn: "提交貴賓席申請",
+            submitBtn: "提交貴賓通行申請",
             submittingBtn: "提交中...",
             backBtn: "← 返回貴賓登入",
             nameRequired: "請輸入您的完整姓名。",
@@ -61,11 +61,11 @@ function VIPApplyForm() {
             submitSuccess: "申請提交成功！\n\n您的申請已送出並進入大會審核程序。大會審核完成後，將依資格核發【SVIP 尊榮預展晚會卡】或【VIP 展期貴賓卡】，專屬通行邀請信將自動寄送至您的信箱。"
         },
         en: {
-            title: "VIP Seat Request",
+            title: "VIP Access Request",
             dateLabel: "DATES",
             dateValue: "Jan 6 (Wed) – Jan 9 (Sat), 2027",
             vipPreviewNote: "✦ Registration for Fair VIP Pass (Jan 7 - 9)",
-            galaDisclaimer: "💡 This form registers for Fair VIP Pass (Jan 7-9). Due to capacity limits, the Jan 6 Vernissage & Opening Gala is by special invitation or approved SVIP honorees.",
+            galaDisclaimer: "💡 This form registers for Fair VIP Pass (Jan 7-9). Due to limited capacity, the Jan 6 Vernissage & Opening Gala is by special invitation or approved SVIP honorees.",
             venueLabel: "VENUE",
             venueValue: "Guangfu Hall, Taipei Zhongshan Hall",
             addressValue: "No. 98, Yanping S. Rd., Zhongzheng Dist., Taipei",
