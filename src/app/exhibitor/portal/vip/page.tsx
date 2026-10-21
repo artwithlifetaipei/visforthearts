@@ -268,6 +268,23 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
           return;
         }
 
+        // Also ensure vip_allowlist auto-activation in client fallback
+        try {
+          await supabase
+            .from('vip_allowlist')
+            .upsert(
+              {
+                email: trimmedEmail,
+                name: `${surname.trim()} 氏`,
+                tier: selectedTier,
+                status: 'Approved',
+                role: 'VIP',
+                rsvp_status: 'Pending',
+              },
+              { onConflict: 'email' }
+            );
+        } catch {}
+
         newRecord = directData ? { ...directData, tier: selectedTier } : {
           id: `temp-${Date.now()}`,
           brand_id: brand.id,
