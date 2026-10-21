@@ -452,9 +452,9 @@ export default function VIPDashboard() {
                             <span className="font-mono tracking-wider font-semibold">掃描立牌</span>
                         </button>
 
-                        <div className={`inline-block px-3.5 py-1.5 border-[0.5px] rounded-sm ${isSVIP ? 'border-[#DFBA87] text-[#DFBA87]' : 'border-[#1A1A1A]/60 text-[#1A1A1A]'}`}>
-                            <span className="text-[9px] tracking-[0.3em] uppercase font-light">
-                                {profile.tier}
+                        <div className={`inline-block px-3.5 py-1.5 border-[0.5px] rounded-sm ${isSVIP ? 'border-[#DFBA87] text-[#DFBA87] bg-[#DFBA87]/10' : 'border-[#73531E]/40 text-[#73531E] bg-[#73531E]/5'}`}>
+                            <span className="text-[9px] tracking-[0.25em] uppercase font-semibold">
+                                {isSVIP ? 'SVIP 開幕晚會席位' : 'VIP 展期通行證'}
                             </span>
                         </div>
                     </div>
@@ -543,14 +543,27 @@ export default function VIPDashboard() {
                     {/* Privilege Highlight */}
                     <div className="border-b border-current/10 pb-4 text-left">
                         <p className={`text-[9.5px] tracking-[0.25em] uppercase font-semibold mb-2 ${goldText}`}>
-                            VIP PRIVILEGES / 貴賓權益
+                            {isSVIP ? 'SVIP PRIVILEGES / 榮譽貴賓專屬權益' : 'VIP PRIVILEGES / 展期貴賓權益'}
                         </p>
-                        <p className="text-[11px] leading-relaxed tracking-wide font-normal">
-                            憑此數位禮賓卡，您於所有展期時段（含預展與公眾日）皆享 **尊榮優先快速通行**。
-                        </p>
-                        <p className="text-[9px] leading-relaxed tracking-wide opacity-60 font-light mt-1">
-                            This digital pass grants you **priority fast-track admission** for all preview and public hours.
-                        </p>
+                        {isSVIP ? (
+                            <>
+                                <p className="text-[11px] leading-relaxed tracking-wide font-normal">
+                                    憑此 SVIP 尊榮數位卡，您享有 **1/6 (三) 尊榮預展暨開幕晚會專屬席位**，以及全展期時段 **尊榮優先快速通行**。
+                                </p>
+                                <p className="text-[9px] leading-relaxed tracking-wide opacity-60 font-light mt-1">
+                                    This SVIP pass grants you exclusive admission to the **Jan 6 Vernissage & Opening Gala** and **priority fast-track admission** throughout all fair days.
+                                </p>
+                            </>
+                        ) : (
+                            <>
+                                <p className="text-[11px] leading-relaxed tracking-wide font-normal">
+                                    憑此數位禮賓卡，您於 **1/7 至 1/9 公眾展期皆享尊榮優先快速通行**。（1/6 開幕晚會席位有限，僅限特邀 SVIP 憑證出席）
+                                </p>
+                                <p className="text-[9px] leading-relaxed tracking-wide opacity-60 font-light mt-1">
+                                    This digital pass grants you **priority fast-track admission for public days (Jan 7-9)**. (Jan 6 Opening Gala is reserved for SVIP honorees).
+                                </p>
+                            </>
+                        )}
                     </div>
 
                     {/* Complete Timetable */}
@@ -561,12 +574,34 @@ export default function VIPDashboard() {
                         
                         <div className="space-y-3 text-[10.5px] leading-relaxed font-light">
                             <div className="flex justify-between items-start gap-4">
-                                <span className="font-normal shrink-0">VIP 預展 & 開幕酒會<br/><span className="text-[8px] opacity-50 uppercase tracking-wider font-mono">VIP Preview & Vernissage</span></span>
-                                <span className="text-right font-mono font-medium">1/6 (三) 18:00 - 21:30</span>
+                                <div className="shrink-0 space-y-0.5">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="font-medium">VIP 預展 & 開幕晚會</span>
+                                        {isSVIP ? (
+                                            <span className="text-[8.5px] font-mono px-1.5 py-0.2 rounded bg-amber-500/20 text-[#DFBA87] border border-amber-500/30 font-semibold">
+                                                ✦ 專屬席位
+                                            </span>
+                                        ) : (
+                                            <span className="text-[8.5px] font-mono px-1.5 py-0.2 rounded bg-neutral-200/80 text-neutral-600 border border-neutral-300">
+                                                特邀 SVIP 專屬
+                                            </span>
+                                        )}
+                                    </div>
+                                    <span className="text-[8px] opacity-60 uppercase tracking-wider font-mono block">VIP Preview & Vernissage</span>
+                                </div>
+                                <span className={`text-right font-mono font-medium ${isSVIP ? goldText : 'opacity-50'}`}>1/6 (三) 18:00 - 21:30</span>
                             </div>
                             
                             <div className="flex justify-between items-start gap-4 border-t border-current/5 pt-2.5">
-                                <span className="font-normal shrink-0">公眾展期<br/><span className="text-[8px] opacity-50 uppercase tracking-wider font-mono">Public Days</span></span>
+                                <div className="shrink-0 space-y-0.5">
+                                    <div className="flex items-center gap-1.5">
+                                        <span className="font-medium">公眾展期</span>
+                                        <span className={`text-[8.5px] font-mono px-1.5 py-0.2 rounded font-semibold ${goldBadge}`}>
+                                            ✦ 優先快速通行
+                                        </span>
+                                    </div>
+                                    <span className="text-[8px] opacity-60 uppercase tracking-wider font-mono block">Public Days (Fast-Track)</span>
+                                </div>
                                 <div className="text-right font-mono font-medium space-y-0.5">
                                     <p>1/7 (四) 12:00 - 18:00</p>
                                     <p>1/8 (五) 12:00 - 18:00</p>

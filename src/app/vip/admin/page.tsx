@@ -141,7 +141,9 @@ export default function VIPAdminPage() {
             if (!res.ok) {
                 alert(data.error || '操作審核失敗');
             } else {
-                alert(action === 'approve' ? `✓ 已核准為 ${tier || 'VIP'} 並成功寄出 Magic Link 邀請信！` : '✓ 已拒絕該貴賓申請。');
+                alert(action === 'approve' 
+                    ? (tier === 'SVIP' ? '✓ 已核准為【SVIP 榮譽貴賓 (含 1/6 開幕晚會席位)】並成功發送專屬邀請！' : '✓ 已核准為【VIP 展期觀展貴賓 (1/7-1/9 通行)】並成功發送專屬邀請！') 
+                    : '✓ 已拒絕該貴賓申請。');
                 await fetchList();
             }
         } catch (err: any) {
@@ -876,51 +878,50 @@ export default function VIPAdminPage() {
                                                     <span className="text-[8px] px-2 py-0.5 bg-amber-500/10 text-[#DFBA87] uppercase tracking-widest font-mono border border-amber-500/20">
                                                         Pending 待審核
                                                     </span>
-                                                    <div className="ml-2">
+                                                    <div className="ml-2 space-y-1">
                                                         <p className="text-xs tracking-wider text-white font-mono">{vip.email}</p>
-                                                        <p className="text-[10px] tracking-widest text-neutral-400 mt-1">
-                                                            申請姓名：{vip.name || '未提供'}
-                                                        </p>
+                                                        <div className="flex items-center gap-2 flex-wrap">
+                                                            <span className="text-[10px] tracking-widest text-neutral-400">
+                                                                申請姓名：{vip.name || '未提供'}
+                                                            </span>
+                                                            {vip.role && vip.role !== 'VIP' && (
+                                                                <span className={`text-[9px] px-2 py-0.5 rounded font-mono ${
+                                                                    vip.role.startsWith('推薦/代碼') 
+                                                                        ? 'bg-[#DFBA87]/20 text-[#DFBA87] border border-[#DFBA87]/40 font-semibold' 
+                                                                        : 'bg-white/5 text-neutral-300 border border-white/10'
+                                                                }`}>
+                                                                    {vip.role}
+                                                                </span>
+                                                            )}
+                                                        </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-3 flex-wrap sm:flex-nowrap">
-                                                    {/* SVIP/VIP Selection (styled as custom checkable pills) */}
-                                                    <div className="flex items-center gap-1 bg-neutral-900/60 p-1 border border-neutral-800">
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setSelectedTiers(prev => ({ ...prev, [vip.email]: 'VIP' }))}
-                                                            className={`px-3 py-1.5 text-[9px] tracking-wider uppercase font-semibold transition-all ${
-                                                                (selectedTiers[vip.email] || 'VIP') === 'VIP'
-                                                                    ? 'bg-[#DFBA87] text-black font-bold'
-                                                                    : 'text-neutral-500 hover:text-neutral-300'
-                                                            }`}
-                                                        >
-                                                            VIP
-                                                        </button>
-                                                        <button
-                                                            type="button"
-                                                            onClick={() => setSelectedTiers(prev => ({ ...prev, [vip.email]: 'SVIP' }))}
-                                                            className={`px-3 py-1.5 text-[9px] tracking-wider uppercase font-semibold transition-all ${
-                                                                (selectedTiers[vip.email] || 'VIP') === 'SVIP'
-                                                                    ? 'bg-[#DFBA87] text-black font-bold'
-                                                                    : 'text-neutral-500 hover:text-neutral-300'
-                                                            }`}
-                                                        >
-                                                            SVIP
-                                                        </button>
-                                                    </div>
-
+                                                <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                                                    {/* Option 1: Approve as SVIP (Opening Gala + Fair) */}
                                                     <button
-                                                        onClick={() => handleApproveStatus(vip.email, 'approve', selectedTiers[vip.email] || 'VIP')}
+                                                        onClick={() => handleApproveStatus(vip.email, 'approve', 'SVIP')}
                                                         disabled={approvingEmail === vip.email}
-                                                        className="px-4 py-2.5 bg-[#DFBA87] hover:bg-white text-black font-semibold text-[9px] tracking-widest uppercase transition-all duration-300 cursor-pointer"
+                                                        className="px-3.5 py-2 bg-gradient-to-r from-amber-600 to-amber-500 hover:from-amber-500 hover:to-amber-400 text-black font-bold text-[9px] tracking-wider uppercase transition-all duration-300 cursor-pointer shadow-md rounded-sm"
+                                                        title="核准為 SVIP 榮譽貴賓（含 1/6 開幕晚會與預展專屬席位）"
                                                     >
-                                                        {approvingEmail === vip.email ? '處理中...' : '核准'}
+                                                        {approvingEmail === vip.email ? '處理中...' : '✦ 核准 SVIP (含晚會)'}
                                                     </button>
+
+                                                    {/* Option 2: Approve as VIP (Public Fair Days Only) */}
+                                                    <button
+                                                        onClick={() => handleApproveStatus(vip.email, 'approve', 'VIP')}
+                                                        disabled={approvingEmail === vip.email}
+                                                        className="px-3.5 py-2 bg-[#DFBA87] hover:bg-white text-black font-semibold text-[9px] tracking-wider uppercase transition-all duration-300 cursor-pointer rounded-sm"
+                                                        title="核准為一般 VIP 觀展貴賓（1/7 至 1/9 展期優先通行）"
+                                                    >
+                                                        {approvingEmail === vip.email ? '處理中...' : '核准 VIP (展期)'}
+                                                    </button>
+
+                                                    {/* Option 3: Reject */}
                                                     <button
                                                         onClick={() => handleApproveStatus(vip.email, 'reject')}
                                                         disabled={approvingEmail === vip.email}
-                                                        className="px-4 py-2.5 border border-neutral-800 hover:border-rose-900 text-neutral-400 hover:text-rose-400 text-[9px] tracking-widest uppercase transition-all duration-300 cursor-pointer"
+                                                        className="px-3 py-2 border border-neutral-800 hover:border-rose-900 text-neutral-400 hover:text-rose-400 text-[9px] tracking-widest uppercase transition-all duration-300 cursor-pointer rounded-sm"
                                                     >
                                                         拒絕
                                                     </button>

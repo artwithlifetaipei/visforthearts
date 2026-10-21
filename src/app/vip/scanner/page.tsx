@@ -636,13 +636,34 @@ export default function StaffScannerPage() {
             return;
         }
 
-        // 5. Handle valid entries
+        // 5. Handle valid entries with Gala date check
+        const currentDate = new Date();
+        const taipeiDateStr = currentDate.toLocaleDateString('zh-TW', { timeZone: 'Asia/Taipei' });
+        const isOpeningGalaDate = taipeiDateStr.includes('2027/1/6') || taipeiDateStr.includes('2027/01/06');
+
+        if (isOpeningGalaDate && guest.tier !== 'SVIP') {
+            playErrorSound();
+            setFeedback({
+                status: 'invalid',
+                name: guest.name || guest.email.split('@')[0],
+                tier: 'none',
+                message: `⚠️ 此證為【VIP 展期觀展卡】（適用 1/7 至 1/9）。\n今晚 1/6 預展暨開幕晚會僅限特邀【SVIP 專屬席位】入場，期待明日 1/7 起隨時為您開通優先入場！`
+            });
+            setTimeout(() => {
+                setFeedback(f => f.status === 'invalid' ? { status: 'none', name: '', tier: 'none', message: '' } : f);
+                isProcessingRef.current = false;
+            }, 4500);
+            return;
+        }
+
         playSuccessSound();
         setFeedback({
             status: 'valid',
             name: guest.name || guest.email.split('@')[0],
             tier: guest.tier,
-            message: `歡迎貴賓！進場驗證成功。`
+            message: guest.tier === 'SVIP'
+                ? `歡迎 SVIP 榮譽貴賓！1/6 開幕晚會專屬席位與展期通行驗證成功。`
+                : `歡迎 VIP 貴賓！1/7 - 1/9 展期優先快速通行驗證成功。`
         });
 
         // 6. Push to Sync Queue
@@ -1085,8 +1106,8 @@ export default function StaffScannerPage() {
                                 </div>
                                 <span className="text-[9px] tracking-[0.6em] text-[#DFBA87] uppercase font-mono mb-2">VALID ENTRY PASS</span>
                                 <h2 className="text-3xl font-serif tracking-widest font-light text-white mb-2">{feedback.name}</h2>
-                                <div className="px-6 py-2 bg-[#DFBA87]/10 border border-[#DFBA87]/30 text-[#DFBA87] text-[10px] tracking-[0.4em] font-mono uppercase mb-8">
-                                    VIP 貴賓
+                                <div className="px-6 py-2 bg-[#DFBA87]/10 border border-[#DFBA87]/30 text-[#DFBA87] text-[10px] tracking-[0.3em] font-mono uppercase mb-8">
+                                    VIP 展期貴賓 ✦ 1/7–1/9 優先通行
                                 </div>
                                 <p className="text-[11px] tracking-widest text-neutral-400 font-light leading-relaxed">{feedback.message}</p>
                             </div>
@@ -1113,8 +1134,8 @@ export default function StaffScannerPage() {
                                 <span className="text-[9px] tracking-[0.7em] text-[#DFBA87] uppercase font-mono mb-2 font-semibold">SVIP ULTIMATE PASS</span>
                                 <h2 className="text-3xl font-serif tracking-widest font-bold text-white mb-2 drop-shadow-lg">{feedback.name}</h2>
                                 
-                                <div className="px-8 py-2.5 bg-gradient-to-r from-[#1E1D1A] via-[#2F2C24] to-[#1E1D1A] border border-[#DFBA87] text-[#DFBA87] text-[10px] tracking-[0.5em] font-mono font-bold uppercase mb-8 shadow-inner">
-                                    SVIP 榮譽貴賓
+                                <div className="px-8 py-2.5 bg-gradient-to-r from-[#1E1D1A] via-[#2F2C24] to-[#1E1D1A] border border-[#DFBA87] text-[#DFBA87] text-[10px] tracking-[0.3em] font-mono font-bold uppercase mb-8 shadow-inner">
+                                    SVIP 榮譽貴賓 ✦ 1/6 開幕晚會專屬席位
                                 </div>
                                 <p className="text-[11px] tracking-widest text-[#E5E5E5] font-light leading-relaxed max-w-sm">{feedback.message}</p>
                             </div>

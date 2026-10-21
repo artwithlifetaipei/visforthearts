@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 
 export const dynamic = 'force-dynamic';
 
@@ -17,10 +17,14 @@ const formatVipError = (msg: string, lang: 'zh' | 'en'): string => {
   return msg;
 };
 
-export default function VIPApplyPage() {
+function VIPApplyForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const initialCode = searchParams.get('code') || searchParams.get('ref') || '';
+
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
+    const [inviteCode, setInviteCode] = useState(initialCode);
     const [isLoading, setIsLoading] = useState(false);
     const [message, setMessage] = useState('');
     const [statusType, setStatusType] = useState<'success' | 'error' | ''>('');
@@ -30,9 +34,10 @@ export default function VIPApplyPage() {
     const dict = {
         zh: {
             title: "貴賓席位申請登記",
-            dateLabel: "日期",
+            dateLabel: "展期",
             dateValue: "2027 年 1 月 6 日（三）– 1 月 9 日（六）",
-            vipPreviewNote: "1/6 (三) 18:00–21:30 開幕晚會（僅限受邀貴賓）",
+            vipPreviewNote: "✦ 本登記預設為 1/7–1/9 展期專屬貴賓通行證",
+            galaDisclaimer: "💡 本申請表為【VIS 2027 展期貴賓通行證】專屬登記。1/6 (三) 尊榮預展暨開幕晚會（18:00–21:30）因席位有限，採大會專屬特邀或經大會審核通過之 SVIP 資格出席。",
             venueLabel: "地點",
             venueValue: "台北中山堂 光復廳",
             addressValue: "台北市中正區延平南路 98 號",
@@ -40,6 +45,8 @@ export default function VIPApplyPage() {
             namePlaceholder: "請輸入中文或英文姓名",
             emailLabel: "電子信箱 (Email Address)",
             emailPlaceholder: "attendant@example.com",
+            codeLabel: "受邀代碼 / 推薦參展品牌或單位（選填）",
+            codePlaceholder: "例如：受邀代碼、參展藝廊名稱或推薦人",
             submitBtn: "提交貴賓席申請",
             submittingBtn: "提交中...",
             backBtn: "← 返回貴賓登入",
@@ -51,13 +58,14 @@ export default function VIPApplyPage() {
             existingPending: "此信箱已在申請審核中，大會核准後將會發送通知信，請耐心等候。",
             existingRejected: "此信箱已被審核退回，如有疑問請洽 visvipteam@gmail.com。",
             insertFailed: "提交登記失敗: ",
-            submitSuccess: "申請提交成功！\n\n您的申請已送出，現正進入審核程序。若需進一步確認您的身份或相關資訊，我們將以電子郵件與您聯繫。審核完成後，專屬邀請連結將自動寄送至您的信箱。"
+            submitSuccess: "申請提交成功！\n\n您的申請已送出並進入大會審核程序。大會審核完成後，將依資格核發【SVIP 尊榮預展晚會卡】或【VIP 展期貴賓卡】，專屬通行邀請信將自動寄送至您的信箱。"
         },
         en: {
             title: "VIP Seat Request",
-            dateLabel: "DATE",
+            dateLabel: "DATES",
             dateValue: "Jan 6 (Wed) – Jan 9 (Sat), 2027",
-            vipPreviewNote: "Jan 6 (Wed) 18:00–21:30 Opening Gala (By Invitation Only)",
+            vipPreviewNote: "✦ Registration for Fair VIP Pass (Jan 7 - 9)",
+            galaDisclaimer: "💡 This form registers for Fair VIP Pass (Jan 7-9). Due to capacity limits, the Jan 6 Vernissage & Opening Gala is by special invitation or approved SVIP honorees.",
             venueLabel: "VENUE",
             venueValue: "Guangfu Hall, Taipei Zhongshan Hall",
             addressValue: "No. 98, Yanping S. Rd., Zhongzheng Dist., Taipei",
@@ -65,6 +73,8 @@ export default function VIPApplyPage() {
             namePlaceholder: "Enter your first and last name",
             emailLabel: "Email Address",
             emailPlaceholder: "attendant@example.com",
+            codeLabel: "Invite Code / Referral Gallery or Org (Optional)",
+            codePlaceholder: "e.g., Invitation code, participating gallery or referral",
             submitBtn: "Submit VIP Request",
             submittingBtn: "Submitting...",
             backBtn: "← Back to VIP Login",
@@ -76,7 +86,7 @@ export default function VIPApplyPage() {
             existingPending: "This email is already pending review. An invite will be sent once approved.",
             existingRejected: "This request has been declined. Please contact visvipteam@gmail.com.",
             insertFailed: "Submission failed: ",
-            submitSuccess: "✓ Request submitted successfully! A magic link will be emailed once approved."
+            submitSuccess: "✓ Request submitted successfully! Your application is under review. Upon approval, your SVIP (Opening Gala) or VIP (Fair Access) digital pass invite will be emailed to you."
         }
     };
 
@@ -88,6 +98,7 @@ export default function VIPApplyPage() {
 
         const formattedEmail = email.toLowerCase().trim();
         const formattedName = name.trim();
+        const formattedCode = inviteCode.trim();
 
         if (!formattedName) {
             setMessage(dict[lang].nameRequired);
@@ -138,7 +149,9 @@ export default function VIPApplyPage() {
                 return;
             }
 
-            // 2. Insert as pending self-registration
+            // 2. Insert as pending self-registration with referral/invite code recorded in role
+            const roleValue = formattedCode ? `推薦/代碼: ${formattedCode}` : '自主登記貴賓';
+
             const insertPromise = supabase
                 .from('vip_allowlist')
                 .insert({
@@ -146,7 +159,7 @@ export default function VIPApplyPage() {
                     name: formattedName,
                     status: 'Pending',
                     tier: 'VIP',
-                    role: 'VIP',
+                    role: roleValue,
                     rsvp_status: 'Unconfirmed'
                 });
 
@@ -161,6 +174,7 @@ export default function VIPApplyPage() {
             setStatusType('success');
             setName('');
             setEmail('');
+            setInviteCode('');
         } catch (err: any) {
             console.error('VIP Application failed:', err);
             const errMsg = err.message || String(err);
@@ -242,6 +256,13 @@ export default function VIPApplyPage() {
                     </div>
                 </div>
 
+                {/* Gala / Preview Clarification Note */}
+                <div className="p-3 bg-amber-500/8 border border-amber-500/25 text-left rounded-sm">
+                    <p className="text-[10px] text-[#73531E] font-normal leading-relaxed">
+                        {dict[lang].galaDisclaimer}
+                    </p>
+                </div>
+
                 <form onSubmit={handleSubmit} className="space-y-5">
                     <div className="space-y-4">
                         <div className="border-b border-neutral-200 focus-within:border-[#DFBA87] transition-all py-1">
@@ -266,6 +287,17 @@ export default function VIPApplyPage() {
                                 required
                                 disabled={isLoading}
                                 className="w-full bg-transparent border-none outline-none text-xs text-neutral-800 tracking-widest font-mono py-1"
+                            />
+                        </div>
+                        <div className="border-b border-neutral-200 focus-within:border-[#DFBA87] transition-all py-1">
+                            <label className="block text-[7px] tracking-widest text-neutral-500 uppercase mb-1">{dict[lang].codeLabel}</label>
+                            <input 
+                                type="text"
+                                placeholder={dict[lang].codePlaceholder}
+                                value={inviteCode}
+                                onChange={(e) => setInviteCode(e.target.value)}
+                                disabled={isLoading}
+                                className="w-full bg-transparent border-none outline-none text-xs text-neutral-800 tracking-widest py-1"
                             />
                         </div>
                     </div>
@@ -310,3 +342,16 @@ export default function VIPApplyPage() {
         </div>
     );
 }
+
+export default function VIPApplyPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center">
+                <div className="w-5 h-5 border-t-2 border-[#DFBA87] rounded-full animate-spin"></div>
+            </div>
+        }>
+            <VIPApplyForm />
+        </Suspense>
+    );
+}
+
