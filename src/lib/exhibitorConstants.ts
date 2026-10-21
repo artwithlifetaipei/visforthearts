@@ -195,6 +195,8 @@ export interface KeyDate {
   labelEn: string;
   noteZh?: string;
   noteEn?: string;
+  targetIso?: string;
+  statusOverride?: 'completed' | 'active' | 'pending';
 }
 
 export const KEY_DATES: KeyDate[] = [
@@ -204,31 +206,47 @@ export const KEY_DATES: KeyDate[] = [
     labelEn: 'Application Deadline',
     noteZh: '因應需求特別加開至今日午夜',
     noteEn: 'Specially extended upon high demand',
+    targetIso: '2026-10-15T23:59:59+08:00',
+    statusOverride: 'completed',
   },
   {
     dateStr: '2026/10/20 18:00 前',
     labelZh: '評選結果公布',
     labelEn: 'Selection Results Announced',
+    noteZh: '評選結果已正式公佈並發送通知',
+    noteEn: 'Selection officially announced',
+    targetIso: '2026-10-20T18:00:00+08:00',
+    statusOverride: 'completed',
   },
   {
     dateStr: '2026/10/27 18:00',
     labelZh: '繳費期限',
     labelEn: 'Payment Deadline',
+    noteZh: '第一期展位保證金匯款截止',
+    noteEn: 'First installment deposit deadline',
+    targetIso: '2026-10-27T18:00:00+08:00',
+    statusOverride: 'active',
   },
   {
     dateStr: '2026/11月中旬',
     labelZh: '說明會與 MOU 簽署',
     labelEn: 'Briefing & MOU Signing',
+    targetIso: '2026-11-15T18:00:00+08:00',
+    statusOverride: 'pending',
   },
   {
     dateStr: '2027/01/06',
-    labelZh: '佈展與 VIP 開幕酒會',
-    labelEn: 'Setup & VIP Vernissage',
+    labelZh: '佈展與 開幕晚會（僅限受邀貴賓）',
+    labelEn: 'Setup & VIP Opening Night',
+    targetIso: '2027-01-06T18:00:00+08:00',
+    statusOverride: 'pending',
   },
   {
     dateStr: '2027/01/07 - 01/09',
     labelZh: '公眾展期與撤場',
     labelEn: 'Public Days & Move-Out',
+    targetIso: '2027-01-07T10:00:00+08:00',
+    statusOverride: 'pending',
   },
 ];
 

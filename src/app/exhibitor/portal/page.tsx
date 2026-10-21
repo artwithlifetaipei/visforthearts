@@ -202,10 +202,34 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   const hasDiscount = isCustomFeeSet && finalPayablePrice < boothPrice;
 
   // Determine current active timeline phase
-  const getTimelineStatus = (dateStr: string) => {
+  const getTimelineStatus = (dateItem: any) => {
+    if (dateItem.statusOverride === 'completed') {
+      return { label: '已完成 Completed', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' };
+    }
+    if (dateItem.statusOverride === 'active') {
+      const today = new Date();
+      const targetDate = dateItem.targetIso ? new Date(dateItem.targetIso) : new Date(dateItem.dateStr.replace(/\//g, '-'));
+      const diffTime = Math.max(0, targetDate.getTime() - today.getTime());
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      return { 
+        label: `進行中 Active (${diffDays > 0 ? `${diffDays}天後` : '即刻截止'})`, 
+        color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
+        active: true
+      };
+    }
+    if (dateItem.statusOverride === 'pending') {
+      return { label: '待辦中 Pending', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' };
+    }
+
     const today = new Date();
-    const targetDate = new Date(dateStr.replace(/\//g, '-'));
+    const rawStr = dateItem.targetIso || dateItem.dateStr;
+    const cleanStr = rawStr.replace(/[^0-9\/\-:]/g, ' ').trim().split(' ')[0];
+    const targetDate = new Date(cleanStr.replace(/\//g, '-'));
     
+    if (isNaN(targetDate.getTime())) {
+      return { label: '待辦中 Pending', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' };
+    }
+
     // Reset hours for comparison
     today.setHours(0,0,0,0);
     targetDate.setHours(0,0,0,0);
@@ -214,18 +238,6 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
       return { label: '已完成 Completed', color: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20' };
     }
     
-    // If it's the next upcoming deadline in the sequence
-    const isUpcoming = KEY_DATES.find(d => new Date(d.dateStr.replace(/\//g, '-')).getTime() >= today.getTime())?.dateStr === dateStr;
-    if (isUpcoming) {
-      const diffTime = Math.abs(targetDate.getTime() - today.getTime());
-      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-      return { 
-        label: `進行中 Active (${diffDays}天後)`, 
-        color: 'text-sky-400 bg-sky-500/10 border-sky-500/20',
-        active: true
-      };
-    }
-
     return { label: '待辦中 Pending', color: 'text-amber-400 bg-amber-500/10 border-amber-500/20' };
   };
 
@@ -321,7 +333,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
         </h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {KEY_DATES.map((date, idx) => {
-            const status = getTimelineStatus(date.dateStr);
+            const status = getTimelineStatus(date);
             return (
               <div 
                 key={idx}
