@@ -8,8 +8,9 @@ import { formatBoothDisplay } from '@/lib/exhibitorConstants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu, X, Calendar, FileCheck, Users, Image as ImageIcon, LogOut, ShieldCheck, 
-  HelpCircle, ArrowRight, Sparkles, Loader2, CheckCircle2, QrCode 
+  HelpCircle, ArrowRight, Sparkles, Loader2, CheckCircle2, QrCode, Globe
 } from 'lucide-react';
+import { ExhibitorLanguageProvider, useExhibitorLanguage } from '@/lib/ExhibitorLanguageContext';
 
 const ADMIN_EMAILS = [
   'artwithlifetaipei@gmail.com',
@@ -49,9 +50,10 @@ function safeRemoveStorage(key: string): void {
   }
 }
 
-export default function ExhibitorPortalLayout({ children }: { children: React.ReactNode }) {
+function ExhibitorPortalLayoutContent({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { lang, setLang, toggleLang, t } = useExhibitorLanguage();
   
   // Auth state with safe storage caching for instant loads (<3s)
   const [session, setSession] = useState<any>(() => {
@@ -297,9 +299,13 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
       if (error) {
         if (error.message === 'Invalid login credentials') {
-          setLoginMessage('帳號或密碼輸入錯誤。若您尚未設定過登入密碼，請點擊下方「首次登入或設定密碼」自訂密碼以開通後台。');
+          setLoginMessage(
+            lang === 'en'
+              ? 'Invalid email or password. If you have not set a password yet, click "First time login or set password" below to activate your account.'
+              : '帳號或密碼輸入錯誤。若您尚未設定過登入密碼，請點擊下方「首次登入或設定密碼」自訂密碼以開通後台。'
+          );
         } else {
-          setLoginMessage(`登入失敗: ${error.message}`);
+          setLoginMessage(lang === 'en' ? `Login failed: ${error.message}` : `登入失敗: ${error.message}`);
         }
         setLoginLoading(false);
         return;
@@ -329,7 +335,11 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
       }
 
       if (!allowed && !ADMIN_EMAILS.includes(formattedEmail)) {
-        setLoginMessage('您的帳號尚未被主辦單位核准入選，或查無參展商資料。若已核准，請確認帳號是否與申請時一致。');
+        setLoginMessage(
+          lang === 'en'
+            ? 'Your account has not been approved by the organizer or exhibitor records were not found. Please confirm your email is identical to your application.'
+            : '您的帳號尚未被主辦單位核准入選，或查無參展商資料。若已核准，請確認帳號是否與申請時一致。'
+        );
         await supabase.auth.signOut();
         setLoginLoading(false);
         return;
@@ -337,7 +347,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
       // Login success: onAuthStateChange will trigger and set session / brandData
     } catch (err: any) {
-      setLoginMessage(`登入異常: ${err.message || err}`);
+      setLoginMessage(lang === 'en' ? `Login error: ${err.message || err}` : `登入異常: ${err.message || err}`);
     } finally {
       setLoginLoading(false);
     }
@@ -377,7 +387,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         .single();
 
       if (appErr) {
-        setLoginMessage(`Demo 登入失敗 (Application): ${appErr.message}`);
+        setLoginMessage(`Demo Login Failed: ${appErr.message}`);
         setLoginLoading(false);
         return;
       }
@@ -396,7 +406,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         });
 
       if (brandErr) {
-        setLoginMessage(`Demo 登入失敗 (Brand): ${brandErr.message}`);
+        setLoginMessage(`Demo Login Failed (Brand): ${brandErr.message}`);
         setLoginLoading(false);
         return;
       }
@@ -416,7 +426,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         });
 
         if (signUpError) {
-          setLoginMessage(`Demo 登入失敗 (SignUp): ${signUpError.message}`);
+          setLoginMessage(`Demo Login Failed (SignUp): ${signUpError.message}`);
         } else {
           // Retry login
           const { error: retryError } = await supabase.auth.signInWithPassword({
@@ -424,12 +434,12 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
             password: 'vis2027exhibitor',
           });
           if (retryError) {
-            setLoginMessage(`Demo 登入失敗 (Retry): ${retryError.message}`);
+            setLoginMessage(`Demo Login Failed (Retry): ${retryError.message}`);
           }
         }
       }
     } catch (ex) {
-      setLoginMessage('Demo 帳號初始化異常，請以普通 Magic Link 發送。');
+      setLoginMessage(lang === 'en' ? 'Demo login initialization exception.' : 'Demo 帳號初始化異常，請以普通帳號登入。');
     } finally {
       setLoginLoading(false);
     }
@@ -443,45 +453,45 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
     router.push('/exhibitor');
   };
 
-  // Nav Items configuration
+  // Nav Items configuration with full bilingual translations
   const getNavItems = () => {
     const isMicro = brandData?.is_micro_exposure || brandData?.booth_type === 'T';
     return [
       {
-        name: '模組 A — 時程與財務管理',
+        name: lang === 'en' ? 'Module A — Schedule & Finance' : '模組 A — 時程與財務管理',
         href: '/exhibitor/portal',
         icon: Calendar,
       },
       {
-        name: '模組 B — 展位規範簽署',
+        name: lang === 'en' ? 'Module B — Compliance Agreement' : '模組 B — 展位規範簽署',
         href: '/exhibitor/portal/compliance',
         icon: FileCheck,
       },
       {
-        name: '模組 C — VIP 專屬貴賓邀請',
+        name: lang === 'en' ? 'Module C — VIP Guest Invitations' : '模組 C — VIP 專屬貴賓邀請',
         href: '/exhibitor/portal/vip',
         icon: Users,
-        badge: isMicro ? '限一般展商' : null,
+        badge: isMicro ? (lang === 'en' ? 'Standard Only' : '限一般展商') : null,
         disabled: isMicro,
       },
       {
-        name: '模組 D — 媒體公關素材',
+        name: lang === 'en' ? 'Module D — Media & PR Kit' : '模組 D — 媒體公關素材',
         href: '/exhibitor/portal/media',
         icon: ImageIcon,
-        badge: isMicro ? '限一般展商' : null,
+        badge: isMicro ? (lang === 'en' ? 'Standard Only' : '限一般展商') : null,
         disabled: isMicro,
       },
       {
-        name: '模組 E — 展品與立牌標籤',
+        name: lang === 'en' ? 'Module E — Artworks & Table Tents' : '模組 E — 展品與立牌標籤',
         href: '/exhibitor/portal/products',
         icon: QrCode,
-        badge: '新功能',
+        badge: lang === 'en' ? 'New' : '新功能',
       },
       {
-        name: '模組 F — 現場貴賓接待與商機',
+        name: lang === 'en' ? 'Module F — VIP Reception & Leads' : '模組 F — 現場貴賓接待與商機',
         href: '/exhibitor/portal/leads',
         icon: Sparkles,
-        badge: 'VIP管家',
+        badge: lang === 'en' ? 'VIP Concierge' : 'VIP管家',
       },
     ];
   };
@@ -492,13 +502,15 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
       <div className="min-h-screen bg-[#0D0D0D] flex items-center justify-center font-sans-outfit">
         <div className="text-center space-y-4">
           <Loader2 className="w-8 h-8 animate-spin text-[#DFBA87] mx-auto" />
-          <p className="text-xs text-neutral-500 font-light tracking-[0.2em] uppercase">載入品牌專屬中心 Loading...</p>
+          <p className="text-xs text-neutral-500 font-light tracking-[0.2em] uppercase">
+            {t('載入品牌專屬中心 Loading...', 'Loading Exhibitor Collaboration Portal...')}
+          </p>
         </div>
       </div>
     );
   }
 
-  // 2. Unauthenticated state - Show Premium login screen
+  // 2. Unauthenticated state - Show Premium login screen with prominent language toggle
   if (!session) {
     return (
       <div className="min-h-screen bg-[#0D0D0D] flex flex-col p-6 font-sans-outfit text-white relative overflow-hidden justify-center items-center">
@@ -507,18 +519,39 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-[#C9A96E]/5 rounded-full blur-3xl" />
         <div className="absolute bottom-[-20%] right-[-10%] w-[50%] h-[50%] bg-[#C9A96E]/5 rounded-full blur-3xl" />
 
-        <div className="w-full max-w-md bg-[#111111] border border-white/5 p-8 rounded-xl relative z-10">
-          <img 
-            src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
-            alt="VIS" 
-            className="h-10 mx-auto mb-8 filter invert brightness-200"
-          />
+        <div className="w-full max-w-md bg-[#111111] border border-white/5 p-8 rounded-xl relative z-10 shadow-2xl">
+          
+          {/* Top Row: Logo + Prominent One-Click English Button */}
+          <div className="flex items-center justify-between mb-8 pb-4 border-b border-white/5">
+            <img 
+              src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+              alt="VIS" 
+              className="h-8 filter invert brightness-200"
+            />
+            
+            {/* Prominent One-Click English Toggle for Foreign Brands */}
+            <button
+              type="button"
+              onClick={toggleLang}
+              className={`
+                px-3 py-1.5 rounded-full border text-xs font-semibold tracking-wider transition-all duration-200 flex items-center gap-1.5 cursor-pointer shadow-md
+                ${lang === 'en'
+                  ? 'bg-[#DFBA87] text-black border-[#DFBA87] hover:bg-[#c9a370]'
+                  : 'bg-[#DFBA87]/15 hover:bg-[#DFBA87] hover:text-black text-[#DFBA87] border-[#DFBA87]/50'
+                }
+              `}
+              title={lang === 'zh' ? '切換為英文 Switch to English' : '切換為繁體中文 Switch to Chinese'}
+            >
+              <Globe className="w-3.5 h-3.5" />
+              <span>{lang === 'zh' ? '🌐 一鍵轉英文 English' : '🌐 繁體中文'}</span>
+            </button>
+          </div>
           
           <h2 className="text-xl md:text-2xl font-serif-garamond text-center font-normal tracking-wider mb-2 text-[#DFBA87]">
-            參展品牌協作中心
+            {t('參展品牌協作中心', 'Exhibitor Portal')}
           </h2>
           <p className="text-[10px] text-center text-neutral-400 font-light tracking-[0.2em] uppercase mb-8">
-            Exhibitor Collaboration Portal
+            {t('Exhibitor Collaboration Portal', 'Official Exhibitor Management')}
           </p>
 
           <AnimatePresence mode="wait">
@@ -531,12 +564,14 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               exit={{ opacity: 0 }}
             >
               <div>
-                <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-2">登錄電子信箱 EMAIL ADDRESS</label>
+                <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-2">
+                  {t('登錄電子信箱 EMAIL ADDRESS', 'Registered Email Address')}
+                </label>
                 <input 
                   type="email" 
                   value={loginEmail}
                   onChange={(e) => setLoginEmail(e.target.value)}
-                  placeholder="ENTER YOUR REGISTERED EMAIL"
+                  placeholder={t('ENTER YOUR REGISTERED EMAIL', 'ENTER YOUR REGISTERED EMAIL')}
                   className="w-full text-center text-xs tracking-wider border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-4 py-3 outline-none text-white transition-all uppercase"
                   required
                   disabled={loginLoading}
@@ -544,12 +579,14 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-2">密碼 PASSWORD</label>
+                <label className="block text-[10px] font-semibold tracking-widest text-[#DFBA87] uppercase mb-2">
+                  {t('密碼 PASSWORD', 'Password')}
+                </label>
                 <input 
                   type="password" 
                   value={loginPassword}
                   onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="ENTER YOUR PASSWORD"
+                  placeholder={t('ENTER YOUR PASSWORD', 'ENTER YOUR PASSWORD')}
                   className="w-full text-center text-xs tracking-wider border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded px-4 py-3 outline-none text-white transition-all"
                   required
                   disabled={loginLoading}
@@ -559,9 +596,9 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               <button 
                 type="submit" 
                 disabled={loginLoading}
-                className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-3 rounded text-xs font-semibold tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer"
+                className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-3 rounded text-xs font-semibold tracking-[0.2em] uppercase transition-all flex items-center justify-center gap-2 disabled:opacity-50 cursor-pointer shadow-lg shadow-[#C9A96E]/20"
               >
-                {loginLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : '登入協作平台 LOGIN TO PORTAL'}
+                {loginLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : t('登入協作平台 LOGIN TO PORTAL', 'LOG IN TO PORTAL')}
               </button>
 
               {/* First-time setup & Forgot password prominent buttons */}
@@ -570,7 +607,8 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
                   href={`/exhibitor/reset-password${loginEmail ? `?email=${encodeURIComponent(loginEmail)}` : ''}`}
                   className="w-full inline-flex items-center justify-center gap-2 border border-[#DFBA87]/40 hover:border-[#DFBA87] hover:bg-[#DFBA87]/10 text-[#DFBA87] py-2.5 rounded text-xs font-medium tracking-wider transition-all"
                 >
-                  <Sparkles className="w-3.5 h-3.5" /> 首次登入或設定密碼？點此立即啟用帳號 →
+                  <Sparkles className="w-3.5 h-3.5" /> 
+                  {t('首次登入或設定密碼？點此立即啟用帳號 →', 'First time login or set password? Activate account →')}
                 </Link>
 
                 <div className="text-center">
@@ -578,14 +616,16 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
                     href={`/exhibitor/reset-password${loginEmail ? `?email=${encodeURIComponent(loginEmail)}` : ''}`}
                     className="text-[10px] text-neutral-400 hover:text-[#DFBA87] underline underline-offset-4 tracking-wider transition-colors inline-block"
                   >
-                    忘記密碼？以安全驗證碼重設密碼 Reset Password
+                    {t('忘記密碼？以安全驗證碼重設密碼 Reset Password', 'Forgot password? Reset password with security code')}
                   </Link>
                 </div>
               </div>
 
               <div className="relative flex py-2 items-center">
                 <div className="flex-grow border-t border-white/5"></div>
-                <span className="flex-shrink mx-4 text-[9px] text-neutral-500 font-semibold tracking-widest uppercase">或者 OR</span>
+                <span className="flex-shrink mx-4 text-[9px] text-neutral-500 font-semibold tracking-widest uppercase">
+                  {t('或者 OR', 'OR')}
+                </span>
                 <div className="flex-grow border-t border-white/5"></div>
               </div>
 
@@ -596,7 +636,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
                 disabled={loginLoading}
                 className="w-full border border-dashed border-[#DFBA87]/45 hover:border-[#DFBA87] hover:bg-[#DFBA87]/5 text-[#DFBA87] py-3 rounded text-xs font-semibold tracking-[0.15em] transition-all flex items-center justify-center gap-2 disabled:opacity-50"
               >
-                <Sparkles className="w-4 h-4" /> 快速本地測試登入 (DEMO KEY)
+                <Sparkles className="w-4 h-4" /> {t('快速本地測試登入 (DEMO KEY)', 'QUICK DEMO LOGIN (DEMO KEY)')}
               </button>
 
               {loginMessage && (
@@ -618,9 +658,14 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
             <ShieldCheck className="w-6 h-6 animate-pulse" />
           </div>
           <div>
-            <h2 className="text-lg font-serif-garamond text-[#DFBA87] tracking-wider">信箱授權未核對</h2>
+            <h2 className="text-lg font-serif-garamond text-[#DFBA87] tracking-wider">
+              {t('信箱授權未核對', 'Email Authorization Pending')}
+            </h2>
             <p className="text-xs text-neutral-400 font-light leading-relaxed mt-2">
-              您已成功登入系統，但信箱 (<strong className="text-white">{userEmail}</strong>) 尚未被入選為 2027 VIS 參展品牌。
+              {t(
+                `您已成功登入系統，但信箱 (${userEmail}) 尚未被入選為 2027 VIS 參展品牌。`,
+                `You have logged in, but your email (${userEmail}) is not associated with an approved 2027 VIS exhibitor.`
+              )}
             </p>
           </div>
           <div className="space-y-3 pt-4">
@@ -628,7 +673,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               onClick={handleLogout}
               className="w-full bg-[#C9A96E] hover:bg-[#B39359] text-white py-2.5 rounded text-xs font-semibold tracking-wider transition-colors flex items-center justify-center gap-1.5"
             >
-              <LogOut className="w-3.5 h-3.5" /> 登出並返回
+              <LogOut className="w-3.5 h-3.5" /> {t('登出並返回', 'Log Out & Return')}
             </button>
           </div>
         </div>
@@ -650,7 +695,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
       {/* Fixed dashboard light bg pattern */}
       <div className="fixed inset-0 pointer-events-none opacity-[0.02] bg-[radial-gradient(circle_at_center,#C9A96E_1px,transparent_1px)] bg-[size:24px_24px] z-0" />
 
-      {/* Mobile Sticky Top Header */}
+      {/* Mobile Sticky Top Header with English Toggle */}
       <div className="md:hidden sticky top-0 bg-[#0D0D0D]/90 backdrop-blur-md border-b border-white/5 z-50 p-4 flex justify-between items-center w-full">
         <Link href="/exhibitor/portal">
           <img 
@@ -659,18 +704,33 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
             className="h-7 filter invert brightness-200"
           />
         </Link>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5">
+          {/* Prominent Mobile English Toggle */}
+          <button
+            type="button"
+            onClick={toggleLang}
+            className={`px-2.5 py-1.5 rounded-md border text-xs font-bold flex items-center gap-1 transition-all ${
+              lang === 'en'
+                ? 'bg-[#DFBA87] text-black border-[#DFBA87]'
+                : 'bg-[#DFBA87]/15 text-[#DFBA87] border-[#DFBA87]/40 hover:border-[#DFBA87]'
+            }`}
+            title={lang === 'zh' ? '一鍵轉英文 Switch to English' : '切換繁體中文 Switch to Chinese'}
+          >
+            <Globe className="w-3.5 h-3.5" />
+            <span>{lang === 'zh' ? 'EN 英文' : '中文'}</span>
+          </button>
+
           <Link
             href="/exhibitor/portal/leads?scan=true"
             className="p-1.5 bg-[#DFBA87] text-black rounded text-xs flex items-center gap-1 font-semibold shadow-md shadow-[#DFBA87]/20"
-            title="現場接待掃碼"
+            title={t('現場接待掃碼', 'VIP Check-in')}
           >
             <QrCode className="w-4 h-4" />
-            <span className="text-[11px]">接待掃碼</span>
+            <span className="text-[11px]">{t('接待掃碼', 'Scan')}</span>
           </Link>
           <button 
             onClick={() => setIsSidebarOpen(prev => !prev)}
-            className="text-[#DFBA87] hover:text-white transition-colors"
+            className="text-[#DFBA87] hover:text-white transition-colors p-1"
           >
             {isSidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -683,7 +743,7 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
         transform md:transform-none transition-transform duration-300 ease-in-out flex flex-col justify-between
         ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <div className="p-6 space-y-8">
+        <div className="p-6 space-y-6">
           {/* Logo block */}
           <div className="hidden md:block">
             <Link href="/exhibitor/portal">
@@ -694,17 +754,56 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
               />
             </Link>
             <p className="text-[9px] text-[#DFBA87] font-light tracking-[0.2em] uppercase mt-2">
-              Exhibitor Collaboration
+              {t('參展品牌協作中心', 'Exhibitor Collaboration')}
             </p>
           </div>
 
           {/* Brand Info Display Card */}
           <div className="bg-white/[0.02] border border-white/5 rounded p-4 space-y-2">
             <span className="text-[9px] text-neutral-500 uppercase tracking-widest font-mono block">Current Brand</span>
-            <h3 className="text-sm font-semibold text-white tracking-wide">{brandData?.brand_name_zh}</h3>
-            <p className="text-[10px] text-neutral-400 font-light truncate">{brandData?.brand_name_en}</p>
+            <h3 className="text-sm font-semibold text-white tracking-wide">
+              {lang === 'en' ? (brandData?.brand_name_en || brandData?.brand_name_zh) : brandData?.brand_name_zh}
+            </h3>
+            <p className="text-[10px] text-neutral-400 font-light truncate">
+              {lang === 'en' ? brandData?.brand_name_zh : (brandData?.brand_name_en || '')}
+            </p>
             <div className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded bg-[#C9A96E]/10 border border-[#C9A96E]/20 text-[9px] text-[#DFBA87]">
-              <span>展位規格: {formatBoothDisplay(brandData?.booth_type, brandData?.zone_id)}</span>
+              <span>{t('展位規格: ', 'Booth: ')}{formatBoothDisplay(brandData?.booth_type, brandData?.zone_id)}</span>
+            </div>
+          </div>
+
+          {/* Bilingual Switcher Card in Sidebar */}
+          <div className="bg-[#141414] border border-white/5 rounded-lg p-2.5 space-y-1.5">
+            <div className="flex items-center justify-between text-[10px] text-neutral-400 font-mono">
+              <span className="flex items-center gap-1.5 text-neutral-300">
+                <Globe className="w-3 h-3 text-[#DFBA87]" />
+                <span>{t('語系切換 LANGUAGE', 'PORTAL LANGUAGE')}</span>
+              </span>
+              <span className="text-[9px] text-[#DFBA87] font-bold">{lang === 'en' ? 'ENGLISH' : '繁體中文'}</span>
+            </div>
+            <div className="grid grid-cols-2 gap-1.5 pt-0.5">
+              <button
+                type="button"
+                onClick={() => setLang('zh')}
+                className={`py-1.5 rounded text-xs font-semibold tracking-wider transition-all text-center ${
+                  lang === 'zh' 
+                    ? 'bg-[#DFBA87] text-black font-bold shadow-sm' 
+                    : 'bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                繁體中文
+              </button>
+              <button
+                type="button"
+                onClick={() => setLang('en')}
+                className={`py-1.5 rounded text-xs font-semibold tracking-wider transition-all text-center ${
+                  lang === 'en' 
+                    ? 'bg-[#DFBA87] text-black font-bold shadow-sm' 
+                    : 'bg-white/5 text-neutral-400 hover:text-white hover:bg-white/10'
+                }`}
+              >
+                English
+              </button>
             </div>
           </div>
 
@@ -715,11 +814,11 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
             className="flex items-center justify-center gap-2 w-full py-2.5 px-3 bg-[#DFBA87] hover:bg-[#c9a370] text-black font-semibold text-xs rounded transition-all shadow-md shadow-[#DFBA87]/20 cursor-pointer"
           >
             <QrCode className="w-4 h-4" />
-            <span>📷 現場貴賓接待掃碼</span>
+            <span>{t('📷 現場貴賓接待掃碼', '📷 Concierge VIP Check-in')}</span>
           </Link>
 
           {/* Navigation Links */}
-          <nav className="space-y-2">
+          <nav className="space-y-1.5">
             {getNavItems().map((item) => {
               const isActive = pathname === item.href;
               if (item.disabled) {
@@ -766,14 +865,14 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
 
           {/* Admin Mode Switcher Button */}
           {ADMIN_EMAILS.map(e => e.toLowerCase().trim()).includes((userEmail || '').toLowerCase().trim()) && (
-            <div className="pt-4 border-t border-white/5 mt-4">
+            <div className="pt-2 border-t border-white/5 mt-2">
               <Link
                 href="/exhibitor/admin"
                 className="flex items-center justify-between p-3 rounded text-xs tracking-wider border border-[#DFBA87]/40 bg-[#DFBA87]/10 text-[#DFBA87] hover:bg-[#DFBA87]/20 transition-all font-medium"
               >
                 <div className="flex items-center gap-2.5">
                   <ShieldCheck className="w-4 h-4 text-[#DFBA87]" />
-                  <span>大會審查管理後台</span>
+                  <span>{t('大會審查管理後台', 'Admin Review Dashboard')}</span>
                 </div>
                 <ArrowRight className="w-3.5 h-3.5" />
               </Link>
@@ -791,16 +890,64 @@ export default function ExhibitorPortalLayout({ children }: { children: React.Re
             onClick={handleLogout}
             className="w-full border border-white/5 hover:border-white/20 bg-white/5 text-neutral-400 hover:text-white py-2 rounded text-xs tracking-widest uppercase transition-colors flex items-center justify-center gap-2"
           >
-            <LogOut className="w-3.5 h-3.5" /> 登出 LOGOUT
+            <LogOut className="w-3.5 h-3.5" /> {t('登出 LOGOUT', 'LOG OUT')}
           </button>
         </div>
       </aside>
 
       {/* Main Content Area */}
       <main className="flex-grow p-6 md:p-12 z-10 relative overflow-x-hidden">
+        
+        {/* Prominent Desktop Top Header Bar with One-Click English Button */}
+        <header className="hidden md:flex items-center justify-between pb-6 mb-8 border-b border-white/5">
+          <div className="flex items-center gap-3">
+            <span className="text-xs uppercase tracking-widest text-neutral-400 font-mono">
+              {t('參展品牌協作中心', 'Exhibitor Portal')} /
+            </span>
+            <span className="text-sm font-semibold text-white tracking-wide">
+              {lang === 'en' ? (brandData?.brand_name_en || brandData?.brand_name_zh) : brandData?.brand_name_zh}
+            </span>
+            <span className="text-[10px] px-2 py-0.5 rounded bg-[#C9A96E]/10 border border-[#C9A96E]/20 text-[#DFBA87]">
+              {formatBoothDisplay(brandData?.booth_type, brandData?.zone_id)}
+            </span>
+          </div>
+
+          {/* Prominent One-Click English / Chinese Toggle Button */}
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleLang}
+              className={`
+                px-4 py-2 rounded-full border transition-all duration-300 flex items-center gap-2.5 font-semibold text-xs tracking-wider cursor-pointer shadow-lg
+                ${lang === 'en'
+                  ? 'bg-[#DFBA87] text-black border-[#DFBA87] hover:bg-[#c9a370] shadow-[#DFBA87]/20 font-bold'
+                  : 'bg-[#181818] hover:bg-[#DFBA87]/20 text-[#DFBA87] border-[#DFBA87]/50 hover:border-[#DFBA87] shadow-black/50'
+                }
+              `}
+              title={lang === 'zh' ? '點擊一鍵轉英文 (One-Click English Translation)' : '點擊切換為繁體中文 (Switch to Traditional Chinese)'}
+            >
+              <Globe className="w-4 h-4" />
+              <span>{lang === 'zh' ? '🌐 一鍵轉英文 English' : '🌐 切換繁體中文 (Chinese)'}</span>
+              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold uppercase tracking-wider ${lang === 'en' ? 'bg-black text-[#DFBA87]' : 'bg-[#DFBA87]/20 text-[#DFBA87]'}`}>
+                {lang === 'en' ? 'EN ACTIVE' : 'ONE-CLICK'}
+              </span>
+            </button>
+          </div>
+        </header>
+
         {children}
       </main>
 
     </div>
+  );
+}
+
+export default function ExhibitorPortalLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <ExhibitorLanguageProvider>
+      <ExhibitorPortalLayoutContent>
+        {children}
+      </ExhibitorPortalLayoutContent>
+    </ExhibitorLanguageProvider>
   );
 }
