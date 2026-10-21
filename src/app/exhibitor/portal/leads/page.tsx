@@ -73,6 +73,7 @@ export default function ExhibitorLeadsPage() {
   const [isScanning, setIsScanning] = useState(false);
   const [scannerError, setScannerError] = useState<string | null>(null);
   const scannerRef = useRef<any>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Guest Identification State
   const [guestSearchInput, setGuestSearchInput] = useState('');
@@ -313,17 +314,62 @@ export default function ExhibitorLeadsPage() {
     setIsScanning(false);
   };
 
+  // 3b. Mobile File / Native Camera Photo QR Scan Handler
+  const handleFileUploadScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    try {
+      setIsSearchingGuest(true);
+      setScannerError(null);
+      const { Html5Qrcode } = await import('html5-qrcode');
+      let tempEl = document.getElementById('concierge-qr-file-temp');
+      if (!tempEl) {
+        tempEl = document.createElement('div');
+        tempEl.id = 'concierge-qr-file-temp';
+        tempEl.style.display = 'none';
+        document.body.appendChild(tempEl);
+      }
+      const fileScanner = new Html5Qrcode('concierge-qr-file-temp');
+      const decodedText = await fileScanner.scanFile(file, true);
+      try { fileScanner.clear(); } catch {}
+      handleQRScanned(decodedText);
+    } catch (err: any) {
+      console.warn('File QR decode failed:', err);
+      setScannerError('未能在此相片中辨識出 QR Code，請確認條碼清晰度，或點擊下方切換為手動查詢。');
+      setIsSearchingGuest(false);
+    } finally {
+      if (fileInputRef.current) fileInputRef.current.value = '';
+    }
+  };
+
   // 4. Resolve Guest from QR Scan or Manual Input
   const handleQRScanned = async (decodedText: string) => {
     stopScanner();
     playChime('beep');
 
-    // Decode format: [userId]:[timestamp] or raw email or UUID
-    const parts = decodedText.split(':');
-    const rawVal = parts[0]?.trim();
+    let cleanTerm = (decodedText || '').trim();
 
-    if (!rawVal) return;
-    await resolveGuestIdentity(rawVal);
+    // Check if URL (e.g. customer shows a dashboard or registration URL)
+    if (cleanTerm.startsWith('http://') || cleanTerm.startsWith('https://')) {
+      try {
+        const parsed = new URL(cleanTerm);
+        cleanTerm = parsed.searchParams.get('u') || 
+                    parsed.searchParams.get('id') || 
+                    parsed.searchParams.get('email') || 
+                    parsed.pathname.split('/').filter(Boolean).pop() || 
+                    cleanTerm;
+      } catch {}
+    }
+
+    // Decode standard VIS QR format: [userId]:[timestamp]
+    if (cleanTerm.includes(':')) {
+      const parts = cleanTerm.split(':');
+      cleanTerm = parts[0]?.trim() || cleanTerm;
+    }
+
+    if (!cleanTerm) return;
+    await resolveGuestIdentity(cleanTerm);
   };
 
   const resolveGuestIdentity = async (searchTerm: string) => {
@@ -334,36 +380,56 @@ export default function ExhibitorLeadsPage() {
       const term = searchTerm.toLowerCase().trim();
       let resolved: any = null;
 
-      // Case A: UUID match in users table
+      // Case A: UUID match (36 chars with dashes)
       if (term.length === 36 && term.includes('-')) {
-        const { data: uData } = await supabase
-          .from('users')
+        // 1. Check vip_allowlist by ID first
+        const { data: alById } = await supabase
+          .from('vip_allowlist')
           .select('*')
           .eq('id', term)
           .maybeSingle();
 
-        if (uData) {
-          // Cross-reference allowlist for tier & company
-          const { data: alData } = await supabase
-            .from('vip_allowlist')
-            .select('*')
-            .ilike('email', uData.email)
-            .maybeSingle();
-
+        if (alById) {
           resolved = {
-            id: uData.id,
-            email: uData.email,
-            name: alData?.name || uData.name || null,
-            phone: uData.phone || null,
-            tier: (alData?.tier as 'VIP' | 'SVIP') || 'VIP',
-            role: alData?.role || 'VIP 貴賓',
-            company: alData?.company || null,
+            id: alById.id,
+            email: alById.email,
+            name: alById.name || null,
+            phone: null,
+            tier: (alById.tier as 'VIP' | 'SVIP') || 'VIP',
+            role: alById.role || 'VIP 貴賓',
+            company: alById.company || null,
             isVerified: true
           };
+        } else {
+          // 2. Check users table
+          const { data: uData } = await supabase
+            .from('users')
+            .select('*')
+            .eq('id', term)
+            .maybeSingle();
+
+          if (uData) {
+            const { data: alData } = await supabase
+              .from('vip_allowlist')
+              .select('*')
+              .ilike('email', uData.email)
+              .maybeSingle();
+
+            resolved = {
+              id: uData.id,
+              email: uData.email,
+              name: alData?.name || null,
+              phone: null,
+              tier: (alData?.tier as 'VIP' | 'SVIP') || 'VIP',
+              role: alData?.role || 'VIP 貴賓',
+              company: alData?.company || null,
+              isVerified: true
+            };
+          }
         }
       }
 
-      // Case B: Search by email in users or vip_allowlist
+      // Case B: Search by email in vip_allowlist or users
       if (!resolved && term.includes('@')) {
         const { data: alData } = await supabase
           .from('vip_allowlist')
@@ -371,56 +437,63 @@ export default function ExhibitorLeadsPage() {
           .ilike('email', term)
           .maybeSingle();
 
-        const { data: uData } = await supabase
-          .from('users')
-          .select('*')
-          .ilike('email', term)
-          .maybeSingle();
-
-        if (alData || uData) {
+        if (alData) {
           resolved = {
-            id: uData?.id,
-            email: alData?.email || uData?.email || term,
-            name: alData?.name || uData?.name || null,
-            phone: uData?.phone || null,
-            tier: (alData?.tier as 'VIP' | 'SVIP') || 'VIP',
-            role: alData?.role || 'VIP 貴賓',
-            company: alData?.company || null,
+            id: alData.id,
+            email: alData.email,
+            name: alData.name || null,
+            phone: null,
+            tier: (alData.tier as 'VIP' | 'SVIP') || 'VIP',
+            role: alData.role || 'VIP 貴賓',
+            company: alData.company || null,
             isVerified: true
           };
-        }
-      }
-
-      // Case C: Search by phone or name in users
-      if (!resolved && term.length >= 3) {
-        const { data: uList } = await supabase
-          .from('users')
-          .select('*')
-          .or(`phone.ilike.%${term}%,name.ilike.%${term}%`)
-          .limit(1);
-
-        if (uList && uList.length > 0) {
-          const u = uList[0];
-          const { data: alData } = await supabase
-            .from('vip_allowlist')
+        } else {
+          const { data: uData } = await supabase
+            .from('users')
             .select('*')
-            .ilike('email', u.email)
+            .ilike('email', term)
             .maybeSingle();
 
+          if (uData) {
+            resolved = {
+              id: uData.id,
+              email: uData.email,
+              name: null,
+              phone: null,
+              tier: 'VIP',
+              role: 'VIP 貴賓',
+              company: null,
+              isVerified: true
+            };
+          }
+        }
+      }
+
+      // Case C: Search by name in vip_allowlist
+      if (!resolved && term.length >= 2) {
+        const { data: alList } = await supabase
+          .from('vip_allowlist')
+          .select('*')
+          .or(`name.ilike.%${term}%,email.ilike.%${term}%`)
+          .limit(1);
+
+        if (alList && alList.length > 0) {
+          const al = alList[0];
           resolved = {
-            id: u.id,
-            email: u.email,
-            name: alData?.name || u.name || null,
-            phone: u.phone || null,
-            tier: (alData?.tier as 'VIP' | 'SVIP') || 'VIP',
-            role: alData?.role || 'VIP 貴賓',
-            company: alData?.company || null,
+            id: al.id,
+            email: al.email,
+            name: al.name || null,
+            phone: null,
+            tier: (al.tier as 'VIP' | 'SVIP') || 'VIP',
+            role: al.role || 'VIP 貴賓',
+            company: al.company || null,
             isVerified: true
           };
         }
       }
 
-      // Case D: Not in system yet - allow on-site quick entry
+      // Case D: Not in system yet - allow on-site quick entry if valid email
       if (!resolved) {
         if (term.includes('@')) {
           resolved = {
@@ -704,12 +777,20 @@ export default function ExhibitorLeadsPage() {
       {tableMissingWarning && (
         <div className="p-4 rounded-lg bg-amber-500/10 border border-amber-500/30 flex items-start gap-3 text-amber-200 text-xs">
           <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
-          <div className="space-y-1">
+          <div className="space-y-1 flex-1">
             <div className="font-semibold text-amber-300">資料庫商機名單資料表尚未建立提示</div>
             <p className="text-neutral-300">
               系統目前以本地安全快取紀錄商機名單。請於 Supabase Dashboard 的 SQL Editor 中貼上並執行本專案根目錄的 <code className="bg-black/50 px-1 py-0.5 rounded text-[#DFBA87]">supabase_phase2_concierge_leads.sql</code> 腳本以啟用雲端持久化儲存。
             </p>
           </div>
+          <button
+            type="button"
+            onClick={() => setTableMissingWarning(false)}
+            className="text-neutral-400 hover:text-white p-1 rounded hover:bg-white/5 transition-colors cursor-pointer"
+            title="關閉提示"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
       )}
 
@@ -1066,7 +1147,7 @@ export default function ExhibitorLeadsPage() {
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              className="bg-[#141414] border border-[#DFBA87]/40 rounded-xl max-w-xl w-full p-5 md:p-6 text-left space-y-5 shadow-2xl relative my-auto"
+              className="bg-[#141414] border border-[#DFBA87]/40 rounded-xl max-w-xl w-full p-4 sm:p-6 text-left space-y-4 sm:space-y-5 shadow-2xl relative my-auto max-h-[92vh] overflow-y-auto custom-scrollbar"
             >
               
               {/* Modal Header */}
@@ -1130,8 +1211,8 @@ export default function ExhibitorLeadsPage() {
                   {/* Camera Viewfinder */}
                   {inputMode === 'camera' && (
                     <div className="space-y-3">
-                      <div className="relative mx-auto aspect-square max-w-[280px] bg-black rounded-lg overflow-hidden border border-white/15 flex items-center justify-center">
-                        <div id="concierge-qr-reader" className="w-full h-full" />
+                      <div className="relative mx-auto aspect-square max-w-[280px] w-full bg-black rounded-lg overflow-hidden border border-white/15 flex items-center justify-center shadow-inner">
+                        <div id="concierge-qr-reader" className="w-full h-full [&_video]:object-cover [&_video]:w-full [&_video]:h-full [&_video]:rounded-lg" />
                         
                         {/* Target Overlay */}
                         <div className="pointer-events-none absolute inset-0 border-2 border-[#DFBA87]/40 rounded-lg flex items-center justify-center">
@@ -1144,16 +1225,37 @@ export default function ExhibitorLeadsPage() {
                         </div>
 
                         {isSearchingGuest && (
-                          <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center space-y-2 z-10">
+                          <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center space-y-2 z-10 backdrop-blur-xs">
                             <Loader2 className="w-6 h-6 animate-spin text-[#DFBA87]" />
                             <span className="text-xs text-neutral-300 font-mono">驗證貴賓身分中...</span>
                           </div>
                         )}
                       </div>
 
-                      <p className="text-[11px] text-center text-neutral-400">
-                        請對準顧客手機出示的 <span className="text-[#DFBA87]">VIS 數位貴賓卡 QR Code</span>
-                      </p>
+                      <div className="space-y-2 text-center">
+                        <p className="text-[11px] text-neutral-400">
+                          手機鏡頭對準顧客出示的 <span className="text-[#DFBA87]">VIS 數位貴賓卡 QR Code</span>
+                        </p>
+
+                        {/* File Upload / Native Camera Capture Fallback for Mobile */}
+                        <div className="flex items-center justify-center gap-2 pt-0.5">
+                          <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept="image/*"
+                            onChange={handleFileUploadScan}
+                            className="hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => fileInputRef.current?.click()}
+                            className="px-3 py-1.5 rounded-full bg-white/5 hover:bg-white/10 border border-white/10 text-neutral-300 text-[11px] flex items-center gap-1.5 transition-colors cursor-pointer"
+                          >
+                            <Camera className="w-3.5 h-3.5 text-[#DFBA87]" />
+                            <span>手機相簿／拍照辨識</span>
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
 
