@@ -467,7 +467,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
             <ul className="list-disc pl-5 space-y-1.5 text-neutral-400">
               <li>參展品牌須依大會統一規劃進行展位搭設與陳列，不得擅自更改位置或超出大會提供之範圍。</li>
               <li>展位設計需符合安全規範（電力負載、防火材料等），並於進場前完成安全檢查。</li>
-              <li>禁止於展區內進行任何危險行為或擺放易燃、易爆、違禁品。</li>
+              <li>未經許可，禁止於展區內進行任何危險行為或擺放易燃、易爆、違禁品。</li>
             </ul>
           </div>
         </div>
