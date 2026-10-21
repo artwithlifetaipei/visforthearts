@@ -37,7 +37,21 @@ function safeSetStorage(key: string, value: string): void {
 export default function ArtworkDetailPage() {
   const params = useParams();
   const router = useRouter();
-  const productId = params?.id as string;
+
+  // Bulletproof clean ID extraction with multiple fallbacks
+  const getCleanProductId = (): string => {
+    if (params?.id) {
+      const raw = Array.isArray(params.id) ? params.id[0] : params.id;
+      if (raw && raw !== '[id]') return raw.trim();
+    }
+    if (typeof window !== 'undefined' && window.location.pathname) {
+      const match = window.location.pathname.match(/\/vip\/product\/([^/?#]+)/i);
+      if (match && match[1] && match[1] !== '[id]') {
+        return decodeURIComponent(match[1]).trim();
+      }
+    }
+    return '';
+  };
 
   const [product, setProduct] = useState<any>(null);
   const [loading, setLoading] = useState(true);
@@ -59,68 +73,107 @@ export default function ArtworkDetailPage() {
   const [inquirySent, setInquirySent] = useState(false);
 
   useEffect(() => {
-    const init = async () => {
-      // 1. Check existing authenticated session or stored email
-      let currentEmail = '';
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session?.user?.email) {
-          currentEmail = session.user.email.toLowerCase().trim();
-          setUserEmail(currentEmail);
-          safeSetStorage('vis_vip_email', currentEmail);
-        } else {
-          const cached = safeGetStorage('vis_vip_email');
-          if (cached) {
-            currentEmail = cached;
-            setUserEmail(cached);
-          }
-        }
-      } catch {
-        // Non-blocking
+    let isMounted = true;
+
+    // Hard safety timeout: guarantee loading spinner is NEVER stuck longer than 3.5s under any condition
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }, 3500);
+
+    const loadData = async () => {
+      let id = getCleanProductId();
+
+      // In case Next.js App Router client hydration is completing:
+      if (!id && typeof window !== 'undefined') {
+        await new Promise((resolve) => setTimeout(resolve, 80));
+        id = getCleanProductId();
       }
 
-      // 2. Fetch product details
-      if (!productId) return;
+      if (!id) {
+        if (isMounted) setLoading(false);
+        return;
+      }
 
+      // 1. Immediately fetch artwork details (NO blocking on auth session!)
       try {
         const { data, error } = await supabase
           .from('exhibitor_products')
           .select('*')
-          .eq('id', productId)
+          .eq('id', id)
           .maybeSingle();
 
         if (error) {
           console.error('Fetch product error:', error);
         }
 
-        if (data) {
+        if (data && isMounted) {
           setProduct(data);
+        }
+      } catch (err) {
+        console.error('Fetch artwork exception:', err);
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
+      }
 
-          // Check if already in user's collection
-          if (currentEmail) {
+      // 2. Non-blocking background check for session & VIP collection status
+      (async () => {
+        try {
+          let currentEmail = '';
+          const cached = safeGetStorage('vis_vip_email');
+          if (cached) {
+            currentEmail = cached;
+            if (isMounted) setUserEmail(cached);
+          }
+
+          // Race getSession with a 1.2s timeout so mobile browsers never hang
+          try {
+            const sessionPromise = supabase.auth.getSession();
+            const timeoutPromise = new Promise<any>((_, reject) => setTimeout(() => reject('timeout'), 1200));
+            const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
+            if (session?.user?.email) {
+              currentEmail = session.user.email.toLowerCase().trim();
+              if (isMounted) {
+                setUserEmail(currentEmail);
+                safeSetStorage('vis_vip_email', currentEmail);
+              }
+            }
+          } catch {
+            // Ignore session race errors/timeouts
+          }
+
+          if (currentEmail && id && isMounted) {
             try {
               const { data: col } = await supabase
                 .from('vip_collections')
                 .select('id')
                 .eq('vip_email', currentEmail)
-                .eq('product_id', productId)
+                .eq('product_id', id)
                 .maybeSingle();
 
-              if (col) setIsSaved(true);
+              if (col && isMounted) {
+                setIsSaved(true);
+              }
             } catch {
               // Non-blocking
             }
           }
+        } catch {
+          // Non-blocking
         }
-      } catch (err) {
-        console.error('Fetch artwork exception:', err);
-      } finally {
-        setLoading(false);
-      }
+      })();
     };
 
-    init();
-  }, [productId]);
+    loadData();
+
+    return () => {
+      isMounted = false;
+      clearTimeout(safetyTimer);
+    };
+  }, [params?.id]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);

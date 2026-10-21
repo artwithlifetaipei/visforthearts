@@ -25,6 +25,8 @@ export default function VIPDashboard() {
     const [showExploreModal, setShowExploreModal] = useState(false);
     const [isScannerOpen, setIsScannerOpen] = useState(false);
     const scannerRef = useRef<any>(null);
+    const isScannerProcessingRef = useRef(false);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [scannerError, setScannerError] = useState<string | null>(null);
 
     useEffect(() => {
@@ -249,9 +251,24 @@ export default function VIPDashboard() {
         }
     };
 
+    const extractProductIdFromText = (text: string): string => {
+        const clean = (text || '').trim();
+        if (clean.includes('/vip/product/')) {
+            const parts = clean.split('/vip/product/');
+            return parts[1].split('?')[0].split('#')[0].replace(/\/+$/, '').trim();
+        }
+        // Match UUID directly if scanned
+        if (/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(clean)) {
+            return clean;
+        }
+        return '';
+    };
+
     const handleStartScanner = () => {
         setIsScannerOpen(true);
         setScannerError(null);
+        isScannerProcessingRef.current = false;
+
         setTimeout(() => {
             import('html5-qrcode').then((module) => {
                 const Html5Qrcode = module.Html5Qrcode;
@@ -260,27 +277,75 @@ export default function VIPDashboard() {
                 scanner.start(
                     { facingMode: 'environment' },
                     { fps: 10, qrbox: { width: 220, height: 220 } },
-                    (decodedText: string) => {
-                        if (decodedText.includes('/vip/product/')) {
-                            const parts = decodedText.split('/vip/product/');
-                            const prodId = parts[1].split('?')[0].split('#')[0];
-                            scanner.stop().then(() => {
-                                setIsScannerOpen(false);
-                                router.push(`/vip/product/${prodId}`);
-                            }).catch(() => {
-                                router.push(`/vip/product/${prodId}`);
-                            });
-                        } else if (decodedText.startsWith('http')) {
+                    async (decodedText: string) => {
+                        if (isScannerProcessingRef.current) return;
+                        isScannerProcessingRef.current = true;
+
+                        const prodId = extractProductIdFromText(decodedText);
+                        if (prodId) {
+                            try {
+                                await scanner.stop();
+                            } catch {}
+                            setIsScannerOpen(false);
+                            router.push(`/vip/product/${prodId}`);
+                        } else if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
+                            try {
+                                await scanner.stop();
+                            } catch {}
+                            setIsScannerOpen(false);
                             window.location.href = decodedText;
+                        } else {
+                            isScannerProcessingRef.current = false;
                         }
                     },
                     () => {}
                 ).catch((err) => {
                     console.warn('Camera failed to start:', err);
-                    setScannerError('無法啟動相機鏡頭，請確認瀏覽器已允許相機權限，或直接使用手機內建相機掃碼。');
+                    setScannerError('無法啟動相機鏡頭，請確認瀏覽器已允許相機權限，或使用下方拍照/相片上傳。');
                 });
             });
         }, 300);
+    };
+
+    const handleFileUploadScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        if (isScannerProcessingRef.current) return;
+        isScannerProcessingRef.current = true;
+
+        try {
+            setScannerError(null);
+            const { Html5Qrcode } = await import('html5-qrcode');
+            let tempEl = document.getElementById('vip-artwork-file-temp');
+            if (!tempEl) {
+                tempEl = document.createElement('div');
+                tempEl.id = 'vip-artwork-file-temp';
+                tempEl.style.display = 'none';
+                document.body.appendChild(tempEl);
+            }
+            const fileScanner = new Html5Qrcode('vip-artwork-file-temp');
+            const decodedText = await fileScanner.scanFile(file, true);
+            try { fileScanner.clear(); } catch {}
+
+            const prodId = extractProductIdFromText(decodedText);
+            if (prodId) {
+                handleCloseScanner();
+                router.push(`/vip/product/${prodId}`);
+            } else if (decodedText.startsWith('http://') || decodedText.startsWith('https://')) {
+                handleCloseScanner();
+                window.location.href = decodedText;
+            } else {
+                setScannerError('未能辨識為作品條碼，請確認是否為 VIS 作品立牌 QR Code。');
+                isScannerProcessingRef.current = false;
+            }
+        } catch (err) {
+            console.warn('File QR decode failed:', err);
+            setScannerError('未能在此相片中辨識出 QR Code，請確認條碼清晰度或靠近重拍。');
+            isScannerProcessingRef.current = false;
+        } finally {
+            if (fileInputRef.current) fileInputRef.current.value = '';
+        }
     };
 
     const handleCloseScanner = () => {
@@ -679,6 +744,27 @@ export default function VIPDashboard() {
                                         </button>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Hidden file input for native camera / gallery fallback */}
+                            <input
+                                type="file"
+                                ref={fileInputRef}
+                                accept="image/*"
+                                capture="environment"
+                                onChange={handleFileUploadScan}
+                                className="hidden"
+                            />
+
+                            <div className="flex gap-2 pt-1">
+                                <button
+                                    type="button"
+                                    onClick={() => fileInputRef.current?.click()}
+                                    className="w-full py-2.5 px-3 bg-white/5 hover:bg-white/10 border border-white/20 rounded text-[11px] font-sans text-neutral-300 flex items-center justify-center gap-2 transition-colors cursor-pointer"
+                                >
+                                    <Camera className="w-3.5 h-3.5 text-[#DFBA87]" />
+                                    <span>拍照 / 從相簿上傳立牌條碼</span>
+                                </button>
                             </div>
 
                             <p className="text-[10px] text-neutral-400 font-light leading-relaxed">
