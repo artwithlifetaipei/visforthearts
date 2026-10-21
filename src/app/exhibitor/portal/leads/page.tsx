@@ -73,6 +73,7 @@ export default function ExhibitorLeadsPage() {
   const [scannerError, setScannerError] = useState<string | null>(null);
   const scannerRef = useRef<any>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const isProcessingRef = useRef(false);
 
   // Guest Identification State
   const [guestSearchInput, setGuestSearchInput] = useState('');
@@ -298,15 +299,18 @@ export default function ExhibitorLeadsPage() {
     }, 200);
   };
 
-  const stopScanner = () => {
+  const stopScanner = async () => {
     if (scannerRef.current) {
-      try {
-        if (scannerRef.current.isScanning) {
-          scannerRef.current.stop().catch(() => {});
-        }
-        scannerRef.current.clear();
-      } catch {}
+      const scanner = scannerRef.current;
       scannerRef.current = null;
+      try {
+        if (scanner.isScanning) {
+          await scanner.stop();
+        }
+        scanner.clear();
+      } catch (err) {
+        console.warn('stopScanner warning:', err);
+      }
     }
     setIsScanning(false);
   };
@@ -315,6 +319,9 @@ export default function ExhibitorLeadsPage() {
   const handleFileUploadScan = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
 
     try {
       setIsSearchingGuest(true);
@@ -330,11 +337,13 @@ export default function ExhibitorLeadsPage() {
       const fileScanner = new Html5Qrcode('concierge-qr-file-temp');
       const decodedText = await fileScanner.scanFile(file, true);
       try { fileScanner.clear(); } catch {}
-      handleQRScanned(decodedText);
+      isProcessingRef.current = false;
+      await handleQRScanned(decodedText);
     } catch (err: any) {
       console.warn('File QR decode failed:', err);
       setScannerError('未能在此相片中辨識出 QR Code，請確認條碼清晰度，或點擊下方切換為手動查詢。');
       setIsSearchingGuest(false);
+      isProcessingRef.current = false;
     } finally {
       if (fileInputRef.current) fileInputRef.current.value = '';
     }
@@ -342,30 +351,46 @@ export default function ExhibitorLeadsPage() {
 
   // 4. Resolve Guest from QR Scan or Manual Input
   const handleQRScanned = async (decodedText: string) => {
-    stopScanner();
+    if (isProcessingRef.current) return;
+    isProcessingRef.current = true;
+
+    await stopScanner();
     playChime('beep');
 
     let cleanTerm = (decodedText || '').trim();
 
-    // Check if URL (e.g. customer shows a dashboard or registration URL)
+    // 1. JSON parse fallback
+    if (cleanTerm.startsWith('{') && cleanTerm.endsWith('}')) {
+      try {
+        const obj = JSON.parse(cleanTerm);
+        cleanTerm = obj.id || obj.userId || obj.email || cleanTerm;
+      } catch {}
+    }
+
+    // 2. URL parse (e.g. customer shows a dashboard, ticket or registration URL)
     if (cleanTerm.startsWith('http://') || cleanTerm.startsWith('https://')) {
       try {
         const parsed = new URL(cleanTerm);
-        cleanTerm = parsed.searchParams.get('u') || 
-                    parsed.searchParams.get('id') || 
+        cleanTerm = parsed.searchParams.get('id') || 
+                    parsed.searchParams.get('u') || 
                     parsed.searchParams.get('email') || 
+                    parsed.searchParams.get('ticket') || 
                     parsed.pathname.split('/').filter(Boolean).pop() || 
                     cleanTerm;
       } catch {}
     }
 
-    // Decode standard VIS QR format: [userId]:[timestamp]
+    // 3. Decode standard VIS QR format: [userId]:[timestamp]
     if (cleanTerm.includes(':')) {
       const parts = cleanTerm.split(':');
       cleanTerm = parts[0]?.trim() || cleanTerm;
     }
 
-    if (!cleanTerm) return;
+    if (!cleanTerm) {
+      isProcessingRef.current = false;
+      return;
+    }
+
     await resolveGuestIdentity(cleanTerm);
   };
 
@@ -373,124 +398,235 @@ export default function ExhibitorLeadsPage() {
     setIsSearchingGuest(true);
     setScannerError(null);
 
-    try {
+    // Guaranteed 6s safety timeout so the spinner can NEVER hang indefinitely
+    const timeoutPromise = new Promise((_, reject) => 
+      setTimeout(() => reject(new Error('TIMEOUT')), 6000)
+    );
+
+    const lookupWork = (async () => {
       const term = searchTerm.toLowerCase().trim();
       let resolved: any = null;
 
-      // Case A: UUID match (36 chars with dashes)
+      // --- 1. UUID Match (36 chars with dashes) ---
       if (term.length === 36 && term.includes('-')) {
-        // 1. Check vip_allowlist by ID first
-        const { data: alById } = await supabase
-          .from('vip_allowlist')
-          .select('*')
-          .eq('id', term)
-          .maybeSingle();
-
-        if (alById) {
-          resolved = {
-            id: alById.id,
-            email: alById.email,
-            name: alById.name || null,
-            phone: null,
-            tier: (alById.tier as 'VIP' | 'SVIP') || 'VIP',
-            role: alById.role || 'VIP 貴賓',
-            company: alById.company || null,
-            isVerified: true
-          };
-        } else {
-          // 2. Check users table
-          const { data: uData } = await supabase
-            .from('users')
+        // A. Check tickets table first (matches electronic tickets & guest invitations)
+        try {
+          const { data: ticket } = await supabase
+            .from('tickets')
             .select('*')
             .eq('id', term)
             .maybeSingle();
 
-          if (uData) {
-            const { data: alData } = await supabase
-              .from('vip_allowlist')
-              .select('*')
-              .ilike('email', uData.email)
-              .maybeSingle();
-
+          if (ticket) {
             resolved = {
-              id: uData.id,
-              email: uData.email,
-              name: alData?.name || null,
+              id: ticket.id,
+              email: ticket.email,
+              name: ticket.name || null,
               phone: null,
-              tier: (alData?.tier as 'VIP' | 'SVIP') || 'VIP',
-              role: alData?.role || 'VIP 貴賓',
-              company: alData?.company || null,
+              tier: 'VIP',
+              role: ticket.brand_name ? `特邀貴賓 (${ticket.brand_name})` : 'VIS 貴賓',
+              company: ticket.brand_name || null,
               isVerified: true
             };
+          }
+        } catch (e) {
+          console.warn('Ticket lookup error:', e);
+        }
+
+        // B. Check vip_allowlist by ID
+        if (!resolved) {
+          try {
+            const { data: alById } = await supabase
+              .from('vip_allowlist')
+              .select('*')
+              .eq('id', term)
+              .maybeSingle();
+
+            if (alById) {
+              resolved = {
+                id: alById.id,
+                email: alById.email,
+                name: alById.name || null,
+                phone: null,
+                tier: (alById.tier as 'VIP' | 'SVIP') || 'VIP',
+                role: alById.role || 'VIP 貴賓',
+                company: alById.company || null,
+                isVerified: true
+              };
+            }
+          } catch (e) {
+            console.warn('Allowlist by ID error:', e);
+          }
+        }
+
+        // C. Check users table by ID
+        if (!resolved) {
+          try {
+            const { data: uData } = await supabase
+              .from('users')
+              .select('*')
+              .eq('id', term)
+              .maybeSingle();
+
+            if (uData) {
+              const { data: alData } = await supabase
+                .from('vip_allowlist')
+                .select('*')
+                .ilike('email', uData.email)
+                .maybeSingle();
+
+              resolved = {
+                id: uData.id,
+                email: uData.email,
+                name: alData?.name || null,
+                phone: null,
+                tier: (alData?.tier as 'VIP' | 'SVIP') || 'VIP',
+                role: alData?.role || 'VIP 貴賓',
+                company: alData?.company || null,
+                isVerified: true
+              };
+            }
+          } catch (e) {
+            console.warn('Users by ID error:', e);
           }
         }
       }
 
-      // Case B: Search by email in vip_allowlist or users
+      // --- 2. Search by Email ---
       if (!resolved && term.includes('@')) {
-        const { data: alData } = await supabase
-          .from('vip_allowlist')
-          .select('*')
-          .ilike('email', term)
-          .maybeSingle();
-
-        if (alData) {
-          resolved = {
-            id: alData.id,
-            email: alData.email,
-            name: alData.name || null,
-            phone: null,
-            tier: (alData.tier as 'VIP' | 'SVIP') || 'VIP',
-            role: alData.role || 'VIP 貴賓',
-            company: alData.company || null,
-            isVerified: true
-          };
-        } else {
-          const { data: uData } = await supabase
-            .from('users')
+        // Check vip_allowlist
+        try {
+          const { data: alData } = await supabase
+            .from('vip_allowlist')
             .select('*')
             .ilike('email', term)
             .maybeSingle();
 
-          if (uData) {
+          if (alData) {
             resolved = {
-              id: uData.id,
-              email: uData.email,
-              name: null,
+              id: alData.id,
+              email: alData.email,
+              name: alData.name || null,
               phone: null,
-              tier: 'VIP',
-              role: 'VIP 貴賓',
-              company: null,
+              tier: (alData.tier as 'VIP' | 'SVIP') || 'VIP',
+              role: alData.role || 'VIP 貴賓',
+              company: alData.company || null,
               isVerified: true
             };
+          }
+        } catch (e) {
+          console.warn('Allowlist by email error:', e);
+        }
+
+        // Check tickets table
+        if (!resolved) {
+          try {
+            const { data: tData } = await supabase
+              .from('tickets')
+              .select('*')
+              .ilike('email', term)
+              .maybeSingle();
+
+            if (tData) {
+              resolved = {
+                id: tData.id,
+                email: tData.email,
+                name: tData.name || null,
+                phone: null,
+                tier: 'VIP',
+                role: tData.brand_name ? `特邀貴賓 (${tData.brand_name})` : 'VIS 貴賓',
+                company: tData.brand_name || null,
+                isVerified: true
+              };
+            }
+          } catch (e) {
+            console.warn('Tickets by email error:', e);
+          }
+        }
+
+        // Check users table
+        if (!resolved) {
+          try {
+            const { data: uData } = await supabase
+              .from('users')
+              .select('*')
+              .ilike('email', term)
+              .maybeSingle();
+
+            if (uData) {
+              resolved = {
+                id: uData.id,
+                email: uData.email,
+                name: null,
+                phone: null,
+                tier: 'VIP',
+                role: 'VIP 貴賓',
+                company: null,
+                isVerified: true
+              };
+            }
+          } catch (e) {
+            console.warn('Users by email error:', e);
           }
         }
       }
 
-      // Case C: Search by name in vip_allowlist
+      // --- 3. Search by Name ---
       if (!resolved && term.length >= 2) {
-        const { data: alList } = await supabase
-          .from('vip_allowlist')
-          .select('*')
-          .or(`name.ilike.%${term}%,email.ilike.%${term}%`)
-          .limit(1);
+        // Check vip_allowlist by name
+        try {
+          const { data: alList } = await supabase
+            .from('vip_allowlist')
+            .select('*')
+            .or(`name.ilike.%${term}%,email.ilike.%${term}%`)
+            .limit(1);
 
-        if (alList && alList.length > 0) {
-          const al = alList[0];
-          resolved = {
-            id: al.id,
-            email: al.email,
-            name: al.name || null,
-            phone: null,
-            tier: (al.tier as 'VIP' | 'SVIP') || 'VIP',
-            role: al.role || 'VIP 貴賓',
-            company: al.company || null,
-            isVerified: true
-          };
+          if (alList && alList.length > 0) {
+            const al = alList[0];
+            resolved = {
+              id: al.id,
+              email: al.email,
+              name: al.name || null,
+              phone: null,
+              tier: (al.tier as 'VIP' | 'SVIP') || 'VIP',
+              role: al.role || 'VIP 貴賓',
+              company: al.company || null,
+              isVerified: true
+            };
+          }
+        } catch (e) {
+          console.warn('Allowlist by name error:', e);
+        }
+
+        // Check tickets by name
+        if (!resolved) {
+          try {
+            const { data: tList } = await supabase
+              .from('tickets')
+              .select('*')
+              .ilike('name', `%${term}%`)
+              .limit(1);
+
+            if (tList && tList.length > 0) {
+              const t = tList[0];
+              resolved = {
+                id: t.id,
+                email: t.email,
+                name: t.name || null,
+                phone: null,
+                tier: 'VIP',
+                role: t.brand_name ? `特邀貴賓 (${t.brand_name})` : 'VIS 貴賓',
+                company: t.brand_name || null,
+                isVerified: true
+              };
+            }
+          } catch (e) {
+            console.warn('Tickets by name error:', e);
+          }
         }
       }
 
-      // Case D: Not in system yet - allow on-site quick entry if valid email
+      // --- 4. Fallback Handling ---
       if (!resolved) {
         if (term.includes('@')) {
           resolved = {
@@ -501,7 +637,7 @@ export default function ExhibitorLeadsPage() {
             isVerified: false
           };
         } else {
-          setScannerError('系統查無此條碼或帳號紀錄。請確認是否為 VIS 貴賓卡，或於下方直接輸入貴賓 Email 登記。');
+          setScannerError('系統查無此條碼紀錄。請確認為 VIS 貴賓卡或門票，或切換至「手動輸入查詢」直接輸入 Email 登記。');
           return;
         }
       }
@@ -509,12 +645,22 @@ export default function ExhibitorLeadsPage() {
       playChime('success');
       setIdentifiedGuest(resolved);
       setModalStep('details');
+    })();
 
+    try {
+      await Promise.race([lookupWork, timeoutPromise]);
     } catch (err: any) {
       console.error('resolveGuestIdentity error:', err);
-      setScannerError('身分比對失敗: ' + (err.message || err));
+      if (err?.message === 'TIMEOUT') {
+        setScannerError('網路連線逾時。請確認網路訊號，或切換至「手動輸入查詢」直接輸入 Email / 姓名登記。');
+      } else {
+        setScannerError('身分比對異常: ' + (err.message || '請改用手動搜尋'));
+      }
     } finally {
       setIsSearchingGuest(false);
+      setTimeout(() => {
+        isProcessingRef.current = false;
+      }, 500);
     }
   };
 
