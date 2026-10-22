@@ -6,7 +6,8 @@ import { KEY_DATES, DEPOSIT_AMOUNT, ZONE_MAP, formatBoothDisplay, normalizeBooth
 import { motion } from 'framer-motion';
 import { 
   Calendar, CreditCard, Award, ClipboardCheck, Users, 
-  Image as ImageIcon, HelpCircle, Check, Clock, AlertTriangle 
+  Image as ImageIcon, HelpCircle, Check, Clock, AlertTriangle,
+  Building2, Copy 
 } from 'lucide-react';
 
 function safeGetStorage(key: string): string | null {
@@ -57,6 +58,15 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   const [vipCount, setVipCount] = useState(0);
   const [mediaCount, setMediaCount] = useState(0);
   const [qaCount, setQaCount] = useState(0);
+  const [copiedAccount, setCopiedAccount] = useState(false);
+
+  const copyToClipboard = (text: string) => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(text);
+      setCopiedAccount(true);
+      setTimeout(() => setCopiedAccount(false), 2000);
+    }
+  };
 
   useEffect(() => {
     const loadDashboardData = async () => {
@@ -396,7 +406,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   <h3 className="text-base text-white font-medium mt-0.5">參展履約保證金</h3>
                 </div>
                 <span className="text-xs bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 px-2 py-1 rounded uppercase font-semibold">
-                  已確認 Recieved
+                  已確認 Received
                 </span>
               </div>
               <div className="text-2xl font-bold font-mono text-[#DFBA87] mb-2">
@@ -405,6 +415,16 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
               <p className="text-[11px] text-neutral-400 font-light leading-relaxed">
                 您的保證金匯款憑證已被大會秘書處核對確認。參展保證金主要是為了確保展場設施及場地於佈撤展期間受到妥善維護。展覽結束並完成撤場後，經大會確認場地及設施完整還原、無損壞情形，即會全額退還保證金，可以放心！
               </p>
+
+              <div className="mt-4 text-xs text-neutral-400 bg-black/40 border border-white/5 rounded-lg p-3 space-y-1.5">
+                <div className="flex items-center justify-between text-neutral-300">
+                  <span className="text-[11px] text-neutral-500">已繳付至大會帳戶：</span>
+                  <span className="font-mono text-neutral-200">808 玉山銀行 / 0912940021772</span>
+                </div>
+                <div className="text-[10.5px] text-neutral-500 leading-relaxed">
+                  戶名：泰德文化創意社（活動結束場地設施點交完整無損後，全額無息退還至原帳戶）
+                </div>
+              </div>
             </div>
             <div className="border-t border-white/5 pt-4 mt-6 text-[10px] text-neutral-500 italic">
               * 展覽結束並完成撤場後，經大會確認場地及設施完整還原無損，保證金將於 14 個工作天內全額無息退還至原帳戶。
@@ -449,6 +469,80 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
               <p className="text-[11px] text-neutral-400 font-light leading-relaxed">
                 展位規格為 <strong className="text-[#DFBA87]">{formatBoothDisplay(brand.booth_type, brand.zone_id)}</strong>。尾款請於大會指定截止日前完成匯付，並提供水單以開立電子發票。
               </p>
+
+              {/* 匯款帳號資訊區塊 */}
+              <div className="mt-4 bg-[#181818] border border-[#DFBA87]/30 rounded-lg p-4 space-y-3 shadow-md">
+                <div className="flex items-center justify-between border-b border-white/10 pb-2">
+                  <span className="text-xs font-semibold text-[#DFBA87] tracking-wide flex items-center gap-1.5">
+                    <Building2 className="w-3.5 h-3.5 text-[#DFBA87]" />
+                    大會指定匯款帳號（同保證金帳戶）
+                  </span>
+                  <span className="text-[10px] text-neutral-400 bg-white/5 border border-white/5 px-1.5 py-0.5 rounded font-mono">
+                    玉山銀行 808
+                  </span>
+                </div>
+
+                <div className="space-y-2 text-xs">
+                  <div className="flex items-center justify-between text-neutral-300">
+                    <span className="text-[11px] text-neutral-400">銀行 / 分行：</span>
+                    <span className="font-medium text-white font-mono">808 玉山銀行 中崙分行</span>
+                  </div>
+
+                  <div className="flex items-center justify-between bg-black/60 rounded px-3 py-2 border border-[#DFBA87]/25">
+                    <div>
+                      <span className="text-[10px] text-neutral-400 block font-sans">匯款帳號 ACCOUNT NUMBER</span>
+                      <span className="font-mono text-base font-bold text-[#DFBA87] tracking-wider select-all">
+                        0912940021772
+                      </span>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => copyToClipboard('0912940021772')}
+                      className="inline-flex items-center gap-1.5 text-xs text-neutral-200 hover:text-white bg-white/10 hover:bg-white/20 border border-white/15 px-2.5 py-1 rounded transition active:scale-95"
+                    >
+                      {copiedAccount ? (
+                        <>
+                          <Check className="w-3.5 h-3.5 text-emerald-400" />
+                          <span className="text-emerald-400 font-medium">已複製</span>
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-3.5 h-3.5 text-[#DFBA87]" />
+                          <span>複製帳號</span>
+                        </>
+                      )}
+                    </button>
+                  </div>
+
+                  <div className="flex items-start justify-between text-neutral-300 pt-0.5">
+                    <span className="text-[11px] text-neutral-400 flex-shrink-0">帳戶戶名：</span>
+                    <span className="font-medium text-white text-right leading-snug">
+                      泰德文化創意社 <br />
+                      <span className="text-[10px] text-neutral-400 font-light">
+                        (或 泰德文化創意社郭芝妘，視各家銀行系統規定)
+                      </span>
+                    </span>
+                  </div>
+                </div>
+
+                {/* 國際匯款折疊 */}
+                <details className="text-[11px] text-neutral-400 group pt-1 border-t border-white/5">
+                  <summary className="cursor-pointer text-[#DFBA87]/80 hover:text-[#DFBA87] transition flex items-center justify-between select-none py-0.5">
+                    <span>國外匯款資訊 (International Wire)</span>
+                    <span className="text-[9px] text-neutral-500 group-open:rotate-180 transition">▼</span>
+                  </summary>
+                  <div className="mt-1.5 p-2.5 bg-black/40 rounded border border-white/5 font-mono text-[10.5px] space-y-0.5 text-neutral-300">
+                    <div><span className="text-neutral-500">SWIFT:</span> ESUNTWTP</div>
+                    <div><span className="text-neutral-500">BENEFICIARY:</span> ART PRESS and Life Co.</div>
+                    <div><span className="text-neutral-500">BRANCH:</span> E.Sun Bank / Zhonglun Branch</div>
+                    <div><span className="text-neutral-500">ACCOUNT:</span> 0912940021772</div>
+                  </div>
+                </details>
+
+                <div className="border-t border-white/5 pt-2 text-[10.5px] text-neutral-400 leading-relaxed">
+                  💡 <strong>匯款後回報</strong>：匯付完成後請提供末五碼、日期及公司發票抬頭與統編，回傳至大會官方 LINE（<span className="text-[#DFBA87] font-mono select-all">@vis_culture</span>），大會核帳後即開立電子發票並更新系統狀態。
+                </div>
+              </div>
             </div>
             <div className="border-t border-white/5 pt-4 mt-6 text-[10px] text-neutral-500 italic">
               * 展位費繳清截止日為 2026/10/27，逾期未付清將視同無故退出展位。
