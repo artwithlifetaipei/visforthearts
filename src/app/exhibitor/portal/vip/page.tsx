@@ -204,6 +204,11 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
       return;
     }
 
+    if (trimmedEmail.endsWith('@visforthearts.com')) {
+      setFormError(t('visforthearts.com 為展會官網網域，無法作為收信信箱，請填寫貴賓個人的有效電子信箱。', 'visforthearts.com is the event website domain. Please provide the guest\'s personal email.'));
+      return;
+    }
+
     if (surname.trim() === '') {
       setFormError(t('請輸入貴賓姓氏。', 'Please enter guest surname.'));
       return;
@@ -241,8 +246,14 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
         console.warn('API invite fetch warning, using client fallback:', apiErr);
       }
 
+      if (result?.error) {
+        setFormError(result.error);
+        setAdding(false);
+        return;
+      }
+
       let newRecord: any = null;
-      if (result && !result.error && result.submission) {
+      if (result && result.submission) {
         newRecord = result.submission;
       } else {
         // Direct Client Fallback via authenticated Supabase client

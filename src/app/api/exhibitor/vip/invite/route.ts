@@ -55,6 +55,18 @@ export async function POST(req: Request) {
         }
 
         const normalizedEmail = vip_email.toLowerCase().trim();
+
+        // Strict email format check
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(normalizedEmail)) {
+            return NextResponse.json({ error: '電子信箱格式不正確，請輸入有效的 Email 地址（例如：name@example.com）' }, { status: 400 });
+        }
+
+        // Block event website domain or dummy test domains from triggering mail bouncebacks
+        if (normalizedEmail.endsWith('@visforthearts.com') || normalizedEmail.endsWith('@example.com') || normalizedEmail.endsWith('@test.com')) {
+            return NextResponse.json({ error: '此網域無法作為貴賓收件信箱，請提供貴賓個人的有效電子信箱（如 Gmail、公司郵箱等）' }, { status: 400 });
+        }
+
         const cleanSurname = vip_surname.replace(/\s*\((S?VIP)\)/gi, '').replace(/\s*\[(S?VIP)\]/gi, '').trim();
         const selectedTier = tier === 'SVIP' ? 'SVIP' : 'VIP';
         const formattedSurname = selectedTier === 'SVIP' ? `${cleanSurname} (SVIP)` : cleanSurname;
