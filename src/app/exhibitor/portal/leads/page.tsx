@@ -59,6 +59,7 @@ export default function ExhibitorLeadsPage() {
   const [products, setProducts] = useState<any[]>([]);
   const [leads, setLeads] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
+  const [isRefreshing, setIsRefreshing] = useState(false);
   const [message, setMessage] = useState<{ text: string; type: 'success' | 'error' | '' }>({ text: '', type: '' });
 
   // Filtering & Search
@@ -199,6 +200,7 @@ export default function ExhibitorLeadsPage() {
   }, [autoScanParam, loading]);
 
   const fetchLeads = async (brandId?: string) => {
+    setIsRefreshing(true);
     try {
       const { data, error } = await supabase
         .from('exhibitor_leads')
@@ -223,6 +225,8 @@ export default function ExhibitorLeadsPage() {
       }
     } catch (e) {
       console.warn('fetchLeads failed:', e);
+    } finally {
+      setIsRefreshing(false);
     }
   };
 
@@ -862,7 +866,17 @@ export default function ExhibitorLeadsPage() {
           </p>
         </div>
 
-        <div className="flex items-center gap-3 shrink-0">
+        <div className="flex items-center gap-2.5 shrink-0 flex-wrap">
+          <button
+            onClick={() => fetchLeads(brand?.id)}
+            disabled={isRefreshing}
+            className="flex items-center gap-1.5 px-3 py-2 text-xs bg-white/5 hover:bg-white/10 text-neutral-300 rounded border border-white/10 transition-colors cursor-pointer disabled:opacity-50"
+            title="同步多位同仁最新掃碼接待紀錄"
+          >
+            <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin text-[#DFBA87]' : ''}`} />
+            <span>{isRefreshing ? '同步中...' : '同步同仁名單'}</span>
+          </button>
+
           <button
             onClick={handleExportCSV}
             disabled={leads.length === 0}
