@@ -448,6 +448,9 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   <div className="text-2xl font-bold font-mono text-[#DFBA87]">
                     NT$ {finalPayablePrice.toLocaleString()}
                   </div>
+                  <span className="text-[10.5px] text-amber-300/90 font-sans border border-amber-500/30 bg-amber-500/10 px-1.5 py-0.5 rounded font-medium">
+                    未稅 (款項皆不含稅)
+                  </span>
                   {hasDiscount && (
                     <span className="text-xs text-neutral-500 line-through font-mono">
                       原牌價 NT$ {boothPrice.toLocaleString()}
@@ -467,7 +470,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                 )}
               </div>
               <p className="text-[11px] text-neutral-400 font-light leading-relaxed">
-                展位規格為 <strong className="text-[#DFBA87]">{formatBoothDisplay(brand.booth_type, brand.zone_id)}</strong>。尾款請於大會指定截止日前完成匯付，並提供水單以開立電子發票。
+                展位規格為 <strong className="text-[#DFBA87]">{formatBoothDisplay(brand.booth_type, brand.zone_id)}</strong>。尾款請於大會指定截止日前完成匯付，並提供水單以利大會核帳。
               </p>
 
               {/* 匯款帳號資訊區塊 */}
@@ -539,8 +542,23 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   </div>
                 </details>
 
-                <div className="border-t border-white/5 pt-2 text-[10.5px] text-neutral-400 leading-relaxed">
-                  💡 <strong>匯款後回報</strong>：匯付完成後請提供末五碼、日期及公司發票抬頭與統編，回傳至大會官方 LINE（<span className="text-[#DFBA87] font-mono select-all">@vis_culture</span>），大會核帳後即開立電子發票並更新系統狀態。
+                <div className="border-t border-white/10 pt-3 text-[11px] space-y-2.5">
+                  <div className="bg-amber-500/10 border border-amber-500/30 rounded-md p-3 text-amber-200/95 leading-relaxed space-y-1">
+                    <div className="font-semibold text-amber-300 flex items-center gap-1.5 text-xs">
+                      <span>🧾</span>
+                      <span>發票開立說明（全展款項皆不含稅）：</span>
+                    </div>
+                    <p className="text-[11px] text-neutral-300 font-light leading-relaxed pl-5">
+                      本展各項款項<strong>皆不含稅</strong>。若貴品牌需要開立公司發票，請於 <strong className="text-[#DFBA87]">12/20 前</strong> 提出申請並提供公司發票抬頭與統一編號（可透過大會官方 LINE：<span className="text-[#DFBA87] font-mono">@vis_culture</span> 提供），以利相關部門進行準備；<strong>實體發票將於進場當天統一提供</strong>。
+                    </p>
+                  </div>
+
+                  <div className="text-[10.5px] text-neutral-400 leading-relaxed pt-0.5 flex items-start gap-1.5">
+                    <span className="text-amber-400/90 flex-shrink-0">💡</span>
+                    <span>
+                      <strong>匯款後回報</strong>：匯付完成後請提供帳號末五碼與匯款日期至大會官方 LINE（<span className="text-[#DFBA87] font-mono select-all">@vis_culture</span>），大會核帳後即更新後台系統付訖狀態。
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
