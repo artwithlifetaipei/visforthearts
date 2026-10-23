@@ -325,10 +325,13 @@ export default function PerspectiveDisplayWall() {
       </header>
 
       {/* ─────────────────────────────────────────────────────────────
-          3. MAIN CANVAS: LIVING PERSPECTIVE WALL
-             Only displays: Question, Answer, Name
+          3. MAIN CANVAS: LIVING PERSPECTIVE WALL (BORDERLESS EDITORIAL TYPOGRAPHY)
+             - No boxy rectangular cards or plastic widget frames
+             - Words float organically on the warm architectural canvas
+             - Curated rhythm: featured perspectives command wide presence
+             - Contains strictly: Question, Answer, Name
           ───────────────────────────────────────────────────────────── */}
-      <main className="max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12 relative z-10">
+      <main className="max-w-[1640px] mx-auto px-6 sm:px-10 lg:px-16 pt-10 sm:pt-16 pb-24 relative z-10">
         {isEmergency ? (
           /* Emergency Broadcast Card (LED-010) */
           <motion.div
@@ -358,14 +361,15 @@ export default function PerspectiveDisplayWall() {
           </div>
         ) : (
           /* ─────────────────────────────────────────────────────────
-             DYNAMIC EDITORIAL WALL (DENSE MULTI-COLUMN GRID)
-             - Featured perspectives: span 2 cols, significantly larger
-             - Standard perspectives: span 1 col, harmoniously smaller
-             - Contains ONLY: Question, Answer, Name
+             BORDERLESS ARCHITECTURAL TYPOGRAPHY FLOW
+             - Zero card boxes, zero plastic borders
+             - Featured perspectives: dramatic wide presence & gold left rule
+             - Standard perspectives: elegant literary serif stream
+             - Strictly displays: Question, Answer, Name
           ────────────────────────────────────────────────────────── */
           <motion.div 
             layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 [grid-auto-flow:dense]"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 lg:gap-x-16 gap-y-12 lg:gap-y-16 items-start"
           >
             {items.map((item, idx) => {
               const isFeatured = Boolean(item.featured);
@@ -375,49 +379,54 @@ export default function PerspectiveDisplayWall() {
                 <motion.article
                   key={item.id}
                   layout
-                  initial={{ opacity: 0, y: 24 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.55, delay: Math.min(idx * 0.04, 0.6) }}
+                  transition={{ duration: 0.6, delay: Math.min(idx * 0.05, 0.5) }}
                   onClick={() => setSelectedItem(item)}
                   className={
                     isFeatured
-                      ? /* FEATURED / ENHANCED CARD (俐落大氣、跨 2 欄、高級香檳金光澤) */
-                        "col-span-1 md:col-span-2 relative group rounded-2xl p-7 sm:p-9 lg:p-10 transition-all duration-300 ease-out bg-gradient-to-br from-white/95 via-[#FCF9F3]/90 to-[#F7EFE2]/90 border border-[#DFBA87] hover:border-[#B58544] shadow-md hover:shadow-xl hover:shadow-[#DFBA87]/15 hover:-translate-y-1 backdrop-blur-xl overflow-hidden flex flex-col justify-between cursor-pointer"
-                      : /* STANDARD CARD (極簡俐落、單欄、通透純淨) */
-                        "col-span-1 relative group rounded-2xl p-6 sm:p-7 transition-all duration-300 ease-out bg-white/80 hover:bg-white/95 border border-[#E5DDD0] hover:border-[#B58544] shadow-xs hover:shadow-md hover:shadow-[#DFBA87]/10 hover:-translate-y-0.5 backdrop-blur-md overflow-hidden flex flex-col justify-between cursor-pointer"
+                      ? "col-span-1 md:col-span-2 group relative cursor-pointer p-6 sm:p-8 -m-3 sm:-m-4 rounded-2xl hover:bg-white/40 transition-all duration-500 backdrop-blur-[2px] flex flex-col justify-between"
+                      : "col-span-1 group relative cursor-pointer p-6 sm:p-7 -m-3 sm:-m-4 rounded-2xl hover:bg-white/35 transition-all duration-500 backdrop-blur-[2px] flex flex-col justify-between"
                   }
                 >
-                  {/* 1. 問題 (Question) + 2. 答案 (Answer) */}
-                  <div className="space-y-3">
-                    <p className={`font-serif tracking-wide leading-relaxed ${
-                      isFeatured 
-                        ? 'text-xs sm:text-sm text-[#8C6226] font-medium' 
-                        : 'text-[11px] sm:text-xs text-[#8C6226] font-medium'
-                    }`}>
-                      {questionText}
-                    </p>
+                  <div className="space-y-3.5">
+                    {/* 1. 問題 (Question) */}
+                    <div className="flex items-center gap-2">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#8C6226] opacity-80" />
+                      <p className="text-xs sm:text-[13px] font-serif text-[#8C6226] tracking-wider font-medium leading-relaxed">
+                        {questionText}
+                      </p>
+                    </div>
 
-                    <blockquote className={
+                    {/* 2. 答案 (Answer Quote with architectural left line) */}
+                    <div className={
                       isFeatured 
-                        ? "text-2xl sm:text-3xl lg:text-[2.1rem] font-serif text-[#1C1814] leading-[1.4] tracking-wide font-normal drop-shadow-xs my-3" 
-                        : "text-base sm:text-lg font-serif text-[#1C1814] leading-[1.65] tracking-wide font-normal my-2"
+                        ? "border-l-2 border-[#DFBA87] pl-5 sm:pl-7 my-3 sm:my-4" 
+                        : "border-l border-[#D8CFBF] pl-4 sm:pl-5 my-2.5 sm:my-3"
                     }>
-                      “{item.answer}”
-                    </blockquote>
+                      <blockquote className={
+                        isFeatured 
+                          ? "text-2xl sm:text-3xl lg:text-[2.2rem] font-serif text-[#1C1814] leading-[1.48] tracking-wide font-normal group-hover:text-[#7D541D] transition-colors duration-300 drop-shadow-2xs" 
+                          : "text-base sm:text-lg lg:text-xl font-serif text-[#2B231D] leading-[1.68] tracking-wide font-normal group-hover:text-[#1C1814] transition-colors duration-300"
+                      }>
+                        “{item.answer}”
+                      </blockquote>
+                    </div>
                   </div>
 
                   {/* 3. 名字 (Name) */}
-                  <div className={`pt-3.5 flex items-center justify-end ${
-                    isFeatured ? "border-t border-[#DFBA87]/30" : "border-t border-[#EAE3D6]"
-                  }`}>
+                  <div className="flex items-center justify-end mt-4 sm:mt-5">
                     <span className={
                       isFeatured
-                        ? "text-base sm:text-lg font-serif text-[#875F24] font-semibold tracking-wider"
-                        : "text-xs sm:text-sm font-serif text-[#3D332A] font-medium tracking-wider"
+                        ? "text-base sm:text-lg font-serif text-[#875F24] font-medium tracking-widest"
+                        : "text-xs sm:text-sm font-serif text-[#574D43] font-medium tracking-wider"
                     }>
                       — {item.name}
                     </span>
                   </div>
+
+                  {/* Baseline Hairline Separator */}
+                  <div className="w-full h-px bg-gradient-to-r from-transparent via-[#DFBA87]/40 to-transparent mt-6 sm:mt-8 group-hover:via-[#B58544]/60 transition-all duration-500" />
                 </motion.article>
               );
             })}
