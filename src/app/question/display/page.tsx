@@ -3,8 +3,8 @@
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
-  Maximize2, Minimize2, Sparkles, AlertTriangle, Play, Pause, 
-  QrCode, X, Filter, ArrowUp, RefreshCw, Eye, Share2, Layers
+  Maximize2, Minimize2, Play, Pause, 
+  QrCode, X, ArrowUp
 } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
@@ -43,7 +43,6 @@ interface DisplayApiResponse {
 export default function PerspectiveDisplayWall() {
   const [data, setData] = useState<DisplayApiResponse | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'featured' | 'q1' | 'q2' | 'q3'>('all');
   const [selectedItem, setSelectedItem] = useState<DisplayItem | null>(null);
   const [showQrModal, setShowQrModal] = useState(false);
   const [isAutoScroll, setIsAutoScroll] = useState(true);
@@ -176,42 +175,9 @@ export default function PerspectiveDisplayWall() {
     };
   }, [isAutoScroll, isPausedByUser, selectedItem, showQrModal, data]);
 
-  // Data processing: items filtering
-  const allItems = useMemo(() => {
+  const items = useMemo(() => {
     return data?.items || [];
   }, [data]);
-
-  const featuredCount = useMemo(() => {
-    return allItems.filter(i => i.featured).length;
-  }, [allItems]);
-
-  const q1Count = useMemo(() => {
-    return allItems.filter(i => i.question_id === 'q1').length;
-  }, [allItems]);
-
-  const q2Count = useMemo(() => {
-    return allItems.filter(i => i.question_id === 'q2').length;
-  }, [allItems]);
-
-  const q3Count = useMemo(() => {
-    return allItems.filter(i => i.question_id === 'q3').length;
-  }, [allItems]);
-
-  const filteredItems = useMemo(() => {
-    if (selectedFilter === 'featured') {
-      return allItems.filter(i => i.featured);
-    }
-    if (selectedFilter === 'q1') {
-      return allItems.filter(i => i.question_id === 'q1');
-    }
-    if (selectedFilter === 'q2') {
-      return allItems.filter(i => i.question_id === 'q2');
-    }
-    if (selectedFilter === 'q3') {
-      return allItems.filter(i => i.question_id === 'q3');
-    }
-    return allItems;
-  }, [allItems, selectedFilter]);
 
   const isEmergency = data?.display.mode === 'emergency';
 
@@ -219,11 +185,12 @@ export default function PerspectiveDisplayWall() {
     ? `${window.location.origin}/question`
     : 'https://www.visforthearts.com/question';
 
-  const getQuestionLabel = (qid?: string | null) => {
-    if (qid === 'q1') return '問題一：社會特質';
-    if (qid === 'q2') return '問題二：美的價值';
-    if (qid === 'q3') return '問題三：台灣實踐';
-    return null;
+  const getQuestionPrompt = (item: DisplayItem) => {
+    if (item.question_prompt) return item.question_prompt;
+    if (item.question_id === 'q1') return '你認為，一個真正懂得欣賞美的社會，應該具備什麼樣的特質？';
+    if (item.question_id === 'q2') return '對你來說，美的事物，它的價值是什麼？一個句話形容。';
+    if (item.question_id === 'q3') return '如果希望台灣成為一個更有美感的地方，你最希望大家開始重視什麼？';
+    return '美，如何成為我們共同的價值？';
   };
 
   return (
@@ -254,13 +221,13 @@ export default function PerspectiveDisplayWall() {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          2. EXHIBITION MASTHEAD & LIVE STATUS CONTROLS
+          2. EXHIBITION MASTHEAD (CLEAN & MINIMAL)
       ───────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-[#E5DDD0]/80 bg-[#F6F3ED]/85 backdrop-blur-xl transition-all shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-14 py-4 space-y-4">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-14 py-4 space-y-3">
           
-          {/* Top Bar: Fair Meta + Action Shortcuts */}
-          <div className="flex flex-wrap items-center justify-between gap-3 text-xs">
+          {/* Top Bar: Minimal Meta + Action Shortcuts */}
+          <div className="flex items-center justify-between gap-3 text-xs">
             <div className="flex items-center gap-3">
               <Link 
                 href="/" 
@@ -269,11 +236,8 @@ export default function PerspectiveDisplayWall() {
                 VIS 2027
               </Link>
               <span className="text-[#A89F91]">/</span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-widest uppercase bg-[#DFBA87]/20 text-[#8C6226] border border-[#DFBA87]/50 font-bold">
-                Living Perspective Wall
-              </span>
-              <span className="text-[#7A6B5C] font-mono text-[11px] hidden sm:inline">
-                臺北中山堂 中正廳現場播映
+              <span className="text-[10px] font-mono tracking-widest uppercase text-[#8C6226] font-bold">
+                THE QUESTION OF THE YEAR
               </span>
             </div>
 
@@ -287,10 +251,10 @@ export default function PerspectiveDisplayWall() {
                     ? 'bg-[#DFBA87]/25 text-[#8C6226] border-[#DFBA87]/60 font-semibold shadow-xs'
                     : 'bg-white/80 text-[#574D43] border-[#E0D7C8] hover:text-[#1C1814] hover:bg-white'
                 }`}
-                title="切換現場畫面自動巡覽慢速滾動 (快捷鍵: 空白鍵)"
+                title="切換畫面自動漫遊慢速滾動 (快捷鍵: 空白鍵)"
               >
                 {isAutoScroll ? <Play className="w-3 h-3 text-[#8C6226] fill-[#8C6226]" /> : <Pause className="w-3 h-3 text-[#7A6B5C]" />}
-                <span>{isAutoScroll ? '巡覽中 (AUTO)' : '已暫停 (PAUSE)'}</span>
+                <span>{isAutoScroll ? '巡覽中' : '已暫停'}</span>
               </button>
 
               {/* QR Code Trigger */}
@@ -317,93 +281,22 @@ export default function PerspectiveDisplayWall() {
           </div>
 
           {/* Central Exhibition Banner: The Question of the Year */}
-          <div className="text-center max-w-4xl mx-auto space-y-2 pt-1 pb-1">
-            <h1 className="text-xs sm:text-sm md:text-base font-serif tracking-[0.25em] uppercase text-[#8C6226] font-medium">
+          <div className="text-center max-w-4xl mx-auto space-y-1 pt-1 pb-1">
+            <h1 className="text-xs sm:text-sm font-serif tracking-[0.25em] uppercase text-[#8C6226] font-medium">
               HOW CAN BEAUTY BECOME OUR SHARED VALUE?
             </h1>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-serif text-[#1C1814] tracking-widest font-normal drop-shadow-xs">
               美，如何成為我們共同的價值？
             </h2>
-            <p className="text-[11px] sm:text-xs text-[#574D43] font-light tracking-wider max-w-2xl mx-auto">
-              凝聚公眾對美的社會特質、心靈價值與台灣美感實踐的深刻凝視 · 臺北中山堂現場共創觀點之牆
-            </p>
-          </div>
-
-          {/* Bottom Filter & Stat Tabs */}
-          <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#E5DDD0]">
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2">
-              <button
-                onClick={() => setSelectedFilter('all')}
-                className={`px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                  selectedFilter === 'all'
-                    ? 'bg-[#1C1814] text-white font-semibold shadow-md'
-                    : 'bg-white/80 hover:bg-white text-[#574D43] hover:text-[#1C1814] border border-[#E0D7C8] shadow-xs'
-                }`}
-              >
-                全部觀點 ({allItems.length})
-              </button>
-
-              <button
-                onClick={() => setSelectedFilter('featured')}
-                className={`px-3 py-1 rounded-full text-xs font-mono transition-all flex items-center gap-1.5 cursor-pointer ${
-                  selectedFilter === 'featured'
-                    ? 'bg-[#DFBA87] text-[#1C1814] font-bold shadow-md shadow-[#DFBA87]/25'
-                    : 'bg-[#DFBA87]/15 hover:bg-[#DFBA87]/25 text-[#875F24] border border-[#DFBA87]/40 font-medium'
-                }`}
-              >
-                <Sparkles className="w-3 h-3 text-[#875F24]" />
-                <span>★ 大會精選 ({featuredCount})</span>
-              </button>
-
-              <button
-                onClick={() => setSelectedFilter('q1')}
-                className={`px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                  selectedFilter === 'q1'
-                    ? 'bg-[#1C1814] text-white font-semibold shadow-md'
-                    : 'bg-white/80 hover:bg-white text-[#574D43] hover:text-[#1C1814] border border-[#E0D7C8] shadow-xs'
-                }`}
-              >
-                問題一：社會特質 ({q1Count})
-              </button>
-
-              <button
-                onClick={() => setSelectedFilter('q2')}
-                className={`px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                  selectedFilter === 'q2'
-                    ? 'bg-[#1C1814] text-white font-semibold shadow-md'
-                    : 'bg-white/80 hover:bg-white text-[#574D43] hover:text-[#1C1814] border border-[#E0D7C8] shadow-xs'
-                }`}
-              >
-                問題二：美的價值 ({q2Count})
-              </button>
-
-              <button
-                onClick={() => setSelectedFilter('q3')}
-                className={`px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                  selectedFilter === 'q3'
-                    ? 'bg-[#1C1814] text-white font-semibold shadow-md'
-                    : 'bg-white/80 hover:bg-white text-[#574D43] hover:text-[#1C1814] border border-[#E0D7C8] shadow-xs'
-                }`}
-              >
-                問題三：台灣實踐 ({q3Count})
-              </button>
-            </div>
-
-            <div className="text-[11px] font-mono text-[#7A6B5C] hidden md:flex items-center gap-2">
-              <span>點擊任一張觀點卡即可特寫聚焦</span>
-              <span className="opacity-30">·</span>
-              <Link href="/question" target="_blank" className="text-[#8C6226] hover:underline font-medium">
-                前往手機提報頁面 ↗
-              </Link>
-            </div>
           </div>
 
         </div>
       </header>
 
       {/* ─────────────────────────────────────────────────────────────
-          3. MAIN CANVAS: LIVING PERSPECTIVE WALL (GRID OF ALL PERSPECTIVES)
-      ───────────────────────────────────────────────────────────── */}
+          3. MAIN CANVAS: LIVING PERSPECTIVE WALL
+             Only displays: Question, Answer, Name
+          ───────────────────────────────────────────────────────────── */}
       <main className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-14 pt-8 sm:pt-12 relative z-10">
         {isEmergency ? (
           /* Emergency Broadcast Card (LED-010) */
@@ -412,9 +305,6 @@ export default function PerspectiveDisplayWall() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center max-w-3xl mx-auto space-y-6 bg-white/90 border border-amber-500/40 p-12 sm:p-16 rounded-3xl shadow-2xl my-12 backdrop-blur-md"
           >
-            <div className="w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-600 flex items-center justify-center mx-auto">
-              <Sparkles className="w-8 h-8" />
-            </div>
             <div className="space-y-3">
               <h1 className="text-2xl sm:text-3xl font-serif text-[#1C1814] tracking-wider">
                 {data?.display.emergency_message_en || 'VIS 2027 — HOW CAN BEAUTY BECOME OUR SHARED VALUE?'}
@@ -423,20 +313,11 @@ export default function PerspectiveDisplayWall() {
                 {data?.display.emergency_message_zh || 'VIS 2027 當代生活文化大展 · 美，如何成為我們共同的價值？'}
               </p>
             </div>
-            <div className="text-xs text-[#7A6B5C] font-mono tracking-widest">
-              TAIPEI ZHONGSHAN HALL · 2027.01.07 – 01.09
-            </div>
           </motion.div>
-        ) : filteredItems.length === 0 ? (
+        ) : items.length === 0 ? (
           /* Empty State */
           <div className="text-center max-w-lg mx-auto py-24 space-y-5">
-            <div className="w-16 h-16 rounded-2xl bg-white/80 border border-[#E0D7C8] flex items-center justify-center mx-auto text-[#8C6226] shadow-sm">
-              <Sparkles className="w-8 h-8" />
-            </div>
-            <h3 className="text-xl font-serif text-[#1C1814]">尚未有符合此分類的觀點展示</h3>
-            <p className="text-xs text-[#574D43] font-light leading-relaxed">
-              歡迎掃描現場 QR Code，成為第一位留下關於美之價值的共創者。
-            </p>
+            <h3 className="text-xl font-serif text-[#1C1814]">尚無觀點展示</h3>
             <button
               onClick={() => setShowQrModal(true)}
               className="px-6 py-2.5 rounded-full bg-[#DFBA87] text-[#1C1814] text-xs font-bold hover:bg-[#cf9e5e] shadow-md shadow-[#DFBA87]/20 transition-colors cursor-pointer"
@@ -449,14 +330,15 @@ export default function PerspectiveDisplayWall() {
              DYNAMIC EDITORIAL WALL (DENSE MULTI-COLUMN GRID)
              - Featured perspectives: span 2 cols, significantly larger
              - Standard perspectives: span 1 col, harmoniously smaller
+             - Contains ONLY: Question, Answer, Name
           ────────────────────────────────────────────────────────── */
           <motion.div 
             layout
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 [grid-auto-flow:dense]"
           >
-            {filteredItems.map((item, idx) => {
+            {items.map((item, idx) => {
               const isFeatured = Boolean(item.featured);
-              const qLabel = getQuestionLabel(item.question_id);
+              const questionText = getQuestionPrompt(item);
 
               return (
                 <motion.article
@@ -479,92 +361,35 @@ export default function PerspectiveDisplayWall() {
                     <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#DFBA87]/20 rounded-full blur-3xl pointer-events-none group-hover:bg-[#DFBA87]/30 transition-all duration-700" />
                   )}
 
-                  {/* Top Metadata & Curatorial Pills */}
-                  <div className="space-y-3">
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        {isFeatured ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-gradient-to-r from-amber-500/20 via-[#DFBA87]/30 to-amber-500/20 border border-[#DFBA87]/60 text-[#875F24] text-[10px] font-mono tracking-[0.2em] uppercase font-bold shadow-xs">
-                            <Sparkles className="w-3 h-3 text-[#875F24] fill-[#875F24]" />
-                            <span>大會精選 · CURATORIAL SELECTION</span>
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-[#FAF5EC] border border-[#E5DDD0] text-[#7A6B5C] text-[10px] font-mono tracking-widest uppercase font-medium">
-                            {item.type === 'visitor'
-                              ? 'VISITOR 觀眾'
-                              : item.type === 'vis_people'
-                              ? 'VIS 團隊'
-                              : item.type === 'artist'
-                              ? 'ARTIST 藝術家'
-                              : item.type === 'vip'
-                              ? 'VIP 貴賓'
-                              : 'EXHIBITOR 參展商'}
-                          </span>
-                        )}
+                  {/* 1. 問題 (Question) + 2. 答案 (Answer) */}
+                  <div className="space-y-4">
+                    <p className={`font-serif tracking-wide leading-relaxed ${
+                      isFeatured 
+                        ? 'text-xs sm:text-sm text-[#8C6226] font-medium' 
+                        : 'text-[11px] sm:text-xs text-[#8C6226] font-medium'
+                    }`}>
+                      {questionText}
+                    </p>
 
-                        {/* Question Badge */}
-                        {qLabel && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#DFBA87]/15 border border-[#DFBA87]/35 text-[#875F24] text-[10px] font-mono tracking-wider font-medium">
-                            {qLabel}
-                          </span>
-                        )}
-
-                        {item.role_title && isFeatured && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full bg-black/5 border border-black/10 text-[#574D43] text-[10px] font-mono tracking-wider">
-                            {item.role_title}
-                          </span>
-                        )}
-                      </div>
-
-                      <span className="text-[10px] font-mono text-[#8C6226] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1 font-semibold">
-                        特寫 ↗
-                      </span>
-                    </div>
-
-                    {/* Main Perspective Quote (Featured = 大字級, Regular = 雅緻標準字級) */}
-                    <div className={isFeatured ? "my-5 relative" : "my-4 relative"}>
-                      {isFeatured ? (
-                        <div className="space-y-1">
-                          <span className="text-[#DFBA87]/70 font-serif text-4xl sm:text-5xl leading-none select-none block -mb-2">“</span>
-                          <blockquote className="text-2xl sm:text-3xl lg:text-[2.15rem] font-serif text-[#1C1814] leading-[1.38] tracking-wide font-normal drop-shadow-xs">
-                            {item.answer}
-                          </blockquote>
-                          <span className="text-[#DFBA87]/70 font-serif text-4xl sm:text-5xl leading-none select-none block text-right -mt-2">”</span>
-                        </div>
-                      ) : (
-                        <blockquote className="text-base sm:text-lg font-serif text-[#1C1814] leading-relaxed tracking-wide font-normal">
-                          “{item.answer}”
-                        </blockquote>
-                      )}
-                    </div>
+                    <blockquote className={
+                      isFeatured 
+                        ? "text-2xl sm:text-3xl lg:text-[2.15rem] font-serif text-[#1C1814] leading-[1.38] tracking-wide font-normal drop-shadow-xs my-3" 
+                        : "text-base sm:text-lg font-serif text-[#1C1814] leading-relaxed tracking-wide font-normal my-2"
+                    }>
+                      “{item.answer}”
+                    </blockquote>
                   </div>
 
-                  {/* Bottom Author Attribution & Metadata */}
-                  <div className={
-                    isFeatured
-                      ? "pt-4 border-t border-[#DFBA87]/30 flex items-center justify-between"
-                      : "pt-3 border-t border-[#E5DDD0] flex items-center justify-between"
-                  }>
-                    <div className="flex flex-col">
-                      <div className="flex items-center gap-1.5">
-                        {isFeatured && <span className="text-amber-500 text-xs">★</span>}
-                        <span className={
-                          isFeatured
-                            ? "text-lg sm:text-xl font-serif text-[#875F24] font-semibold tracking-wider"
-                            : "text-xs sm:text-sm font-serif text-[#2B231D] font-medium tracking-wider"
-                        }>
-                          — {item.name}
-                        </span>
-                      </div>
-                      {!isFeatured && item.role_title && (
-                        <span className="text-[10px] text-[#7A6B5C] font-sans tracking-wide pl-3">
-                          {item.role_title}
-                        </span>
-                      )}
-                    </div>
-
-                    <span className="text-[10px] font-mono text-[#A89F91]">
-                      #{item.display_order ? String(item.display_order).padStart(2, '0') : item.id.slice(-4)}
+                  {/* 3. 名字 (Name) */}
+                  <div className={`pt-3 flex items-center justify-end ${
+                    isFeatured ? "border-t border-[#DFBA87]/30" : "border-t border-[#E5DDD0]"
+                  }`}>
+                    <span className={
+                      isFeatured
+                        ? "text-lg sm:text-xl font-serif text-[#875F24] font-semibold tracking-wider"
+                        : "text-xs sm:text-sm font-serif text-[#2B231D] font-medium tracking-wider"
+                    }>
+                      — {item.name}
                     </span>
                   </div>
                 </motion.article>
@@ -601,6 +426,7 @@ export default function PerspectiveDisplayWall() {
 
       {/* ─────────────────────────────────────────────────────────────
           MODAL A: CINEMATIC SPOTLIGHT VIEW FOR ANY PERSPECTIVE
+          Only displays: Question, Answer, Name
       ───────────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {selectedItem && (
@@ -625,35 +451,12 @@ export default function PerspectiveDisplayWall() {
                 <X className="w-5 h-5" />
               </button>
 
-              {/* Badges */}
-              <div className="flex flex-wrap items-center gap-2 pt-2">
-                {selectedItem.featured && (
-                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#DFBA87]/25 border border-[#DFBA87]/60 text-[#875F24] text-xs font-mono tracking-widest uppercase font-bold">
-                    <Sparkles className="w-3.5 h-3.5" />
-                    <span>大會精選觀點 · CURATORIAL SELECTION</span>
-                  </span>
-                )}
-
-                {selectedItem.question_id && (
-                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#DFBA87]/15 border border-[#DFBA87]/40 text-[#875F24] text-xs font-mono tracking-wider font-medium">
-                    {getQuestionLabel(selectedItem.question_id)}
-                  </span>
-                )}
-
-                <span className="px-3 py-1 rounded-full bg-black/5 border border-black/10 text-xs font-mono text-[#574D43] uppercase tracking-wider">
-                  {selectedItem.role_title || selectedItem.type}
-                </span>
+              {/* 1. 問題 (Question) */}
+              <div className="p-3.5 rounded-2xl bg-[#FAF2E6] border border-[#DFBA87]/50 text-xs sm:text-sm text-[#8C6226] font-serif leading-relaxed font-medium">
+                {getQuestionPrompt(selectedItem)}
               </div>
 
-              {/* Specific Question Prompt Banner */}
-              {selectedItem.question_prompt && (
-                <div className="p-3.5 rounded-2xl bg-[#FAF2E6] border border-[#DFBA87]/50 text-xs sm:text-sm text-[#875F24] font-serif flex items-start gap-2.5">
-                  <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-[#875F24]" />
-                  <span className="leading-relaxed font-medium">題目：{selectedItem.question_prompt}</span>
-                </div>
-              )}
-
-              {/* Highlight Quote */}
+              {/* 2. 答案 (Answer) */}
               <div className="space-y-4">
                 <span className="text-[#DFBA87] font-serif text-5xl leading-none block -mb-4">“</span>
                 <blockquote className="text-2xl sm:text-4xl md:text-5xl font-serif text-[#1C1814] leading-snug md:leading-tight tracking-wide font-normal">
@@ -662,37 +465,19 @@ export default function PerspectiveDisplayWall() {
                 <span className="text-[#DFBA87] font-serif text-5xl leading-none block text-right -mt-4">”</span>
               </div>
 
-              {/* Author & Footer Action */}
-              <div className="pt-6 border-t border-[#E5DDD0] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="space-y-1">
-                  <div className="text-xl sm:text-2xl font-serif text-[#875F24] font-medium tracking-wider">
-                    — {selectedItem.name}
-                  </div>
-                  {selectedItem.role_title && (
-                    <div className="text-xs text-[#7A6B5C] font-sans">
-                      {selectedItem.role_title}
-                    </div>
-                  )}
+              {/* 3. 名字 (Name) */}
+              <div className="pt-6 border-t border-[#E5DDD0] flex items-center justify-between">
+                <div className="text-xl sm:text-2xl font-serif text-[#875F24] font-medium tracking-wider">
+                  — {selectedItem.name}
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setShowQrModal(true)}
-                    className="px-4 py-2.5 rounded-xl bg-white hover:bg-neutral-50 text-[#1C1814] text-xs font-mono flex items-center gap-1.5 transition-colors border border-[#D8CFBF] shadow-xs cursor-pointer font-medium"
-                  >
-                    <QrCode className="w-3.5 h-3.5 text-[#875F24]" />
-                    <span>我也要留下觀點</span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setSelectedItem(null)}
-                    className="px-5 py-2.5 rounded-xl bg-[#DFBA87] text-[#1C1814] text-xs font-bold hover:bg-[#cf9e5e] shadow-md shadow-[#DFBA87]/25 transition-colors cursor-pointer"
-                  >
-                    返回觀點之牆
-                  </button>
-                </div>
+                <button
+                  type="button"
+                  onClick={() => setSelectedItem(null)}
+                  className="px-5 py-2.5 rounded-xl bg-[#DFBA87] text-[#1C1814] text-xs font-bold hover:bg-[#cf9e5e] shadow-md shadow-[#DFBA87]/25 transition-colors cursor-pointer"
+                >
+                  返回觀點之牆
+                </button>
               </div>
             </motion.div>
           </div>
@@ -720,15 +505,12 @@ export default function PerspectiveDisplayWall() {
               </button>
 
               <div className="space-y-2">
-                <span className="text-[11px] font-mono tracking-widest uppercase text-[#875F24] block font-bold">
+                <span className="text-[11px] font-mono tracking-widest uppercase text-[#8C6226] block font-bold">
                   THE QUESTION OF THE YEAR 2027
                 </span>
                 <h3 className="text-xl font-serif text-[#1C1814]">
                   美，如何成為我們共同的價值？
                 </h3>
-                <p className="text-xs text-[#574D43] font-light leading-relaxed">
-                  使用手機相機掃描下方 QR Code，於三道具體文化提問中任選一題回答。通過審核後將即時登上臺北中山堂現場觀點之牆。
-                </p>
               </div>
 
               {/* QR Code Container */}
@@ -742,7 +524,7 @@ export default function PerspectiveDisplayWall() {
               </div>
 
               <div className="text-[11px] font-mono text-[#7A6B5C]">
-                網址：visforthearts.com/question
+                visforthearts.com/question
               </div>
 
               <button
