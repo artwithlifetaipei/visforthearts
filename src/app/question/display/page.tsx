@@ -221,32 +221,40 @@ export default function PerspectiveDisplayWall() {
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
-          2. EXHIBITION MASTHEAD (CLEAN & MINIMAL)
+          2. EXHIBITION MASTHEAD (SLEEK & MINIMAL PER UI/UX PRO MAX)
       ───────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-[#E5DDD0]/80 bg-[#F6F3ED]/85 backdrop-blur-xl transition-all shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-14 py-4 space-y-3">
+        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-14 py-4 space-y-4">
           
-          {/* Top Bar: Minimal Meta + Action Shortcuts */}
-          <div className="flex items-center justify-between gap-3 text-xs">
-            <div className="flex items-center gap-3">
+          {/* Top Bar: VIS Logo + Meta + Action Controls */}
+          <div className="flex items-center justify-between gap-4">
+            
+            {/* Top-Left: VIS Logo + Subtitle */}
+            <div className="flex items-center gap-3.5">
               <Link 
                 href="/" 
-                className="font-serif tracking-widest text-[#1C1814] font-semibold text-sm hover:text-[#8C6226] transition-colors"
+                className="flex items-center gap-2 group transition-opacity hover:opacity-80"
+                title="返回 VIS 首頁"
               >
-                VIS 2027
+                <img 
+                  src="/vis_logo.png" 
+                  alt="VIS" 
+                  className="h-8 sm:h-9 w-auto object-contain"
+                />
               </Link>
-              <span className="text-[#A89F91]">/</span>
-              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-widest uppercase bg-[#DFBA87]/20 text-[#8C6226] border border-[#DFBA87]/50 font-bold">
+              <div className="h-4 w-px bg-[#D8CFBF]" />
+              <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] uppercase text-[#8C6226] font-semibold">
                 The Question of the Year · 年度文化命題
               </span>
             </div>
 
+            {/* Top-Right: Minimal Action Controls */}
             <div className="flex items-center gap-2">
               {/* Auto Scroll Toggle */}
               <button
                 type="button"
                 onClick={() => setIsAutoScroll(prev => !prev)}
-                className={`px-3 py-1.5 rounded-full border text-[11px] font-mono tracking-wider flex items-center gap-1.5 transition-all cursor-pointer ${
+                className={`px-3 py-1.5 rounded-full border text-[11px] font-mono tracking-wider flex items-center gap-1.5 transition-all duration-300 cursor-pointer ${
                   isAutoScroll
                     ? 'bg-[#DFBA87]/25 text-[#8C6226] border-[#DFBA87]/60 font-semibold shadow-xs'
                     : 'bg-white/80 text-[#574D43] border-[#E0D7C8] hover:text-[#1C1814] hover:bg-white'
@@ -261,7 +269,7 @@ export default function PerspectiveDisplayWall() {
               <button
                 type="button"
                 onClick={() => setShowQrModal(true)}
-                className="px-3 py-1.5 rounded-full bg-white/80 hover:bg-white text-[#4A3F35] hover:text-[#8C6226] border border-[#E0D7C8] text-[11px] font-mono tracking-wider flex items-center gap-1.5 transition-colors cursor-pointer shadow-xs"
+                className="px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-[#4A3F35] hover:text-[#8C6226] border border-[#E0D7C8] text-[11px] font-mono tracking-wider flex items-center gap-1.5 transition-all duration-300 cursor-pointer shadow-xs hover:border-[#DFBA87]"
                 title="顯示觀眾提報 QR Code"
               >
                 <QrCode className="w-3.5 h-3.5 text-[#8C6226]" />
@@ -272,7 +280,7 @@ export default function PerspectiveDisplayWall() {
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="p-1.5 rounded-full bg-white/80 hover:bg-[#DFBA87] hover:text-black text-[#4A3F35] border border-[#E0D7C8] transition-all cursor-pointer shadow-xs"
+                className="p-1.5 rounded-full bg-white/80 hover:bg-[#DFBA87] hover:text-black text-[#4A3F35] border border-[#E0D7C8] transition-all duration-300 cursor-pointer shadow-xs"
                 title="切換全螢幕 (按 F)"
               >
                 {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
@@ -280,14 +288,15 @@ export default function PerspectiveDisplayWall() {
             </div>
           </div>
 
-          {/* Central Exhibition Banner: The Question of the Year */}
-          <div className="text-center max-w-4xl mx-auto space-y-1 pt-1 pb-1">
-            <h1 className="text-xs sm:text-sm font-serif tracking-[0.25em] uppercase text-[#8C6226] font-medium">
+          {/* Central Exhibition Banner: Generous Breathing Room */}
+          <div className="text-center max-w-4xl mx-auto space-y-2 pt-2 pb-2">
+            <h1 className="text-xs sm:text-sm font-serif tracking-[0.28em] uppercase text-[#8C6226] font-medium">
               HOW CAN BEAUTY BECOME OUR SHARED VALUE?
             </h1>
-            <h2 className="text-xl sm:text-2xl md:text-3xl font-serif text-[#1C1814] tracking-widest font-normal drop-shadow-xs">
+            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#1C1814] tracking-[0.08em] font-normal drop-shadow-xs">
               美，如何成為我們共同的價值？
             </h2>
+            <div className="w-8 h-[1px] bg-[#DFBA87] mx-auto mt-3 rounded-full opacity-70" />
           </div>
 
         </div>
@@ -350,19 +359,14 @@ export default function PerspectiveDisplayWall() {
                   onClick={() => setSelectedItem(item)}
                   className={
                     isFeatured
-                      ? /* FEATURED / ENHANCED CARD (比較大、跨 2 欄、醒目金色光澤) */
-                        "col-span-1 md:col-span-2 relative group rounded-3xl p-7 sm:p-9 lg:p-10 transition-all duration-500 bg-gradient-to-br from-white via-[#FCF8F2] to-[#F7EDE0] border-2 border-[#DFBA87] hover:border-[#B58544] shadow-[0_16px_40px_-10px_rgba(223,186,135,0.25)] hover:shadow-[0_22px_55px_-8px_rgba(223,186,135,0.35)] hover:-translate-y-1.5 backdrop-blur-2xl overflow-hidden flex flex-col justify-between cursor-pointer ring-1 ring-[#DFBA87]/30"
-                      : /* STANDARD CARD (比較小、單欄、明亮溫潤白皙玻璃卡片) */
-                        "col-span-1 relative group rounded-2xl p-6 sm:p-7 transition-all duration-500 bg-white/85 hover:bg-white/98 border border-[#E2D8C9] hover:border-[#B58544]/60 shadow-md shadow-[#DFBA87]/5 hover:shadow-xl hover:shadow-[#DFBA87]/15 hover:-translate-y-1 backdrop-blur-xl overflow-hidden flex flex-col justify-between cursor-pointer"
+                      ? /* FEATURED / ENHANCED CARD (俐落大氣、跨 2 欄、高級香檳金光澤) */
+                        "col-span-1 md:col-span-2 relative group rounded-2xl p-7 sm:p-9 lg:p-10 transition-all duration-300 ease-out bg-gradient-to-br from-white/95 via-[#FCF9F3]/90 to-[#F7EFE2]/90 border border-[#DFBA87] hover:border-[#B58544] shadow-md hover:shadow-xl hover:shadow-[#DFBA87]/15 hover:-translate-y-1 backdrop-blur-xl overflow-hidden flex flex-col justify-between cursor-pointer"
+                      : /* STANDARD CARD (極簡俐落、單欄、通透純淨) */
+                        "col-span-1 relative group rounded-2xl p-6 sm:p-7 transition-all duration-300 ease-out bg-white/80 hover:bg-white/95 border border-[#E5DDD0] hover:border-[#B58544] shadow-xs hover:shadow-md hover:shadow-[#DFBA87]/10 hover:-translate-y-0.5 backdrop-blur-md overflow-hidden flex flex-col justify-between cursor-pointer"
                   }
                 >
-                  {/* Subtle Corner Glow for Featured Cards */}
-                  {isFeatured && (
-                    <div className="absolute -top-24 -right-24 w-64 h-64 bg-[#DFBA87]/20 rounded-full blur-3xl pointer-events-none group-hover:bg-[#DFBA87]/30 transition-all duration-700" />
-                  )}
-
                   {/* 1. 問題 (Question) + 2. 答案 (Answer) */}
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     <p className={`font-serif tracking-wide leading-relaxed ${
                       isFeatured 
                         ? 'text-xs sm:text-sm text-[#8C6226] font-medium' 
@@ -373,21 +377,21 @@ export default function PerspectiveDisplayWall() {
 
                     <blockquote className={
                       isFeatured 
-                        ? "text-2xl sm:text-3xl lg:text-[2.15rem] font-serif text-[#1C1814] leading-[1.38] tracking-wide font-normal drop-shadow-xs my-3" 
-                        : "text-base sm:text-lg font-serif text-[#1C1814] leading-relaxed tracking-wide font-normal my-2"
+                        ? "text-2xl sm:text-3xl lg:text-[2.1rem] font-serif text-[#1C1814] leading-[1.4] tracking-wide font-normal drop-shadow-xs my-3" 
+                        : "text-base sm:text-lg font-serif text-[#1C1814] leading-[1.65] tracking-wide font-normal my-2"
                     }>
                       “{item.answer}”
                     </blockquote>
                   </div>
 
                   {/* 3. 名字 (Name) */}
-                  <div className={`pt-3 flex items-center justify-end ${
-                    isFeatured ? "border-t border-[#DFBA87]/30" : "border-t border-[#E5DDD0]"
+                  <div className={`pt-3.5 flex items-center justify-end ${
+                    isFeatured ? "border-t border-[#DFBA87]/30" : "border-t border-[#EAE3D6]"
                   }`}>
                     <span className={
                       isFeatured
-                        ? "text-lg sm:text-xl font-serif text-[#875F24] font-semibold tracking-wider"
-                        : "text-xs sm:text-sm font-serif text-[#2B231D] font-medium tracking-wider"
+                        ? "text-base sm:text-lg font-serif text-[#875F24] font-semibold tracking-wider"
+                        : "text-xs sm:text-sm font-serif text-[#3D332A] font-medium tracking-wider"
                     }>
                       — {item.name}
                     </span>
@@ -406,7 +410,7 @@ export default function PerspectiveDisplayWall() {
         <button
           type="button"
           onClick={() => setShowQrModal(true)}
-          className="px-5 py-2.5 rounded-full bg-white/95 hover:bg-white border-2 border-[#DFBA87] hover:border-[#B58544] text-[#875F24] text-xs font-mono font-bold tracking-wider flex items-center gap-2 shadow-2xl shadow-[#DFBA87]/25 backdrop-blur-xl transition-all duration-300 hover:scale-105 cursor-pointer"
+          className="px-5 py-2.5 rounded-full bg-white/95 hover:bg-white border border-[#DFBA87] hover:border-[#B58544] text-[#875F24] text-xs font-mono font-semibold tracking-wider flex items-center gap-2 shadow-xl shadow-[#DFBA87]/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
         >
           <QrCode className="w-4 h-4 text-[#875F24]" />
           <span>掃描 QR Code · 留下你對美的觀點（即時登牆）</span>
