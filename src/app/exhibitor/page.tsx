@@ -596,6 +596,14 @@ export default function ExhibitorLandingPage() {
               alt="Zhongshan Hall Interior" 
               className="w-full h-full object-cover filter brightness-[0.85] contrast-[1.03] transition-transform duration-[12s] ease-out hover:scale-105"
             />
+            {/* 2027 Exhibition Date & Venue Badge overlay on banner */}
+            <div className="absolute bottom-3 right-3 md:bottom-4 md:right-5 z-20 flex items-center gap-2 bg-black/65 backdrop-blur-md border border-[#C9A96E]/40 px-3 py-1.5 rounded-xs text-white font-mono text-[11px] md:text-xs tracking-wider shadow-lg">
+              <span className="text-[#DFBA87] font-medium">✦ 2027. 01. 06 – 01. 09</span>
+              <span className="text-white/40">｜</span>
+              <span className="text-white/90 font-sans tracking-wide">
+                {lang === 'zh' ? '台北中山堂 光復廳' : 'Taipei Zhongshan Hall'}
+              </span>
+            </div>
           </div>
         </motion.div>
       </div>
@@ -624,10 +632,66 @@ export default function ExhibitorLandingPage() {
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="text-xs md:text-sm font-serif-garamond tracking-[0.3em] text-[#0D0D0D]/40 uppercase mb-10"
+          className="text-xs md:text-sm font-serif-garamond tracking-[0.3em] text-[#0D0D0D]/40 uppercase mb-8"
         >
           {dict[lang].heroSub}
         </motion.p>
+
+        {/* 2027 Exhibition Date & Venue Lockup (Designed with UI/UX Pro Max) */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.25, ease: [0.16, 1, 0.3, 1] }}
+          className="w-full max-w-xl mx-auto mb-10 flex flex-col items-center"
+        >
+          {/* Eyebrow with venue badge */}
+          <div className="inline-flex items-center gap-2.5 mb-2.5">
+            <span className="w-6 h-[1px] bg-gradient-to-r from-transparent to-[#C9A96E]" />
+            <span className="font-sans text-[11px] font-semibold tracking-[0.28em] text-[#C9A96E] uppercase">
+              {lang === 'zh' ? '2027 展會日程' : '2027 EXHIBITION DATES'}
+            </span>
+            <span className="font-sans text-[10px] font-medium tracking-wider text-[#8C6D37] bg-[#C9A96E]/10 border border-[#C9A96E]/30 px-2.5 py-0.5 rounded-full uppercase">
+              {lang === 'zh' ? '台北中山堂 光復廳' : 'TAIPEI ZHONGSHAN HALL'}
+            </span>
+            <span className="w-6 h-[1px] bg-gradient-to-l from-transparent to-[#C9A96E]" />
+          </div>
+
+          {/* Primary Date Headline */}
+          <div className="font-serif-garamond text-3xl md:text-4.5xl font-light tracking-wide text-[#0D0D0D] flex items-baseline gap-2 mb-4">
+            <span>2027. 01. 06</span>
+            <span className="text-[#C9A96E] font-light italic opacity-90">–</span>
+            <span>01. 09</span>
+          </div>
+
+          {/* Frosted Glass Schedule Breakdown Card */}
+          <div className="w-full bg-white/75 backdrop-blur-md border border-[#C9A96E]/25 rounded-none p-3.5 md:p-4 shadow-[0_12px_32px_-8px_rgba(0,0,0,0.04)] hover:border-[#C9A96E]/50 transition-all duration-300 space-y-2.5 text-left">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-4 text-xs font-sans">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#C9A96E] shadow-[0_0_8px_rgba(201,169,110,0.6)] shrink-0" />
+                <span className="font-semibold text-[#9E7D42] tracking-wider text-[11.5px] whitespace-nowrap">
+                  {lang === 'zh' ? '尊榮預展暨開幕晚會' : 'VIP Opening Gala'}
+                </span>
+              </div>
+              <span className="text-[#555555] text-[11.5px] tracking-wide sm:text-right">
+                {lang === 'zh' ? '1/6 (三) 18:00 – 21:00 ｜ 受邀貴賓專屬' : 'Jan 6 (Wed) 18:00–21:00 · By Invitation'}
+              </span>
+            </div>
+
+            <div className="h-[0.5px] bg-[#0D0D0D]/5 w-full" />
+
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-4 text-xs font-sans">
+              <div className="flex items-center gap-2">
+                <span className="w-1.5 h-1.5 rounded-full bg-[#999999] shrink-0" />
+                <span className="font-semibold text-[#333333] tracking-wider text-[11.5px] whitespace-nowrap">
+                  {lang === 'zh' ? '公眾展期' : 'Public Exhibition'}
+                </span>
+              </div>
+              <span className="text-[#555555] text-[11.5px] tracking-wide sm:text-right">
+                {lang === 'zh' ? '1/7 (四) – 1/9 (六) ｜ 台北市中正區延平南路98號' : 'Jan 7–9 (Thu–Sat) · Taipei City'}
+              </span>
+            </div>
+          </div>
+        </motion.div>
 
         <motion.p 
           initial={{ opacity: 0, y: 15 }}
@@ -899,18 +963,14 @@ export default function ExhibitorLandingPage() {
               <p className="text-[10px] text-center text-[#0D0D0D]/40 font-light tracking-[0.25em] uppercase mb-16">
                 {dict[lang].timelineSub}
               </p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-6 relative">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5 relative">
                 {KEY_DATES.map((item, idx) => (
-                  <div key={idx} className="relative flex flex-col items-center text-center p-6 border border-[#C9A96E]/10 bg-white/40 hover:border-[#C9A96E]/30 transition-all duration-300">
-                    {/* Visual Line connector */}
-                    {idx < 3 && (
-                      <div className="hidden md:block absolute top-[2.25rem] left-[65%] w-[70%] h-[0.5px] bg-[#C9A96E]/20 z-0" />
-                    )}
-                    <div className="w-10 h-10 rounded-full bg-[#FAF9F6] border border-[#C9A96E]/30 flex items-center justify-center mb-5 z-10 shadow-sm text-[#C9A96E]">
+                  <div key={idx} className="relative flex flex-col items-center text-center p-5 border border-[#C9A96E]/15 bg-white/60 backdrop-blur-xs hover:border-[#C9A96E]/40 transition-all duration-300">
+                    <div className="w-9 h-9 rounded-full bg-[#FAF9F6] border border-[#C9A96E]/30 flex items-center justify-center mb-4 z-10 shadow-xs text-[#C9A96E]">
                       <Calendar className="w-4 h-4" />
                     </div>
-                    <h4 className="font-mono text-[#C9A96E] text-xs font-semibold tracking-wider mb-2">{item.dateStr}</h4>
-                    <p className="text-xs text-[#0D0D0D]/85 font-medium tracking-wide">{item.labelZh}</p>
+                    <h4 className="font-mono text-[#C9A96E] text-xs font-semibold tracking-wider mb-1.5">{item.dateStr}</h4>
+                    <p className="text-xs text-[#0D0D0D]/85 font-medium tracking-wide leading-tight">{item.labelZh}</p>
                     <p className="text-[9px] text-[#0D0D0D]/40 uppercase tracking-widest mt-1">{item.labelEn}</p>
                     {item.noteZh && (
                       <span className="mt-2 text-[9px] text-[#8C7853] bg-[#C9A96E]/10 border border-[#C9A96E]/25 px-2 py-0.5 inline-block rounded-xs">
