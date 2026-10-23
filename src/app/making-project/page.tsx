@@ -304,6 +304,16 @@ export default function MakingProjectPage() {
           </Link>
 
           <div className="flex items-center gap-3 sm:gap-5">
+            {/* Exhibition Date Pill in Navbar */}
+            <div className="hidden md:flex items-center gap-2 px-3 py-1 rounded-full border border-[#C9A96E]/30 bg-white/70 text-[11px] font-mono text-[#8C7853] shadow-xs">
+              <span className="text-[#C9A96E]">✦</span>
+              <span className="font-semibold text-[#0D0D0D]">2027. 01. 06 – 01. 09</span>
+              <span className="text-[#C9A96E]/40">｜</span>
+              <span className="text-[#0D0D0D]/70 font-sans-outfit">
+                {lang === 'zh' ? '台北中山堂 光復廳' : 'Taipei Zhongshan Hall'}
+              </span>
+            </div>
+
             {/* Language Switcher Segmented Pill */}
             <div className="flex items-center p-0.5 rounded-full border border-[#C9A96E]/30 bg-white/70 shadow-xs">
               <button
@@ -373,6 +383,57 @@ export default function MakingProjectPage() {
             <span className="text-[11px] sm:text-xs font-sans-outfit tracking-[0.2em] text-[#1A1A1A]/50 uppercase font-light">
               {lang === 'zh' ? '專屬獨立創作者與小型工作室' : 'Independent Makers & Craft Studios'}
             </span>
+          </div>
+
+          {/* 2027 Exhibition Date & Venue Lockup (Designed with UI/UX Pro Max) */}
+          <div className="w-full max-w-xl mx-auto my-8 flex flex-col items-center">
+            {/* Eyebrow with venue badge */}
+            <div className="inline-flex items-center gap-2.5 mb-2.5">
+              <span className="w-6 h-[1px] bg-gradient-to-r from-transparent to-[#C9A96E]" />
+              <span className="font-sans-outfit text-[11px] font-semibold tracking-[0.28em] text-[#C9A96E] uppercase">
+                {lang === 'zh' ? '2027 展會日程' : '2027 EXHIBITION DATES'}
+              </span>
+              <span className="font-sans-outfit text-[10px] font-medium tracking-wider text-[#8C7853] bg-[#C9A96E]/10 border border-[#C9A96E]/30 px-2.5 py-0.5 rounded-full uppercase">
+                {lang === 'zh' ? '台北中山堂 光復廳' : 'TAIPEI ZHONGSHAN HALL'}
+              </span>
+              <span className="w-6 h-[1px] bg-gradient-to-l from-transparent to-[#C9A96E]" />
+            </div>
+
+            {/* Primary Date Headline */}
+            <div className="font-serif-garamond text-3xl sm:text-4xl md:text-5xl font-light tracking-wide text-[#0D0D0D] flex items-baseline gap-2 mb-4">
+              <span>2027. 01. 06</span>
+              <span className="text-[#C9A96E] font-light italic opacity-90">–</span>
+              <span>01. 09</span>
+            </div>
+
+            {/* Frosted Glass Schedule Breakdown Card */}
+            <div className="w-full bg-white/90 backdrop-blur-md border border-[#C9A96E]/30 rounded-none p-3.5 sm:p-4 shadow-[0_12px_32px_-8px_rgba(201,169,110,0.06)] hover:border-[#C9A96E]/60 transition-all duration-300 space-y-2.5 text-left">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-4 text-xs font-sans-outfit">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#C9A96E] shadow-[0_0_8px_rgba(201,169,110,0.6)] shrink-0" />
+                  <span className="font-semibold text-[#9E7D42] tracking-wider text-[11.5px] whitespace-nowrap">
+                    {lang === 'zh' ? '尊榮預展暨開幕晚會' : 'VIP Opening Gala'}
+                  </span>
+                </div>
+                <span className="text-[#555555] text-[11.5px] tracking-wide sm:text-right">
+                  {lang === 'zh' ? '1/6 (三) 18:00 – 21:00 ｜ 受邀貴賓專屬' : 'Jan 6 (Wed) 18:00–21:00 · By Invitation'}
+                </span>
+              </div>
+
+              <div className="h-[0.5px] bg-[#0D0D0D]/10 w-full" />
+
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-4 text-xs font-sans-outfit">
+                <div className="flex items-center gap-2">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#999999] shrink-0" />
+                  <span className="font-semibold text-[#333333] tracking-wider text-[11.5px] whitespace-nowrap">
+                    {lang === 'zh' ? '公眾展期' : 'Public Exhibition'}
+                  </span>
+                </div>
+                <span className="text-[#555555] text-[11.5px] tracking-wide sm:text-right">
+                  {lang === 'zh' ? '1/7 (四) – 1/9 (六) ｜ 台北市中正區延平南路98號' : 'Jan 7–9 (Thu–Sat) · Taipei City'}
+                </span>
+              </div>
+            </div>
           </div>
 
           {/* Curated Disciplines Ribbon */}
