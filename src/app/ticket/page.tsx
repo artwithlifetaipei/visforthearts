@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense, useMemo } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { extractIgHandle } from '@/lib/brandUtils';
 
 export const dynamic = 'force-dynamic';
 
@@ -147,7 +148,7 @@ function TicketRegistrationContent() {
                                 id: app.id,
                                 name_zh: app.brand_name_zh || app.brand_name_en || '',
                                 name_en: app.brand_name_en || '',
-                                instagram_handle: app.instagram_url ? (app.instagram_url.includes('instagram.com/') ? `@${app.instagram_url.split('instagram.com/')[1].split('/')[0].split('?')[0]}` : `@${app.instagram_url.replace(/^@/, '')}`) : '@visforthearts',
+                                instagram_handle: extractIgHandle(app.instagram_url, app.brand_name_en || app.brand_name_zh),
                                 slug: (app.brand_name_en || app.brand_name_zh || app.id).toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-').replace(/^-+|-+$/g, ''),
                                 is_ticket_brand: false,
                             });
@@ -160,7 +161,7 @@ function TicketRegistrationContent() {
                                 id: tb.id,
                                 name_zh: tb.name_zh,
                                 name_en: tb.name_en,
-                                instagram_handle: tb.instagram_handle,
+                                instagram_handle: extractIgHandle(tb.instagram_handle, tb.name_en || tb.name_zh),
                                 slug: (tb.name_en || tb.name_zh || tb.id).toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-').replace(/^-+|-+$/g, ''),
                                 is_ticket_brand: true,
                             });
@@ -666,11 +667,11 @@ function TicketRegistrationContent() {
                                         <span>
                                             為協助主辦單位妥善傳遞大展現場與觀展相關之即時資訊，我同意於入場時出示已追蹤{' '}
                                             <strong className="text-[#1A1A1A]">@visforthearts</strong>
-                                            {!isOfficial && (
+                                            {!isOfficial && activeBrand.instagram_handle && activeBrand.instagram_handle !== '@visforthearts' && (
                                                 <>
                                                     {' '}與{' '}
                                                     <strong className="text-[#A68042]">
-                                                        {activeBrand.instagram_handle || activeBrand.name_zh}
+                                                        {activeBrand.instagram_handle}
                                                     </strong>
                                                 </>
                                             )}{' '}
