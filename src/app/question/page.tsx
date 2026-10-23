@@ -169,19 +169,12 @@ export default function QuestionPage() {
         </div>
 
         {/* 02. Annual Question (Core Prominent Visual) */}
-        <div className="text-center space-y-4 mb-12">
+        <div className="text-center space-y-4 mb-10">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#1C1814] leading-tight font-medium tracking-wide drop-shadow-xs">
             {t('美，如何成為我們共同的價值？', 'HOW CAN BEAUTY BECOME OUR SHARED VALUE?')}
           </h1>
           <p className="text-base sm:text-lg text-[#8C6226] font-serif font-medium tracking-widest">
             {t('HOW CAN BEAUTY BECOME OUR SHARED VALUE?', '美，如何成為我們共同的價值？')}
-          </p>
-          <div className="w-12 h-0.5 bg-[#DFBA87] mx-auto mt-4 rounded-full" />
-          <p className="text-xs sm:text-sm text-[#574D43] font-light max-w-lg mx-auto leading-relaxed pt-2">
-            {t(
-              '美，不僅是感官的愉悅或外在形式，更是深刻滲入日常生活、人際凝視與社會脈動的核心素養。請從以下三道具體提問中任選一題回答，經大會審核後，將於 VIS 2027 臺北中山堂現場大型 LED 觀點之牆動態展示，並永久收錄於 VIS Perspective Archive。',
-              'Beauty is not merely visual delight, but a profound sensibility woven into daily rituals, human connection, and social progress. Please select one of the three prompts below to share your perspective, to be displayed on the live LED wall at Taipei Zhongshan Hall.'
-            )}
           </p>
         </div>
 
