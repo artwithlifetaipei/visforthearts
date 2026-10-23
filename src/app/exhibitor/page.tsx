@@ -712,8 +712,8 @@ export default function ExhibitorLandingPage() {
                   <span>✦</span>
                   <span>
                     {lang === 'zh' 
-                      ? '因應各方申請需求・特別加開延長至今日 23:59 截止' 
-                      : 'Specially extended to 23:59 tonight upon high demand'}
+                      ? '因應各方申請需求・特別加開延長6小時，至10/15  23:59 截止' 
+                      : 'Specially extended by 6 hours to Oct 15, 23:59 upon high demand'}
                   </span>
                 </div>
               </div>
