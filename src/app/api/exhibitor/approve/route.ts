@@ -221,7 +221,11 @@ export async function POST(req: Request) {
 
         if (isMakingProject) {
           // --- MAKING PROJECT ADMISSION EMAIL ---
-          subject = `【2027 VIS Contemporary Culture】「造物計畫」正式核准錄取通知 Official Admission Notice — ${app.brand_name_zh}`;
+          const makingBrandDisplay = (!app.brand_name_zh || app.brand_name_zh === '無' || app.brand_name_zh.trim() === '')
+            ? (app.brand_name_en || '創作提案')
+            : app.brand_name_zh;
+
+          subject = `【2027 VIS Contemporary Culture】「造物計畫」正式核准錄取通知 Official Admission Notice — ${makingBrandDisplay}`;
           
           const materialCategory = app.zone_preference_1?.match(/\((.*?)\)/)?.[1] || '原創造物類別';
 
@@ -250,10 +254,10 @@ export async function POST(req: Request) {
 
               <div style="background-color: #FFFFFF; border: 1px solid rgba(201, 169, 110, 0.3); border-radius: 4px; padding: 32px 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
                 <p style="font-size: 14px; line-height: 1.8; color: #333333; margin-top: 0;">
-                  親愛的創作者 / 品牌代表 <strong>${app.contact_name}</strong>（${app.brand_name_zh}）您好：
+                  親愛的創作者 / 品牌代表 <strong>${app.contact_name}</strong>（${makingBrandDisplay}）您好：
                 </p>
                 <p style="font-size: 14px; line-height: 1.8; color: #333333;">
-                  誠摯恭喜您！大會策展委員會已完成「VIS 2027 造物計畫」之提案審查與作品評核。我們非常榮幸地正式通知您：您的創作提案<strong>《${app.brand_name_zh}》</strong>已正式通過策展評核，獲得 2027 VIS 台北中山堂光復廳之參展資格！
+                  誠摯恭喜您！大會策展委員會已完成「VIS 2027 造物計畫」之提案審查與作品評核。我們非常榮幸地正式通知您：您的創作提案<strong>《${makingBrandDisplay}》</strong>已正式通過策展評核，獲得 2027 VIS 台北中山堂光復廳之參展資格！
                 </p>
 
                 <!-- Approval Status Card -->
@@ -322,7 +326,11 @@ export async function POST(req: Request) {
           `;
         } else {
           // --- REGULAR EXHIBITOR ADMISSION EMAIL ---
-          subject = `【2027 VIS Contemporary Culture】正式核准錄取通知 Official Admission Notice — ${app.brand_name_zh}`;
+          const brandDisplay = (!app.brand_name_zh || app.brand_name_zh === '無' || app.brand_name_zh.trim() === '')
+            ? (app.brand_name_en || '參展品牌')
+            : app.brand_name_zh;
+
+          subject = `【2027 VIS Contemporary Culture】正式核准錄取通知 Official Admission Notice — ${brandDisplay}`;
 
           let regularFeeHtml = '';
           if (feeValue !== null && feeValue !== originalPrice) {
@@ -349,10 +357,10 @@ export async function POST(req: Request) {
 
               <div style="background-color: #FFFFFF; border: 1px solid rgba(201, 169, 110, 0.3); border-radius: 4px; padding: 32px 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
                 <p style="font-size: 14px; line-height: 1.8; color: #333333; margin-top: 0;">
-                  敬啟者 <strong>${app.contact_name}</strong>（${app.brand_name_zh}）您好：
+                  敬啟者 <strong>${app.contact_name}</strong>（${brandDisplay}）您好：
                 </p>
                 <p style="font-size: 14px; line-height: 1.8; color: #333333;">
-                  感謝貴品牌參與 2027 VIS 參展申請。大會策展委員會已完成審查評核與空間配置規劃，我們非常榮幸地正式通知您：貴品牌<strong>《${app.brand_name_zh}》</strong>已獲大會正式核准入選！
+                  感謝貴品牌參與 2027 VIS 參展申請。大會策展委員會已完成審查評核與空間配置規劃，我們非常榮幸地正式通知您：貴品牌<strong>《${brandDisplay}》</strong>已獲大會正式核准入選！
                 </p>
 
                 <!-- Approval Status Card -->
