@@ -2,87 +2,17 @@ import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
 
-// Types definition matching VIS 2027 Perspective Wall Specification (V1.0)
-export interface PerspectiveCampaign {
-  id: string;
-  slug: string;
-  year: number;
-  question_version: string;
-  question_en: string;
-  question_zh: string;
-  identity_label: string;
-  submission_open_at: string;
-  submission_close_at: string;
-  status: 'draft' | 'active' | 'closed' | 'archived';
-  is_display_campaign: boolean;
-  consent_version: string;
-  created_at: string;
-  updated_at: string;
-}
+import { 
+  DEFAULT_CAMPAIGN, 
+  PerspectiveSubmission, 
+  PerspectiveDisplaySettings,
+  PerspectiveCampaign,
+  AnnualSubQuestion,
+  ANNUAL_SUB_QUESTIONS
+} from './perspectiveTypes';
 
-export type SubmissionSource = 'PUBLIC' | 'EDITORIAL' | 'INTERVIEW';
-export type SubmissionType = 'visitor' | 'vip' | 'vis_people' | 'artist' | 'exhibitor';
-export type SubmissionStatus = 'pending' | 'approved' | 'rejected' | 'archived';
-
-export interface PerspectiveSubmission {
-  id: string;
-  campaign_id: string;
-  source: SubmissionSource;
-  type: SubmissionType;
-  original_name: string;
-  display_name: string;
-  original_answer: string;
-  display_answer: string | null;
-  role_title: string | null;
-  language?: string;
-  status: SubmissionStatus;
-  display_enabled: boolean;
-  display_order: number | null;
-  featured: boolean;
-  moderation_flags: string[];
-  rejection_reason?: string | null;
-  consent_version: string;
-  consented_at: string;
-  withdrawn_at?: string | null;
-  submitted_at: string;
-  reviewed_at?: string | null;
-  reviewed_by?: string | null;
-  created_at: string;
-  updated_at: string;
-  idempotency_key?: string | null;
-}
-
-export interface PerspectiveDisplaySettings {
-  id: string;
-  campaign_id: string;
-  mode: 'normal' | 'latest' | 'filtered' | 'emergency';
-  filter_type: string | null;
-  duration_seconds: number;
-  transition: string;
-  emergency_message_en: string;
-  emergency_message_zh: string;
-  content_version: number;
-  updated_at: string;
-  updated_by?: string | null;
-}
-
-// Default Seed Campaign for VIS 2027
-export const DEFAULT_CAMPAIGN: PerspectiveCampaign = {
-  id: 'e3c23114-61b9-4674-8898-0c367ad10827',
-  slug: 'vis-2027',
-  year: 2027,
-  question_version: '2027-v1',
-  question_en: 'WHAT DO YOU HOPE WILL STILL MATTER IN 100 YEARS?',
-  question_zh: '一百年後，你希望什麼仍然重要？',
-  identity_label: 'THE QUESTION OF THE YEAR 2027',
-  submission_open_at: '2026-10-01T00:00:00Z',
-  submission_close_at: '2027-02-01T00:00:00Z',
-  status: 'active',
-  is_display_campaign: true,
-  consent_version: '2027-v1',
-  created_at: '2026-10-21T00:00:00Z',
-  updated_at: '2026-10-21T00:00:00Z',
-};
+// Re-export for server callers
+export * from './perspectiveTypes';
 
 // Default Display Settings
 export const DEFAULT_DISPLAY_SETTINGS: PerspectiveDisplaySettings = {
@@ -92,8 +22,8 @@ export const DEFAULT_DISPLAY_SETTINGS: PerspectiveDisplaySettings = {
   filter_type: null,
   duration_seconds: 8,
   transition: 'fade',
-  emergency_message_en: 'VIS 2027 — LIVE PERSPECTIVE WALL',
-  emergency_message_zh: 'VIS 2027 當代生活文化大展 · 現場觀點共創進行中',
+  emergency_message_en: 'VIS 2027 — HOW CAN BEAUTY BECOME OUR SHARED VALUE?',
+  emergency_message_zh: 'VIS 2027 當代生活文化大展 · 美，如何成為我們共同的價值？',
   content_version: 1,
   updated_at: new Date().toISOString(),
   updated_by: 'system',
@@ -115,8 +45,10 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_enabled: true,
     display_order: 1,
     featured: true,
+    question_id: 'q2',
+    question_prompt: '對你來說，美的事物，它的價值是什麼？一個句話形容。',
     moderation_flags: [],
-    consent_version: '2027-v1',
+    consent_version: '2027-v2',
     consented_at: '2026-10-21T08:00:00Z',
     submitted_at: '2026-10-21T08:00:00Z',
     created_at: '2026-10-21T08:00:00Z',
@@ -136,8 +68,10 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_enabled: true,
     display_order: 2,
     featured: true,
+    question_id: 'q1',
+    question_prompt: '你認為，一個真正懂得欣賞美的社會，應該具備什麼樣的特質？',
     moderation_flags: [],
-    consent_version: '2027-v1',
+    consent_version: '2027-v2',
     consented_at: '2026-10-21T08:30:00Z',
     submitted_at: '2026-10-21T08:30:00Z',
     created_at: '2026-10-21T08:30:00Z',
@@ -157,8 +91,10 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_enabled: true,
     display_order: 3,
     featured: true,
+    question_id: 'q3',
+    question_prompt: '如果希望台灣成為一個更有美感的地方，你最希望大家開始重視什麼？',
     moderation_flags: [],
-    consent_version: '2027-v1',
+    consent_version: '2027-v2',
     consented_at: '2026-10-21T09:00:00Z',
     submitted_at: '2026-10-21T09:00:00Z',
     created_at: '2026-10-21T09:00:00Z',
@@ -178,8 +114,10 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_enabled: true,
     display_order: 4,
     featured: true,
+    question_id: 'q1',
+    question_prompt: '你認為，一個真正懂得欣賞美的社會，應該具備什麼樣的特質？',
     moderation_flags: [],
-    consent_version: '2027-v1',
+    consent_version: '2027-v2',
     consented_at: '2026-10-21T09:30:00Z',
     submitted_at: '2026-10-21T09:30:00Z',
     created_at: '2026-10-21T09:30:00Z',
@@ -199,8 +137,10 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_enabled: true,
     display_order: 5,
     featured: false,
+    question_id: 'q2',
+    question_prompt: '對你來說，美的事物，它的價值是什麼？一個句話形容。',
     moderation_flags: [],
-    consent_version: '2027-v1',
+    consent_version: '2027-v2',
     consented_at: '2026-10-21T10:00:00Z',
     submitted_at: '2026-10-21T10:00:00Z',
     created_at: '2026-10-21T10:00:00Z',
@@ -220,8 +160,10 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_enabled: true,
     display_order: 6,
     featured: true,
+    question_id: 'q2',
+    question_prompt: '對你來說，美的事物，它的價值是什麼？一個句話形容。',
     moderation_flags: [],
-    consent_version: '2027-v1',
+    consent_version: '2027-v2',
     consented_at: '2026-10-21T10:30:00Z',
     submitted_at: '2026-10-21T10:30:00Z',
     created_at: '2026-10-21T10:30:00Z',
@@ -241,8 +183,10 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_enabled: true,
     display_order: 7,
     featured: false,
+    question_id: 'q1',
+    question_prompt: '你認為，一個真正懂得欣賞美的社會，應該具備什麼樣的特質？',
     moderation_flags: [],
-    consent_version: '2027-v1',
+    consent_version: '2027-v2',
     consented_at: '2026-10-21T11:00:00Z',
     submitted_at: '2026-10-21T11:00:00Z',
     created_at: '2026-10-21T11:00:00Z',
@@ -262,8 +206,10 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_enabled: true,
     display_order: 8,
     featured: true,
+    question_id: 'q2',
+    question_prompt: '對你來說，美的事物，它的價值是什麼？一個句話形容。',
     moderation_flags: [],
-    consent_version: '2027-v1',
+    consent_version: '2027-v2',
     consented_at: '2026-10-21T11:30:00Z',
     submitted_at: '2026-10-21T11:30:00Z',
     created_at: '2026-10-21T11:30:00Z',
@@ -283,8 +229,10 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_enabled: true,
     display_order: 9,
     featured: false,
+    question_id: 'q3',
+    question_prompt: '如果希望台灣成為一個更有美感的地方，你最希望大家開始重視什麼？',
     moderation_flags: [],
-    consent_version: '2027-v1',
+    consent_version: '2027-v2',
     consented_at: '2026-10-21T12:00:00Z',
     submitted_at: '2026-10-21T12:00:00Z',
     created_at: '2026-10-21T12:00:00Z',
@@ -304,8 +252,10 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_enabled: true,
     display_order: 10,
     featured: false,
+    question_id: 'q3',
+    question_prompt: '如果希望台灣成為一個更有美感的地方，你最希望大家開始重視什麼？',
     moderation_flags: [],
-    consent_version: '2027-v1',
+    consent_version: '2027-v2',
     consented_at: '2026-10-21T12:30:00Z',
     submitted_at: '2026-10-21T12:30:00Z',
     created_at: '2026-10-21T12:30:00Z',
@@ -528,6 +478,8 @@ export async function getDisplayPerspectives(campaignSlug: string = 'vis-2027'):
     role_title: item.role_title || null,
     display_order: item.display_order,
     featured: Boolean(item.featured),
+    question_id: item.question_id || null,
+    question_prompt: item.question_prompt || null,
     updated_at: item.updated_at,
   }));
 
@@ -558,6 +510,8 @@ export async function createSubmission(payload: {
   display_name: string;
   answer: string;
   role_title?: string | null;
+  question_id?: string | null;
+  question_prompt?: string | null;
   consent_display: boolean;
   consent_version?: string;
   idempotency_key?: string;
@@ -585,6 +539,8 @@ export async function createSubmission(payload: {
     display_enabled: payload.source === 'EDITORIAL' || payload.source === 'INTERVIEW',
     display_order: null,
     featured: false,
+    question_id: payload.question_id || null,
+    question_prompt: payload.question_prompt || null,
     moderation_flags: payload.moderation_flags || [],
     consent_version: payload.consent_version || campaign.consent_version,
     consented_at: nowIso,
@@ -612,6 +568,8 @@ export async function createSubmission(payload: {
         display_enabled: newSubmission.display_enabled,
         display_order: newSubmission.display_order,
         featured: newSubmission.featured,
+        question_id: newSubmission.question_id,
+        question_prompt: newSubmission.question_prompt,
         moderation_flags: newSubmission.moderation_flags,
         consent_version: newSubmission.consent_version,
         consented_at: newSubmission.consented_at,

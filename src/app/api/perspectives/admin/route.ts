@@ -42,6 +42,7 @@ export async function GET(req: Request) {
         'ID',
         '來源 Source',
         '分類 Type',
+        '回答題目 Question',
         '角色頭銜 Role',
         '原始姓名 Original Name',
         '展示姓名 Display Name',
@@ -60,6 +61,7 @@ export async function GET(req: Request) {
           `"${item.id}"`,
           `"${item.source}"`,
           `"${item.type}"`,
+          `"${(item.question_prompt || item.question_id || '').replace(/"/g, '""')}"`,
           `"${(item.role_title || '').replace(/"/g, '""')}"`,
           `"${item.original_name.replace(/"/g, '""')}"`,
           `"${item.display_name.replace(/"/g, '""')}"`,
@@ -144,6 +146,8 @@ export async function PATCH(req: Request) {
         type: patch?.type,
         display_order: patch?.display_order !== undefined ? patch.display_order : undefined,
         featured: patch?.featured !== undefined ? patch.featured : undefined,
+        question_id: patch?.question_id !== undefined ? patch.question_id : undefined,
+        question_prompt: patch?.question_prompt !== undefined ? patch.question_prompt : undefined,
       };
     } else {
       payload = patch || {};
@@ -167,7 +171,16 @@ export async function PATCH(req: Request) {
 export async function POST(req: Request) {
   try {
     const body = await req.json();
-    const { source = 'EDITORIAL', type = 'vis_people', display_name, answer, role_title, display_order } = body;
+    const { 
+      source = 'EDITORIAL', 
+      type = 'vis_people', 
+      display_name, 
+      answer, 
+      role_title, 
+      display_order,
+      question_id,
+      question_prompt,
+    } = body;
 
     if (!display_name || !answer) {
       return NextResponse.json(
@@ -182,6 +195,8 @@ export async function POST(req: Request) {
       display_name,
       answer,
       role_title,
+      question_id,
+      question_prompt,
       consent_display: true,
       consent_version: 'editorial-curated-2027',
     });

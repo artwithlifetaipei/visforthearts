@@ -5,11 +5,13 @@ import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Sparkles, Send, CheckCircle2, AlertCircle, Loader2, ArrowLeft, 
-  ShieldCheck, Eye, HelpCircle, X, ExternalLink
+  ShieldCheck, Eye, HelpCircle, X, ExternalLink, Check
 } from 'lucide-react';
+import { ANNUAL_SUB_QUESTIONS } from '@/lib/perspectiveTypes';
 
 export default function QuestionPage() {
   const [lang, setLang] = useState<'zh' | 'en'>('zh');
+  const [selectedQuestionId, setSelectedQuestionId] = useState<string>('q1');
   const [displayName, setDisplayName] = useState('');
   const [answer, setAnswer] = useState('');
   const [consent, setConsent] = useState(false);
@@ -18,11 +20,14 @@ export default function QuestionPage() {
   const [submittedData, setSubmittedData] = useState<{
     displayName: string;
     answer: string;
+    questionPrompt: string;
     submittedAt: string;
   } | null>(null);
   const [showPrivacyModal, setShowPrivacyModal] = useState(false);
 
   const t = (zh: string, en: string) => (lang === 'zh' ? zh : en);
+
+  const activeQuestion = ANNUAL_SUB_QUESTIONS.find(q => q.id === selectedQuestionId) || ANNUAL_SUB_QUESTIONS[0];
 
   const nameCharCount = displayName.trim().length;
   const answerCharCount = answer.trim().length;
@@ -62,8 +67,10 @@ export default function QuestionPage() {
         body: JSON.stringify({
           display_name: displayName.trim(),
           answer: answer.trim(),
+          question_id: activeQuestion.id,
+          question_prompt: lang === 'zh' ? activeQuestion.question_zh : activeQuestion.question_en,
           consent_display: true,
-          consent_version: '2027-v1',
+          consent_version: '2027-v2',
           campaign_slug: 'vis-2027',
           idempotency_key: idempotencyKey,
         }),
@@ -77,6 +84,7 @@ export default function QuestionPage() {
       setSubmittedData({
         displayName: displayName.trim(),
         answer: answer.trim(),
+        questionPrompt: lang === 'zh' ? activeQuestion.question_zh : activeQuestion.question_en,
         submittedAt: new Date().toLocaleTimeString(lang === 'zh' ? 'zh-TW' : 'en-US', { hour12: false }),
       });
       // Reset form fields
@@ -147,16 +155,16 @@ export default function QuestionPage() {
         {/* 02. Annual Question (Core Prominent Visual) */}
         <div className="text-center space-y-4 mb-12">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#F3EAD8] leading-tight font-medium tracking-wide">
-            WHAT DO YOU HOPE WILL STILL MATTER IN 100 YEARS?
+            {t('美，如何成為我們共同的價值？', 'HOW CAN BEAUTY BECOME OUR SHARED VALUE?')}
           </h1>
-          <p className="text-xl sm:text-2xl text-neutral-200 font-serif font-light tracking-wider">
-            一百年後，你希望什麼仍然重要？
+          <p className="text-base sm:text-lg text-[#DFBA87] font-serif font-light tracking-widest">
+            {t('HOW CAN BEAUTY BECOME OUR SHARED VALUE?', '美，如何成為我們共同的價值？')}
           </p>
           <div className="w-12 h-px bg-[#DFBA87]/40 mx-auto mt-4" />
           <p className="text-xs text-neutral-400 font-light max-w-lg mx-auto leading-relaxed pt-2">
             {t(
-              '在講求極致速度與演算法推播的時代，有哪些工藝、價值、心意或生活習慣，值得穿越一個世紀的時間？請留下你的深刻觀點，經大會策展小組審核後，將於 VIS 2027 臺北中山堂現場 LED 觀點之牆動態播放，並永久收錄於 VIS Perspective Archive。',
-              'In an era driven by algorithmic speed, what craftsmanship, slow rituals, or humane values deserve to transcend an entire century? Share your perspective here to be displayed on the live architectural LED wall at Taipei Zhongshan Hall.'
+              '美，不僅是感官的愉悅或外在形式，更是深刻滲入日常生活、人際凝視與社會脈動的核心素養。請從以下三道具體提問中任選一題回答，經大會審核後，將於 VIS 2027 臺北中山堂現場大型 LED 觀點之牆動態展示，並永久收錄於 VIS Perspective Archive。',
+              'Beauty is not merely visual delight, but a profound sensibility woven into daily rituals, human connection, and social progress. Please select one of the three prompts below to share your perspective, to be displayed on the live LED wall at Taipei Zhongshan Hall.'
             )}
           </p>
         </div>
@@ -164,7 +172,7 @@ export default function QuestionPage() {
         {/* Dynamic Display: Form or In-Place Confirmation */}
         <AnimatePresence mode="wait">
           {submittedData ? (
-            /* 07. Result: Success State (Section 8.1) */
+            /* 07. Result: Success State */
             <motion.div
               key="success-box"
               initial={{ opacity: 0, scale: 0.96 }}
@@ -182,7 +190,7 @@ export default function QuestionPage() {
                 </h3>
                 <p className="text-xs text-neutral-400 font-light leading-relaxed max-w-md mx-auto">
                   {t(
-                    '你的回答已收到，大會策展與公關小組正進行審核。經核准後將可能於 VIS 現場 LED 觀點之牆、官方專刊及社群中動態展示。',
+                    '你的回答已收到，大會策展小組正進行審核。經核准後將即時於 VIS 現場 LED 觀點之牆動態展示，並收錄於年度文化典藏庫。',
                     'Your response has been received and will be reviewed by VIS curatorial moderators for live display.'
                   )}
                 </p>
@@ -190,13 +198,19 @@ export default function QuestionPage() {
 
               {/* Submitted Quote Card */}
               <div className="relative bg-[#080808] border border-white/10 rounded-xl p-6 text-left space-y-3">
-                <div className="text-[10px] font-mono text-[#DFBA87] tracking-wider uppercase flex items-center justify-between">
+                <div className="text-[10px] font-mono text-[#DFBA87] tracking-wider uppercase flex items-center justify-between border-b border-white/5 pb-2">
                   <span>● 待策展審核中 (Under Curatorial Review)</span>
                   <span>{submittedData.submittedAt}</span>
                 </div>
-                <blockquote className="text-sm sm:text-base text-neutral-100 font-serif italic leading-relaxed">
+
+                <div className="text-xs text-[#DFBA87] font-serif font-medium">
+                  題目：{submittedData.questionPrompt}
+                </div>
+
+                <blockquote className="text-sm sm:text-base text-neutral-100 font-serif italic leading-relaxed pt-1">
                   “{submittedData.answer}”
                 </blockquote>
+
                 <div className="text-xs text-neutral-400 font-medium text-right font-sans pt-1">
                   — {submittedData.displayName}
                 </div>
@@ -216,7 +230,7 @@ export default function QuestionPage() {
                   className="w-full sm:w-auto px-6 py-2.5 rounded-lg bg-[#DFBA87] hover:bg-[#c9a370] text-black text-xs font-bold tracking-wider transition-all shadow-lg flex items-center justify-center gap-1.5"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span>{t('觀看現場 LED 播放', 'View Live LED Wall')}</span>
+                  <span>{t('觀看現場觀點之牆', 'View Live Perspective Wall')}</span>
                 </Link>
               </div>
             </motion.div>
@@ -237,62 +251,138 @@ export default function QuestionPage() {
                 </div>
               )}
 
-              {/* 03. Display Name */}
-              <div className="space-y-1.5">
+              {/* Step 1: Select One Question to Answer (三選一) */}
+              <div className="space-y-3">
                 <div className="flex items-center justify-between text-xs">
-                  <label htmlFor="display_name" className="text-white font-medium flex items-center gap-1">
-                    <span>{t('姓名或希望顯示的名稱', 'Name or Display Name')}</span>
+                  <label className="text-white font-medium flex items-center gap-1.5">
+                    <span className="w-1.5 h-1.5 rounded-full bg-[#DFBA87]" />
+                    <span>{t('步驟一：請選擇一個你想回答的題目（三選一）', 'Step 1: Choose One Question to Answer')}</span>
                     <span className="text-[#DFBA87]">*</span>
                   </label>
-                  <span className="text-[11px] font-mono text-neutral-500">
-                    {nameCharCount} / 30 {t('字', 'chars')}
+                  <span className="text-[11px] font-mono text-[#DFBA87]">
+                    {t('點選切換', 'Click to select')}
                   </span>
                 </div>
-                <input
-                  id="display_name"
-                  type="text"
-                  value={displayName}
-                  onChange={(e) => setDisplayName(e.target.value.substring(0, 30))}
-                  placeholder={t('您的姓名或希望顯示的名稱（例如：Amelie、匿名觀展者）', 'Your name or display name')}
-                  className="w-full bg-[#080808] border border-white/10 rounded-lg px-4 py-3 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-[#DFBA87] focus:ring-1 focus:ring-[#DFBA87]/40 transition-all font-sans"
-                  maxLength={30}
-                  required
-                />
-              </div>
 
-              {/* 04. Perspective Answer */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <label htmlFor="perspective_answer" className="text-white font-medium flex items-center gap-1">
-                    <span>{t('你的觀點', 'Your Perspective')}</span>
-                    <span className="text-[#DFBA87]">*</span>
-                  </label>
-                  <span className="text-[11px] font-mono text-neutral-500">
-                    {answerCharCount} / 120 {t('字', 'chars')}
-                  </span>
+                <div className="grid grid-cols-1 gap-2.5">
+                  {ANNUAL_SUB_QUESTIONS.map((q, idx) => {
+                    const isSelected = q.id === selectedQuestionId;
+                    return (
+                      <div
+                        key={q.id}
+                        onClick={() => setSelectedQuestionId(q.id)}
+                        className={`p-4 rounded-xl border transition-all duration-300 cursor-pointer flex items-start gap-3.5 relative overflow-hidden ${
+                          isSelected
+                            ? 'bg-gradient-to-r from-[#DFBA87]/15 to-[#DFBA87]/5 border-[#DFBA87] shadow-[0_0_20px_rgba(223,186,135,0.12)]'
+                            : 'bg-[#080808] border-white/10 hover:border-white/20 hover:bg-white/[0.02]'
+                        }`}
+                      >
+                        {/* Radio Check Circle */}
+                        <div className="pt-0.5 shrink-0">
+                          <div className={`w-4 h-4 rounded-full border flex items-center justify-center transition-colors ${
+                            isSelected ? 'border-[#DFBA87] bg-[#DFBA87]' : 'border-neutral-600'
+                          }`}>
+                            {isSelected && <Check className="w-2.5 h-2.5 text-black stroke-[3]" />}
+                          </div>
+                        </div>
+
+                        <div className="space-y-1 flex-grow">
+                          <div className="flex items-center justify-between">
+                            <span className={`text-[10px] font-mono tracking-widest uppercase font-semibold ${
+                              isSelected ? 'text-[#DFBA87]' : 'text-neutral-500'
+                            }`}>
+                              {t(`問題 0${idx + 1} · ${q.short_label_zh}`, `QUESTION 0${idx + 1} · ${q.short_label_en}`)}
+                            </span>
+                            {isSelected && (
+                              <span className="text-[10px] font-mono text-[#DFBA87] flex items-center gap-1 font-medium">
+                                ✓ {t('已選擇', 'Selected')}
+                              </span>
+                            )}
+                          </div>
+
+                          <p className={`text-sm sm:text-base font-serif leading-snug transition-colors ${
+                            isSelected ? 'text-white font-medium' : 'text-neutral-300 font-normal'
+                          }`}>
+                            {t(q.question_zh, q.question_en)}
+                          </p>
+                        </div>
+                      </div>
+                    );
+                  })}
                 </div>
-                <textarea
-                  id="perspective_answer"
-                  value={answer}
-                  onChange={(e) => setAnswer(e.target.value.substring(0, 120))}
-                  placeholder={t('用一句話留下你的答案...', 'Share your answer in one sentence...')}
-                  rows={4}
-                  className="w-full bg-[#080808] border border-white/10 rounded-lg p-4 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-[#DFBA87] focus:ring-1 focus:ring-[#DFBA87]/40 transition-all font-sans leading-relaxed resize-none"
-                  maxLength={120}
-                  required
-                />
-                <p className="text-[11px] text-neutral-500 flex items-center gap-1.5">
-                  <HelpCircle className="w-3 h-3 text-[#DFBA87] shrink-0" />
-                  <span>
-                    {t(
-                      '請勿填寫電話、Email、地址或其他個人私密資料。',
-                      'Please do not include phone, email, address, or other personal contact details.'
-                    )}
-                  </span>
-                </p>
               </div>
 
-              {/* 05. Consent Checkbox & Privacy Policy */}
+              {/* Step 2: Answer Input Details */}
+              <div className="pt-3 border-t border-white/5 space-y-5">
+                <div className="text-xs text-neutral-400 font-medium flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#DFBA87]" />
+                  <span>{t('步驟二：填寫你的姓名與回答觀點', 'Step 2: Enter Your Name and Perspective')}</span>
+                </div>
+
+                {/* Display Name */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <label htmlFor="display_name" className="text-white font-medium flex items-center gap-1">
+                      <span>{t('姓名或希望顯示的名稱', 'Name or Display Name')}</span>
+                      <span className="text-[#DFBA87]">*</span>
+                    </label>
+                    <span className="text-[11px] font-mono text-neutral-500">
+                      {nameCharCount} / 30 {t('字', 'chars')}
+                    </span>
+                  </div>
+                  <input
+                    id="display_name"
+                    type="text"
+                    value={displayName}
+                    onChange={(e) => setDisplayName(e.target.value.substring(0, 30))}
+                    placeholder={t('您的姓名或稱謂（例如：Amelie、建築愛好者、匿名觀展者）', 'Your name or display name')}
+                    className="w-full bg-[#080808] border border-white/10 rounded-lg px-4 py-3 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-[#DFBA87] focus:ring-1 focus:ring-[#DFBA87]/40 transition-all font-sans"
+                    maxLength={30}
+                    required
+                  />
+                </div>
+
+                {/* Perspective Answer */}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <label htmlFor="perspective_answer" className="text-white font-medium flex items-center gap-1">
+                      <span>{t('你的觀點', 'Your Perspective')}</span>
+                      <span className="text-[#DFBA87]">*</span>
+                    </label>
+                    <span className="text-[11px] font-mono text-neutral-500">
+                      {answerCharCount} / 120 {t('字', 'chars')}
+                    </span>
+                  </div>
+
+                  {/* Active Question Context Banner */}
+                  <div className="p-3 rounded-lg bg-[#DFBA87]/10 border border-[#DFBA87]/30 text-xs text-[#DFBA87] font-serif flex items-start gap-2">
+                    <Sparkles className="w-3.5 h-3.5 shrink-0 mt-0.5 text-[#DFBA87]" />
+                    <span>{t(`正在回答：${activeQuestion.question_zh}`, `Answering: ${activeQuestion.question_en}`)}</span>
+                  </div>
+
+                  <textarea
+                    id="perspective_answer"
+                    value={answer}
+                    onChange={(e) => setAnswer(e.target.value.substring(0, 120))}
+                    placeholder={t(activeQuestion.placeholder_zh, activeQuestion.placeholder_en)}
+                    rows={4}
+                    className="w-full bg-[#080808] border border-white/10 rounded-lg p-4 text-sm text-neutral-100 placeholder-neutral-600 focus:outline-none focus:border-[#DFBA87] focus:ring-1 focus:ring-[#DFBA87]/40 transition-all font-sans leading-relaxed resize-none"
+                    maxLength={120}
+                    required
+                  />
+                  <p className="text-[11px] text-neutral-500 flex items-center gap-1.5">
+                    <HelpCircle className="w-3 h-3 text-[#DFBA87] shrink-0" />
+                    <span>
+                      {t(
+                        '請勿填寫電話、Email、地址或其他個人私密聯絡資料。',
+                        'Please do not include phone, email, address, or other personal contact details.'
+                      )}
+                    </span>
+                  </p>
+                </div>
+              </div>
+
+              {/* Consent Checkbox & Privacy Policy */}
               <div className="pt-2 border-t border-white/5 space-y-2">
                 <label className="flex items-start gap-3 cursor-pointer group select-none">
                   <input
@@ -303,7 +393,7 @@ export default function QuestionPage() {
                   />
                   <span className="text-xs text-neutral-400 font-light leading-relaxed group-hover:text-neutral-300 transition-colors">
                     {t(
-                      '我同意 VIS 得於現場展示、官方網站、社群媒體、影片、出版品及 VIS Perspective Archive 中，使用我提供的顯示名稱與回答內容。我已閱讀並同意',
+                      '我同意 VIS 得於現場觀點之牆展示、官方網站、社群媒體、影片、出版品及 VIS Perspective Archive 中，公開展示我提供的顯示名稱、選定題目與回答內容。我已閱讀並同意',
                       'I agree that VIS may display and use my display name and answer on-site, on official websites, social media, videos, publications, and in the VIS Perspective Archive. I have read the '
                     )}
                     <button
@@ -322,7 +412,7 @@ export default function QuestionPage() {
                 </label>
               </div>
 
-              {/* 06. Submit Button */}
+              {/* Submit Button */}
               <button
                 type="submit"
                 disabled={submitting || !displayName.trim() || !answer.trim() || !consent}
@@ -365,7 +455,7 @@ export default function QuestionPage() {
         </Link>
       </footer>
 
-      {/* Privacy Policy & Consent Modal (Section 9.1 & 17) */}
+      {/* Privacy Policy & Consent Modal */}
       <AnimatePresence>
         {showPrivacyModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm">
@@ -393,8 +483,8 @@ export default function QuestionPage() {
                   <h4 className="font-semibold text-white">{t('一、 資料蒐集與目的', '1. Data Collection & Purpose')}</h4>
                   <p>
                     {t(
-                      '本功能為 VIS 2027「The Question of the Year 年度文化命題」觀點共創計畫。我們僅蒐集您主動填寫之「顯示名稱」與「回答觀點」。本系統不要求會員登入、亦不強制蒐集您的 Email、電話或真實身分資料。',
-                      'This feature is part of the VIS 2027 cultural co-creation program. We only collect the display name and perspective answer you submit.'
+                      '本功能為 VIS 2027「The Question of the Year 年度文化命題」觀點共創計畫。我們僅蒐集您主動填寫之「顯示名稱」、所選題目與「回答觀點」。本系統不要求會員登入、亦不強制蒐集您的 Email、電話或真實身分資料。',
+                      'This feature is part of the VIS 2027 cultural co-creation program. We only collect the display name, chosen question, and perspective answer you submit.'
                     )}
                   </p>
                 </section>

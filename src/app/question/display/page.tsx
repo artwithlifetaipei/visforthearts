@@ -17,6 +17,8 @@ interface DisplayItem {
   role_title: string | null;
   display_order: number | null;
   featured: boolean;
+  question_id?: string | null;
+  question_prompt?: string | null;
   updated_at: string;
 }
 
@@ -41,7 +43,7 @@ interface DisplayApiResponse {
 export default function PerspectiveDisplayWall() {
   const [data, setData] = useState<DisplayApiResponse | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [selectedFilter, setSelectedFilter] = useState<'all' | 'featured' | 'visitors' | 'curatorial'>('all');
+  const [selectedFilter, setSelectedFilter] = useState<'all' | 'featured' | 'q1' | 'q2' | 'q3'>('all');
   const [selectedItem, setSelectedItem] = useState<DisplayItem | null>(null);
   const [showQrModal, setShowQrModal] = useState(false);
   const [isAutoScroll, setIsAutoScroll] = useState(true);
@@ -177,24 +179,35 @@ export default function PerspectiveDisplayWall() {
   // Filtered perspectives
   const allItems = data?.items || [];
   const featuredCount = allItems.filter(i => i.featured).length;
-  const visitorCount = allItems.filter(i => i.type === 'visitor').length;
-  const curatorialCount = allItems.filter(i => ['vis_people', 'artist', 'vip', 'exhibitor'].includes(i.type)).length;
+  const q1Count = allItems.filter(i => i.question_id === 'q1').length;
+  const q2Count = allItems.filter(i => i.question_id === 'q2').length;
+  const q3Count = allItems.filter(i => i.question_id === 'q3').length;
 
   const filteredItems = useMemo(() => {
     if (selectedFilter === 'featured') {
       return allItems.filter(i => i.featured);
     }
-    if (selectedFilter === 'visitors') {
-      return allItems.filter(i => i.type === 'visitor');
+    if (selectedFilter === 'q1') {
+      return allItems.filter(i => i.question_id === 'q1');
     }
-    if (selectedFilter === 'curatorial') {
-      return allItems.filter(i => ['vis_people', 'artist', 'vip', 'exhibitor'].includes(i.type));
+    if (selectedFilter === 'q2') {
+      return allItems.filter(i => i.question_id === 'q2');
+    }
+    if (selectedFilter === 'q3') {
+      return allItems.filter(i => i.question_id === 'q3');
     }
     return allItems;
   }, [allItems, selectedFilter]);
 
   const isEmergency = data?.display.mode === 'emergency';
   const submissionUrl = 'https://www.visforthearts.com/question';
+
+  const getQuestionLabel = (qId?: string | null) => {
+    if (qId === 'q1') return '問題 01 · 社會特質';
+    if (qId === 'q2') return '問題 02 · 美的價值';
+    if (qId === 'q3') return '問題 03 · 台灣實踐';
+    return null;
+  };
 
   return (
     <div className="min-h-screen bg-[#070707] text-white selection:bg-[#DFBA87] selection:text-black font-sans relative pb-28">
@@ -270,13 +283,13 @@ export default function PerspectiveDisplayWall() {
           {/* Central Exhibition Banner: The Question of the Year */}
           <div className="text-center max-w-4xl mx-auto space-y-2 pt-1 pb-1">
             <h1 className="text-xs sm:text-sm md:text-base font-serif tracking-[0.25em] uppercase text-[#E5C69F] font-light">
-              {data?.campaign.question_en || 'WHAT DO YOU HOPE WILL STILL MATTER IN 100 YEARS?'}
+              HOW CAN BEAUTY BECOME OUR SHARED VALUE?
             </h1>
             <h2 className="text-xl sm:text-2xl md:text-3xl font-serif text-white tracking-widest font-normal drop-shadow-sm">
-              {data?.campaign.question_zh || '一百年後，你希望什麼仍然重要？'}
+              美，如何成為我們共同的價值？
             </h2>
             <p className="text-[11px] sm:text-xs text-neutral-400 font-light tracking-wider max-w-2xl mx-auto">
-              聚集展場觀眾、藝術家、參展團隊與貴賓對未來百年的深刻凝視 · 臺北中山堂現場共創觀點之牆
+              凝聚公眾對美的社會特質、心靈價值與台灣美感實踐的深刻凝視 · 臺北中山堂現場共創觀點之牆
             </p>
           </div>
 
@@ -307,25 +320,36 @@ export default function PerspectiveDisplayWall() {
               </button>
 
               <button
-                onClick={() => setSelectedFilter('visitors')}
+                onClick={() => setSelectedFilter('q1')}
                 className={`px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                  selectedFilter === 'visitors'
+                  selectedFilter === 'q1'
                     ? 'bg-white text-black font-semibold shadow'
                     : 'bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white'
                 }`}
               >
-                現場觀眾 ({visitorCount})
+                問題一：社會特質 ({q1Count})
               </button>
 
               <button
-                onClick={() => setSelectedFilter('curatorial')}
+                onClick={() => setSelectedFilter('q2')}
                 className={`px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
-                  selectedFilter === 'curatorial'
+                  selectedFilter === 'q2'
                     ? 'bg-white text-black font-semibold shadow'
                     : 'bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white'
                 }`}
               >
-                團隊與名家 ({curatorialCount})
+                問題二：美的價值 ({q2Count})
+              </button>
+
+              <button
+                onClick={() => setSelectedFilter('q3')}
+                className={`px-3 py-1 rounded-full text-xs font-mono transition-all cursor-pointer ${
+                  selectedFilter === 'q3'
+                    ? 'bg-white text-black font-semibold shadow'
+                    : 'bg-white/5 hover:bg-white/10 text-neutral-400 hover:text-white'
+                }`}
+              >
+                問題三：台灣實踐 ({q3Count})
               </button>
             </div>
 
@@ -357,10 +381,10 @@ export default function PerspectiveDisplayWall() {
             </div>
             <div className="space-y-3">
               <h1 className="text-2xl sm:text-3xl font-serif text-white tracking-wider">
-                {data?.display.emergency_message_en || 'VIS 2027 — LIVE PERSPECTIVE WALL'}
+                {data?.display.emergency_message_en || 'VIS 2027 — HOW CAN BEAUTY BECOME OUR SHARED VALUE?'}
               </h1>
               <p className="text-lg text-[#DFBA87] font-serif tracking-widest">
-                {data?.display.emergency_message_zh || 'VIS 2027 當代生活文化大展 · 現場觀點共創進行中'}
+                {data?.display.emergency_message_zh || 'VIS 2027 當代生活文化大展 · 美，如何成為我們共同的價值？'}
               </p>
             </div>
             <div className="text-xs text-neutral-400 font-mono tracking-widest">
@@ -375,7 +399,7 @@ export default function PerspectiveDisplayWall() {
             </div>
             <h3 className="text-xl font-serif text-white">尚未有符合此分類的觀點展示</h3>
             <p className="text-xs text-neutral-400 font-light leading-relaxed">
-              歡迎掃描現場 QR Code，成為第一位留下未來百年提問解答的共創者。
+              歡迎掃描現場 QR Code，成為第一位留下關於美之價值的共創者。
             </p>
             <button
               onClick={() => setShowQrModal(true)}
@@ -396,6 +420,7 @@ export default function PerspectiveDisplayWall() {
           >
             {filteredItems.map((item, idx) => {
               const isFeatured = Boolean(item.featured);
+              const qLabel = getQuestionLabel(item.question_id);
 
               return (
                 <motion.article
@@ -438,6 +463,13 @@ export default function PerspectiveDisplayWall() {
                               : item.type === 'vip'
                               ? 'VIP 貴賓'
                               : 'EXHIBITOR 參展商'}
+                          </span>
+                        )}
+
+                        {/* Question Badge */}
+                        {qLabel && (
+                          <span className="inline-flex items-center px-2 py-0.5 rounded-full bg-[#DFBA87]/10 border border-[#DFBA87]/30 text-[#DFBA87] text-[10px] font-mono tracking-wider">
+                            {qLabel}
                           </span>
                         )}
 
@@ -516,7 +548,7 @@ export default function PerspectiveDisplayWall() {
           className="px-5 py-2.5 rounded-full bg-[#111111]/90 hover:bg-[#1A1A1A] border border-[#DFBA87]/50 hover:border-[#DFBA87] text-[#DFBA87] text-xs font-mono tracking-wider flex items-center gap-2 shadow-2xl backdrop-blur-xl transition-all duration-300 hover:scale-105 cursor-pointer"
         >
           <QrCode className="w-4 h-4 text-[#DFBA87]" />
-          <span>掃描 QR Code · 留下你的百年觀點（即時登牆）</span>
+          <span>掃描 QR Code · 留下你對美的觀點（即時登牆）</span>
         </button>
 
         {showScrollTop && (
@@ -542,7 +574,7 @@ export default function PerspectiveDisplayWall() {
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 16 }}
               transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="relative max-w-3xl w-full bg-[#100E0C] border border-[#DFBA87]/40 rounded-3xl p-8 sm:p-14 shadow-2xl space-y-8 overflow-hidden"
+              className="relative max-w-3xl w-full bg-[#100E0C] border border-[#DFBA87]/40 rounded-3xl p-8 sm:p-14 shadow-2xl space-y-7 overflow-hidden"
             >
               {/* Top ambient gold light */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-[#DFBA87]/15 rounded-full blur-3xl pointer-events-none" />
@@ -565,10 +597,25 @@ export default function PerspectiveDisplayWall() {
                     <span>大會精選觀點 · CURATORIAL SELECTION</span>
                   </span>
                 )}
+
+                {selectedItem.question_id && (
+                  <span className="inline-flex items-center px-3 py-1 rounded-full bg-[#DFBA87]/15 border border-[#DFBA87]/40 text-[#DFBA87] text-xs font-mono tracking-wider">
+                    {getQuestionLabel(selectedItem.question_id)}
+                  </span>
+                )}
+
                 <span className="px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-neutral-300 uppercase tracking-wider">
                   {selectedItem.role_title || selectedItem.type}
                 </span>
               </div>
+
+              {/* Specific Question Prompt Banner */}
+              {selectedItem.question_prompt && (
+                <div className="p-3.5 rounded-xl bg-[#DFBA87]/10 border border-[#DFBA87]/30 text-xs sm:text-sm text-[#DFBA87] font-serif flex items-start gap-2.5">
+                  <Sparkles className="w-4 h-4 shrink-0 mt-0.5 text-[#DFBA87]" />
+                  <span className="leading-relaxed">題目：{selectedItem.question_prompt}</span>
+                </div>
+              )}
 
               {/* Highlight Quote */}
               <div className="space-y-4">
@@ -641,10 +688,10 @@ export default function PerspectiveDisplayWall() {
                   THE QUESTION OF THE YEAR 2027
                 </span>
                 <h3 className="text-xl font-serif text-white">
-                  留下你的一百年觀點
+                  美，如何成為我們共同的價值？
                 </h3>
                 <p className="text-xs text-neutral-400 font-light leading-relaxed">
-                  使用手機相機掃描下方 QR Code，填寫並送出你的答案。通過審核後將即時登上臺北中山堂現場觀點之牆。
+                  使用手機相機掃描下方 QR Code，於三道具體文化提問中任選一題回答。通過審核後將即時登上臺北中山堂現場觀點之牆。
                 </p>
               </div>
 

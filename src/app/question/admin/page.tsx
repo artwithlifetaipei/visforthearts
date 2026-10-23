@@ -7,7 +7,7 @@ import {
   Download, Plus, Search, Filter, RefreshCw, AlertTriangle, Sparkles, 
   Check, X, Clock, HelpCircle, Save, Loader2, FileText, ArrowLeft
 } from 'lucide-react';
-import { PerspectiveSubmission, PerspectiveDisplaySettings } from '@/lib/perspectiveDb';
+import { PerspectiveSubmission, PerspectiveDisplaySettings, ANNUAL_SUB_QUESTIONS } from '@/lib/perspectiveTypes';
 
 export default function PerspectiveAdminPage() {
   const [items, setItems] = useState<PerspectiveSubmission[]>([]);
@@ -35,6 +35,8 @@ export default function PerspectiveAdminPage() {
     type: 'visitor',
     display_order: '',
     featured: false,
+    question_id: 'q1',
+    question_prompt: '',
   });
 
   // Editorial Entry Modal State
@@ -46,6 +48,8 @@ export default function PerspectiveAdminPage() {
     source: 'EDITORIAL' as const,
     type: 'vis_people' as const,
     display_order: '',
+    question_id: 'q1',
+    question_prompt: '',
   });
 
   const [savingAction, setSavingAction] = useState(false);
@@ -105,6 +109,7 @@ export default function PerspectiveAdminPage() {
     if (!editingItem) return;
     try {
       setSavingAction(true);
+      const chosenQ = ANNUAL_SUB_QUESTIONS.find(q => q.id === editForm.question_id);
       const res = await fetch('/api/perspectives/admin', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
@@ -118,6 +123,8 @@ export default function PerspectiveAdminPage() {
             type: editForm.type,
             display_order: editForm.display_order ? Number(editForm.display_order) : null,
             featured: editForm.featured,
+            question_id: editForm.question_id,
+            question_prompt: editForm.question_prompt || (chosenQ ? chosenQ.prompt_zh : null),
           },
         }),
       });
@@ -141,10 +148,15 @@ export default function PerspectiveAdminPage() {
 
     try {
       setSavingAction(true);
+      const chosenQ = ANNUAL_SUB_QUESTIONS.find(q => q.id === editorialForm.question_id);
+      const payload = {
+        ...editorialForm,
+        question_prompt: editorialForm.question_prompt || (chosenQ ? chosenQ.prompt_zh : ''),
+      };
       const res = await fetch('/api/perspectives/admin', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(editorialForm),
+        body: JSON.stringify(payload),
       });
       const data = await res.json();
       if (data.success) {
@@ -157,6 +169,8 @@ export default function PerspectiveAdminPage() {
           source: 'EDITORIAL',
           type: 'vis_people',
           display_order: '',
+          question_id: 'q1',
+          question_prompt: '',
         });
         fetchAdminData();
       }
@@ -556,6 +570,18 @@ export default function PerspectiveAdminPage() {
                         )}
                       </div>
 
+                      {/* Question Prompt Badge */}
+                      {item.question_prompt && (
+                        <div className="pt-0.5">
+                          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-sans bg-[#DFBA87]/10 text-[#DFBA87] border border-[#DFBA87]/25 font-medium">
+                            <span className="font-mono text-[9px] uppercase tracking-wider px-1 py-0.5 rounded bg-[#DFBA87]/20 text-[#DFBA87] font-bold">
+                              {item.question_id?.toUpperCase() || 'Q'}
+                            </span>
+                            <span>{item.question_prompt}</span>
+                          </span>
+                        </div>
+                      )}
+
                       {/* Display Answer & Name */}
                       <blockquote className="text-sm md:text-base font-serif text-neutral-100 leading-relaxed pt-1">
                         “{item.display_answer || item.original_answer}”
@@ -677,6 +703,8 @@ export default function PerspectiveAdminPage() {
                             type: item.type,
                             display_order: item.display_order ? String(item.display_order) : '',
                             featured: item.featured,
+                            question_id: item.question_id || 'q1',
+                            question_prompt: item.question_prompt || '',
                           });
                         }}
                         className="px-2.5 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 text-neutral-300 text-xs font-medium border border-white/10 flex items-center gap-1 transition-colors cursor-pointer"
@@ -719,6 +747,28 @@ export default function PerspectiveAdminPage() {
                   maxLength={30}
                   className="w-full bg-[#080808] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#DFBA87]"
                 />
+              </div>
+
+              <div>
+                <label className="text-neutral-400 block mb-1">對應年度子題目 (Sub-Question)</label>
+                <select
+                  value={editForm.question_id}
+                  onChange={(e) => {
+                    const q = ANNUAL_SUB_QUESTIONS.find((item) => item.id === e.target.value);
+                    setEditForm({
+                      ...editForm,
+                      question_id: e.target.value,
+                      question_prompt: q ? q.prompt_zh : '',
+                    });
+                  }}
+                  className="w-full bg-[#080808] border border-white/10 rounded-lg px-2.5 py-2 text-white text-xs focus:outline-none focus:border-[#DFBA87]"
+                >
+                  {ANNUAL_SUB_QUESTIONS.map((q) => (
+                    <option key={q.id} value={q.id}>
+                      [{q.label_zh}] {q.prompt_zh}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>
@@ -839,6 +889,28 @@ export default function PerspectiveAdminPage() {
                   placeholder="例如: 隈研吾、Norman、VIS 策展人"
                   className="w-full bg-[#080808] border border-white/10 rounded-lg px-3 py-2 text-white focus:outline-none focus:border-[#DFBA87]"
                 />
+              </div>
+
+              <div>
+                <label className="text-neutral-400 block mb-1">對應回答子題目 (Sub-Question) *</label>
+                <select
+                  value={editorialForm.question_id}
+                  onChange={(e) => {
+                    const q = ANNUAL_SUB_QUESTIONS.find((item) => item.id === e.target.value);
+                    setEditorialForm({
+                      ...editorialForm,
+                      question_id: e.target.value,
+                      question_prompt: q ? q.prompt_zh : '',
+                    });
+                  }}
+                  className="w-full bg-[#080808] border border-white/10 rounded-lg px-2.5 py-2 text-white text-xs focus:outline-none focus:border-[#DFBA87]"
+                >
+                  {ANNUAL_SUB_QUESTIONS.map((q) => (
+                    <option key={q.id} value={q.id}>
+                      [{q.label_zh}] {q.prompt_zh}
+                    </option>
+                  ))}
+                </select>
               </div>
 
               <div>

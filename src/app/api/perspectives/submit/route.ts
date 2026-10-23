@@ -48,7 +48,16 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const { display_name, answer, consent_display, consent_version, campaign_slug, idempotency_key } = body;
+    const { 
+      display_name, 
+      answer, 
+      question_id, 
+      question_prompt, 
+      consent_display, 
+      consent_version, 
+      campaign_slug, 
+      idempotency_key 
+    } = body;
 
     // 1. Validate mandatory fields
     if (!consent_display) {
@@ -100,8 +109,10 @@ export async function POST(req: Request) {
       type: 'visitor',
       display_name: nameStr,
       answer: answerStr,
+      question_id: question_id || null,
+      question_prompt: question_prompt || null,
       consent_display: true,
-      consent_version: consent_version || '2027-v1',
+      consent_version: consent_version || '2027-v2',
       idempotency_key,
       moderation_flags: flags,
     });
