@@ -336,130 +336,13 @@ export default function V2LandingPage() {
                     transform: scale(0.97);
                 }
                 .v2-hero-zh { width: 100%; font-size: 1.45rem; font-weight: 300; line-height: 2; margin-bottom: 2rem; color: #444; }
-                /* ─── Hero 2027 Date Lockup (UI/UX Pro Max) ─── */
-                .v2-hero-date-block {
-                    width: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: flex-end;
-                    text-align: right;
-                    margin-top: 0.5rem;
-                }
-                .v2-hero-date-eyebrow {
-                    display: inline-flex;
-                    align-items: center;
-                    gap: 10px;
-                    margin-bottom: 0.5rem;
-                }
-                .v2-hero-date-line-accent {
-                    width: 24px;
-                    height: 1px;
-                    background: linear-gradient(90deg, transparent, var(--v2-gold));
-                }
-                .v2-hero-date-kicker {
-                    font-family: var(--v2-font-sans);
-                    font-size: 0.68rem;
-                    font-weight: 600;
-                    letter-spacing: 0.28em;
-                    text-transform: uppercase;
-                    color: var(--v2-gold);
-                }
-                .v2-hero-date-badge-venue {
-                    font-family: var(--v2-font-sans);
-                    font-size: 0.64rem;
-                    font-weight: 500;
-                    letter-spacing: 0.12em;
-                    text-transform: uppercase;
-                    padding: 2.5px 10px;
-                    border-radius: 20px;
-                    background: rgba(201, 169, 110, 0.08);
-                    border: 0.5px solid rgba(201, 169, 110, 0.28);
-                    color: #8C6D37;
-                }
-                .v2-hero-date-main {
+                .v2-hero-en {
                     font-family: var(--v2-font-serif);
-                    font-size: 2.75rem;
-                    font-weight: 400;
-                    line-height: 1.15;
-                    letter-spacing: 0.04em;
-                    color: #111111;
-                    display: flex;
-                    align-items: baseline;
-                    gap: 0.65rem;
-                    margin-bottom: 1rem;
-                }
-                .v2-hero-date-dash {
-                    color: var(--v2-gold);
+                    font-size: 1.65rem;
                     font-weight: 300;
-                    font-style: italic;
-                    opacity: 0.9;
-                }
-                .v2-hero-date-card {
-                    width: 100%;
-                    max-width: 490px;
-                    background: rgba(255, 255, 255, 0.78);
-                    backdrop-filter: blur(16px);
-                    -webkit-backdrop-filter: blur(16px);
-                    border: 0.5px solid rgba(201, 169, 110, 0.28);
-                    border-radius: 10px;
-                    padding: 13px 18px;
-                    box-shadow: 0 16px 36px -12px rgba(0, 0, 0, 0.04), 0 2px 10px -2px rgba(201, 169, 110, 0.08);
-                    display: flex;
-                    flex-direction: column;
-                    gap: 9px;
-                    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-                }
-                .v2-hero-date-card:hover {
-                    border-color: rgba(201, 169, 110, 0.55);
-                    box-shadow: 0 20px 40px -12px rgba(201, 169, 110, 0.12), 0 4px 14px -2px rgba(0, 0, 0, 0.05);
-                    transform: translateY(-2px);
-                }
-                .v2-hero-date-row {
-                    display: flex;
-                    align-items: center;
-                    justify-content: space-between;
-                    gap: 12px;
-                    font-family: var(--v2-font-sans);
-                }
-                .v2-hero-date-row-left {
-                    display: flex;
-                    align-items: center;
-                    gap: 7px;
-                    flex-shrink: 0;
-                }
-                .v2-hero-date-indicator {
-                    width: 6px;
-                    height: 6px;
-                    border-radius: 50%;
-                }
-                .v2-hero-date-indicator.vip {
-                    background: #C9A96E;
-                    box-shadow: 0 0 8px rgba(201, 169, 110, 0.6);
-                }
-                .v2-hero-date-indicator.public {
-                    background: #999999;
-                }
-                .v2-hero-date-tier-label {
-                    font-size: 0.72rem;
-                    font-weight: 600;
                     letter-spacing: 0.06em;
-                }
-                .v2-hero-date-tier-label.vip {
-                    color: #9E7D42;
-                }
-                .v2-hero-date-tier-label.public {
-                    color: #333333;
-                }
-                .v2-hero-date-row-detail {
-                    font-size: 0.75rem;
-                    color: #666666;
-                    font-weight: 400;
-                    letter-spacing: 0.01em;
-                    text-align: right;
-                }
-                .v2-hero-date-row-divider {
-                    height: 0.5px;
-                    background: rgba(0, 0, 0, 0.06);
+                    color: #1a1a1a;
+                    line-height: 1.4;
                     width: 100%;
                 }
 
@@ -643,38 +526,7 @@ export default function V2LandingPage() {
                     .v2-hero-text { text-align: left; display: flex; flex-direction: column; align-items: flex-start; }
                     .lang-toggle-wrapper { justify-content: flex-start; }
                     .v2-hero-zh { font-size: 1.15rem; width: 100%; }
-                    .v2-hero-date-block {
-                        align-items: flex-start;
-                        text-align: left;
-                        margin-top: 1.25rem;
-                    }
-                    .v2-hero-date-eyebrow {
-                        justify-content: flex-start;
-                    }
-                    .v2-hero-date-line-accent {
-                        display: none;
-                    }
-                    .v2-hero-date-main {
-                        font-size: 2rem;
-                        justify-content: flex-start;
-                        gap: 0.4rem;
-                        margin-bottom: 0.85rem;
-                    }
-                    .v2-hero-date-card {
-                        max-width: 100%;
-                        padding: 12px 14px;
-                        gap: 8px;
-                    }
-                    .v2-hero-date-row {
-                        flex-direction: column;
-                        align-items: flex-start;
-                        gap: 3px;
-                        text-align: left;
-                    }
-                    .v2-hero-date-row-detail {
-                        text-align: left;
-                        font-size: 0.7rem;
-                    }
+                    .v2-hero-en { font-family: var(--v2-font-serif); font-size: 1.35rem; font-weight: 300; letter-spacing: 0.05em; line-height: 1.5; width: 100%; }
                     .v2-exhibition-scroller { gap: 15vw; padding: 0 6vw; }
                     .v2-exhibit-intro { width: 80vw; }
                     .v2-card { width: 80vw; }
@@ -849,56 +701,9 @@ export default function V2LandingPage() {
                                 VIS was founded in 2022. Since its inception, it has collaborated with numerous individuals of discerning taste and wealth to explore how humanity and aesthetics manifest in a beautiful life.
                             </p>
                         )}
-                        {/* 2027 Exhibition Schedule Lockup (UI/UX Pro Max) */}
-                        <div className="v2-hero-date-block v2-reveal">
-                            <div className="v2-hero-date-eyebrow">
-                                <span className="v2-hero-date-line-accent" />
-                                <span className="v2-hero-date-kicker">
-                                    {lang === 'zh' ? '2027 展會日程' : '2027 EXHIBITION'}
-                                </span>
-                                <span className="v2-hero-date-badge-venue">
-                                    {lang === 'zh' ? '台北中山堂 光復廳' : 'TAIPEI ZHONGSHAN HALL'}
-                                </span>
-                            </div>
-
-                            <div className="v2-hero-date-main">
-                                <span className="v2-hero-date-val">2027. 01. 06</span>
-                                <span className="v2-hero-date-dash">–</span>
-                                <span className="v2-hero-date-val">01. 09</span>
-                            </div>
-
-                            <div className="v2-hero-date-card">
-                                <div className="v2-hero-date-row vip">
-                                    <div className="v2-hero-date-row-left">
-                                        <span className="v2-hero-date-indicator vip" />
-                                        <span className="v2-hero-date-tier-label vip">
-                                            {lang === 'zh' ? '尊榮預展暨開幕晚會' : 'VIP Opening Gala'}
-                                        </span>
-                                    </div>
-                                    <span className="v2-hero-date-row-detail">
-                                        {lang === 'zh' 
-                                            ? '1/6 (三) 18:00 – 21:00 ｜ 受邀貴賓專屬' 
-                                            : 'Jan 6 (Wed) 18:00–21:00 · By Invitation'}
-                                    </span>
-                                </div>
-
-                                <div className="v2-hero-date-row-divider" />
-
-                                <div className="v2-hero-date-row public">
-                                    <div className="v2-hero-date-row-left">
-                                        <span className="v2-hero-date-indicator public" />
-                                        <span className="v2-hero-date-tier-label public">
-                                            {lang === 'zh' ? '公眾展期' : 'Public Exhibition'}
-                                        </span>
-                                    </div>
-                                    <span className="v2-hero-date-row-detail">
-                                        {lang === 'zh' 
-                                            ? '1/7 (四) – 1/9 (六) ｜ 台北市中正區延平南路98號' 
-                                            : 'Jan 7–9 (Thu–Sat) · Taipei City'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
+                        <p className="v2-hero-en v2-reveal">
+                            2027. 01. 06–01. 09
+                        </p>
                     </div>
                 </div>
             </section>
