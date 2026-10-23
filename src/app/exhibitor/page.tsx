@@ -81,7 +81,6 @@ export default function ExhibitorLandingPage() {
       m4Label: '媒體/意見領袖',
       m5Label: '一年購買預算80萬以上',
       ctaApply: '立即線上申請 APPLY ONLINE',
-      ctaGuidelines: '2027 簡章 2027 Guidelines',
       ctaBrandLogin: '已獲准入選品牌登入 BRAND LOGIN',
       currentEmail: '目前登入帳號 CURRENT EMAIL',
       step1Title: '階段一：線上申請與審查',
@@ -131,7 +130,6 @@ export default function ExhibitorLandingPage() {
       m4Label: 'Press & KOLs',
       m5Label: 'Annual Purchase Budget > 800k TWD',
       ctaApply: 'APPLY ONLINE',
-      ctaGuidelines: '2027 Guidelines',
       ctaBrandLogin: 'APPROVED BRAND LOGIN',
       currentEmail: 'CURRENT EMAIL',
       step1Title: 'Phase 1: Online Application & Review',
@@ -766,16 +764,6 @@ export default function ExhibitorLandingPage() {
                 {dict[lang].ctaApply}
               </button>
             )}
-            <a 
-              href="https://drive.google.com/file/d/1MGj1MLLeMvV6mf7wyRDb800BfMYZBkdW/view?usp=sharing"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn-pola-outline flex-1"
-              onMouseEnter={() => setCursorHovered(true)} 
-              onMouseLeave={() => setCursorHovered(false)}
-            >
-              {dict[lang].ctaGuidelines}
-            </a>
             <button
               onClick={() => {
                 if (session) {

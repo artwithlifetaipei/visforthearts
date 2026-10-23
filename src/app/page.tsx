@@ -1388,7 +1388,6 @@ export default function LandingPage() {
                             More than a fair, but a purposefully architected space for intellectual and aesthetic elevation.
                         </p>
                         <div className="exhibit-buttons-container">
-                            <a href="https://drive.google.com/file/d/1MGj1MLLeMvV6mf7wyRDb800BfMYZBkdW/view?usp=sharing" target="_blank" rel="noopener noreferrer" className="btn-pola">{lang === 'zh' ? '2027 簡章 Guidelines' : '2027 Guidelines'}</a>
                             <Link href="/exhibitor" className="btn-pola btn-pola-gold">{lang === 'zh' ? '線上申請 Apply Online' : 'Apply Online'}</Link>
                         </div>
                     </div>
