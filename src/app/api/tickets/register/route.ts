@@ -156,19 +156,19 @@ function getTicketEmailHtml(name: string, ticketId: string, slotNameZh: string, 
                 
                 <div class="greeting">
                     親愛的 <strong>${name}</strong>，您好：<br/>
-                    感謝您索取 VIS Contemporary Culture 數位觀展憑證。您的電子入場門票已成功鑄造，詳細資訊如下：<br/>
+                    感謝您預約 VIS Contemporary Culture 數位觀展門票。您的預約已完成，詳細門票資訊如下：<br/>
                     <span style="font-size: 12px; color: #666666; display: block; margin-top: 6px;">
-                        Dear <strong>${name}</strong>, thank you for claiming your VIS Contemporary Culture Digital Pass. Your entrance ticket has been minted successfully:
+                        Dear <strong>${name}</strong>, thank you for reserving your VIS Contemporary Culture Digital Pass. Your admission details are as follows:
                     </span>
                 </div>
                 
                 <div class="ticket-card">
                     <div class="ticket-field">
-                        <div class="field-label">Guest 貴賓姓名</div>
+                        <div class="field-label">Visitor 姓名 / Name</div>
                         <div class="field-value">${name}</div>
                     </div>
                     <div class="ticket-field">
-                        <div class="field-label">Invited By 邀請品牌</div>
+                        <div class="field-label">Invited By 邀請來源</div>
                         <div class="field-value">${brandName}</div>
                     </div>
                     <div class="ticket-field">
@@ -176,7 +176,7 @@ function getTicketEmailHtml(name: string, ticketId: string, slotNameZh: string, 
                         <div class="field-value">${dateStr} ${slotNameZh} (${timeRange})</div>
                     </div>
                     <div class="ticket-field" style="margin-bottom: 0;">
-                        <div class="field-label">Ticket ID 憑證編號</div>
+                        <div class="field-label">Ticket ID 門票序號</div>
                         <div class="field-value" style="font-size: 11px; font-family: monospace; color: #555;">${ticketId}</div>
                     </div>
                 </div>
@@ -190,9 +190,10 @@ function getTicketEmailHtml(name: string, ticketId: string, slotNameZh: string, 
                 </div>
                 
                 <div class="ticket-footer-msg">
+                    * 提醒：本券為公眾免費預約門票（非數位貴賓卡），入場順序與等候時間需依現場人流控管規定而定。<br/>
                     * 請於入場時出示本信件之 QR Code 與已追蹤 @visforthearts 及邀請品牌之 Instagram 畫面供工作人員核銷。<br/>
-                    * 本時段門票採總量管制。若遇現場人潮達場館上限，將啟動『一進一出』之動線管制，敬請持本憑證依序排隊等候進場。<br/>
-                    <span style="font-size: 10px; color: #888888; display: block; margin-top: 6px;">* Please present this QR Code and your Instagram following screen for @visforthearts and the inviting brand at entry. Capacity control applies.</span>
+                    * 本時段門票採總量管制。若遇現場人潮達場館上限，將啟動『一進一出』之動線管制，敬請持本門票依序排隊等候進場。<br/>
+                    <span style="font-size: 10px; color: #888888; display: block; margin-top: 6px;">* Note: General admission ticket (distinct from VIP passes); entry order and waiting times follow onsite crowd management. Please present this QR Code and your Instagram following screen at entry.</span>
                 </div>
                 
                 <div class="footer">
@@ -328,9 +329,9 @@ export async function POST(req: Request) {
                 );
 
                 await transporter.sendMail({
-                    from: `"VIS VIP TEAM" <${gmailUser}>`,
+                    from: `"VIS Contemporary Culture" <${gmailUser}>`,
                     to: ticket.email,
-                    subject: `【VIS Contemporary Culture】您的專屬數位觀展憑證已解鎖 Digital Pass Unlocked`,
+                    subject: `【VIS Contemporary Culture】您的數位觀展門票已發送 Digital Admission Pass`,
                     html: htmlContent
                 });
                 emailSent = true;

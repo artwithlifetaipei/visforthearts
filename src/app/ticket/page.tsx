@@ -447,16 +447,17 @@ function TicketRegistrationContent() {
                                 <div className="text-xs font-light leading-relaxed text-neutral-300 tracking-wide border-t border-[#DFBA87]/20 pt-3">
                                     {isOfficial ? (
                                         <>
-                                            歡迎蒞臨 VIS Contemporary Culture。大會官方誠摯邀請您共赴 2027 當代生活文化盛宴。請於下方填妥貴賓資訊並選擇預約時段以領取專屬數位觀展憑證。
+                                            歡迎來到 VIS Contemporary Culture。大會官方誠摯邀請您蒞臨，與我們一起，從文化與人文美學出發，探索當代生活，體驗這一屬於品味人士的跨界盛會。
                                         </>
                                     ) : (
                                         <>
                                             歡迎來到 VIS Contemporary Culture。<strong className="font-medium text-white">{activeBrand.name_zh}</strong> 誠摯邀請您蒞臨，與我們一起，從文化與人文美學出發，探索當代生活，體驗這一屬於品味人士的跨界盛會。
-                                            <span className="block mt-1.5 text-[#DFBA87] font-medium">
-                                                您的品牌專屬觀展名額已為您保留，請選擇預約時段並完成憑證領取。
-                                            </span>
                                         </>
                                     )}
+                                    <div className="mt-2.5 pt-2 border-t border-white/10 text-[11px] text-neutral-400 font-light leading-relaxed flex items-center gap-1.5">
+                                        <span className="text-[#DFBA87]">✦</span>
+                                        <span>提醒：本券為公眾免費預約門票（非數位貴賓卡），入場順序與等候時間依現場人流控管規定為準。</span>
+                                    </div>
                                 </div>
 
                                 {/* Optional Switcher Drawer */}
@@ -688,7 +689,7 @@ function TicketRegistrationContent() {
                                             className="accent-[#DFBA87] mt-1 cursor-pointer"
                                         />
                                         <span>
-                                            我已理解：為維護高質量的藝術觀展體驗與符合公共安全規範，本時段票券採總量管制。若遇現場人潮達場館容留上限，將啟動『一進一出』之動線管制。請持本憑證依序排隊等候進場。
+                                            我已理解：本券為公眾免費預約門票（非數位貴賓卡）。為維護觀展體驗與符合公共安全規範，各時段採總量管制；入場順序與等候時間需依現場人流控管規定而定，遇現場人潮達場館容留上限將啟動「一進一出」動線管制，敬請持本門票依序排隊等候進場。
                                         </span>
                                     </label>
 
@@ -717,7 +718,7 @@ function TicketRegistrationContent() {
                                     disabled={isSubmitting}
                                     className="w-full bg-gradient-to-r from-[#DFBA87] via-[#E8CA9D] to-[#DFBA87] hover:brightness-105 disabled:opacity-50 text-[#121110] text-xs uppercase tracking-[0.25em] font-semibold py-4 rounded-none transition-all shadow-xl cursor-pointer"
                                 >
-                                    {isSubmitting ? '正在鑄造憑證中...' : '確認預約並鑄造專屬電子票券 Claim Pass'}
+                                    {isSubmitting ? '正在登記領取中...' : '確認預約並領取數位觀展門票 Claim Pass'}
                                 </button>
                             </form>
                         </motion.div>
@@ -739,9 +740,9 @@ function TicketRegistrationContent() {
                                 ✓
                             </div>
                             <div>
-                                <h2 className="text-lg font-serif tracking-wider text-white">憑證鑄造成功！</h2>
+                                <h2 className="text-lg font-serif tracking-wider text-white">數位觀展門票預約成功！</h2>
                                 <p className="text-xs text-neutral-300 mt-2">
-                                    電子票券已成功發送至您的信箱：<strong className="text-[#DFBA87]">{email}</strong>。<br/>
+                                    電子門票已成功發送至您的信箱：<strong className="text-[#DFBA87]">{email}</strong>。<br/>
                                     現場參觀時請出示此畫面或信件 QR Code 核銷。
                                 </p>
                             </div>
@@ -754,7 +755,7 @@ function TicketRegistrationContent() {
                                 </div>
                                 <div className="space-y-3 text-xs">
                                     <div>
-                                        <div className="text-[9px] uppercase text-neutral-400 tracking-wider">Guest 貴賓姓名</div>
+                                        <div className="text-[9px] uppercase text-neutral-400 tracking-wider">Visitor 姓名 / Name</div>
                                         <div className="text-white text-sm font-medium">{name}</div>
                                     </div>
                                     <div>
@@ -795,7 +796,7 @@ function TicketRegistrationContent() {
                                 }}
                                 className="text-xs text-[#DFBA87]/80 hover:text-[#DFBA87] hover:underline cursor-pointer transition-colors"
                             >
-                                ← 鑄造另一張票券
+                                ← 預約另一張觀展門票
                             </button>
                         </motion.div>
                     )}

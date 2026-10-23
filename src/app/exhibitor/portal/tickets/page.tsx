@@ -365,7 +365,7 @@ export default function ExhibitorPublicTicketsPage({ brand: parentBrand }: { bra
                 <div className="text-[10px] font-mono font-semibold text-[#DFBA87]">01. 品牌專屬銘刻</div>
                 <div className="text-xs font-medium text-white">{t('票券永久標註邀請品牌', 'Passes Branded With Your Name')}</div>
                 <p className="text-[11px] text-neutral-400 font-light leading-relaxed">
-                  {t('訪客點擊進入後，全程展示【貴品牌名稱】。領取成功之電子票券與憑證確認信上，永久標註「邀請來源：【貴品牌】」，極具尊榮感。', 'Your brand name is permanently displayed on the registration page, pass UI, and confirmation emails.')}
+                  {t('訪客點擊進入後，全程展示【貴品牌名稱】。領取成功之電子門票與確認信上，永久標註「邀請來源：【貴品牌】」，加深大眾顧客對品牌的專屬歸屬感與識別度。', 'Your brand name is permanently displayed on the registration page, pass UI, and confirmation emails, enhancing brand attribution.')}
                 </p>
               </div>
 

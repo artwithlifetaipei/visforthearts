@@ -65,8 +65,6 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
   const [formError, setFormError] = useState('');
   const [successNotice, setSuccessNotice] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
-  const [copiedTicketLink, setCopiedTicketLink] = useState(false);
-  const [copiedPromoText, setCopiedPromoText] = useState(false);
 
   // Helper to extract tier cleanly
   const getVipTier = (vip: any): 'VIP' | 'SVIP' => {
@@ -187,44 +185,6 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
 
   const handleShareToLine = (vip: any) => {
     const text = getLineInviteText(vip);
-    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
-    window.open(lineUrl, '_blank', 'noopener,noreferrer');
-  };
-
-  // Dedicated Brand Ticket Registration Link & Promo Copy
-  const getDedicatedTicketLink = () => {
-    if (!brand) return 'https://www.visforthearts.com/ticket';
-    const brandParam = (brand.brand_name_en || brand.name_en || brand.brand_name_zh || brand.name_zh || brand.id).trim();
-    return `https://www.visforthearts.com/ticket?brand=${encodeURIComponent(brandParam)}`;
-  };
-
-  const getPromoMessage = () => {
-    const brandName = brand?.brand_name_zh || brand?.name_zh || 'VIS 參展品牌';
-    const link = getDedicatedTicketLink();
-    if (lang === 'en') {
-      return `[${brand?.brand_name_en || brandName} Exclusive Admission]\nWarmly inviting you to VIS Contemporary Culture 2027!\nClaim your complimentary digital entrance pass via our dedicated brand link:\n${link}\n\n✦ Dates: Jan 6–9, 2027\n✦ Venue: Taipei Zhongshan Hall (Guangfu Hall)\n* Please follow @visforthearts and @${brand?.instagram_handle || brandName} on IG before arrival. Looking forward to welcoming you!`;
-    }
-    return `【${brandName} 專屬觀展邀請】\n誠摯邀請您蒞臨 VIS Contemporary Culture 2027 當代生活文化大展！\n點擊下方品牌專屬連結，即可免費預約領取數位觀展憑證：\n${link}\n\n✦ 展期：2027 年 1 月 6 日 – 1 月 9 日\n✦ 地點：台北中山堂 光復廳（台北市中正區延平南路 98 號）\n* 入場時請出示此憑證與已追蹤 IG 畫面。期待在現場與您相見！`;
-  };
-
-  const handleCopyTicketLink = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(getDedicatedTicketLink());
-      setCopiedTicketLink(true);
-      setTimeout(() => setCopiedTicketLink(false), 3000);
-    }
-  };
-
-  const handleCopyPromoMessage = () => {
-    if (typeof navigator !== 'undefined' && navigator.clipboard) {
-      navigator.clipboard.writeText(getPromoMessage());
-      setCopiedPromoText(true);
-      setTimeout(() => setCopiedPromoText(false), 3000);
-    }
-  };
-
-  const handleShareDedicatedTicketToLine = () => {
-    const text = getPromoMessage();
     const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
     window.open(lineUrl, '_blank', 'noopener,noreferrer');
   };
