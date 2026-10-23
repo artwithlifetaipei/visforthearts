@@ -666,6 +666,58 @@ export default function ExhibitorAdminPage() {
     }
   };
 
+  // Action: Resend Admission Notification Email directly
+  const handleResendAdmissionEmail = async (app: any) => {
+    const brandName = (!app.brand_name_zh || app.brand_name_zh === '無' || app.brand_name_zh.trim() === '')
+      ? (app.brand_name_en || '參展品牌')
+      : app.brand_name_zh;
+
+    const confirmResend = window.confirm(`確定要重新寄送【正式入選核准通知信】給「${brandName}」嗎？\n\n收件信箱：${app.contact_email}`);
+    if (!confirmResend) return;
+
+    if (actionLoadingId) return;
+    setActionLoadingId(app.id);
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const token = session?.access_token || (typeof window !== 'undefined' ? sessionStorage.getItem('vis_admin_token') : undefined);
+
+      const isMaking = isMakingProjectApp(app);
+      const chosenZoneId = isMaking ? 'artsy' : (app.zone_id || 'artsy');
+      const chosenBoothType = isMaking ? 'MAKING-PROJECT' : (app.booth_type || 'A01');
+
+      const res = await fetch('/api/exhibitor/approve', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+        },
+        body: JSON.stringify({
+          applicationId: app.id,
+          zoneId: chosenZoneId,
+          boothType: chosenBoothType,
+          customFee: app.custom_fee ?? null,
+          discountNote: app.discount_note ?? null,
+        })
+      });
+
+      const result = await res.json();
+      if (!res.ok) {
+        throw new Error(result.error || '重寄信件失敗');
+      }
+
+      if (result.emailSent) {
+        alert(`✉️ 已成功重新寄送【正式入選核准通知電郵】至申請人信箱：\n${app.contact_email}`);
+      } else {
+        alert(`⚠️ 系統已處理，但寄信出現異常：${result.emailError || '未知錯誤'}`);
+      }
+    } catch (err: any) {
+      alert(`重寄失敗: ${err.message}`);
+    } finally {
+      setActionLoadingId(null);
+    }
+  };
+
   // Action: Adjust Booth Fee / Special Discount directly
   const handleSaveFeeAdjustment = async (app: any, customFeeVal: number | null, discountNoteVal: string | null) => {
     setIsSavingFee(true);
@@ -1529,6 +1581,15 @@ export default function ExhibitorAdminPage() {
                                           <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/20 p-3 rounded">
                                             <span className="text-emerald-400 text-xs font-medium">✓ 已正式核准參展，協作平台帳號已開通就緒</span>
                                             <div className="flex items-center gap-2">
+                                              <button
+                                                onClick={() => handleResendAdmissionEmail(app)}
+                                                disabled={actionLoadingId === app.id}
+                                                className="text-xs bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-300 border border-emerald-500/30 px-3 py-1.5 rounded transition-colors inline-flex items-center gap-1 font-medium"
+                                                title="重新發送官方入選通知信與平台啟用指引至申請人信箱"
+                                              >
+                                                {actionLoadingId === app.id ? <Loader2 className="w-3 h-3 animate-spin" /> : <Mail className="w-3 h-3" />}
+                                                重發入選通知信
+                                              </button>
                                               <button
                                                 onClick={() => openFeeModal(app, 'edit')}
                                                 className="text-xs bg-[#DFBA87]/15 hover:bg-[#DFBA87]/25 text-[#DFBA87] border border-[#DFBA87]/30 px-3 py-1.5 rounded transition-colors inline-flex items-center gap-1 font-medium"

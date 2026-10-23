@@ -22,14 +22,14 @@ export async function POST(req: NextRequest) {
     // 1. Verify eligibility in exhibitor_applications or admin list
     const { data: approvedApp } = await supabase
       .from('exhibitor_applications')
-      .select('id, brand_name_zh, contact_name, contact_email, status')
+      .select('id, brand_name_zh, brand_name_en, contact_name, contact_email, status')
       .eq('contact_email', normalizedEmail)
       .eq('status', 'approved')
       .maybeSingle();
 
     const { data: existingBrand } = await supabase
       .from('exhibitor_brands')
-      .select('id, brand_name_zh, portal_email')
+      .select('id, brand_name_zh, brand_name_en, portal_email')
       .eq('portal_email', normalizedEmail)
       .maybeSingle();
 
@@ -42,7 +42,11 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const brandName = approvedApp?.brand_name_zh || existingBrand?.brand_name_zh || (isAdmin ? '大會管理員' : '參展商');
+    const rawBrand = (approvedApp?.brand_name_zh && approvedApp.brand_name_zh !== '無' && approvedApp.brand_name_zh.trim() !== '')
+      ? approvedApp.brand_name_zh
+      : (approvedApp?.brand_name_en || existingBrand?.brand_name_zh || existingBrand?.brand_name_en || (isAdmin ? '大會管理員' : '參展商'));
+
+    const brandName = rawBrand;
     const contactName = approvedApp?.contact_name || brandName;
 
     // 2. Trigger Supabase resetPasswordForEmail
