@@ -1077,9 +1077,9 @@ export default function VIPDashboard() {
                                 {/* Ticket Header */}
                                 <div className="w-full flex justify-between items-center border-b border-white/10 pb-4 mb-4">
                                     <img 
-                                        src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
+                                        src="/vis_logo_white.png" 
                                         alt="VIS Logo" 
-                                        className="h-5 brightness-200 opacity-80"
+                                        className="h-5 opacity-90"
                                     />
                                     <span className="text-[9px] tracking-[0.2em] font-mono text-[#DFBA87] border border-[#DFBA87]/40 px-2 py-0.5 uppercase">
                                         {profile.tier} PASS

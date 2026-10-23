@@ -379,9 +379,9 @@ function TicketRegistrationContent() {
                 {/* Header Logo & Exhibition Dates */}
                 <div className="flex flex-col items-center mb-8 text-center">
                     <img
-                        src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png"
+                        src="/vis_logo_white.png"
                         alt="VIS Contemporary Culture"
-                        className="h-14 md:h-16 object-contain mb-4 invert brightness-200 opacity-95"
+                        className="h-14 md:h-16 object-contain mb-4"
                     />
                     <h1 className="text-xs uppercase tracking-[0.4em] text-neutral-300 font-medium">Digital Entrance Pass</h1>
                     <div className="text-[12px] tracking-[0.25em] text-[#DFBA87] font-serif mt-2 font-normal">
