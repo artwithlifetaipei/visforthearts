@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Maximize2, Minimize2, Play, Pause, 
-  QrCode, X, ArrowUp
+  QrCode, X, ArrowUp, ArrowUpRight
 } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
@@ -224,9 +224,9 @@ export default function PerspectiveDisplayWall() {
           2. EXHIBITION MASTHEAD (SLEEK & MINIMAL PER UI/UX PRO MAX)
       ───────────────────────────────────────────────────────────── */}
       <header className="sticky top-0 z-30 border-b border-[#E5DDD0]/80 bg-[#F6F3ED]/85 backdrop-blur-xl transition-all shadow-xs">
-        <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-14 py-4 space-y-4">
+        <div className="max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 py-3.5 sm:py-4 space-y-3 sm:space-y-4">
           
-          {/* Top Bar: VIS Logo + Meta + Action Controls */}
+          {/* Top Bar: VIS Logo (Left) + Scannable QR Code & Controls (Right) */}
           <div className="flex items-center justify-between gap-4">
             
             {/* Top-Left: VIS Logo + Subtitle */}
@@ -242,61 +242,96 @@ export default function PerspectiveDisplayWall() {
                   className="h-8 sm:h-9 w-auto object-contain"
                 />
               </Link>
-              <div className="h-4 w-px bg-[#D8CFBF]" />
-              <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.2em] uppercase text-[#8C6226] font-semibold">
+              <div className="hidden sm:block h-4 w-px bg-[#D8CFBF]" />
+              <span className="hidden sm:inline-block text-[10px] sm:text-[11px] font-mono tracking-[0.2em] uppercase text-[#8C6226] font-semibold">
                 The Question of the Year · 年度文化命題
               </span>
             </div>
 
-            {/* Top-Right: Minimal Action Controls */}
-            <div className="flex items-center gap-2">
-              {/* Auto Scroll Toggle */}
-              <button
-                type="button"
-                onClick={() => setIsAutoScroll(prev => !prev)}
-                className={`px-3 py-1.5 rounded-full border text-[11px] font-mono tracking-wider flex items-center gap-1.5 transition-all duration-300 cursor-pointer ${
-                  isAutoScroll
-                    ? 'bg-[#DFBA87]/25 text-[#8C6226] border-[#DFBA87]/60 font-semibold shadow-xs'
-                    : 'bg-white/80 text-[#574D43] border-[#E0D7C8] hover:text-[#1C1814] hover:bg-white'
-                }`}
-                title="切換畫面自動漫遊慢速滾動 (快捷鍵: 空白鍵)"
-              >
-                {isAutoScroll ? <Play className="w-3 h-3 text-[#8C6226] fill-[#8C6226]" /> : <Pause className="w-3 h-3 text-[#7A6B5C]" />}
-                <span>{isAutoScroll ? '巡覽中' : '已暫停'}</span>
-              </button>
+            {/* Top-Right: Scannable QR Code Card & Exhibition Controls */}
+            <div className="flex items-center gap-2.5 sm:gap-3.5">
+              
+              {/* Operator Utility Tools: Auto-scroll & Fullscreen */}
+              <div className="flex items-center gap-1.5 sm:gap-2">
+                {/* Auto Scroll Toggle */}
+                <button
+                  type="button"
+                  onClick={() => setIsAutoScroll(prev => !prev)}
+                  className={`px-3 py-1.5 rounded-full border text-[11px] font-mono tracking-wider flex items-center gap-1.5 transition-all duration-300 cursor-pointer ${
+                    isAutoScroll
+                      ? 'bg-[#DFBA87]/20 text-[#8C6226] border-[#DFBA87]/50 font-semibold shadow-2xs'
+                      : 'bg-white/80 text-[#574D43] border-[#E0D7C8] hover:text-[#1C1814] hover:bg-white'
+                  }`}
+                  title="切換畫面自動漫遊慢速滾動 (快捷鍵: 空白鍵)"
+                >
+                  {isAutoScroll ? <Play className="w-3 h-3 text-[#8C6226] fill-[#8C6226]" /> : <Pause className="w-3 h-3 text-[#7A6B5C]" />}
+                  <span className="hidden md:inline">{isAutoScroll ? '巡覽中' : '已暫停'}</span>
+                </button>
 
-              {/* QR Code Trigger */}
-              <button
-                type="button"
+                {/* Fullscreen Button */}
+                <button
+                  type="button"
+                  onClick={toggleFullscreen}
+                  className="p-1.5 sm:p-2 rounded-full bg-white/80 hover:bg-[#DFBA87] hover:text-black text-[#4A3F35] border border-[#E0D7C8] transition-all duration-300 cursor-pointer shadow-2xs"
+                  title="切換全螢幕 (快捷鍵: 按 F)"
+                >
+                  {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+                </button>
+              </div>
+
+              {/* The Scannable QR Code Badge (Top-Right of Public Digital Wall) */}
+              <div
                 onClick={() => setShowQrModal(true)}
-                className="px-3.5 py-1.5 rounded-full bg-white/80 hover:bg-white text-[#4A3F35] hover:text-[#8C6226] border border-[#E0D7C8] text-[11px] font-mono tracking-wider flex items-center gap-1.5 transition-all duration-300 cursor-pointer shadow-xs hover:border-[#DFBA87]"
-                title="顯示觀眾提報 QR Code"
+                className="group relative flex items-center gap-2.5 sm:gap-3 bg-white/90 hover:bg-white backdrop-blur-xl border border-[#DFBA87]/50 hover:border-[#B58544] rounded-2xl p-1.5 sm:p-2 shadow-xs hover:shadow-lg hover:shadow-[#DFBA87]/15 transition-all duration-300 cursor-pointer ring-1 ring-[#DFBA87]/20 hover:ring-[#DFBA87]/40"
+                title="點擊放大 QR Code · 掃碼提報觀點"
               >
-                <QrCode className="w-3.5 h-3.5 text-[#8C6226]" />
-                <span className="hidden sm:inline font-medium">參與作答</span>
-              </button>
+                {/* QR Code Container */}
+                <div className="bg-white p-1 sm:p-1.5 rounded-xl border border-[#EDE5D8] shadow-2xs group-hover:scale-[1.02] transition-transform duration-300 flex-shrink-0">
+                  <QRCodeSVG
+                    value={submissionUrl}
+                    size={80}
+                    level="H"
+                    includeMargin={false}
+                    fgColor="#1C1814"
+                    className="w-12 h-12 sm:w-[68px] sm:h-[68px] lg:w-[78px] lg:h-[78px]"
+                  />
+                </div>
 
-              {/* Fullscreen Button */}
-              <button
-                type="button"
-                onClick={toggleFullscreen}
-                className="p-1.5 rounded-full bg-white/80 hover:bg-[#DFBA87] hover:text-black text-[#4A3F35] border border-[#E0D7C8] transition-all duration-300 cursor-pointer shadow-xs"
-                title="切換全螢幕 (按 F)"
-              >
-                {isFullscreen ? <Minimize2 className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
-              </button>
+                {/* Text & Prompt */}
+                <div className="flex flex-col justify-center text-left space-y-0.5 pr-1 sm:pr-2">
+                  <div className="flex items-center gap-1.5">
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#DFBA87] opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-[#8C6226]" />
+                    </span>
+                    <span className="text-[9px] sm:text-[10px] font-mono tracking-[0.16em] uppercase text-[#8C6226] font-semibold whitespace-nowrap">
+                      LIVE CO-CREATE
+                    </span>
+                  </div>
+
+                  <div className="text-xs sm:text-[13px] lg:text-sm font-serif font-medium text-[#1C1814] tracking-wider leading-tight group-hover:text-[#8C6226] transition-colors whitespace-nowrap">
+                    掃碼參與作答
+                  </div>
+
+                  <div className="text-[9px] sm:text-[10px] font-mono text-[#7A6B5C] tracking-tight flex items-center gap-1 whitespace-nowrap">
+                    <span>即時登牆播映</span>
+                    <ArrowUpRight className="w-3 h-3 text-[#8C6226] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" />
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
           {/* Central Exhibition Banner: Generous Breathing Room */}
-          <div className="text-center max-w-4xl mx-auto space-y-2 pt-2 pb-2">
+          <div className="text-center max-w-4xl mx-auto space-y-2 pt-1 pb-1 sm:pt-2 sm:pb-2">
             <h1 className="text-xs sm:text-sm font-serif tracking-[0.28em] uppercase text-[#8C6226] font-medium">
               HOW CAN BEAUTY BECOME OUR SHARED VALUE?
             </h1>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#1C1814] tracking-[0.08em] font-normal drop-shadow-xs">
               美，如何成為我們共同的價值？
             </h2>
-            <div className="w-8 h-[1px] bg-[#DFBA87] mx-auto mt-3 rounded-full opacity-70" />
+            <div className="w-8 h-[1px] bg-[#DFBA87] mx-auto mt-2.5 rounded-full opacity-70" />
           </div>
 
         </div>
@@ -306,7 +341,7 @@ export default function PerspectiveDisplayWall() {
           3. MAIN CANVAS: LIVING PERSPECTIVE WALL
              Only displays: Question, Answer, Name
           ───────────────────────────────────────────────────────────── */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-14 pt-8 sm:pt-12 relative z-10">
+      <main className="max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12 relative z-10">
         {isEmergency ? (
           /* Emergency Broadcast Card (LED-010) */
           <motion.div
@@ -404,29 +439,20 @@ export default function PerspectiveDisplayWall() {
       </main>
 
       {/* ─────────────────────────────────────────────────────────────
-          4. FLOATING PARTICIPATION DOCK (BOTTOM CENTER)
+          4. UNOBTRUSIVE FLOATING CONTROLS (BOTTOM RIGHT)
       ───────────────────────────────────────────────────────────── */}
-      <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-40 flex items-center gap-2">
-        <button
-          type="button"
-          onClick={() => setShowQrModal(true)}
-          className="px-5 py-2.5 rounded-full bg-white/95 hover:bg-white border border-[#DFBA87] hover:border-[#B58544] text-[#875F24] text-xs font-mono font-semibold tracking-wider flex items-center gap-2 shadow-xl shadow-[#DFBA87]/20 backdrop-blur-xl transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer"
-        >
-          <QrCode className="w-4 h-4 text-[#875F24]" />
-          <span>掃描 QR Code · 留下你對美的觀點（即時登牆）</span>
-        </button>
-
-        {showScrollTop && (
+      {showScrollTop && (
+        <div className="fixed bottom-6 right-6 z-40">
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="p-2.5 rounded-full bg-white/95 hover:bg-white border border-[#DFBA87]/50 text-[#875F24] hover:text-[#1C1814] transition-all shadow-xl backdrop-blur-xl cursor-pointer"
+            className="p-3 rounded-full bg-white/90 hover:bg-white border border-[#DFBA87]/60 text-[#875F24] hover:text-[#1C1814] transition-all shadow-lg shadow-[#DFBA87]/15 backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95"
             title="回到頂部"
           >
             <ArrowUp className="w-4 h-4" />
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* ─────────────────────────────────────────────────────────────
           MODAL A: CINEMATIC SPOTLIGHT VIEW FOR ANY PERSPECTIVE
@@ -489,54 +515,63 @@ export default function PerspectiveDisplayWall() {
       </AnimatePresence>
 
       {/* ─────────────────────────────────────────────────────────────
-          MODAL B: PARTICIPATION QR CODE MODAL
+          MODAL B: PARTICIPATION QR CODE MODAL (ENLARGED PRESENTATION)
       ───────────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {showQrModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.95 }}
-              className="relative max-w-md w-full bg-[#FAF7F2] border border-[#DFBA87]/50 rounded-3xl p-8 text-center space-y-6 shadow-2xl text-[#1C1814]"
+              initial={{ opacity: 0, scale: 0.95, y: 12 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 12 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="relative max-w-md w-full bg-[#FAF7F2] border border-[#DFBA87]/60 rounded-3xl p-8 sm:p-10 text-center space-y-6 shadow-2xl text-[#1C1814] overflow-hidden"
             >
+              {/* Top ambient gold light */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[150px] bg-[#DFBA87]/25 rounded-full blur-3xl pointer-events-none" />
+
               <button
                 type="button"
                 onClick={() => setShowQrModal(false)}
-                className="absolute top-4 right-4 p-2 text-[#7A6B5C] hover:text-[#1C1814] cursor-pointer"
+                className="absolute top-5 right-5 p-2 rounded-full bg-black/5 hover:bg-black/10 text-[#7A6B5C] hover:text-[#1C1814] transition-colors cursor-pointer"
+                title="關閉視窗 (ESC)"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="space-y-2">
-                <span className="text-[11px] font-mono tracking-widest uppercase text-[#8C6226] block font-bold">
-                  THE QUESTION OF THE YEAR 2027
+              <div className="space-y-2 pt-2">
+                <span className="text-[10.5px] font-mono tracking-[0.22em] uppercase text-[#8C6226] block font-semibold">
+                  THE QUESTION OF THE YEAR · 年度文化命題
                 </span>
-                <h3 className="text-xl font-serif text-[#1C1814]">
+                <h3 className="text-xl sm:text-2xl font-serif text-[#1C1814] font-normal">
                   美，如何成為我們共同的價值？
                 </h3>
+                <p className="text-xs text-[#7A6B5C] font-serif leading-relaxed max-w-xs mx-auto">
+                  拿起手機相機掃描，立即選題填寫你的觀點，審核後即時同步登牆播映。
+                </p>
               </div>
 
               {/* QR Code Container */}
-              <div className="p-6 bg-white rounded-2xl inline-block shadow-md border border-[#E5DDD0]">
+              <div className="p-6 bg-white rounded-2xl inline-block shadow-md border border-[#E5DDD0] ring-1 ring-[#DFBA87]/20">
                 <QRCodeSVG
                   value={submissionUrl}
-                  size={200}
+                  size={220}
                   level="H"
                   includeMargin={false}
+                  fgColor="#1C1814"
                 />
               </div>
 
-              <div className="text-[11px] font-mono text-[#7A6B5C]">
-                visforthearts.com/question
+              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-[#E5DDD0] text-[11px] font-mono text-[#7A6B5C]">
+                <span>{submissionUrl.replace(/^https?:\/\//, '')}</span>
               </div>
 
               <button
                 type="button"
                 onClick={() => setShowQrModal(false)}
-                className="w-full py-3 rounded-xl bg-white hover:bg-neutral-100 text-[#1C1814] text-xs font-mono font-medium transition-colors border border-[#D8CFBF] cursor-pointer"
+                className="w-full py-3 rounded-xl bg-white hover:bg-[#FAF2E6] text-[#1C1814] text-xs font-mono font-medium transition-colors border border-[#D8CFBF] hover:border-[#DFBA87] cursor-pointer shadow-2xs"
               >
-                關閉視窗
+                關閉視窗 (ESC)
               </button>
             </motion.div>
           </div>
