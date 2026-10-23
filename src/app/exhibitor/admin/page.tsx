@@ -1172,6 +1172,14 @@ export default function ExhibitorAdminPage() {
               </button>
             );
           })}
+          <Link
+            href="/question/admin"
+            target="_blank"
+            className="flex items-center gap-1.5 px-3.5 py-2 text-xs tracking-wider font-medium text-[#DFBA87] hover:text-white hover:bg-[#DFBA87]/10 rounded-lg ml-auto whitespace-nowrap transition-colors self-center border border-[#DFBA87]/30"
+          >
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>年度文化命題審核 (LED 觀點牆) ↗</span>
+          </Link>
         </div>
 
         {/* Tab Content Panels */}

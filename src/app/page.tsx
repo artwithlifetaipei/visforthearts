@@ -1105,15 +1105,34 @@ export default function LandingPage() {
                             </p>
                         </div>
                         
-                        <div className="curatorial-card">
+                        <div className="curatorial-card group hover:border-[#DFBA87]/40 transition-colors">
                             <span className="curatorial-num">03</span>
-                            <h3 className="curatorial-card-title-en">The Question of the Year</h3>
-                            <h4 className="curatorial-card-title-zh">年度文化命題</h4>
+                            <Link 
+                                href="/question" 
+                                className="block group-hover:text-[#DFBA87] transition-colors cursor-pointer"
+                                title={lang === 'zh' ? '點擊進入 2027 年度文化命題' : 'Enter The Question of the Year'}
+                            >
+                                <h3 className="curatorial-card-title-en flex items-center justify-between text-inherit">
+                                    <span>The Question of the Year</span>
+                                    <span className="text-xs font-mono text-[#DFBA87] opacity-80 group-hover:translate-x-1 transition-transform">↗</span>
+                                </h3>
+                                <h4 className="curatorial-card-title-zh hover:underline underline-offset-4 text-inherit">
+                                    年度文化命題
+                                </h4>
+                            </Link>
                             <p className="curatorial-card-desc">
                                 {lang === 'zh' 
                                     ? '每年透過一道文化命題，邀請不同領域的創作者共同回應，以策展、創作與觀點，重新閱讀文化及其所處的時代。' 
                                     : 'Each year, we propose a central cultural question, inviting creators across various fields to respond. Through exhibitions, original works, and unique perspectives, we re-evaluate culture and the era we live in.'}
                             </p>
+                            <div className="mt-3 pt-2">
+                                <Link 
+                                    href="/question"
+                                    className="text-xs text-[#DFBA87] hover:text-white underline underline-offset-4 flex items-center gap-1 font-medium transition-colors"
+                                >
+                                    <span>{lang === 'zh' ? '點擊進入留下你的觀點' : 'Click to Share Your Perspective'}&nbsp;→</span>
+                                </Link>
+                            </div>
                         </div>
                         
                         <div className="curatorial-card">
