@@ -137,9 +137,9 @@ export default function QuestionPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/question/display"
-              className="text-xs text-[#8C6226] hover:text-[#1C1814] flex items-center gap-1 font-mono tracking-wider transition-colors font-medium"
+              className="text-xs sm:text-[13px] text-[#8C6226] hover:text-[#1C1814] flex items-center gap-1.5 font-medium px-3 py-1.5 rounded-full bg-white/70 hover:bg-white border border-[#DFBA87]/40 hover:border-[#DFBA87] shadow-2xs transition-all duration-300"
             >
-              <Eye className="w-3.5 h-3.5" />
+              <Eye className="w-3.5 h-3.5 text-[#8C6226]" />
               <span>{t('The Question of the Year · 年度文化命題', 'The Question of the Year')} ↗</span>
             </Link>
 
@@ -156,16 +156,21 @@ export default function QuestionPage() {
       {/* Main Single-Page Container */}
       <main className="relative z-10 flex-grow max-w-2xl mx-auto w-full px-5 py-10 sm:py-16">
         
-        {/* 01. VIS Identity & Badge */}
-        <div className="text-center space-y-3 mb-10">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#DFBA87]/20 border border-[#DFBA87]/60 text-[#7D5720] text-[11px] font-mono tracking-widest uppercase font-semibold shadow-xs">
+        {/* 01. VIS Identity & Project Pillar Title */}
+        <div className="text-center space-y-3.5 mb-8 sm:mb-10">
+          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#DFBA87]/15 border border-[#DFBA87]/50 text-[#7D5720] text-[11px] sm:text-xs font-mono tracking-widest uppercase font-semibold shadow-2xs backdrop-blur-md">
             <Sparkles className="w-3.5 h-3.5 text-[#8C6226]" />
             <span>VIS Contemporary Culture 2027</span>
           </div>
 
-          <h2 className="text-xs font-mono tracking-[0.3em] uppercase text-[#7A6B5C] font-semibold mt-2">
-            The Question of the Year · 年度文化命題
-          </h2>
+          <div className="space-y-2 pt-1">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-serif text-[#8C6226] font-medium tracking-[0.14em] sm:tracking-[0.2em] flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
+              <span>The Question of the Year</span>
+              <span className="hidden sm:inline text-[#DFBA87] opacity-60">·</span>
+              <span className="text-[#3D332A] font-normal tracking-[0.16em]">年度文化命題</span>
+            </h2>
+            <div className="w-10 h-[1px] bg-[#DFBA87] mx-auto mt-2.5 rounded-full opacity-60" />
+          </div>
         </div>
 
         {/* 02. Annual Question (Core Prominent Visual) */}
