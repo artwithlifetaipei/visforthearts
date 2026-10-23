@@ -26,14 +26,52 @@ async function createSupabaseServerClient() {
     );
 }
 
-function extractIgHandle(urlOrHandle: string | null | undefined): string {
+const KNOWN_BRAND_IGS: Record<string, string> = {
+    'looom': '@looomasia',
+    'looom-club': '@looomasia',
+    'looomasia': '@looomasia',
+    'looom club邀請': '@looomasia',
+    'pumpkin-vintage-watches': '@nangua.vintage.watches',
+    'nangua': '@nangua.vintage.watches',
+    '南瓜鐘錶': '@nangua.vintage.watches',
+    'reborn-antique': '@reborn_antique_store',
+    'reborn antique 古董雜貨鋪': '@reborn_antique_store',
+    'dan-retro-furniture': '@dan_decoantique_',
+    'dan retro & furniture': '@dan_decoantique_',
+    'j-l-jewelry': '@jl_jewelry2020',
+    '詠聆珠寶': '@jl_jewelry2020',
+    'aaa': '@theartpressasia',
+};
+
+function extractIgHandle(urlOrHandle: string | null | undefined, fallbackKey?: string): string {
+    if (fallbackKey) {
+        const normKey = fallbackKey.toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-').replace(/^-+|-+$/g, '');
+        if (KNOWN_BRAND_IGS[normKey]) return KNOWN_BRAND_IGS[normKey];
+        if (KNOWN_BRAND_IGS[fallbackKey.toLowerCase().trim()]) return KNOWN_BRAND_IGS[fallbackKey.toLowerCase().trim()];
+    }
+
     if (!urlOrHandle) return '@visforthearts';
     let clean = urlOrHandle.trim();
-    if (clean.includes('instagram.com/')) {
-        const parts = clean.split('instagram.com/')[1].split('/')[0].split('?')[0];
-        if (parts) return `@${parts}`;
+    if (!clean) return '@visforthearts';
+
+    const lower = clean.toLowerCase();
+    for (const [key, ig] of Object.entries(KNOWN_BRAND_IGS)) {
+        if (lower.includes(key)) return ig;
     }
-    clean = clean.replace(/^@/, '').split('?')[0].split('/')[0].trim();
+
+    if (clean.includes('instagram.com/')) {
+        const after = clean.split('instagram.com/')[1];
+        if (after) {
+            const handle = after.split('/')[0].split('?')[0].split('&')[0].replace(/^@/, '').trim();
+            if (handle) return `@${handle}`;
+        }
+    }
+
+    if (clean.startsWith('http://') || clean.startsWith('https://') || clean.includes('.com') || clean.includes('.net') || clean.includes('.org') || clean.includes('/')) {
+        return '@visforthearts';
+    }
+
+    clean = clean.replace(/^@+/, '').split('?')[0].split('/')[0].trim();
     return clean ? `@${clean}` : '@visforthearts';
 }
 
@@ -90,7 +128,7 @@ export async function GET() {
             for (const app of approvedApps) {
                 const zh = (app.brand_name_zh || '').trim();
                 const en = (app.brand_name_en || '').trim();
-                const ig = extractIgHandle(app.instagram_url);
+                const ig = extractIgHandle(app.instagram_url, en || zh || app.id);
                 const primarySlug = slugify(en || zh || app.id);
 
                 brandMap.set(app.id, {
@@ -109,15 +147,14 @@ export async function GET() {
             for (const tb of ticketBrands) {
                 const zh = (tb.name_zh || '').trim();
                 const en = (tb.name_en || '').trim();
-                const ig = (tb.instagram_handle || '').trim();
+                const ig = extractIgHandle(tb.instagram_handle, en || zh || tb.id);
                 const primarySlug = slugify(en || zh || tb.id);
 
-                // If brand already exists with similar name, mark as ticket_brand = true
                 brandMap.set(tb.id, {
                     id: tb.id,
                     name_zh: zh,
                     name_en: en,
-                    instagram_handle: ig ? (ig.startsWith('@') ? ig : `@${ig}`) : '@visforthearts',
+                    instagram_handle: ig,
                     slug: primarySlug,
                     is_ticket_brand: true,
                 });
