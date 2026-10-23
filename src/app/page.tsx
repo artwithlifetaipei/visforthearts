@@ -946,10 +946,10 @@ export default function LandingPage() {
                         <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" className="nav-logo" alt="VIS Logo" />
                     </a>
                     <div className="nav-links">
-                        <a href="#about" className="nav-link">{lang === 'zh' ? 'ABOUT 關於' : 'ABOUT'}</a>
-                        <a href="#exhibition" className="nav-link">{lang === 'zh' ? 'EXHIBITION 參展' : 'EXHIBITION'}</a>
-                        <a href="#vip" className="nav-link">{lang === 'zh' ? 'VIP-Looom Club 禮賓入口' : 'VIP ACCESS'}</a>
-                        <a href="#press" className="nav-link">{lang === 'zh' ? 'PRESS 媒體' : 'PRESS'}</a>
+                        <a href="#about" className="nav-link">ABOUT</a>
+                        <a href="#exhibition" className="nav-link">EXHIBITION</a>
+                        <a href="#vip" className="nav-link">VIP-LOOOM CLUB</a>
+                        <a href="#press" className="nav-link">PRESS</a>
                     </div>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '1.5rem' }}>
@@ -975,10 +975,10 @@ export default function LandingPage() {
             </nav>
 
             <div className={`mobile-menu-overlay ${isMobileMenuOpen ? 'open' : ''}`}>
-                <a href="#about" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{lang === 'zh' ? 'ABOUT 關於' : 'ABOUT'}</a>
-                <a href="#exhibition" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{lang === 'zh' ? 'EXHIBITION 參展' : 'EXHIBITION'}</a>
-                <a href="#vip" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{lang === 'zh' ? 'VIP-Looom Club 禮賓入口' : 'VIP ACCESS'}</a>
-                <a href="#press" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>{lang === 'zh' ? 'PRESS 媒體' : 'PRESS'}</a>
+                <a href="#about" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>ABOUT</a>
+                <a href="#exhibition" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>EXHIBITION</a>
+                <a href="#vip" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>VIP-LOOOM CLUB</a>
+                <a href="#press" className="nav-link" onClick={() => setIsMobileMenuOpen(false)}>PRESS</a>
                 <a href="/vip" className="btn-access" style={{ display: 'block', marginTop: '2rem' }}>VIP ACCESS</a>
                 <div style={{ marginTop: '3rem', display: 'flex', flexDirection: 'column', alignItems: 'center', opacity: 0.9 }}>
                     <span style={{ fontSize: '0.55rem', letterSpacing: '0.15em', color: '#999', textTransform: 'uppercase', marginBottom: '8px' }}>Sponsored by</span>

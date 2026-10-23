@@ -667,12 +667,12 @@ export default function V2LandingPage() {
                     <img src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" className="v2-logo" alt="VIS" />
                 </a>
                 <div className="v2-nav-links">
-                    <a href="#about" className="v2-nav-link">{lang === 'zh' ? 'About 關於' : 'About'}</a>
-                    <a href="#exhibition" className="v2-nav-link">{lang === 'zh' ? 'Exhibition 參展' : 'Exhibition'}</a>
-                    <a href="#vip" className="v2-nav-link">{lang === 'zh' ? 'VIP Club 禮賓入口' : 'VIP Club'}</a>
-                    <a href="#press" className="v2-nav-link">{lang === 'zh' ? 'Press 媒體' : 'Press'}</a>
+                    <a href="#about" className="v2-nav-link">ABOUT</a>
+                    <a href="#exhibition" className="v2-nav-link">EXHIBITION</a>
+                    <a href="#vip" className="v2-nav-link">VIP-LOOOM CLUB</a>
+                    <a href="#press" className="v2-nav-link">PRESS</a>
                 </div>
-                <a href="/vip" className="v2-btn-magnetic" style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textDecoration: 'none', color: 'inherit', border: '1px solid #000', padding: '0.6rem 1.2rem' }}>{lang === 'zh' ? 'Access 登入' : 'Access'}</a>
+                <a href="/vip" className="v2-btn-magnetic" style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.2em', textDecoration: 'none', color: 'inherit', border: '1px solid #000', padding: '0.6rem 1.2rem' }}>ACCESS</a>
             </nav>
 
             <section className="v2-hero" id="hero">
