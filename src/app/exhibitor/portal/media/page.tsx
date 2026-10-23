@@ -130,6 +130,18 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState('');
 
+  // Brand Transparent Logo state (1 asset, transparent PNG / SVG / WebP)
+  const [logoAsset, setLogoAsset] = useState<any>(() => {
+    const saved = brand?.id ? safeGetStorage(`vis_portal_media_logo_${brand.id}`) : null;
+    if (saved) {
+      try { return JSON.parse(saved); } catch { return null; }
+    }
+    return null;
+  });
+  const [uploadingLogo, setUploadingLogo] = useState(false);
+  const [deletingLogo, setDeletingLogo] = useState(false);
+  const [logoError, setLogoError] = useState('');
+
   // PR Editorial Q&A Answers state
   const [qaAnswers, setQaAnswers] = useState<PrQaState>(() => {
     const local = brand?.id ? safeGetStorage(`vis_portal_pr_qa_${brand.id}`) : null;
@@ -201,7 +213,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
           setBrand(currentBrand);
           safeSetStorage('vis_portal_brand_data', JSON.stringify(currentBrand));
 
-          // 1. Fetch visual image assets (exclude PR Q&A record)
+          // 1. Fetch visual image assets & transparent logo (exclude PR Q&A record)
           const { data: list } = await supabase
             .from('exhibitor_media_assets')
             .select('*')
@@ -209,9 +221,18 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
             .neq('file_type', 'pr_qa_submission')
             .order('created_at', { ascending: false });
           
-          const mediaList = list || [];
-          setAssets(mediaList);
-          safeSetStorage(`vis_portal_media_assets_${currentBrand.id}`, JSON.stringify(mediaList));
+          const rawList = list || [];
+          const logo = rawList.find((a: any) => a.file_type === 'brand_logo_transparent') || null;
+          const photos = rawList.filter((a: any) => a.file_type !== 'brand_logo_transparent');
+
+          setLogoAsset(logo);
+          setAssets(photos);
+          if (logo) {
+            safeSetStorage(`vis_portal_media_logo_${currentBrand.id}`, JSON.stringify(logo));
+          } else {
+            try { sessionStorage.removeItem(`vis_portal_media_logo_${currentBrand.id}`); } catch {}
+          }
+          safeSetStorage(`vis_portal_media_assets_${currentBrand.id}`, JSON.stringify(photos));
 
           // 2. Fetch PR Q&A submission
           const { data: qaAsset } = await supabase
@@ -347,6 +368,187 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
       setTimeout(() => setQaMessage({ text: '', type: '' }), 8000);
     } finally {
       setSavingQa(false);
+    }
+  };
+
+  // Brand Transparent Logo upload handling (Strictly 1 transparent image)
+  const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0 || !brand) return;
+
+    const file = files[0];
+    setLogoError('');
+
+    // Strict validation: Must be PNG, SVG, or WebP
+    const fileNameLower = file.name.toLowerCase();
+    const isPng = file.type === 'image/png' || fileNameLower.endsWith('.png');
+    const isSvg = file.type === 'image/svg+xml' || fileNameLower.endsWith('.svg');
+    const isWebp = file.type === 'image/webp' || fileNameLower.endsWith('.webp');
+
+    if (!isPng && !isSvg && !isWebp) {
+      setLogoError(
+        t(
+          '品牌 Logo 必須為透明無底色之去背圖檔，請提供 PNG、SVG 或 WebP 格式（不支援 JPG/JPEG 格式）。',
+          'Brand logo must have a transparent background. Please upload PNG, SVG, or WebP format (JPG/JPEG not supported).'
+        )
+      );
+      e.target.value = '';
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+      setLogoError(t('Logo 檔案大小不能超過 3MB。', 'Logo file size cannot exceed 3MB.'));
+      e.target.value = '';
+      return;
+    }
+
+    setUploadingLogo(true);
+
+    try {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64Data = reader.result as string;
+        let fileUrl = '';
+        const fileExt = file.name.split('.').pop() || (isSvg ? 'svg' : isWebp ? 'webp' : 'png');
+        const storagePath = `${brand.id}/logo_transparent_${Date.now()}.${fileExt}`;
+
+        try {
+          // If previous logo exists in storage, clean it up
+          if (logoAsset?.file_url?.includes('exhibitor-media')) {
+            try {
+              const oldParts = logoAsset.file_url.split('exhibitor-media/');
+              if (oldParts.length === 2) {
+                await supabase.storage.from('exhibitor-media').remove([oldParts[1]]);
+              }
+            } catch (delErr) {
+              console.warn('Error removing old logo from storage:', delErr);
+            }
+          }
+
+          let uploadSuccess = false;
+          const { error: directUploadError } = await supabase.storage
+            .from('exhibitor-media')
+            .upload(storagePath, file, {
+              contentType: file.type || (isSvg ? 'image/svg+xml' : isWebp ? 'image/webp' : 'image/png'),
+              upsert: true
+            });
+
+          if (!directUploadError) {
+            uploadSuccess = true;
+          } else {
+            // Buffer fallback
+            try {
+              const base64Clean = base64Data.split(',')[1];
+              const buffer = Buffer.from(base64Clean, 'base64');
+              const { error: bufError } = await supabase.storage
+                .from('exhibitor-media')
+                .upload(storagePath, buffer, {
+                  contentType: file.type,
+                  upsert: true
+                });
+              if (!bufError) uploadSuccess = true;
+            } catch {}
+          }
+
+          if (uploadSuccess) {
+            const { data: publicUrlData } = supabase.storage
+              .from('exhibitor-media')
+              .getPublicUrl(storagePath);
+            fileUrl = publicUrlData?.publicUrl || base64Data;
+          } else {
+            fileUrl = base64Data;
+          }
+        } catch {
+          fileUrl = base64Data;
+        }
+
+        let savedRow: any = null;
+        if (logoAsset?.id) {
+          const { data, error } = await supabase
+            .from('exhibitor_media_assets')
+            .update({
+              file_url: fileUrl,
+              file_name: file.name,
+              file_type: 'brand_logo_transparent',
+              created_at: new Date().toISOString()
+            })
+            .eq('id', logoAsset.id)
+            .select()
+            .single();
+
+          if (error) {
+            setLogoError(t(`更新失敗: ${error.message}`, `Update failed: ${error.message}`));
+          } else {
+            savedRow = data;
+          }
+        } else {
+          const { data, error } = await supabase
+            .from('exhibitor_media_assets')
+            .insert({
+              brand_id: brand.id,
+              file_url: fileUrl,
+              file_name: file.name,
+              file_type: 'brand_logo_transparent',
+            })
+            .select()
+            .single();
+
+          if (error) {
+            setLogoError(t(`儲存失敗: ${error.message}`, `Save failed: ${error.message}`));
+          } else {
+            savedRow = data;
+          }
+        }
+
+        if (savedRow) {
+          setLogoAsset(savedRow);
+          safeSetStorage(`vis_portal_media_logo_${brand.id}`, JSON.stringify(savedRow));
+        }
+
+        setUploadingLogo(false);
+        e.target.value = '';
+      };
+      reader.readAsDataURL(file);
+    } catch {
+      setLogoError(t('上傳過程中發生異常，請重試。', 'An error occurred during upload. Please try again.'));
+      setUploadingLogo(false);
+      e.target.value = '';
+    }
+  };
+
+  // Delete Brand Transparent Logo
+  const handleDeleteLogo = async () => {
+    if (!logoAsset || deletingLogo || !brand) return;
+    setDeletingLogo(true);
+    setLogoError('');
+
+    try {
+      if (logoAsset.file_url?.includes('exhibitor-media')) {
+        try {
+          const parts = logoAsset.file_url.split('exhibitor-media/');
+          if (parts.length === 2) {
+            await supabase.storage.from('exhibitor-media').remove([parts[1]]);
+          }
+        } catch (storageErr) {
+          console.warn('Storage deletion error:', storageErr);
+        }
+      }
+
+      const { error } = await supabase
+        .from('exhibitor_media_assets')
+        .delete()
+        .eq('id', logoAsset.id);
+
+      if (error) {
+        setLogoError(t(`刪除失敗: ${error.message}`, `Delete failed: ${error.message}`));
+      } else {
+        setLogoAsset(null);
+        try { sessionStorage.removeItem(`vis_portal_media_logo_${brand.id}`); } catch {}
+      }
+    } catch (err: any) {
+      setLogoError(err?.message || '刪除失敗');
+    } finally {
+      setDeletingLogo(false);
     }
   };
 
@@ -556,10 +758,21 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
             }`}
           >
             <ImageIcon className="w-3.5 h-3.5" />
-            {t('視覺素材圖檔', 'Visual Assets')}
-            <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/30">
-              {assets.length}/5
-            </span>
+            {t('視覺素材與 Logo', 'Visual Assets & Logo')}
+            <div className="flex items-center gap-1.5">
+              {logoAsset ? (
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                  Logo✓
+                </span>
+              ) : (
+                <span className="text-[9px] font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-500/30">
+                  Logo待傳
+                </span>
+              )}
+              <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-black/30">
+                {assets.length}/5
+              </span>
+            </div>
           </button>
         </div>
       </div>
@@ -889,141 +1102,328 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          SECTION B: VISUAL ASSETS UPLOAD (大會視覺圖檔素材)
+          SECTION B: VISUAL ASSETS & LOGO UPLOAD (品牌識別與視覺素材提報)
       ───────────────────────────────────────────────────────────── */}
       {activeTab === 'images' && (
-        <div className="space-y-6">
-          <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-4">
-            <div>
-              <h2 className="text-sm font-semibold text-white tracking-wider flex items-center gap-2">
-                <ImageIcon className="w-4 h-4 text-[#DFBA87]" />
-                {t('大會宣傳高解析視覺圖檔提報', 'High-Resolution Visual Assets')}
-              </h2>
-              <p className="text-xs text-neutral-400 font-light mt-0.5">
-                {t('請提供 3 至 5 張體現品牌調性與精緻工藝的作品情境圖（每張 3MB 內）。', 'Please upload 3 to 5 images reflecting brand aesthetic (max 3MB each).')}
-              </p>
-            </div>
-            <div className="bg-[#DFBA87]/15 border border-[#DFBA87]/30 px-3.5 py-1.5 rounded-full text-xs font-mono text-[#DFBA87]">
-              {t('已上傳素材', 'Uploaded')}: {assets.length} / 5
-            </div>
-          </div>
+        <div className="space-y-8">
 
-          {errorMessage && (
-            <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded font-mono max-w-lg">
-              {errorMessage}
-            </p>
-          )}
-
-          {/* Grid Layout: Uploader and Previews */}
-          <div className="grid lg:grid-cols-3 gap-8">
-            
-            {/* Upload Button Card */}
-            <div className="bg-[#111111] border border-white/5 rounded-xl p-6 h-fit space-y-4">
-              <h3 className="text-xs font-semibold tracking-widest text-[#DFBA87] uppercase flex items-center gap-1.5 border-b border-white/5 pb-3">
-                <Upload className="w-4 h-4" /> {t('素材上傳', 'Upload Asset')}
-              </h3>
-              
-              <div className="text-xs text-neutral-400 font-light leading-relaxed space-y-2">
-                <p>
+          {/* 1. BRAND TRANSPARENT LOGO UPLOAD AREA (品牌透明無底色 Logo) */}
+          <div className="bg-[#111111] border border-white/10 rounded-xl p-6 shadow-xl relative overflow-hidden">
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-white/5 pb-4 mb-5">
+              <div>
+                <div className="flex items-center gap-2 mb-1">
+                  <span className="text-[10px] font-mono tracking-widest text-[#DFBA87] uppercase px-2 py-0.5 rounded bg-[#DFBA87]/10 border border-[#DFBA87]/30">
+                    {t('必填識別素材', 'Required Brand Identity')}
+                  </span>
+                  <span className="text-xs font-mono text-neutral-400">
+                    {t('單一檔案 · 1 張', '1 Asset Only')}
+                  </span>
+                </div>
+                <h3 className="text-base font-semibold text-white tracking-wide flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-[#DFBA87]" />
+                  {t('品牌專屬透明無底色 Logo 上傳區', 'Brand Transparent Logo Upload')}
+                </h3>
+                <p className="text-xs text-neutral-400 font-light mt-1 max-w-2xl leading-relaxed">
                   {t(
-                    '請提報 3 至 5 張 能充分體現品牌調性與精緻工藝的高解析度商品/意境圖。',
-                    'Please upload 3 to 5 high-resolution images showcasing your brand spirit.'
+                    '為確保 VIS 官方社群聯名發文、專題公關報導、大會實體專刊及展會現場導覽手冊之排版美感，請提報貴品牌「去背透明無底色」之 Logo 圖檔。',
+                    'Please submit a transparent background (cutout) logo for official joint PR, curatorial publications, and exhibition signage.'
                   )}
-                </p>
-                <p className="text-[10px] text-neutral-500">
-                  {t('* 規格要求：比例 3:2 或 1:1，解析度建議 2000px 以上，無浮水印。', '* Spec: 3:2 or 1:1 ratio, 2000px+ recommended, no watermark.')}
                 </p>
               </div>
 
-              <div className="border border-dashed border-white/10 hover:border-[#C9A96E]/50 rounded-lg p-6 text-center cursor-pointer transition-colors relative group">
-                <input 
-                  type="file" 
-                  accept="image/*"
-                  onChange={handleFileUpload}
-                  className="absolute inset-0 opacity-0 cursor-pointer"
-                  disabled={uploading || assets.length >= 5}
-                />
-                {uploading ? (
-                  <div className="py-4">
-                    <Loader2 className="w-8 h-8 animate-spin text-[#DFBA87] mx-auto mb-2" />
-                    <p className="text-[10px] text-neutral-400 uppercase tracking-widest">
-                      {t('檔案上傳中...', 'Uploading file...')}
-                    </p>
-                  </div>
+              {/* Status badge */}
+              <div className="self-start md:self-auto">
+                {logoAsset ? (
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-500/15 border border-emerald-500/40 text-emerald-300 text-xs font-medium">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>{t('已完成上傳 (1/1)', 'Uploaded (1/1)')}</span>
+                  </span>
                 ) : (
-                  <div className="py-4 flex flex-col items-center">
-                    <FileImage className="w-8 h-8 text-neutral-500 group-hover:scale-105 transition-transform mb-2" />
-                    <span className="text-[10px] font-semibold text-[#DFBA87] tracking-wider uppercase block">
-                      {assets.length >= 5 ? t('已達數量上限 (5張)', 'Max 5 reached') : t('選取圖片檔案', 'Select Image')}
-                    </span>
-                    <span className="text-[9px] text-neutral-600 block mt-1">MAX 3MB (JPG / PNG / WebP)</span>
-                  </div>
+                  <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/20 border border-amber-500/50 text-amber-300 text-xs font-semibold animate-pulse">
+                    <AlertCircle className="w-3.5 h-3.5 text-amber-400" />
+                    <span>{t('尚未上傳 (待提供)', 'Pending (0/1)')}</span>
+                  </span>
                 )}
               </div>
             </div>
 
-            {/* Uploaded Materials Preview Grid */}
-            <div className="lg:col-span-2 bg-[#111111] border border-white/5 rounded-xl p-6 flex flex-col min-h-[300px]">
-              <h3 className="text-xs font-semibold tracking-widest text-[#DFBA87] uppercase border-b border-white/5 pb-3 mb-6">
-                {t('已提報視覺素材 Previews', 'Uploaded Visual Assets Previews')}
-              </h3>
+            {/* Logo Error message if any */}
+            {logoError && (
+              <div className="mb-4 p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center justify-between">
+                <span>{logoError}</span>
+                <button 
+                  type="button"
+                  onClick={() => setLogoError('')} 
+                  className="text-xs font-mono opacity-70 hover:opacity-100"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
 
-              {assets.length === 0 ? (
-                <div className="flex-grow flex flex-col justify-center items-center text-center p-8 text-neutral-500 space-y-2">
-                  <ImageIcon2 className="w-8 h-8 text-neutral-600" />
-                  <p className="text-xs font-light">
-                    {t('目前尚未上傳任何素材圖檔', 'No visual assets uploaded yet')}
-                  </p>
+            {logoAsset ? (
+              /* Uploaded state with Checkerboard Transparency Preview */
+              <div className="grid md:grid-cols-12 gap-6 items-center">
+                <div 
+                  className="md:col-span-5 rounded-xl border border-white/10 p-6 flex items-center justify-center relative min-h-[160px] overflow-hidden"
+                  style={{
+                    backgroundColor: '#0c0c0c',
+                    backgroundImage: 'repeating-conic-gradient(rgba(255, 255, 255, 0.08) 0% 25%, transparent 0% 50%)',
+                    backgroundSize: '20px 20px',
+                  }}
+                >
+                  <img 
+                    src={logoAsset.file_url} 
+                    alt={logoAsset.file_name || 'Brand Transparent Logo'} 
+                    className="max-h-24 max-w-full object-contain filter drop-shadow-md transition-transform duration-300 hover:scale-105"
+                  />
+                  <div className="absolute bottom-2 right-2 px-2 py-0.5 rounded bg-black/70 backdrop-blur-sm border border-white/10 text-[9px] font-mono text-neutral-400">
+                    {t('透明背景預覽', 'Transparency Preview')}
+                  </div>
                 </div>
-              ) : (
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
-                  <AnimatePresence initial={false}>
-                    {assets.map((asset) => (
-                      <motion.div
-                        key={asset.id}
-                        initial={{ opacity: 0, scale: 0.95 }}
-                        animate={{ opacity: 1, scale: 1 }}
-                        exit={{ opacity: 0, scale: 0.95 }}
-                        className="relative group border border-white/5 rounded overflow-hidden aspect-[4/3] bg-neutral-900"
-                      >
-                        <img 
-                          src={asset.file_url} 
-                          alt={asset.file_name} 
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                        />
-                        
-                        <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3.5 text-left">
-                          <span className="text-[9px] font-mono text-neutral-300 truncate w-full">{asset.file_name}</span>
-                          <button
-                            onClick={() => handleDeleteAsset(asset.id, asset.file_url)}
-                            disabled={deletingId === asset.id}
-                            className="bg-rose-600 hover:bg-rose-700 text-white rounded p-2 self-end transition-colors flex items-center justify-center cursor-pointer"
-                            title={t('刪除素材', 'Delete asset')}
-                          >
-                            {deletingId === asset.id ? (
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                            ) : (
-                              <Trash2 className="w-3.5 h-3.5" />
-                            )}
-                          </button>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </AnimatePresence>
-                </div>
-              )}
 
-              <div className="border-t border-white/5 pt-4 mt-8 flex gap-2 text-[10px] text-neutral-500 font-light">
-                <Info className="w-3.5 h-3.5 flex-shrink-0 text-[#DFBA87]" />
-                <p>
-                  {t(
-                    '大會將對您的素材進行專業剪裁與微調，以符合 VIS 藝術節官方推廣美學。若有重大修改將主動諮詢品牌聯絡窗口。',
-                    'The curatorial team will adjust images for VIS visual standards with brand coordination.'
-                  )}
+                <div className="md:col-span-7 space-y-3">
+                  <div>
+                    <div className="text-xs text-neutral-400 font-mono">
+                      {t('已上傳檔案：', 'Current File:')}{' '}
+                      <span className="text-neutral-200 font-medium">{logoAsset.file_name}</span>
+                    </div>
+                    <p className="text-[11px] text-neutral-400 font-light mt-1 leading-relaxed">
+                      {t(
+                        '✓ 圖檔已妥善儲存。大會視覺團隊將以此 Logo 進行聯名視覺設計。如需更新版本，可點擊「更換 Logo」重新選取檔案。',
+                        '✓ Saved. The design team will use this logo for joint visuals. Click "Replace Logo" if you wish to update.'
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-wrap items-center gap-3 pt-1">
+                    {/* Replace Button */}
+                    <label className="relative inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white border border-white/20 text-xs font-medium cursor-pointer transition-colors">
+                      {uploadingLogo ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Upload className="w-3.5 h-3.5 text-[#DFBA87]" />
+                      )}
+                      <span>{uploadingLogo ? t('上傳中...', 'Uploading...') : t('更換 Logo 圖檔', 'Replace Logo')}</span>
+                      <input 
+                        type="file" 
+                        accept=".png,.svg,.webp,image/png,image/svg+xml,image/webp" 
+                        onChange={handleLogoUpload} 
+                        disabled={uploadingLogo || deletingLogo} 
+                        className="absolute inset-0 opacity-0 cursor-pointer w-full h-full"
+                      />
+                    </label>
+
+                    {/* Delete Button */}
+                    <button
+                      type="button"
+                      onClick={handleDeleteLogo}
+                      disabled={uploadingLogo || deletingLogo}
+                      className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 text-xs font-medium transition-colors cursor-pointer disabled:opacity-50"
+                    >
+                      {deletingLogo ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Trash2 className="w-3.5 h-3.5" />}
+                      <span>{t('刪除', 'Delete')}</span>
+                    </button>
+
+                    {/* View Original */}
+                    <a
+                      href={logoAsset.file_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] text-neutral-400 hover:text-[#DFBA87] underline underline-offset-4 flex items-center gap-1 ml-auto"
+                    >
+                      {t('開啟原圖 ↗', 'Open Original ↗')}
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              /* Upload placeholder dropzone */
+              <div className="border border-dashed border-[#DFBA87]/40 hover:border-[#DFBA87] bg-white/[0.01] hover:bg-white/[0.03] rounded-xl p-8 text-center transition-all relative group cursor-pointer">
+                <input 
+                  type="file" 
+                  accept=".png,.svg,.webp,image/png,image/svg+xml,image/webp"
+                  onChange={handleLogoUpload}
+                  disabled={uploadingLogo}
+                  className="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10"
+                />
+                
+                {uploadingLogo ? (
+                  <div className="py-4">
+                    <Loader2 className="w-8 h-8 animate-spin text-[#DFBA87] mx-auto mb-2" />
+                    <p className="text-xs text-neutral-300 font-medium">
+                      {t('透明 Logo 上傳處理中...', 'Uploading transparent logo...')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="w-12 h-12 rounded-full bg-[#DFBA87]/10 border border-[#DFBA87]/30 flex items-center justify-center mx-auto text-[#DFBA87] group-hover:scale-110 transition-transform">
+                      <Upload className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <div className="text-sm font-semibold text-white tracking-wide">
+                        {t('點擊或拖曳檔案至此，上傳品牌透明無底色 Logo', 'Click or drag file here to upload transparent brand logo')}
+                      </div>
+                      <div className="text-xs text-neutral-400 font-light mt-1">
+                        {t('嚴格要求：透明無底色（去除背景色塊） · 支援 PNG / SVG / WebP 格式', 'Strict Requirement: Transparent Background (No background color) · PNG / SVG / WebP')}
+                      </div>
+                    </div>
+                    <div className="flex flex-wrap items-center justify-center gap-2 pt-1 text-[11px] text-neutral-500 font-mono">
+                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5">{t('單檔 3MB 內', 'Max 3MB')}</span>
+                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5">{t('建議長邊 1500px 以上', '1500px+ recommended')}</span>
+                      <span className="px-2 py-0.5 rounded bg-white/5 border border-white/5 text-amber-400/80">{t('* 不支援 JPG/JPEG', '* JPG/JPEG not supported')}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Helpful Format Guidance */}
+            <div className="mt-4 pt-3.5 border-t border-white/5 flex items-start gap-2 text-[11px] text-neutral-400 font-light">
+              <Info className="w-3.5 h-3.5 flex-shrink-0 text-[#DFBA87] mt-0.5" />
+              <p>
+                {t(
+                  '溫馨說明：若您的 Logo 有黑色款與白色款兩種版本，建議優先上傳「白色款」或「反白款」透明圖檔，最利於大會深色奢華主調之各類文宣應用；若為多色向量彩色 Logo，亦請確保去背完整無白底邊框。',
+                  'Note: If your logo has white and black versions, we recommend uploading the white/reversed transparent version for optimal contrast on our dark curatorial palette.'
+                )}
+              </p>
+            </div>
+          </div>
+
+          {/* 2. HIGH-RES SHOWCASE & CRAFT ASSETS (大會宣傳情境與工藝圖檔 3~5 張) */}
+          <div className="space-y-4 pt-2">
+            <div className="flex flex-col md:flex-row md:justify-between md:items-center gap-3 bg-white/5 border border-white/10 rounded-xl p-4">
+              <div>
+                <h2 className="text-sm font-semibold text-white tracking-wider flex items-center gap-2">
+                  <ImageIcon className="w-4 h-4 text-[#DFBA87]" />
+                  {t('大會宣傳情境與工藝視覺圖檔 (3 ~ 5 張)', 'High-Resolution Showcase & Craft Assets (3–5)')}
+                </h2>
+                <p className="text-xs text-neutral-400 font-light mt-0.5">
+                  {t('請提供 3 至 5 張體現品牌調性與精緻工藝的作品情境圖（每張 3MB 內）。', 'Please upload 3 to 5 images reflecting brand aesthetic (max 3MB each).')}
                 </p>
+              </div>
+              <div className="bg-[#DFBA87]/15 border border-[#DFBA87]/30 px-3.5 py-1.5 rounded-full text-xs font-mono text-[#DFBA87]">
+                {t('已上傳情境圖', 'Uploaded')}: {assets.length} / 5
               </div>
             </div>
 
+            {errorMessage && (
+              <p className="text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3 rounded font-mono max-w-lg">
+                {errorMessage}
+              </p>
+            )}
+
+            {/* Grid Layout: Uploader and Previews */}
+            <div className="grid lg:grid-cols-3 gap-8">
+              
+              {/* Upload Button Card */}
+              <div className="bg-[#111111] border border-white/5 rounded-xl p-6 h-fit space-y-4">
+                <h3 className="text-xs font-semibold tracking-widest text-[#DFBA87] uppercase flex items-center gap-1.5 border-b border-white/5 pb-3">
+                  <Upload className="w-4 h-4" /> {t('素材上傳', 'Upload Asset')}
+                </h3>
+                
+                <div className="text-xs text-neutral-400 font-light leading-relaxed space-y-2">
+                  <p>
+                    {t(
+                      '請提報 3 至 5 張 能充分體現品牌調性與精緻工藝的高解析度商品/意境圖。',
+                      'Please upload 3 to 5 high-resolution images showcasing your brand spirit.'
+                    )}
+                  </p>
+                  <p className="text-[10px] text-neutral-500">
+                    {t('* 規格要求：比例 3:2 或 1:1，解析度建議 2000px 以上，無浮水印。', '* Spec: 3:2 or 1:1 ratio, 2000px+ recommended, no watermark.')}
+                  </p>
+                </div>
+
+                <div className="border border-dashed border-white/10 hover:border-[#C9A96E]/50 rounded-lg p-6 text-center cursor-pointer transition-colors relative group">
+                  <input 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleFileUpload}
+                    className="absolute inset-0 opacity-0 cursor-pointer"
+                    disabled={uploading || assets.length >= 5}
+                  />
+                  {uploading ? (
+                    <div className="py-4">
+                      <Loader2 className="w-8 h-8 animate-spin text-[#DFBA87] mx-auto mb-2" />
+                      <p className="text-[10px] text-neutral-400 uppercase tracking-widest">
+                        {t('檔案上傳中...', 'Uploading file...')}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="py-4 flex flex-col items-center">
+                      <FileImage className="w-8 h-8 text-neutral-500 group-hover:scale-105 transition-transform mb-2" />
+                      <span className="text-[10px] font-semibold text-[#DFBA87] tracking-wider uppercase block">
+                        {assets.length >= 5 ? t('已達數量上限 (5張)', 'Max 5 reached') : t('選取圖片檔案', 'Select Image')}
+                      </span>
+                      <span className="text-[9px] text-neutral-600 block mt-1">MAX 3MB (JPG / PNG / WebP)</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Uploaded Materials Preview Grid */}
+              <div className="lg:col-span-2 bg-[#111111] border border-white/5 rounded-xl p-6 flex flex-col min-h-[300px]">
+                <h3 className="text-xs font-semibold tracking-widest text-[#DFBA87] uppercase border-b border-white/5 pb-3 mb-6">
+                  {t('已提報視覺素材 Previews', 'Uploaded Visual Assets Previews')}
+                </h3>
+
+                {assets.length === 0 ? (
+                  <div className="flex-grow flex flex-col justify-center items-center text-center p-8 text-neutral-500 space-y-2">
+                    <ImageIcon2 className="w-8 h-8 text-neutral-600" />
+                    <p className="text-xs font-light">
+                      {t('目前尚未上傳任何素材圖檔', 'No visual assets uploaded yet')}
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                    <AnimatePresence initial={false}>
+                      {assets.map((asset) => (
+                        <motion.div
+                          key={asset.id}
+                          initial={{ opacity: 0, scale: 0.95 }}
+                          animate={{ opacity: 1, scale: 1 }}
+                          exit={{ opacity: 0, scale: 0.95 }}
+                          className="relative group border border-white/5 rounded overflow-hidden aspect-[4/3] bg-neutral-900"
+                        >
+                          <img 
+                            src={asset.file_url} 
+                            alt={asset.file_name} 
+                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                          />
+                          
+                          <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col justify-between p-3.5 text-left">
+                            <span className="text-[9px] font-mono text-neutral-300 truncate w-full">{asset.file_name}</span>
+                            <button
+                              onClick={() => handleDeleteAsset(asset.id, asset.file_url)}
+                              disabled={deletingId === asset.id}
+                              className="bg-rose-600 hover:bg-rose-700 text-white rounded p-2 self-end transition-colors flex items-center justify-center cursor-pointer"
+                              title={t('刪除素材', 'Delete asset')}
+                            >
+                              {deletingId === asset.id ? (
+                                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </AnimatePresence>
+                  </div>
+                )}
+
+                <div className="border-t border-white/5 pt-4 mt-8 flex gap-2 text-[10px] text-neutral-500 font-light">
+                  <Info className="w-3.5 h-3.5 flex-shrink-0 text-[#DFBA87]" />
+                  <p>
+                    {t(
+                      '大會將對您的素材進行專業剪裁與微調，以符合 VIS 藝術節官方推廣美學。若有重大修改將主動諮詢品牌聯絡窗口。',
+                      'The curatorial team will adjust images for VIS visual standards with brand coordination.'
+                    )}
+                  </p>
+                </div>
+              </div>
+
+            </div>
           </div>
         </div>
       )}

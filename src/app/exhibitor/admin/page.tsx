@@ -2072,7 +2072,8 @@ export default function ExhibitorAdminPage() {
 
           {/* TAB 4: MEDIA ASSETS & PR Q&A */}
           {activeTab === 'media' && (() => {
-            const imageAssets = mediaAssets.filter((a) => a.file_type !== 'pr_qa_submission');
+            const imageAssets = mediaAssets.filter((a) => a.file_type !== 'pr_qa_submission' && a.file_type !== 'brand_logo_transparent');
+            const logoAssets = mediaAssets.filter((a) => a.file_type === 'brand_logo_transparent');
             const qaSubmissions = mediaAssets.filter((a) => a.file_type === 'pr_qa_submission');
 
             const handleCopyQaText = (brandName: string, parsed: any, id: string) => {
@@ -2212,7 +2213,85 @@ export default function ExhibitorAdminPage() {
                   )}
                 </div>
 
-                {/* 2. Visual Image Assets Grid */}
+                {/* 2. Brand Transparent Logos */}
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-white tracking-wider flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[#DFBA87]" />
+                        品牌專屬透明無底色 Logo 匯總 ({logoAssets.length} 家品牌已提報)
+                      </h3>
+                      <span className="text-xs text-neutral-400 font-light mt-0.5 block">
+                        參展品牌提交之去背透明 Logo（PNG / SVG / WebP），大會社群聯名視覺、專刊印刷與現場導覽排版專用。
+                      </span>
+                    </div>
+                    <span className="text-xs font-mono text-[#DFBA87] bg-[#DFBA87]/10 px-3 py-1 rounded-full border border-[#DFBA87]/20 self-start">
+                      透明去背
+                    </span>
+                  </div>
+
+                  {logoAssets.length === 0 ? (
+                    <div className="text-center py-8 text-neutral-500 text-xs font-light border border-dashed border-white/5 rounded-xl">
+                      目前尚無品牌提交透明 Logo。
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+                      {logoAssets.map((logo) => {
+                        const brandName = logo.exhibitor_brands?.brand_name_zh || '參展品牌';
+                        const brandNameEn = logo.exhibitor_brands?.brand_name_en;
+                        return (
+                          <div 
+                            key={logo.id} 
+                            className="bg-[#111111] border border-white/10 rounded-xl overflow-hidden hover:border-[#DFBA87]/40 transition-all flex flex-col justify-between"
+                          >
+                            <div 
+                              className="p-4 flex items-center justify-center min-h-[110px] relative"
+                              style={{
+                                backgroundColor: '#0c0c0c',
+                                backgroundImage: 'repeating-conic-gradient(rgba(255, 255, 255, 0.08) 0% 25%, transparent 0% 50%)',
+                                backgroundSize: '16px 16px',
+                              }}
+                            >
+                              <img 
+                                src={logo.file_url} 
+                                alt={brandName} 
+                                className="max-h-16 max-w-full object-contain filter drop-shadow-md"
+                              />
+                            </div>
+                            <div className="p-3 bg-black/40 border-t border-white/5 space-y-1">
+                              <div className="flex items-center justify-between gap-1.5">
+                                <div className="text-xs font-semibold text-white truncate" title={brandName}>
+                                  {brandName}
+                                </div>
+                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                                  Logo✓
+                                </span>
+                              </div>
+                              {brandNameEn && (
+                                <div className="text-[10px] text-neutral-400 font-mono truncate">{brandNameEn}</div>
+                              )}
+                              <div className="flex items-center justify-between pt-1 text-[10px]">
+                                <span className="text-[9px] text-neutral-500 font-mono truncate max-w-[100px]">
+                                  {logo.file_name}
+                                </span>
+                                <a
+                                  href={logo.file_url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="text-[#DFBA87] hover:text-white flex items-center gap-0.5 font-mono transition-colors"
+                                >
+                                  檢視原圖 ↗
+                                </a>
+                              </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3. Visual Image Assets Grid */}
                 <div className="space-y-4">
                   <div className="border-b border-white/5 pb-3">
                     <h3 className="text-sm font-semibold text-white tracking-wider flex items-center gap-2">
