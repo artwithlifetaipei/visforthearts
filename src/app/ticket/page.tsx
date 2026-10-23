@@ -327,24 +327,25 @@ function TicketRegistrationContent() {
 
     if (isLoading || !isMounted) {
         return (
-            <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center text-[#C9A96E] relative overflow-hidden">
+            <div className="min-h-screen bg-[#0D0C0B] flex items-center justify-center text-[#DFBA87] relative overflow-hidden">
                 <div className="fixed inset-0 z-0 pointer-events-none">
                     <img
                         src="/vip_lobby_bg.jpg"
                         alt=""
                         className="w-full h-full object-cover object-center"
-                        style={{ filter: 'brightness(0.38) saturate(0.75)' }}
+                        style={{ filter: 'brightness(0.72) contrast(1.05)' }}
                     />
                     <div
                         className="absolute inset-0"
                         style={{
-                            background: 'linear-gradient(180deg, rgba(245,242,235,0.82) 0%, rgba(240,235,225,0.6) 40%, rgba(245,242,235,0.88) 100%)'
+                            background: 'linear-gradient(180deg, rgba(13,12,11,0.65) 0%, rgba(13,12,11,0.4) 40%, rgba(13,12,11,0.78) 100%)'
                         }}
                     />
+                    <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(223,186,135,0.12) 0%, transparent 65%)' }} />
                 </div>
                 <div className="text-center font-sans relative z-10">
-                    <div className="w-8 h-8 border-t-2 border-[#C9A96E] rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-xs font-light tracking-[0.2em] uppercase text-[#1A1A1A]">票務系統載入中 Loading Ticket System...</p>
+                    <div className="w-8 h-8 border-t-2 border-[#DFBA87] rounded-full animate-spin mx-auto mb-4"></div>
+                    <p className="text-xs font-light tracking-[0.2em] uppercase text-neutral-300">票務系統載入中 Loading Ticket System...</p>
                 </div>
             </div>
         );
@@ -353,24 +354,24 @@ function TicketRegistrationContent() {
     const isOfficial = activeBrand.id === 'vis-official';
 
     return (
-        <div className="min-h-screen bg-[#FAF9F6] text-[#1A1A1A] flex flex-col items-center justify-center relative overflow-hidden font-sans selection:bg-[#C9A96E] selection:text-white">
-            {/* Full-bleed architectural background matching VIP dashboard light style */}
+        <div className="min-h-screen bg-[#0D0C0B] text-white flex flex-col items-center justify-center relative overflow-hidden font-sans selection:bg-[#DFBA87] selection:text-black">
+            {/* Full-bleed authentic architectural background */}
             <div className="fixed inset-0 z-0 pointer-events-none">
                 <img
                     src="/vip_lobby_bg.jpg"
                     alt=""
                     className="w-full h-full object-cover object-center"
-                    style={{ filter: 'brightness(0.38) saturate(0.75)' }}
+                    style={{ filter: 'brightness(0.72) contrast(1.05)' }}
                 />
-                {/* Warm light beige gradient overlay for readability */}
+                {/* Subtle dark vignette overlay preserving authentic architectural colors & lighting */}
                 <div
                     className="absolute inset-0"
                     style={{
-                        background: 'linear-gradient(180deg, rgba(245,242,235,0.82) 0%, rgba(240,235,225,0.6) 40%, rgba(245,242,235,0.88) 100%)'
+                        background: 'linear-gradient(180deg, rgba(12,11,10,0.68) 0%, rgba(12,11,10,0.42) 35%, rgba(12,11,10,0.78) 100%)'
                     }}
                 />
-                {/* Subtle gold vignette top */}
-                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(223,186,135,0.08) 0%, transparent 65%)' }} />
+                {/* Subtle gold ambient glow top */}
+                <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(223,186,135,0.12) 0%, transparent 70%)' }} />
             </div>
 
             {/* Content Wrapper */}
@@ -380,13 +381,13 @@ function TicketRegistrationContent() {
                     <img
                         src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png"
                         alt="VIS Contemporary Culture"
-                        className="h-14 md:h-16 object-contain mb-4 opacity-100"
+                        className="h-14 md:h-16 object-contain mb-4 invert brightness-200 opacity-95"
                     />
-                    <h1 className="text-xs uppercase tracking-[0.4em] text-[#1A1A1A]/70 font-medium">Digital Entrance Pass</h1>
-                    <div className="text-[12px] tracking-[0.25em] text-[#8C6D3B] font-serif mt-2 font-normal">
+                    <h1 className="text-xs uppercase tracking-[0.4em] text-neutral-300 font-medium">Digital Entrance Pass</h1>
+                    <div className="text-[12px] tracking-[0.25em] text-[#DFBA87] font-serif mt-2 font-normal">
                         2027. 01. 06–01. 09
                     </div>
-                    <div className="w-8 h-[0.5px] bg-[#1A1A1A]/20 mt-3" />
+                    <div className="w-8 h-[0.5px] bg-[#DFBA87]/40 mt-3" />
                 </div>
 
                 <AnimatePresence mode="wait">
@@ -397,78 +398,78 @@ function TicketRegistrationContent() {
                             animate={{ opacity: 1, y: 0 }}
                             exit={{ opacity: 0, y: -15 }}
                             transition={{ duration: 0.5 }}
-                            className="bg-white/95 border border-[#C9A96E]/20 backdrop-blur-xl p-7 sm:p-9 rounded-none shadow-2xl relative"
+                            className="bg-[#141210]/90 border border-[#DFBA87]/30 backdrop-blur-2xl p-7 sm:p-9 rounded-none shadow-2xl relative text-white"
                         >
                             {/* Corner Accents */}
-                            <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
-                            <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
-                            <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
-                            <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
+                            <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-[#DFBA87] opacity-60"></div>
+                            <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-[#DFBA87] opacity-60"></div>
+                            <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-[#DFBA87] opacity-60"></div>
+                            <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-[#DFBA87] opacity-60"></div>
 
                             {dbError && (
-                                <div className="mb-8 p-4 bg-rose-50 border border-rose-200 text-rose-700 text-xs rounded-none font-light">
+                                <div className="mb-8 p-4 bg-rose-950/40 border border-rose-500/40 text-rose-300 text-xs rounded-none font-light">
                                     <strong>⚠️ 資料庫載入失敗 / Database Load Error:</strong>
                                     <p className="mt-1 font-mono text-[10px]">{dbError}</p>
                                 </div>
                             )}
 
-                            {/* Brand Exclusive Invitation Card (No Dropdown - Dedicated Link Scheme) */}
-                            <div className="mb-8 border border-[#C9A96E]/35 bg-gradient-to-b from-[#FAF8F5] to-[#F5EFE6] p-6 rounded-none relative shadow-sm">
+                            {/* Brand Exclusive Invitation Card */}
+                            <div className="mb-8 border border-[#DFBA87]/40 bg-gradient-to-b from-[#1E1B17]/95 via-[#171512]/95 to-[#12110F]/95 p-6 rounded-none relative shadow-lg">
                                 {/* Inner micro accent */}
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
-                                        <span className="w-1.5 h-1.5 rounded-full bg-[#C9A96E] animate-pulse"></span>
-                                        <span className="text-[10px] uppercase tracking-[0.25em] text-[#A68042] font-semibold">
+                                        <span className="w-1.5 h-1.5 rounded-full bg-[#DFBA87] animate-pulse"></span>
+                                        <span className="text-[10px] uppercase tracking-[0.25em] text-[#DFBA87] font-semibold">
                                             {isOfficial ? 'OFFICIAL INVITATION // 大會官方觀展通道' : 'BRAND EXCLUSIVE INVITATION // 品牌專屬邀請'}
                                         </span>
                                     </div>
                                     {!isOfficial && (
-                                        <span className="text-[9px] font-mono tracking-widest px-2 py-0.5 bg-[#C9A96E]/15 text-[#8C6D3B] border border-[#C9A96E]/30 uppercase">
+                                        <span className="text-[9px] font-mono tracking-widest px-2.5 py-0.5 bg-[#DFBA87]/15 text-[#DFBA87] border border-[#DFBA87]/40 uppercase">
                                             VERIFIED PASS
                                         </span>
                                     )}
                                 </div>
 
                                 <div className="space-y-1 mb-3.5">
-                                    <div className="text-[9px] uppercase tracking-[0.2em] text-[#888888]">
+                                    <div className="text-[9px] uppercase tracking-[0.2em] text-neutral-400">
                                         Invited By 邀請來源
                                     </div>
-                                    <h2 className="text-xl sm:text-2xl font-serif text-[#1A1A1A] tracking-wide font-normal">
+                                    <h2 className="text-xl sm:text-2xl font-serif text-white tracking-wide font-normal">
                                         {activeBrand.name_zh}
                                     </h2>
                                     {activeBrand.name_en && (
-                                        <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#777777]">
+                                        <div className="text-[11px] font-mono uppercase tracking-[0.16em] text-[#DFBA87]/80">
                                             {activeBrand.name_en}
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="text-xs font-light leading-relaxed text-[#444444] tracking-wide border-t border-[#E5DEC9] pt-3">
+                                <div className="text-xs font-light leading-relaxed text-neutral-300 tracking-wide border-t border-[#DFBA87]/20 pt-3">
                                     {isOfficial ? (
                                         <>
                                             歡迎蒞臨 VIS Contemporary Culture。大會官方誠摯邀請您共赴 2027 當代生活文化盛宴。請於下方填妥貴賓資訊並選擇預約時段以領取專屬數位觀展憑證。
                                         </>
                                     ) : (
                                         <>
-                                            歡迎來到 VIS Contemporary Culture。<strong className="font-medium text-[#1A1A1A]">{activeBrand.name_zh}</strong> 誠摯邀請您蒞臨，與我們一起，從文化與人文美學出發，探索當代生活，體驗這一屬於品味人士的跨界盛會。
-                                            <span className="block mt-1.5 text-[#1A1A1A] font-medium">
+                                            歡迎來到 VIS Contemporary Culture。<strong className="font-medium text-white">{activeBrand.name_zh}</strong> 誠摯邀請您蒞臨，與我們一起，從文化與人文美學出發，探索當代生活，體驗這一屬於品味人士的跨界盛會。
+                                            <span className="block mt-1.5 text-[#DFBA87] font-medium">
                                                 您的品牌專屬觀展名額已為您保留，請選擇預約時段並完成憑證領取。
                                             </span>
                                         </>
                                     )}
                                 </div>
 
-                                {/* Optional Switcher Drawer for Visitors holding an Invite Code */}
-                                <div className="mt-4 pt-3 border-t border-[#E5DEC9]/80 flex flex-col gap-2">
+                                {/* Optional Switcher Drawer */}
+                                <div className="mt-4 pt-3 border-t border-[#DFBA87]/20 flex flex-col gap-2">
                                     <button
                                         type="button"
                                         onClick={() => setShowCodeInput(!showCodeInput)}
-                                        className="text-[11px] text-[#777777] hover:text-[#A68042] transition-colors flex items-center justify-between cursor-pointer group"
+                                        className="text-[11px] text-neutral-400 hover:text-[#DFBA87] transition-colors flex items-center justify-between cursor-pointer group"
                                     >
                                         <span className="group-hover:underline">
                                             {isOfficial ? '✦ 持有品牌專屬邀請代碼？點此切換專屬通道' : '切換其他邀請代碼或回大會官方通道'}
                                         </span>
-                                        <span className="text-[10px] font-mono text-[#A68042]">
+                                        <span className="text-[10px] font-mono text-[#DFBA87]">
                                             {showCodeInput ? '收起 ✕' : '輸入代碼 ＋'}
                                         </span>
                                     </button>
@@ -496,18 +497,18 @@ function TicketRegistrationContent() {
                                                                 handleSwitchBrand();
                                                             }
                                                         }}
-                                                        className="flex-1 bg-white border border-[#C9A96E]/40 px-3 py-2 rounded-none text-xs text-[#1A1A1A] placeholder-neutral-400 focus:outline-none focus:border-[#C9A96E]"
+                                                        className="flex-1 bg-black/60 border border-[#DFBA87]/40 px-3 py-2 rounded-none text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#DFBA87]"
                                                     />
                                                     <button
                                                         type="button"
                                                         onClick={handleSwitchBrand}
-                                                        className="bg-[#1A1A1A] text-white text-xs px-4 py-2 rounded-none hover:bg-neutral-800 transition-colors tracking-widest font-light cursor-pointer"
+                                                        className="bg-[#DFBA87] text-[#121110] text-xs px-4 py-2 rounded-none hover:bg-[#E8CA9D] transition-colors tracking-widest font-medium cursor-pointer"
                                                     >
                                                         切換
                                                     </button>
                                                 </div>
                                                 {switchError && (
-                                                    <p className="text-[10px] text-rose-500 mt-1.5 font-light">{switchError}</p>
+                                                    <p className="text-[10px] text-rose-400 mt-1.5 font-light">{switchError}</p>
                                                 )}
                                             </motion.div>
                                         )}
@@ -519,7 +520,7 @@ function TicketRegistrationContent() {
                             <form onSubmit={handleSubmit} className="space-y-6">
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                                     <div>
-                                        <label className="block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E] font-semibold mb-2">
+                                        <label className="block text-[10px] uppercase tracking-[0.2em] text-[#DFBA87] font-semibold mb-2">
                                             Full Name 姓名
                                         </label>
                                         <input
@@ -527,11 +528,11 @@ function TicketRegistrationContent() {
                                             value={name}
                                             onChange={(e) => setName(e.target.value)}
                                             placeholder="請輸入真實姓名以利核對"
-                                            className="w-full bg-white/70 border border-neutral-200 px-4 py-3 rounded-none text-sm text-[#1A1A1A] placeholder-neutral-400 focus:outline-none focus:border-[#C9A96E] transition-colors"
+                                            className="w-full bg-black/50 border border-white/15 px-4 py-3 rounded-none text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#DFBA87] transition-colors"
                                         />
                                     </div>
                                     <div>
-                                        <label className="block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E] font-semibold mb-2">
+                                        <label className="block text-[10px] uppercase tracking-[0.2em] text-[#DFBA87] font-semibold mb-2">
                                             Email 電子信箱
                                         </label>
                                         <input
@@ -539,14 +540,14 @@ function TicketRegistrationContent() {
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
                                             placeholder="接收數位憑證票券信件"
-                                            className="w-full bg-white/70 border border-neutral-200 px-4 py-3 rounded-none text-sm text-[#1A1A1A] placeholder-neutral-400 focus:outline-none focus:border-[#C9A96E] transition-colors"
+                                            className="w-full bg-black/50 border border-white/15 px-4 py-3 rounded-none text-sm text-white placeholder-neutral-500 focus:outline-none focus:border-[#DFBA87] transition-colors"
                                         />
                                     </div>
                                 </div>
 
                                 {/* Slots choice */}
                                 <div>
-                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-[#C9A96E] font-semibold mb-3">
+                                    <label className="block text-[10px] uppercase tracking-[0.2em] text-[#DFBA87] font-semibold mb-3">
                                         Select Time Slot 觀展場次選擇
                                     </label>
                                     <div className="space-y-3">
@@ -564,10 +565,10 @@ function TicketRegistrationContent() {
                                                     }}
                                                     className={`border rounded-none p-4 transition-all cursor-pointer ${
                                                         isFull
-                                                            ? 'border-neutral-100 bg-neutral-50/40 text-neutral-400 cursor-not-allowed'
+                                                            ? 'border-white/5 bg-white/[0.02] text-neutral-500 cursor-not-allowed'
                                                             : isSelected
-                                                            ? 'border-[#C9A96E] bg-[#C9A96E]/5'
-                                                            : 'border-neutral-200 bg-white/60 hover:border-[#C9A96E]/40'
+                                                            ? 'border-[#DFBA87] bg-[#DFBA87]/15 shadow-[0_0_20px_rgba(223,186,135,0.15)]'
+                                                            : 'border-white/10 bg-black/40 hover:border-[#DFBA87]/40 text-neutral-300'
                                                     }`}
                                                 >
                                                     <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
@@ -579,12 +580,12 @@ function TicketRegistrationContent() {
                                                                 disabled={isFull}
                                                                 checked={isSelected}
                                                                 onChange={() => setSelectedSlotId(s.id)}
-                                                                className="accent-[#C9A96E] w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
+                                                                className="accent-[#DFBA87] w-4 h-4 cursor-pointer disabled:cursor-not-allowed"
                                                             />
                                                             <div className="text-sm">
-                                                                <span className="font-medium mr-2 text-[#1A1A1A]">{s.date_str}</span>
-                                                                <span className="font-light text-[#2D2D2D]">{s.name_zh}</span>
-                                                                <span className="block text-[11px] text-neutral-400 mt-0.5">{s.time_range}</span>
+                                                                <span className="font-medium mr-2 text-white">{s.date_str}</span>
+                                                                <span className="font-light text-neutral-200">{s.name_zh}</span>
+                                                                <span className="block text-[11px] text-[#DFBA87]/80 mt-0.5">{s.time_range}</span>
                                                             </div>
                                                         </label>
 
@@ -592,23 +593,23 @@ function TicketRegistrationContent() {
                                                         <div>
                                                             {isFull ? (
                                                                 <div className="flex flex-col items-end gap-1.5">
-                                                                    <span className="text-[10px] bg-red-50 text-red-500 px-2 py-0.5 rounded-none border border-red-200">
+                                                                    <span className="text-[10px] bg-red-950/40 text-red-300 px-2 py-0.5 rounded-none border border-red-500/30">
                                                                         已額滿
                                                                     </span>
                                                                     <button
                                                                         type="button"
                                                                         onClick={() => setSelectedSlotId(s.id)}
-                                                                        className="text-[11px] text-[#C9A96E] hover:underline cursor-pointer"
+                                                                        className="text-[11px] text-[#DFBA87] hover:underline cursor-pointer"
                                                                     >
                                                                         展開候補登記
                                                                     </button>
                                                                 </div>
                                                             ) : isWarning ? (
-                                                                <span className="text-[10px] bg-amber-50 text-amber-600 px-2 py-0.5 rounded-none border border-amber-200">
+                                                                <span className="text-[10px] bg-amber-950/40 text-amber-300 px-2 py-0.5 rounded-none border border-amber-500/30">
                                                                     名額即將額滿
                                                                 </span>
                                                             ) : (
-                                                                <span className="text-[10px] bg-green-50 text-green-600 px-2 py-0.5 rounded-none border border-green-200">
+                                                                <span className="text-[10px] text-emerald-400">
                                                                     尚有觀展名額
                                                                 </span>
                                                             )}
@@ -620,9 +621,9 @@ function TicketRegistrationContent() {
                                                         <motion.div
                                                             initial={{ opacity: 0, height: 0 }}
                                                             animate={{ opacity: 1, height: 'auto' }}
-                                                            className="mt-4 pt-4 border-t border-neutral-100 space-y-3"
+                                                            className="mt-4 pt-4 border-t border-white/10 space-y-3"
                                                         >
-                                                            <p className="text-[11px] text-neutral-500">
+                                                            <p className="text-[11px] text-neutral-400">
                                                                 該時段目前已滿額。您可以留下您的 Email，一有名額釋出我們會立刻系統通知您候補。
                                                             </p>
                                                             <div className="flex gap-2">
@@ -631,19 +632,19 @@ function TicketRegistrationContent() {
                                                                     value={waitlistEmail}
                                                                     onChange={(e) => setWaitlistEmail(e.target.value)}
                                                                     placeholder="請輸入候補通知 Email"
-                                                                    className="flex-1 bg-white border border-neutral-200 px-3 py-2 rounded-none text-xs text-[#1A1A1A] focus:outline-none focus:border-[#C9A96E]"
+                                                                    className="flex-1 bg-black/60 border border-white/20 px-3 py-2 rounded-none text-xs text-white placeholder-neutral-500 focus:outline-none focus:border-[#DFBA87]"
                                                                 />
                                                                 <button
                                                                     type="button"
                                                                     disabled={isSubmittingWaitlist}
                                                                     onClick={() => handleJoinWaitlist(s.id)}
-                                                                    className="bg-[#1A1A1A] text-white text-xs font-light tracking-widest px-4 py-2 rounded-none hover:bg-neutral-800 transition-colors disabled:opacity-50 cursor-pointer"
+                                                                    className="bg-[#DFBA87] text-[#121110] text-xs font-medium tracking-wider px-4 py-2 rounded-none hover:bg-[#E8CA9D] transition-colors disabled:opacity-50 cursor-pointer"
                                                                 >
                                                                     {isSubmittingWaitlist ? '登記中' : '加入候補'}
                                                                 </button>
                                                             </div>
                                                             {waitlistFeedback && (
-                                                                <p className="text-[11px] text-[#C9A96E] font-light">
+                                                                <p className="text-[11px] text-[#DFBA87] font-light">
                                                                     {waitlistFeedback}
                                                                 </p>
                                                             )}
@@ -656,21 +657,21 @@ function TicketRegistrationContent() {
                                 </div>
 
                                 {/* Checkbox clauses */}
-                                <div className="space-y-4 pt-4 border-t border-neutral-100">
-                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-[#2D2D2D] font-light">
+                                <div className="space-y-4 pt-4 border-t border-white/10">
+                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-neutral-300 font-light">
                                         <input
                                             type="checkbox"
                                             checked={agreeIg}
                                             onChange={(e) => setAgreeIg(e.target.checked)}
-                                            className="accent-[#C9A96E] mt-1 cursor-pointer"
+                                            className="accent-[#DFBA87] mt-1 cursor-pointer"
                                         />
                                         <span>
                                             為協助主辦單位妥善傳遞大展現場與觀展相關之即時資訊，我同意於入場時出示已追蹤{' '}
-                                            <strong className="text-[#1A1A1A]">@visforthearts</strong>
+                                            <strong className="text-white">@visforthearts</strong>
                                             {!isOfficial && activeBrand.instagram_handle && activeBrand.instagram_handle !== '@visforthearts' && (
                                                 <>
                                                     {' '}與{' '}
-                                                    <strong className="text-[#A68042]">
+                                                    <strong className="text-[#DFBA87]">
                                                         {activeBrand.instagram_handle}
                                                     </strong>
                                                 </>
@@ -679,24 +680,24 @@ function TicketRegistrationContent() {
                                         </span>
                                     </label>
 
-                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-[#2D2D2D] font-light">
+                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-neutral-300 font-light">
                                         <input
                                             type="checkbox"
                                             checked={agreeLimit}
                                             onChange={(e) => setAgreeLimit(e.target.checked)}
-                                            className="accent-[#C9A96E] mt-1 cursor-pointer"
+                                            className="accent-[#DFBA87] mt-1 cursor-pointer"
                                         />
                                         <span>
                                             我已理解：為維護高質量的藝術觀展體驗與符合公共安全規範，本時段票券採總量管制。若遇現場人潮達場館容留上限，將啟動『一進一出』之動線管制。請持本憑證依序排隊等候進場。
                                         </span>
                                     </label>
 
-                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-[#2D2D2D] font-light">
+                                    <label className="flex items-start gap-3 cursor-pointer text-xs leading-relaxed text-neutral-300 font-light">
                                         <input
                                             type="checkbox"
                                             checked={agreePrivacy}
                                             onChange={(e) => setAgreePrivacy(e.target.checked)}
-                                            className="accent-[#C9A96E] mt-1 cursor-pointer"
+                                            className="accent-[#DFBA87] mt-1 cursor-pointer"
                                         />
                                         <span>
                                             我同意 VIS Contemporary Culture 隱私權政策，並願意接收未來的展會與活動資訊。
@@ -705,7 +706,7 @@ function TicketRegistrationContent() {
                                 </div>
 
                                 {submitError && (
-                                    <div className="text-sm bg-red-50 border border-red-200 p-4 rounded-none text-red-600 font-light">
+                                    <div className="text-sm bg-rose-950/40 border border-rose-500/40 p-4 rounded-none text-rose-300 font-light">
                                         ⚠️ {submitError}
                                     </div>
                                 )}
@@ -714,9 +715,9 @@ function TicketRegistrationContent() {
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
-                                    className="w-full bg-[#1A1A1A] hover:bg-neutral-850 disabled:opacity-50 text-white text-xs uppercase tracking-[0.3em] font-light py-4 rounded-none transition-all shadow-md cursor-pointer"
+                                    className="w-full bg-gradient-to-r from-[#DFBA87] via-[#E8CA9D] to-[#DFBA87] hover:brightness-105 disabled:opacity-50 text-[#121110] text-xs uppercase tracking-[0.25em] font-semibold py-4 rounded-none transition-all shadow-xl cursor-pointer"
                                 >
-                                    {isSubmitting ? '正在鑄造憑證中...' : '鑄造專屬電子票券'}
+                                    {isSubmitting ? '正在鑄造憑證中...' : '確認預約並鑄造專屬電子票券 Claim Pass'}
                                 </button>
                             </form>
                         </motion.div>
@@ -726,43 +727,43 @@ function TicketRegistrationContent() {
                             initial={{ opacity: 0, scale: 0.95 }}
                             animate={{ opacity: 1, scale: 1 }}
                             transition={{ duration: 0.5 }}
-                            className="bg-white/95 border border-[#C9A96E]/20 p-8 rounded-none shadow-2xl text-center space-y-6 relative text-[#1A1A1A]"
+                            className="bg-[#141210]/90 border border-[#DFBA87]/30 backdrop-blur-2xl p-8 rounded-none shadow-2xl text-center space-y-6 relative text-white"
                         >
                             {/* Corner Accents */}
-                            <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
-                            <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
-                            <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-current opacity-30"></div>
-                            <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-current opacity-30"></div>
+                            <div className="absolute top-4 left-4 w-2 h-2 border-t-[0.5px] border-l-[0.5px] border-[#DFBA87] opacity-60"></div>
+                            <div className="absolute top-4 right-4 w-2 h-2 border-t-[0.5px] border-r-[0.5px] border-[#DFBA87] opacity-60"></div>
+                            <div className="absolute bottom-4 left-4 w-2 h-2 border-b-[0.5px] border-l-[0.5px] border-[#DFBA87] opacity-60"></div>
+                            <div className="absolute bottom-4 right-4 w-2 h-2 border-b-[0.5px] border-r-[0.5px] border-[#DFBA87] opacity-60"></div>
 
-                            <div className="w-12 h-12 rounded-full bg-green-50 border border-green-200 text-green-600 flex items-center justify-center mx-auto text-xl">
+                            <div className="w-12 h-12 rounded-full bg-[#DFBA87]/15 border border-[#DFBA87]/40 text-[#DFBA87] flex items-center justify-center mx-auto text-xl">
                                 ✓
                             </div>
                             <div>
-                                <h2 className="text-lg font-medium tracking-wide">憑證鑄造成功！</h2>
-                                <p className="text-xs text-neutral-500 mt-2">
-                                    電子票券已成功發送至您的信箱：<strong className="text-[#1A1A1A]">{email}</strong>。<br/>
+                                <h2 className="text-lg font-serif tracking-wider text-white">憑證鑄造成功！</h2>
+                                <p className="text-xs text-neutral-300 mt-2">
+                                    電子票券已成功發送至您的信箱：<strong className="text-[#DFBA87]">{email}</strong>。<br/>
                                     現場參觀時請出示此畫面或信件 QR Code 核銷。
                                 </p>
                             </div>
 
                             {/* Digital Pass Preview */}
-                            <div className="border border-neutral-100 bg-neutral-50/70 p-6 rounded-none max-w-sm mx-auto text-left space-y-4">
-                                <div className="flex justify-between items-center pb-3 border-b border-neutral-100">
+                            <div className="border border-[#DFBA87]/30 bg-black/60 p-6 rounded-none max-w-sm mx-auto text-left space-y-4 shadow-xl">
+                                <div className="flex justify-between items-center pb-3 border-b border-white/10">
                                     <span className="text-[10px] uppercase tracking-wider text-[#DFBA87] font-semibold">VIS ENTRY PASS</span>
                                     <span className="text-[9px] font-mono text-neutral-400">{mintedTicket.id.slice(0, 8)}...</span>
                                 </div>
                                 <div className="space-y-3 text-xs">
                                     <div>
                                         <div className="text-[9px] uppercase text-neutral-400 tracking-wider">Guest 貴賓姓名</div>
-                                        <div className="text-[#1A1A1A] text-sm font-medium">{name}</div>
+                                        <div className="text-white text-sm font-medium">{name}</div>
                                     </div>
                                     <div>
                                         <div className="text-[9px] uppercase text-neutral-400 tracking-wider">Invitation Source 邀請來源</div>
-                                        <div className="text-[#1A1A1A] text-sm font-serif">{activeBrand.name_zh}</div>
+                                        <div className="text-white text-sm font-serif">{activeBrand.name_zh}</div>
                                     </div>
                                     <div>
                                         <div className="text-[9px] uppercase text-neutral-400 tracking-wider">Time Slot 預約場次</div>
-                                        <div className="text-[#1A1A1A] text-sm">
+                                        <div className="text-white text-sm">
                                             {slots.find((s) => s.id === selectedSlotId)?.date_str}{' '}
                                             {slots.find((s) => s.id === selectedSlotId)?.name_zh}
                                         </div>
@@ -771,7 +772,7 @@ function TicketRegistrationContent() {
 
                                 {/* QR Render */}
                                 <div className="pt-4 flex justify-center">
-                                    <div className="bg-white p-2 rounded-lg inline-block shadow-md">
+                                    <div className="bg-white p-3 rounded-none inline-block shadow-lg border border-[#DFBA87]/30">
                                         <img
                                             src={mintedTicket.qrUrl}
                                             alt="Ticket QR Code"
@@ -792,7 +793,7 @@ function TicketRegistrationContent() {
                                     setAgreeLimit(false);
                                     setAgreePrivacy(false);
                                 }}
-                                className="text-xs text-[#1A1A1A]/60 hover:text-[#1A1A1A] hover:underline cursor-pointer"
+                                className="text-xs text-[#DFBA87]/80 hover:text-[#DFBA87] hover:underline cursor-pointer transition-colors"
                             >
                                 ← 鑄造另一張票券
                             </button>
@@ -807,8 +808,8 @@ function TicketRegistrationContent() {
 export default function TicketRegistrationPage() {
     return (
         <Suspense fallback={
-            <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center text-[#C9A96E]">
-                <div className="w-8 h-8 border-t-2 border-[#C9A96E] rounded-full animate-spin"></div>
+            <div className="min-h-screen bg-[#0D0C0B] flex items-center justify-center text-[#DFBA87]">
+                <div className="w-8 h-8 border-t-2 border-[#DFBA87] rounded-full animate-spin"></div>
             </div>
         }>
             <TicketRegistrationContent />
