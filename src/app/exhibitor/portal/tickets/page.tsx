@@ -144,14 +144,14 @@ export default function ExhibitorPublicTicketsPage({ brand: parentBrand }: { bra
       title: lang === 'en' ? 'Template 1: Instagram Stories / Post (Concise)' : '模板一：Instagram 限時動態 / 貼文（極簡精煉版）',
       subtitle: lang === 'en' ? 'Ideal for Link in Bio or Story link sticker' : '最適合放置於個人簡介連結 (Link in Bio) 或限動連結貼紙',
       text: lang === 'en'
-        ? `【VIS 2027 × ${brandNameEn || brandNameZh}】\n\nWe are pleased to invite you to 2027  VIS Contemporary Culture !\nClaim your complimentary admission pass via our exclusive brand link:\n${dedicatedTicketLink}\n\n✦ Dates: Jan 7 (Thu) – Jan 9 (Sat), 2027\n✦ Venue: Taipei Zhongshan Hall (Guangfu Hall)\n* Please follow ${igFollowTextEn} on Instagram for onsite entry verification.`
-        : `【VIS 2027 × ${brandNameZh} 專屬觀展邀請】\n\n誠摯邀請您蒞臨 2027  VIS Contemporary Culture ！\n點擊下方專屬連結即可免費預約領取數位觀展門票：\n${dedicatedTicketLink}\n\n✦ 展期：2027. 01. 07 (四) – 01. 09 (六)\n✦ 地點：台北中山堂 光復廳（台北市中正區延平南路 98 號）\n* 入場時請出示此憑證與已追蹤 ${igFollowTextZh} 畫面。現場見！`,
+        ? `【VIS 2027 × ${brandNameEn || brandNameZh}】\n\nWe are pleased to invite you to 2027  VIS Contemporary Culture !\nClaim your complimentary admission pass via our exclusive brand link:\n${dedicatedTicketLink}\n\n✦ Dates: Jan 7 (Thu) – Jan 9 (Sat), 2027\n✦ Venue: Taipei Zhongshan Hall (Guangfu Hall)\n* Please follow ${igFollowTextEn} on Instagram for onsite entry verification.\n* Note: General admission pass (distinct from VIP cards); entry order and wait times follow onsite crowd capacity control.`
+        : `【VIS 2027 × ${brandNameZh} 專屬觀展邀請】\n\n誠摯邀請您蒞臨 2027  VIS Contemporary Culture ！\n點擊下方專屬連結即可免費預約領取數位觀展門票：\n${dedicatedTicketLink}\n\n✦ 展期：2027. 01. 07 (四) – 01. 09 (六)\n✦ 地點：台北中山堂 光復廳（台北市中正區延平南路 98 號）\n* 入場時請出示此憑證與已追蹤 ${igFollowTextZh} 畫面。\n* 提醒：本券為公眾預約門票（非數位貴賓卡），入場順序與等候時間依現場人流管制為準。現場見！`,
     },
     {
       id: 'global_en',
       title: lang === 'en' ? 'Template 2: Global English Edition' : '模板二：國際社群英文發布版 (Global Audience)',
       subtitle: lang === 'en' ? 'Designed for overseas collectors, foreign guests, and English posts' : '適合跨國藏家、海外品牌粉絲與國際社群分享',
-      text: `[Exclusive Visitor Invitation] Join ${brandNameEn || brandNameZh} at 2027  VIS Contemporary Culture in Taipei!\n\nWe are thrilled to present our curation at the historic Guangfu Hall, Taipei Zhongshan Hall from Jan 7–9, 2027.\n\nUnlock your complimentary Digital Entry Pass via our dedicated brand link:\n${dedicatedTicketLink}\n\n• Exhibition: 2027  VIS Contemporary Culture\n• Venue: Guangfu Hall, Taipei Zhongshan Hall\n• Dates: January 7–9, 2027\n* Onsite entry requirement: Please show your pass and follow screen for ${igFollowTextEn}.`,
+      text: `[Exclusive Visitor Invitation] Join ${brandNameEn || brandNameZh} at 2027  VIS Contemporary Culture in Taipei!\n\nWe are thrilled to present our curation at the historic Guangfu Hall, Taipei Zhongshan Hall from Jan 7–9, 2027.\n\nUnlock your complimentary Digital Entry Pass via our dedicated brand link:\n${dedicatedTicketLink}\n\n• Exhibition: 2027  VIS Contemporary Culture\n• Venue: Guangfu Hall, Taipei Zhongshan Hall\n• Dates: January 7–9, 2027\n* Onsite entry requirement: Please show your pass and follow screen for ${igFollowTextEn}.\n* Note: General admission ticket (distinct from VIP passes); entry order and wait time follow onsite capacity control.`,
     }
   ];
 
@@ -434,8 +434,11 @@ export default function ExhibitorPublicTicketsPage({ brand: parentBrand }: { bra
             <h2 className="text-sm font-semibold tracking-widest text-[#DFBA87] uppercase flex items-center gap-2">
               <Share2 className="w-4 h-4" /> {t('品牌宣傳推廣文案庫（一鍵複製發布）', 'Pre-Formatted Marketing Templates (One-Click Copy)')}
             </h2>
-            <p className="text-xs text-neutral-400 font-light mt-1">
-              {t('已為您填妥品牌名稱、專屬連結與展期資訊，點擊右上方「複製」即可直接發布於各社群平台。', 'Pre-populated with your brand name, URL, dates, and venue. Click "Copy" to broadcast immediately.')}
+            <p className="text-xs text-neutral-400 font-light mt-1 leading-relaxed">
+              {t(
+                '已為您填妥品牌名稱、專屬連結與展期資訊，點擊「複製」即可直接發布。提醒：公眾免費票與數位貴賓卡不同，入場順序與等待時間需依現場人流控管規定而定。',
+                'Pre-populated with your brand info and URL. Note: General admission passes differ from VIP cards; entry order and waiting times follow onsite crowd management.'
+              )}
             </p>
           </div>
         </div>
