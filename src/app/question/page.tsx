@@ -171,10 +171,10 @@ export default function QuestionPage() {
         {/* 02. Annual Question (Core Prominent Visual) */}
         <div className="text-center space-y-4 mb-10">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#1C1814] leading-tight font-medium tracking-wide drop-shadow-xs">
-            {t('美，如何成為我們共同的價值？', 'HOW CAN BEAUTY BECOME OUR SHARED VALUE?')}
+            {t('美，如何成為我們共同的價值？', 'HOW CAN AESTHETICS BECOME OUR SHARED VALUE?')}
           </h1>
           <p className="text-base sm:text-lg text-[#8C6226] font-serif font-medium tracking-widest">
-            {t('HOW CAN BEAUTY BECOME OUR SHARED VALUE?', '美，如何成為我們共同的價值？')}
+            {t('HOW CAN AESTHETICS BECOME OUR SHARED VALUE?', '美，如何成為我們共同的價值？')}
           </p>
         </div>
 

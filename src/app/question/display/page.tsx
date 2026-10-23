@@ -326,7 +326,7 @@ export default function PerspectiveDisplayWall() {
           {/* Central Exhibition Banner: Generous Breathing Room */}
           <div className="text-center max-w-4xl mx-auto space-y-2 pt-1 pb-1 sm:pt-2 sm:pb-2">
             <h1 className="text-xs sm:text-sm font-serif tracking-[0.28em] uppercase text-[#8C6226] font-medium">
-              HOW CAN BEAUTY BECOME OUR SHARED VALUE?
+              HOW CAN AESTHETICS BECOME OUR SHARED VALUE?
             </h1>
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#1C1814] tracking-[0.08em] font-normal drop-shadow-xs">
               美，如何成為我們共同的價值？
@@ -351,7 +351,7 @@ export default function PerspectiveDisplayWall() {
           >
             <div className="space-y-3">
               <h1 className="text-2xl sm:text-3xl font-serif text-[#1C1814] tracking-wider">
-                {data?.display.emergency_message_en || 'VIS 2027 — HOW CAN BEAUTY BECOME OUR SHARED VALUE?'}
+                {data?.display.emergency_message_en || 'VIS 2027 — HOW CAN AESTHETICS BECOME OUR SHARED VALUE?'}
               </h1>
               <p className="text-lg text-[#8C6226] font-serif tracking-widest">
                 {data?.display.emergency_message_zh || 'VIS 2027 當代生活文化大展 · 美，如何成為我們共同的價值？'}

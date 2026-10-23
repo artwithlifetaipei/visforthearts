@@ -22,7 +22,7 @@ export const DEFAULT_DISPLAY_SETTINGS: PerspectiveDisplaySettings = {
   filter_type: null,
   duration_seconds: 8,
   transition: 'fade',
-  emergency_message_en: 'VIS 2027 — HOW CAN BEAUTY BECOME OUR SHARED VALUE?',
+  emergency_message_en: 'VIS 2027 — HOW CAN AESTHETICS BECOME OUR SHARED VALUE?',
   emergency_message_zh: 'VIS 2027 當代生活文化大展 · 美，如何成為我們共同的價值？',
   content_version: 1,
   updated_at: new Date().toISOString(),
