@@ -8,7 +8,7 @@ import { formatBoothDisplay } from '@/lib/exhibitorConstants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu, X, Calendar, FileCheck, Users, Image as ImageIcon, LogOut, ShieldCheck, 
-  HelpCircle, ArrowRight, Sparkles, Loader2, CheckCircle2, QrCode, Globe
+  HelpCircle, ArrowRight, Sparkles, Loader2, CheckCircle2, QrCode, Globe, Ticket
 } from 'lucide-react';
 import { ExhibitorLanguageProvider, useExhibitorLanguage } from '@/lib/ExhibitorLanguageContext';
 
@@ -516,6 +516,12 @@ function ExhibitorPortalLayoutContent({ children }: { children: React.ReactNode 
         href: '/exhibitor/portal/leads',
         icon: Sparkles,
         badge: lang === 'en' ? 'VIP Concierge' : 'VIP管家',
+      },
+      {
+        name: lang === 'en' ? 'Module G — Public Registration Link' : '模組 G — 公眾專屬預約連結',
+        href: '/exhibitor/portal/tickets',
+        icon: Ticket,
+        badge: lang === 'en' ? 'General Admission' : '一般大眾',
       },
     ];
   };

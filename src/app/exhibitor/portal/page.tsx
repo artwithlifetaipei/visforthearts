@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { KEY_DATES, DEPOSIT_AMOUNT, ZONE_MAP, formatBoothDisplay, normalizeBoothCode, getBoothPrice } from '@/lib/exhibitorConstants';
 import { motion } from 'framer-motion';
@@ -358,6 +359,23 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
               * 微型曝光品牌 (T區) 不適用模組 C 與 D 之專屬禮遇
             </div>
           )}
+        </div>
+
+        {/* Module G Notice Banner */}
+        <div className="mt-4 pt-3.5 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/[0.02] p-3 rounded-lg border border-white/5">
+          <div className="flex items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-[#DFBA87] animate-pulse shrink-0" />
+            <div className="text-xs">
+              <span className="text-[#DFBA87] font-semibold mr-1.5">【模組 G 新上線】公眾專屬觀展預約連結：</span>
+              <span className="text-neutral-300 font-light">提供一般民眾與社群粉絲免費預約門票，現場強制出示追蹤貴品牌 IG，無限額廣泛導客！</span>
+            </div>
+          </div>
+          <Link
+            href="/exhibitor/portal/tickets"
+            className="text-xs text-[#DFBA87] hover:text-white underline underline-offset-4 flex items-center gap-1 font-medium shrink-0"
+          >
+            取得專屬連結 →
+          </Link>
         </div>
       </div>
 

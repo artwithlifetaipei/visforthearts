@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
@@ -497,104 +498,31 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
         </motion.div>
       )}
 
-      {/* Brand Exclusive Public Ticket Registration Link Card */}
-      <div className="bg-gradient-to-r from-[#171512] via-[#121212] to-[#171512] border border-[#DFBA87]/30 rounded-xl p-5 md:p-6 shadow-2xl relative overflow-hidden">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-[#DFBA87]/5 rounded-full blur-3xl pointer-events-none" />
-        
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
-          <div className="space-y-2 max-w-2xl">
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#DFBA87] animate-pulse" />
-              <span className="text-[10px] uppercase font-mono tracking-[0.25em] text-[#DFBA87] font-semibold">
-                {t('公眾預約門票・品牌專屬方案', 'Public Registration • Dedicated Brand Scheme')}
-              </span>
-            </div>
-            <h3 className="text-base sm:text-lg font-serif-garamond text-white tracking-wide">
-              {brand.brand_name_zh || brand.name_zh || '貴品牌'} {t('專屬觀展預約連結', 'Exclusive Registration Link')}
-            </h3>
-            <p className="text-xs text-neutral-400 font-light leading-relaxed">
+      {/* Notice distinguishing VIP Pass (Module C) from Public Admission (Module G) */}
+      <div className="bg-[#141414] border border-[#DFBA87]/20 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 text-xs shadow-md">
+        <div className="flex items-start sm:items-center gap-3">
+          <Info className="w-5 h-5 text-[#DFBA87] shrink-0 mt-0.5 sm:mt-0" />
+          <div className="space-y-0.5 font-light text-neutral-300 leading-relaxed">
+            <span className="font-medium text-[#DFBA87] block sm:inline mr-2">
+              {t('【重要分流說明】', '[Important Access Distinction]')}
+            </span>
+            <span>
               {t(
-                '大會全面採用「品牌專屬連結方案」。透過此連結登記之觀眾，其電子觀展憑證將永久銘刻【貴品牌名稱】，並要求入場時出示已追蹤貴品牌 Instagram！建議將此連結放置於品牌官方 IG 個人簡介、限時動態或 LINE 官方帳號進行宣傳。',
-                'All public visitors must register via brand-dedicated links. Passes minted via your link will permanently showcase your brand name and require visitors to follow your Instagram upon entry.'
+                '本模組 C 為特邀 VIP / SVIP 專屬貴賓（享全展期免排隊優先快速通行與指定席次）。若您欲提供專屬預約連結給「一般大眾、社群粉絲或一般顧客」免費預約觀展，請前往獨立的',
+                'Module C is strictly for VIP / SVIP guests with fast-track entry privileges. To share dedicated admission links with general public visitors and fans, please visit'
               )}
-            </p>
-            <div className="pt-1">
-              <div className="inline-flex items-center gap-2 bg-black/60 border border-white/10 rounded-md px-3 py-1.5 text-xs font-mono text-neutral-300 max-w-full">
-                <span className="truncate select-all text-[#DFBA87]">{getDedicatedTicketLink()}</span>
-                <a
-                  href={getDedicatedTicketLink()}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-neutral-400 hover:text-white transition-colors ml-1 shrink-0"
-                  title={t('開啟專屬預約頁面', 'Open dedicated registration page')}
-                >
-                  <ExternalLink className="w-3.5 h-3.5" />
-                </a>
-              </div>
-            </div>
-          </div>
-
-          {/* Action buttons */}
-          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0">
-            {/* Copy Link Button */}
-            <button
-              type="button"
-              onClick={handleCopyTicketLink}
-              className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
-                copiedTicketLink
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                  : 'bg-[#DFBA87]/15 hover:bg-[#DFBA87]/25 text-[#DFBA87] border border-[#DFBA87]/40'
-              }`}
-            >
-              {copiedTicketLink ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-400" />
-                  <span>{t('已複製連結！', 'Link Copied!')}</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4" />
-                  <span>{t('一鍵複製專屬連結', 'Copy Link')}</span>
-                </>
-              )}
-            </button>
-
-            {/* Copy Promo Message */}
-            <button
-              type="button"
-              onClick={handleCopyPromoMessage}
-              className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
-                copiedPromoText
-                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
-                  : 'bg-white/5 hover:bg-white/10 text-neutral-200 border border-white/10'
-              }`}
-              title={t('複製包含展會時間與地點的社群/LINE宣傳文案', 'Copy promotional message for social media / LINE')}
-            >
-              {copiedPromoText ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-400" />
-                  <span>{t('已複製宣傳文案！', 'Text Copied!')}</span>
-                </>
-              ) : (
-                <>
-                  <Share2 className="w-4 h-4" />
-                  <span>{t('複製宣傳文案', 'Copy Promo Text')}</span>
-                </>
-              )}
-            </button>
-
-            {/* Direct Share to LINE */}
-            <button
-              type="button"
-              onClick={handleShareDedicatedTicketToLine}
-              className="px-3 py-2 text-[#06C755] hover:bg-[#06C755]/15 border border-[#06C755]/30 hover:border-[#06C755] rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
-              title={t('直接開啟 LINE 分享專屬預約邀請', 'Share dedicated invitation to LINE')}
-            >
-              <MessageSquare className="w-4 h-4 fill-[#06C755]/20" />
-              <span>LINE</span>
-            </button>
+            </span>
+            <strong className="text-white font-medium ml-1">
+              {t('【模組 G — 公眾專屬預約連結】', '[Module G — Public Registration Link]')}
+            </strong>。
           </div>
         </div>
+        <Link
+          href="/exhibitor/portal/tickets"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#DFBA87]/15 hover:bg-[#DFBA87] text-[#DFBA87] hover:text-black border border-[#DFBA87]/40 text-xs font-semibold tracking-wider transition-all shrink-0 cursor-pointer"
+        >
+          <span>{t('前往模組 G →', 'Go to Module G →')}</span>
+        </Link>
       </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
