@@ -228,7 +228,7 @@ export default function PerspectiveAdminPage() {
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-widest uppercase bg-[#DFBA87]/15 text-[#DFBA87] border border-[#DFBA87]/30">
-                Live Perspective Wall CMS
+                The Question of the Year · 年度文化命題 CMS
               </span>
               <span className="text-xs text-neutral-400 font-mono">
                 Taipei Zhongshan Hall 2027
@@ -236,7 +236,7 @@ export default function PerspectiveAdminPage() {
             </div>
             <h1 className="text-2xl font-serif text-white tracking-wider flex items-center gap-2">
               <Sparkles className="w-6 h-6 text-[#DFBA87]" />
-              年度文化命題 · 觀點之牆後台審核管理
+              The Question of the Year · 年度文化命題 後台審核管理
             </h1>
             <p className="text-xs text-neutral-400 font-light mt-1">
               審核大會現場觀眾、參展商、VIP 及策展團隊提交的觀點，並即時控制中山堂現場 LED 播放牆與跨年度典藏。

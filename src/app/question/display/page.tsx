@@ -236,8 +236,8 @@ export default function PerspectiveDisplayWall() {
                 VIS 2027
               </Link>
               <span className="text-[#A89F91]">/</span>
-              <span className="text-[10px] font-mono tracking-widest uppercase text-[#8C6226] font-bold">
-                THE QUESTION OF THE YEAR
+              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-mono tracking-widest uppercase bg-[#DFBA87]/20 text-[#8C6226] border border-[#DFBA87]/50 font-bold">
+                The Question of the Year · 年度文化命題
               </span>
             </div>
 
@@ -476,7 +476,7 @@ export default function PerspectiveDisplayWall() {
                   onClick={() => setSelectedItem(null)}
                   className="px-5 py-2.5 rounded-xl bg-[#DFBA87] text-[#1C1814] text-xs font-bold hover:bg-[#cf9e5e] shadow-md shadow-[#DFBA87]/25 transition-colors cursor-pointer"
                 >
-                  返回觀點之牆
+                  返回 The Question of the Year · 年度文化命題
                 </button>
               </div>
             </motion.div>

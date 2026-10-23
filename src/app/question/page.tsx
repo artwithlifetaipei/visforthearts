@@ -140,7 +140,7 @@ export default function QuestionPage() {
               className="text-xs text-[#8C6226] hover:text-[#1C1814] flex items-center gap-1 font-mono tracking-wider transition-colors font-medium"
             >
               <Eye className="w-3.5 h-3.5" />
-              <span>{t('現場 LED 觀點牆', 'Live LED Wall')} ↗</span>
+              <span>{t('The Question of the Year · 年度文化命題', 'The Question of the Year')} ↗</span>
             </Link>
 
             <button
@@ -246,7 +246,7 @@ export default function QuestionPage() {
                   className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-[#DFBA87] hover:bg-[#cf9e5e] text-[#1C1814] text-xs font-bold tracking-wider transition-all shadow-md shadow-[#DFBA87]/25 flex items-center justify-center gap-1.5"
                 >
                   <Eye className="w-3.5 h-3.5" />
-                  <span>{t('觀看現場觀點之牆', 'View Live Perspective Wall')}</span>
+                  <span>{t('觀看 The Question of the Year · 年度文化命題', 'View The Question of the Year')}</span>
                 </Link>
               </div>
             </motion.div>
