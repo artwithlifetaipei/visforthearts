@@ -136,15 +136,37 @@ function TicketRegistrationContent() {
                     console.warn('Failed to load /api/tickets/brands, falling back to direct table:', bErr);
                     // Fallback to direct supabase query
                     const { data: tbData } = await supabase.from('ticket_brands').select('*');
-                    if (tbData) {
-                        loadedBrands = [OFFICIAL_VIS_BRAND, ...tbData.map(tb => ({
-                            id: tb.id,
-                            name_zh: tb.name_zh,
-                            name_en: tb.name_en,
-                            instagram_handle: tb.instagram_handle,
-                            is_ticket_brand: true,
-                        }))];
+                    const { data: appData } = await supabase.from('exhibitor_applications').select('id, brand_name_zh, brand_name_en, instagram_url').eq('status', 'approved');
+
+                    const fallbackMap = new Map<string, BrandEntry>();
+                    fallbackMap.set('vis-official', OFFICIAL_VIS_BRAND);
+
+                    if (appData) {
+                        for (const app of appData) {
+                            fallbackMap.set(app.id, {
+                                id: app.id,
+                                name_zh: app.brand_name_zh || app.brand_name_en || '',
+                                name_en: app.brand_name_en || '',
+                                instagram_handle: app.instagram_url ? (app.instagram_url.includes('instagram.com/') ? `@${app.instagram_url.split('instagram.com/')[1].split('/')[0].split('?')[0]}` : `@${app.instagram_url.replace(/^@/, '')}`) : '@visforthearts',
+                                slug: (app.brand_name_en || app.brand_name_zh || app.id).toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-').replace(/^-+|-+$/g, ''),
+                                is_ticket_brand: false,
+                            });
+                        }
                     }
+
+                    if (tbData) {
+                        for (const tb of tbData) {
+                            fallbackMap.set(tb.id, {
+                                id: tb.id,
+                                name_zh: tb.name_zh,
+                                name_en: tb.name_en,
+                                instagram_handle: tb.instagram_handle,
+                                slug: (tb.name_en || tb.name_zh || tb.id).toLowerCase().replace(/[^a-z0-9\u4e00-\u9fa5]+/g, '-').replace(/^-+|-+$/g, ''),
+                                is_ticket_brand: true,
+                            });
+                        }
+                    }
+                    loadedBrands = Array.from(fallbackMap.values());
                 }
 
                 setBrands(loadedBrands);
@@ -467,6 +489,12 @@ function TicketRegistrationContent() {
                                                             setSwitchError('');
                                                         }}
                                                         placeholder="請輸入品牌名稱或代碼 (如: sonnet, cwtch, 蒔蕼行...)"
+                                                        onKeyDown={(e) => {
+                                                            if (e.key === 'Enter') {
+                                                                e.preventDefault();
+                                                                handleSwitchBrand();
+                                                            }
+                                                        }}
                                                         className="flex-1 bg-white border border-[#C9A96E]/40 px-3 py-2 rounded-none text-xs text-[#1A1A1A] placeholder-neutral-400 focus:outline-none focus:border-[#C9A96E]"
                                                     />
                                                     <button

@@ -26,6 +26,17 @@ async function createSupabaseServerClient() {
     );
 }
 
+function extractIgHandle(urlOrHandle: string | null | undefined): string {
+    if (!urlOrHandle) return '@visforthearts';
+    let clean = urlOrHandle.trim();
+    if (clean.includes('instagram.com/')) {
+        const parts = clean.split('instagram.com/')[1].split('/')[0].split('?')[0];
+        if (parts) return `@${parts}`;
+    }
+    clean = clean.replace(/^@/, '').split('?')[0].split('/')[0].trim();
+    return clean ? `@${clean}` : '@visforthearts';
+}
+
 function slugify(text: string): string {
     return text
         .toLowerCase()
@@ -52,11 +63,15 @@ export async function GET() {
             .select('*')
             .order('name_zh', { ascending: true });
 
-        // 2. Fetch approved exhibitor applications
-        const { data: approvedApps } = await supabase
+        // 2. Fetch approved exhibitor applications (column is instagram_url)
+        const { data: approvedApps, error: appsErr } = await supabase
             .from('exhibitor_applications')
-            .select('id, brand_name_zh, brand_name_en, instagram_handle')
+            .select('id, brand_name_zh, brand_name_en, instagram_url')
             .eq('status', 'approved');
+
+        if (appsErr) {
+            console.error('Error fetching approved exhibitor_applications:', appsErr);
+        }
 
         const brandMap = new Map<string, PublicBrandItem>();
 
@@ -75,14 +90,14 @@ export async function GET() {
             for (const app of approvedApps) {
                 const zh = (app.brand_name_zh || '').trim();
                 const en = (app.brand_name_en || '').trim();
-                const ig = (app.instagram_handle || '').trim();
+                const ig = extractIgHandle(app.instagram_url);
                 const primarySlug = slugify(en || zh || app.id);
 
                 brandMap.set(app.id, {
                     id: app.id,
                     name_zh: zh || en,
                     name_en: en,
-                    instagram_handle: ig ? (ig.startsWith('@') ? ig : `@${ig}`) : '@visforthearts',
+                    instagram_handle: ig,
                     slug: primarySlug,
                     is_ticket_brand: false,
                 });
