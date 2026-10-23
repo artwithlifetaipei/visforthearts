@@ -701,7 +701,14 @@ export default function VIPAdminPage() {
                         <h1 className="text-2xl font-serif font-light tracking-wide mb-1">VIP & 專業買家 CRM 後台</h1>
                         <p className="text-[10px] tracking-widest text-neutral-500 uppercase">Customer Relationship Management</p>
                     </div>
-                    <div className="flex gap-4">
+                    <div className="flex flex-wrap gap-3">
+                        <a
+                            href="/question/admin"
+                            target="_blank"
+                            className="text-[9px] tracking-[0.3em] uppercase text-[#DFBA87] hover:text-white border border-[#DFBA87]/40 hover:border-white px-4 py-2 transition-all duration-300 flex items-center gap-1.5"
+                        >
+                            <span>觀點之牆審核 ↗</span>
+                        </a>
                         <button
                             onClick={() => router.push('/vip/dashboard')}
                             className="text-[9px] tracking-[0.4em] uppercase text-neutral-400 hover:text-white border border-neutral-800 hover:border-white px-5 py-2 transition-all duration-300"

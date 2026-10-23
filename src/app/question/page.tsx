@@ -354,8 +354,15 @@ export default function QuestionPage() {
       </main>
 
       {/* Footer Branding */}
-      <footer className="relative z-10 border-t border-white/5 py-6 text-center text-xs text-neutral-600 font-mono">
+      <footer className="relative z-10 border-t border-white/5 py-6 px-4 text-center text-xs text-neutral-600 font-mono flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3">
         <div>VIS Contemporary Culture · Perspective Archive 2027</div>
+        <span className="hidden sm:inline opacity-30">·</span>
+        <Link
+          href="/question/admin"
+          className="text-neutral-500 hover:text-[#DFBA87] transition-colors text-[11px] underline underline-offset-4 decoration-neutral-700"
+        >
+          策展審核後台 (Curatorial CMS) ↗
+        </Link>
       </footer>
 
       {/* Privacy Policy & Consent Modal (Section 9.1 & 17) */}
