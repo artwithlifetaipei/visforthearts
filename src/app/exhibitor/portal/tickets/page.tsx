@@ -145,16 +145,8 @@ export default function ExhibitorPublicTicketsPage({ brand: parentBrand }: { bra
         : `【VIS 2027 × ${brandNameZh} 專屬觀展邀請】\n誠摯邀請您蒞臨 VIS 當代生活文化大展！\n點擊下方專屬連結即可免費預約領取數位觀展門票：\n${dedicatedTicketLink}\n\n✦ 展期：2027. 01. 06 (三) – 01. 09 (六)\n✦ 地點：台北中山堂 光復廳（台北市中正區延平南路 98 號）\n* 入場時請出示此憑證與已追蹤 ${igHandle} 及 @visforthearts 畫面。現場見！`,
     },
     {
-      id: 'line_broadcast',
-      title: lang === 'en' ? 'Template 2: LINE Official / Direct Message (Detailed)' : '模板二：LINE 官方帳號 / 顧客私訊（完整尊榮版）',
-      subtitle: lang === 'en' ? 'Ideal for VIP member broadcast, EDM, or customer service chat' : '適合 LINE 群發訊息、品牌會員電子報或私訊好友',
-      text: lang === 'en'
-        ? `Dear valued friends and collectors,\n\n${brandNameEn || brandNameZh} is delighted to participate in VIS Contemporary Culture 2027! We would love to share our latest works and curate inspirations with you in person.\n\nWe have set up an exclusive visitor invitation channel for our community. You can claim a complimentary Digital Entry Pass directly via our brand link:\n👉 ${dedicatedTicketLink}\n\n【Exhibition Details】\n✦ Dates: January 6 – 9, 2027\n✦ Venue: Guangfu Hall, Taipei Zhongshan Hall (No. 98 Yanping S. Rd., Zhongzheng Dist., Taipei)\n✦ Booth: ${brandNameZh} ${brand?.booth_number ? `(${brand.booth_number})` : ''}\n\n* Note: Please follow our official Instagram (${igHandle}) and organizer (@visforthearts) upon arrival for admission validation. Looking forward to welcoming you!`
-        : `親愛的朋友與顧客您好：\n\n很高興向大家宣布，${brandNameZh} 將於 2027 年 1 月正式進駐台北中山堂參與【VIS Contemporary Culture 當代生活文化大展】！\n\n大會特別為我們開啟了品牌專屬觀展通道，只要透過以下專屬連結，即可免費預約登記數位觀展憑證：\n👉 ${dedicatedTicketLink}\n\n【大展資訊】\n✦ 展期：2027 年 1 月 6 日 (三) – 1 月 9 日 (六)\n✦ 地點：台北中山堂 光復廳（台北市中正區延平南路 98 號）\n✦ 展位：${brandNameZh} ${brand?.booth_number ? `(${brand.booth_number})` : ''}\n\n※ 貼心提醒：大會採總量安全管制，入場時請向工作人員出示電子憑證及已追蹤 ${igHandle} 與 @visforthearts 之 IG 畫面。期待在現場與您相見！`,
-    },
-    {
       id: 'global_en',
-      title: lang === 'en' ? 'Template 3: Global English Edition' : '模板三：國際社群英文發布版 (Global Audience)',
+      title: lang === 'en' ? 'Template 2: Global English Edition' : '模板二：國際社群英文發布版 (Global Audience)',
       subtitle: lang === 'en' ? 'Designed for overseas collectors, foreign guests, and English posts' : '適合跨國藏家、海外品牌粉絲與國際社群分享',
       text: `[Exclusive Visitor Invitation] Join ${brandNameEn || brandNameZh} at VIS Contemporary Culture 2027 in Taipei!\n\nWe are thrilled to present our curation at the historic Guangfu Hall, Taipei Zhongshan Hall from Jan 6–9, 2027.\n\nUnlock your complimentary Digital Entry Pass via our dedicated brand link:\n${dedicatedTicketLink}\n\n• Exhibition: VIS Contemporary Culture 2027\n• Venue: Guangfu Hall, Taipei Zhongshan Hall\n• Dates: January 6–9, 2027\n* Onsite entry requirement: Please show your pass and follow screen for ${igHandle} and @visforthearts.`,
     }
@@ -445,7 +437,7 @@ export default function ExhibitorPublicTicketsPage({ brand: parentBrand }: { bra
           </div>
         </div>
 
-        <div className="grid md:grid-cols-3 gap-6">
+        <div className="grid md:grid-cols-2 gap-6">
           {promoTemplates.map((template) => {
             const isCopied = copiedTemplateId === template.id;
             return (
