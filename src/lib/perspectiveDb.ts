@@ -46,7 +46,7 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_order: 1,
     featured: true,
     question_id: 'q2',
-    question_prompt: '對你來說，美的事物，它的價值是什麼？一個句話形容。',
+    question_prompt: '對你來說，美的事物，它的價值是什麼？一句話形容。',
     moderation_flags: [],
     consent_version: '2027-v2',
     consented_at: '2026-10-21T08:00:00Z',

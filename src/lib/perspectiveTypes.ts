@@ -46,7 +46,7 @@ export const ANNUAL_SUB_QUESTIONS: AnnualSubQuestion[] = [
   {
     id: 'q2',
     order: 2,
-    question_zh: '對你來說，美的事物，它的價值是什麼？一個句話形容。',
+    question_zh: '對你來說，美的事物，它的價值是什麼？一句話形容。',
     question_en: 'For you, what is the value of beautiful things? Describe it in one sentence.',
     short_label_zh: '美的價值（一句話）',
     short_label_en: 'Value of Aesthetics',
