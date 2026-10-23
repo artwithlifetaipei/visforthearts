@@ -115,9 +115,19 @@ export async function PATCH(req: Request) {
     let payload: Partial<PerspectiveSubmission> = {};
 
     if (action === 'approve') {
-      payload = { status: 'approved', display_enabled: true };
+      payload = { 
+        status: 'approved', 
+        display_enabled: true,
+        ...(patch?.featured !== undefined ? { featured: Boolean(patch.featured) } : {}),
+      };
+    } else if (action === 'toggle_featured') {
+      payload = { featured: Boolean(patch?.featured) };
     } else if (action === 'approve_only') {
-      payload = { status: 'approved', display_enabled: false };
+      payload = { 
+        status: 'approved', 
+        display_enabled: false,
+        ...(patch?.featured !== undefined ? { featured: Boolean(patch.featured) } : {}),
+      };
     } else if (action === 'reject') {
       payload = { status: 'rejected', display_enabled: false, rejection_reason: patch?.rejection_reason || 'Not aligned' };
     } else if (action === 'toggle_display') {

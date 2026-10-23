@@ -11,6 +11,7 @@ interface DisplayItem {
   type: string;
   role_title: string | null;
   display_order: number | null;
+  featured: boolean;
   updated_at: string;
 }
 
@@ -79,7 +80,11 @@ export default function PerspectiveDisplayWall() {
   useEffect(() => {
     if (!data || data.display.mode === 'emergency' || data.items.length === 0) return;
 
-    const duration = Math.max(5, Math.min(20, data.display.duration_seconds || 8)) * 1000;
+    const currentItem = data.items[currentIndex];
+    const baseDuration = Math.max(5, Math.min(20, data.display.duration_seconds || 8));
+    // Give featured / enhanced items slightly longer dwell time (e.g. +2 seconds) for deep appreciation
+    const duration = (currentItem?.featured ? baseDuration + 2 : baseDuration) * 1000;
+
     const timer = setTimeout(() => {
       setCurrentIndex((prev) => (prev + 1) % data.items.length);
     }, duration);
@@ -120,6 +125,7 @@ export default function PerspectiveDisplayWall() {
 
   const isEmergency = data?.display.mode === 'emergency';
   const currentItem = data?.items?.[currentIndex] || null;
+  const isFeatured = Boolean(currentItem?.featured);
 
   return (
     <div
@@ -128,7 +134,11 @@ export default function PerspectiveDisplayWall() {
     >
       {/* Background Architectural Ambient Texture */}
       <div className="absolute inset-0 pointer-events-none">
-        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[1200px] h-[800px] bg-[#DFBA87]/[0.03] rounded-full blur-[160px]" />
+        <div className={`absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full blur-[160px] transition-all duration-1000 ${
+          isFeatured 
+            ? 'w-[1400px] h-[900px] bg-[#DFBA87]/[0.08]' 
+            : 'w-[1200px] h-[800px] bg-[#DFBA87]/[0.03]'
+        }`} />
         <div className="absolute inset-0 bg-[radial-gradient(#ffffff08_1px,transparent_1px)] [background-size:32px_32px] opacity-40" />
       </div>
 
@@ -179,7 +189,7 @@ export default function PerspectiveDisplayWall() {
       {/* ─────────────────────────────────────────────────────────────
           2. HERO CONTENT: SINGLE PERSPECTIVE DISPLAY (LED-001)
       ───────────────────────────────────────────────────────────── */}
-      <main className="relative z-10 flex-grow flex items-center justify-center px-8 sm:px-20 md:px-28 py-6">
+      <main className="relative z-10 flex-grow flex items-center justify-center px-8 sm:px-16 md:px-24 py-6">
         {isEmergency ? (
           /* Emergency Mode Card (LED-010) */
           <motion.div
@@ -203,19 +213,32 @@ export default function PerspectiveDisplayWall() {
             </div>
           </motion.div>
         ) : currentItem ? (
-          /* Normal / Filtered Single Perspective Card */
+          /* Normal / Enhanced Single Perspective Card */
           <AnimatePresence mode="wait">
             <motion.div
               key={currentItem.id}
-              initial={{ opacity: 0, y: 12 }}
+              initial={{ opacity: 0, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -12 }}
+              exit={{ opacity: 0, y: -14 }}
               transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
-              className="text-center max-w-5xl mx-auto space-y-8"
+              className={`text-center mx-auto space-y-8 transition-all duration-700 ${
+                isFeatured ? 'max-w-6xl py-2' : 'max-w-5xl'
+              }`}
             >
-              {/* Type / Role Pill */}
-              <div className="flex items-center justify-center gap-2">
-                <span className="px-3.5 py-1 rounded-full text-[11px] font-mono tracking-widest uppercase bg-[#DFBA87]/15 text-[#DFBA87] border border-[#DFBA87]/30">
+              {/* Type / Role / Enhanced Badge */}
+              <div className="flex flex-wrap items-center justify-center gap-3">
+                {isFeatured && (
+                  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-[#DFBA87]/30 via-[#DFBA87]/20 to-[#DFBA87]/30 border border-[#DFBA87]/70 text-[#DFBA87] text-xs font-mono tracking-[0.25em] uppercase font-bold shadow-lg shadow-[#DFBA87]/20 animate-pulse">
+                    <Sparkles className="w-3.5 h-3.5 text-[#DFBA87] fill-[#DFBA87]" />
+                    <span>大會精選觀點 · CURATORIAL SELECTION</span>
+                  </div>
+                )}
+
+                <span className={`px-3.5 py-1 rounded-full text-[11px] font-mono tracking-widest uppercase border ${
+                  isFeatured
+                    ? 'bg-white/10 text-neutral-200 border-white/20 font-medium'
+                    : 'bg-[#DFBA87]/15 text-[#DFBA87] border-[#DFBA87]/30'
+                }`}>
                   {currentItem.role_title
                     ? currentItem.role_title
                     : currentItem.type === 'vis_people'
@@ -230,15 +253,35 @@ export default function PerspectiveDisplayWall() {
                 </span>
               </div>
 
-              {/* Main Perspective Answer Quote (LED-005, LED-006) */}
-              <blockquote className="text-2xl sm:text-3xl md:text-5xl lg:text-6xl font-serif text-[#FBF6EE] leading-snug md:leading-tight tracking-wide font-normal drop-shadow-md">
-                “{currentItem.answer}”
-              </blockquote>
+              {/* Main Perspective Answer Quote (Significantly larger & more prominent when isFeatured) */}
+              <div className="relative px-4">
+                {isFeatured && (
+                  <div className="absolute inset-0 bg-[#DFBA87]/[0.05] rounded-3xl blur-3xl -z-10 pointer-events-none" />
+                )}
+                <blockquote
+                  className={`font-serif tracking-wide transition-all duration-500 ${
+                    isFeatured
+                      ? 'text-3xl sm:text-4xl md:text-6xl lg:text-7xl xl:text-8xl text-[#FFF9F0] leading-snug md:leading-[1.18] font-normal drop-shadow-2xl'
+                      : 'text-2xl sm:text-3xl md:text-5xl lg:text-6xl text-[#FBF6EE] leading-snug md:leading-tight font-normal drop-shadow-md'
+                  }`}
+                >
+                  <span className={isFeatured ? 'text-[#DFBA87] mr-1' : 'opacity-70 mr-1'}>“</span>
+                  {currentItem.answer}
+                  <span className={isFeatured ? 'text-[#DFBA87] ml-1' : 'opacity-70 ml-1'}>”</span>
+                </blockquote>
+              </div>
 
               {/* Author Display Name & Title */}
               <div className="space-y-1 pt-2">
-                <div className="text-base sm:text-xl md:text-2xl font-serif text-[#DFBA87] tracking-wider font-medium">
-                  — {currentItem.name}
+                <div
+                  className={`font-serif tracking-wider font-medium flex items-center justify-center gap-2 ${
+                    isFeatured
+                      ? 'text-xl sm:text-2xl md:text-3xl text-[#DFBA87] font-semibold drop-shadow'
+                      : 'text-base sm:text-xl md:text-2xl text-[#DFBA87]'
+                  }`}
+                >
+                  {isFeatured && <span className="text-amber-400">★</span>}
+                  <span>— {currentItem.name}</span>
                 </div>
               </div>
             </motion.div>

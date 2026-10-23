@@ -24,6 +24,7 @@ export default function PerspectiveAdminPage() {
   const [activeTab, setActiveTab] = useState<'pending' | 'approved' | 'rejected' | 'all'>('pending');
   const [searchQuery, setSearchQuery] = useState('');
   const [typeFilter, setTypeFilter] = useState('all');
+  const [onlyFeatured, setOnlyFeatured] = useState(false);
 
   // Edit Modal State
   const [editingItem, setEditingItem] = useState<PerspectiveSubmission | null>(null);
@@ -190,6 +191,7 @@ export default function PerspectiveAdminPage() {
     if (activeTab === 'approved' && item.status !== 'approved') return false;
     if (activeTab === 'rejected' && item.status !== 'rejected') return false;
     if (typeFilter !== 'all' && item.type !== typeFilter) return false;
+    if (onlyFeatured && !item.featured) return false;
 
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase().trim();
@@ -347,7 +349,7 @@ export default function PerspectiveAdminPage() {
         {/* ─────────────────────────────────────────────────────────────
             2. STATISTICS CARDS
         ───────────────────────────────────────────────────────────── */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
           <div className="bg-[#111111] border border-white/5 p-4 rounded-xl">
             <div className="text-[10px] font-mono uppercase text-neutral-500">總提報數 Total</div>
             <div className="text-2xl font-bold font-mono text-white mt-1">{stats.total}</div>
@@ -366,6 +368,15 @@ export default function PerspectiveAdminPage() {
           <div className="bg-[#111111] border border-[#DFBA87]/30 p-4 rounded-xl bg-gradient-to-b from-[#DFBA87]/5 to-transparent">
             <div className="text-[10px] font-mono uppercase text-[#DFBA87]">現場播放中 Display On</div>
             <div className="text-2xl font-bold font-mono text-[#DFBA87] mt-1">{stats.display_on}</div>
+          </div>
+          <div className="bg-[#111111] border border-amber-400/30 p-4 rounded-xl bg-gradient-to-b from-amber-400/10 to-transparent">
+            <div className="text-[10px] font-mono uppercase text-[#DFBA87] flex items-center justify-between">
+              <span>加強放大 Featured</span>
+              <Sparkles className="w-3 h-3 text-[#DFBA87]" />
+            </div>
+            <div className="text-2xl font-bold font-mono text-amber-200 mt-1">
+              {items.filter(i => i.featured).length}
+            </div>
           </div>
           <div className="bg-[#111111] border border-white/5 p-4 rounded-xl">
             <div className="text-[10px] font-mono uppercase text-neutral-500">已婉拒 Rejected</div>
@@ -405,6 +416,26 @@ export default function PerspectiveAdminPage() {
                 )}
               </button>
             ))}
+
+            {/* Quick Toggle for Featured Only */}
+            <button
+              type="button"
+              onClick={() => setOnlyFeatured(!onlyFeatured)}
+              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all flex items-center gap-1.5 cursor-pointer border ${
+                onlyFeatured
+                  ? 'bg-gradient-to-r from-amber-500 to-[#DFBA87] text-black font-semibold border-transparent shadow-md'
+                  : 'bg-white/5 hover:bg-white/10 text-[#DFBA87] border-[#DFBA87]/30'
+              }`}
+              title="只查看被標記為加強放大顯示的觀點"
+            >
+              <Sparkles className={`w-3.5 h-3.5 ${onlyFeatured ? 'text-black fill-black' : 'text-[#DFBA87]'}`} />
+              <span>★ 僅看加強顯示</span>
+              <span className={`text-[10px] font-mono px-1.5 py-0.2 rounded ${
+                onlyFeatured ? 'bg-black/20 text-black' : 'bg-black/40 text-amber-300'
+              }`}>
+                {items.filter(i => i.featured).length}
+              </span>
+            </button>
           </div>
 
           {/* Search Input & Type Filter */}
@@ -467,7 +498,9 @@ export default function PerspectiveAdminPage() {
                 return (
                   <div
                     key={item.id}
-                    className="p-5 hover:bg-white/[0.02] transition-colors flex flex-col md:flex-row md:items-start justify-between gap-4"
+                    className={`p-5 hover:bg-white/[0.02] transition-colors flex flex-col md:flex-row md:items-start justify-between gap-4 ${
+                      item.featured ? 'border-l-2 border-l-[#DFBA87] bg-[#DFBA87]/[0.02]' : ''
+                    }`}
                   >
                     {/* Left: Content Details */}
                     <div className="space-y-2 max-w-3xl">
@@ -484,6 +517,13 @@ export default function PerspectiveAdminPage() {
                         ) : (
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-neutral-800 text-neutral-400 border border-neutral-700">
                             <X className="w-3 h-3" /> Rejected
+                          </span>
+                        )}
+
+                        {/* Enhanced Display Badge */}
+                        {item.featured && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-mono bg-gradient-to-r from-amber-500/20 to-[#DFBA87]/20 text-[#DFBA87] border border-[#DFBA87]/40 font-bold shadow-sm">
+                            <Sparkles className="w-3 h-3 text-[#DFBA87]" /> ★ 加強放大顯示
                           </span>
                         )}
 
@@ -548,13 +588,24 @@ export default function PerspectiveAdminPage() {
                         <>
                           <button
                             type="button"
-                            onClick={() => handleAction(item.id, 'approve')}
+                            onClick={() => handleAction(item.id, 'approve', { featured: false })}
                             disabled={savingAction}
                             className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold flex items-center gap-1 transition-colors shadow cursor-pointer disabled:opacity-50"
-                            title="核准並立即上牆播放"
+                            title="核准為一般字級上牆播放"
                           >
                             <Check className="w-3.5 h-3.5" />
-                            <span>核准並上牆</span>
+                            <span>核准上牆</span>
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => handleAction(item.id, 'approve', { featured: true })}
+                            disabled={savingAction}
+                            className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-500 via-[#DFBA87] to-amber-400 hover:brightness-110 text-black text-xs font-bold flex items-center gap-1.5 transition-all shadow-md cursor-pointer disabled:opacity-50"
+                            title="核准並加強放大顯示（於現場 LED 大螢幕以特大字體、金色徽章醒目播放）"
+                          >
+                            <Sparkles className="w-3.5 h-3.5 text-black fill-black" />
+                            <span>★ 核准並加強顯示</span>
                           </button>
 
                           <button
@@ -569,6 +620,22 @@ export default function PerspectiveAdminPage() {
                           </button>
                         </>
                       )}
+
+                      {/* Quick Toggle for Enhanced Display (Featured) */}
+                      <button
+                        type="button"
+                        onClick={() => handleAction(item.id, 'toggle_featured', { featured: !item.featured })}
+                        disabled={savingAction}
+                        className={`px-2.5 py-1.5 rounded-lg text-xs font-medium flex items-center gap-1.5 transition-all cursor-pointer border ${
+                          item.featured
+                            ? 'bg-[#DFBA87]/20 hover:bg-[#DFBA87]/30 text-[#DFBA87] border-[#DFBA87]/50 shadow-sm'
+                            : 'bg-white/5 hover:bg-white/10 text-neutral-400 border-white/10'
+                        }`}
+                        title="切換是否於現場 LED 牆加強放大顯示"
+                      >
+                        <Sparkles className={`w-3.5 h-3.5 ${item.featured ? 'text-[#DFBA87] fill-[#DFBA87]' : 'text-neutral-500'}`} />
+                        <span>{item.featured ? '★ 已加強顯示' : '☆ 加強顯示'}</span>
+                      </button>
 
                       {isApproved && (
                         <button
@@ -713,9 +780,12 @@ export default function PerspectiveAdminPage() {
                     type="checkbox"
                     checked={editForm.featured}
                     onChange={(e) => setEditForm({ ...editForm, featured: e.target.checked })}
-                    className="rounded bg-neutral-900 border-neutral-700 text-[#DFBA87]"
+                    className="rounded bg-neutral-900 border-neutral-700 text-[#DFBA87] w-4 h-4 cursor-pointer"
                   />
-                  <span className="text-xs text-neutral-300">大會精選 (Featured)</span>
+                  <span className="text-xs text-neutral-200 font-medium flex items-center gap-1.5 cursor-pointer">
+                    <Sparkles className="w-3.5 h-3.5 text-[#DFBA87]" />
+                    <span>加強顯示（於現場大型 LED 觀點牆特大字號顯著播放）</span>
+                  </span>
                 </label>
               </div>
             </div>

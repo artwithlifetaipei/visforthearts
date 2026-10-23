@@ -475,6 +475,7 @@ export async function getDisplayPerspectives(campaignSlug: string = 'vis-2027'):
     type: string;
     role_title: string | null;
     display_order: number | null;
+    featured: boolean;
     updated_at: string;
   }>;
 }> {
@@ -518,7 +519,7 @@ export async function getDisplayPerspectives(campaignSlug: string = 'vis-2027'):
     }
   }
 
-  // Map to safe, minimized public payload (OBJ-005)
+  // Map to safe, minimized public payload (OBJ-005, supporting featured enhanced display)
   const safeItems = approvedItems.map(item => ({
     id: item.id,
     name: item.display_name,
@@ -526,6 +527,7 @@ export async function getDisplayPerspectives(campaignSlug: string = 'vis-2027'):
     type: item.type,
     role_title: item.role_title || null,
     display_order: item.display_order,
+    featured: Boolean(item.featured),
     updated_at: item.updated_at,
   }));
 
