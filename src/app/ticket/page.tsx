@@ -444,19 +444,28 @@ function TicketRegistrationContent() {
                                     )}
                                 </div>
 
-                                <div className="text-xs font-light leading-relaxed text-neutral-300 tracking-wide border-t border-[#DFBA87]/20 pt-3">
+                                <div className="text-xs font-light leading-relaxed text-neutral-300 tracking-wide border-t border-[#DFBA87]/20 pt-3" style={{ textWrap: 'pretty' }}>
                                     {isOfficial ? (
-                                        <>
-                                            歡迎來到 VIS Contemporary Culture。大會官方誠摯邀請您蒞臨，與我們一起，從文化與人文美學出發，探索當代生活，體驗這一屬於品味人士的跨界盛會。
-                                        </>
+                                        <p className="leading-relaxed">
+                                            <span className="inline-block">歡迎來到 VIS Contemporary Culture。</span>
+                                            <span className="inline-block">大會官方誠摯邀請您蒞臨，</span>
+                                            <span className="inline-block">與我們一起，從文化與人文美學出發，</span>
+                                            <span className="inline-block">探索當代生活，體驗這一屬於品味人士的跨界盛會。</span>
+                                        </p>
                                     ) : (
-                                        <>
-                                            歡迎來到 VIS Contemporary Culture。<strong className="font-medium text-white">{activeBrand.name_zh}</strong> 誠摯邀請您蒞臨，與我們一起，從文化與人文美學出發，探索當代生活，體驗這一屬於品味人士的跨界盛會。
-                                        </>
+                                        <p className="leading-relaxed">
+                                            <span className="inline-block">歡迎來到 VIS Contemporary Culture。</span>
+                                            <span className="inline-block"><strong className="font-medium text-white">{activeBrand.name_zh}</strong> 誠摯邀請您蒞臨，</span>
+                                            <span className="inline-block">與我們一起，從文化與人文美學出發，</span>
+                                            <span className="inline-block">探索當代生活，體驗這一屬於品味人士的跨界盛會。</span>
+                                        </p>
                                     )}
-                                    <div className="mt-2.5 pt-2 border-t border-white/10 text-[11px] text-neutral-400 font-light leading-relaxed flex items-center gap-1.5">
-                                        <span className="text-[#DFBA87]">✦</span>
-                                        <span>提醒：本券為公眾免費預約門票（非數位貴賓卡），入場順序與等候時間依現場人流控管規定為準。</span>
+                                    <div className="mt-3 pt-2.5 border-t border-white/10 text-[11px] text-neutral-400 font-light leading-relaxed flex items-start gap-2">
+                                        <span className="text-[#DFBA87] mt-0.5 shrink-0">✦</span>
+                                        <span className="leading-relaxed" style={{ textWrap: 'pretty' }}>
+                                            <span className="inline-block">提醒：本券為公眾免費預約門票（非數位貴賓卡），</span>
+                                            <span className="inline-block">入場順序與等候時間依現場人流控管規定為準。</span>
+                                        </span>
                                     </div>
                                 </div>
 
@@ -664,9 +673,9 @@ function TicketRegistrationContent() {
                                             type="checkbox"
                                             checked={agreeIg}
                                             onChange={(e) => setAgreeIg(e.target.checked)}
-                                            className="accent-[#DFBA87] mt-1 cursor-pointer"
+                                            className="accent-[#DFBA87] mt-1 cursor-pointer shrink-0"
                                         />
-                                        <span>
+                                        <span style={{ textWrap: 'pretty' }}>
                                             為協助主辦單位妥善傳遞大展現場與觀展相關之即時資訊，我同意於入場時出示已追蹤{' '}
                                             <strong className="text-white">@visforthearts</strong>
                                             {!isOfficial && activeBrand.instagram_handle && activeBrand.instagram_handle !== '@visforthearts' && (
@@ -686,9 +695,9 @@ function TicketRegistrationContent() {
                                             type="checkbox"
                                             checked={agreeLimit}
                                             onChange={(e) => setAgreeLimit(e.target.checked)}
-                                            className="accent-[#DFBA87] mt-1 cursor-pointer"
+                                            className="accent-[#DFBA87] mt-1 cursor-pointer shrink-0"
                                         />
-                                        <span>
+                                        <span style={{ textWrap: 'pretty' }}>
                                             我已理解：本券為公眾免費預約門票（非數位貴賓卡）。為維護觀展體驗與符合公共安全規範，各時段採總量管制；入場順序與等候時間需依現場人流控管規定而定，遇現場人潮達場館容留上限將啟動「一進一出」動線管制，敬請持本門票依序排隊等候進場。
                                         </span>
                                     </label>
@@ -698,9 +707,9 @@ function TicketRegistrationContent() {
                                             type="checkbox"
                                             checked={agreePrivacy}
                                             onChange={(e) => setAgreePrivacy(e.target.checked)}
-                                            className="accent-[#DFBA87] mt-1 cursor-pointer"
+                                            className="accent-[#DFBA87] mt-1 cursor-pointer shrink-0"
                                         />
-                                        <span>
+                                        <span style={{ textWrap: 'pretty' }}>
                                             我同意 VIS Contemporary Culture 隱私權政策，並願意接收未來的展會與活動資訊。
                                         </span>
                                     </label>
