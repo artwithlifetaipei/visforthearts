@@ -209,23 +209,50 @@ function getTicketEmailHtml(name: string, ticketId: string, slotNameZh: string, 
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { name, email, brandId, slotId } = body;
+        const { name, email, brandId, brandName, slotId } = body;
 
-        if (!name || !email || !brandId || !slotId) {
+        if (!name || !email || !slotId) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
         }
 
         const supabase = await createSupabaseServerClient();
 
-        // 1. Fetch Brand Details
-        const { data: brand, error: brandErr } = await supabase
-            .from('ticket_brands')
-            .select('*')
-            .eq('id', brandId)
-            .single();
+        // 1. Fetch & Resolve Brand Details
+        let resolvedBrandName = 'VIS Contemporary Culture 官方邀請';
+        let resolvedBrandId: string | null = null;
+        let isTicketBrand = false;
 
-        if (brandErr || !brand) {
-            return NextResponse.json({ error: 'Invalid invitation brand selected' }, { status: 400 });
+        if (brandId && brandId !== 'vis-official' && brandId !== 'vis' && brandId !== 'official') {
+            // First check ticket_brands (foreign key target)
+            const { data: tb } = await supabase
+                .from('ticket_brands')
+                .select('*')
+                .eq('id', brandId)
+                .maybeSingle();
+
+            if (tb) {
+                resolvedBrandName = tb.name_zh || tb.name_en;
+                resolvedBrandId = tb.id;
+                isTicketBrand = true;
+            } else {
+                // Check exhibitor_applications (by UUID or brand name)
+                const { data: app } = await supabase
+                    .from('exhibitor_applications')
+                    .select('id, brand_name_zh, brand_name_en')
+                    .eq('id', brandId)
+                    .maybeSingle();
+
+                if (app) {
+                    resolvedBrandName = app.brand_name_zh || app.brand_name_en;
+                    // Do not set brand_id if not in ticket_brands to avoid foreign key violation
+                    resolvedBrandId = null;
+                } else if (brandName) {
+                    resolvedBrandName = brandName;
+                    resolvedBrandId = null;
+                }
+            }
+        } else if (brandName) {
+            resolvedBrandName = brandName;
         }
 
         // 2. Fetch and Validate Slot Capacity (atomic lock check)
@@ -260,8 +287,8 @@ export async function POST(req: Request) {
             .insert({
                 name: name.trim(),
                 email: email.toLowerCase().trim(),
-                brand_id: brandId,
-                brand_name: brand.name_zh,
+                brand_id: isTicketBrand ? resolvedBrandId : null,
+                brand_name: resolvedBrandName,
                 slot_id: slotId,
                 is_redeemed: false
             })
@@ -297,7 +324,7 @@ export async function POST(req: Request) {
                     slot.name_en,
                     slot.date_str,
                     slot.time_range,
-                    brand.name_zh
+                    resolvedBrandName
                 );
 
                 await transporter.sendMail({

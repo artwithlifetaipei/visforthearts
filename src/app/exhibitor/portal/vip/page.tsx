@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Users, UserPlus, Trash2, Mail, ShieldAlert, Lock, Info, 
-  Loader2, Sparkles, CheckCircle2, Copy, Check, MessageSquare, Share2
+  Loader2, Sparkles, CheckCircle2, Copy, Check, MessageSquare, Share2, ExternalLink
 } from 'lucide-react';
 import { useExhibitorLanguage } from '@/lib/ExhibitorLanguageContext';
 
@@ -64,6 +64,8 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
   const [formError, setFormError] = useState('');
   const [successNotice, setSuccessNotice] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
+  const [copiedTicketLink, setCopiedTicketLink] = useState(false);
+  const [copiedPromoText, setCopiedPromoText] = useState(false);
 
   // Helper to extract tier cleanly
   const getVipTier = (vip: any): 'VIP' | 'SVIP' => {
@@ -184,6 +186,44 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
 
   const handleShareToLine = (vip: any) => {
     const text = getLineInviteText(vip);
+    const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
+    window.open(lineUrl, '_blank', 'noopener,noreferrer');
+  };
+
+  // Dedicated Brand Ticket Registration Link & Promo Copy
+  const getDedicatedTicketLink = () => {
+    if (!brand) return 'https://www.visforthearts.com/ticket';
+    const brandParam = (brand.brand_name_en || brand.name_en || brand.brand_name_zh || brand.name_zh || brand.id).trim();
+    return `https://www.visforthearts.com/ticket?brand=${encodeURIComponent(brandParam)}`;
+  };
+
+  const getPromoMessage = () => {
+    const brandName = brand?.brand_name_zh || brand?.name_zh || 'VIS 參展品牌';
+    const link = getDedicatedTicketLink();
+    if (lang === 'en') {
+      return `[${brand?.brand_name_en || brandName} Exclusive Admission]\nWarmly inviting you to VIS Contemporary Culture 2027!\nClaim your complimentary digital entrance pass via our dedicated brand link:\n${link}\n\n✦ Dates: Jan 6–9, 2027\n✦ Venue: Taipei Zhongshan Hall (Guangfu Hall)\n* Please follow @visforthearts and @${brand?.instagram_handle || brandName} on IG before arrival. Looking forward to welcoming you!`;
+    }
+    return `【${brandName} 專屬觀展邀請】\n誠摯邀請您蒞臨 VIS Contemporary Culture 2027 當代生活文化大展！\n點擊下方品牌專屬連結，即可免費預約領取數位觀展憑證：\n${link}\n\n✦ 展期：2027 年 1 月 6 日 – 1 月 9 日\n✦ 地點：台北中山堂 光復廳（台北市中正區延平南路 98 號）\n* 入場時請出示此憑證與已追蹤 IG 畫面。期待在現場與您相見！`;
+  };
+
+  const handleCopyTicketLink = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(getDedicatedTicketLink());
+      setCopiedTicketLink(true);
+      setTimeout(() => setCopiedTicketLink(false), 3000);
+    }
+  };
+
+  const handleCopyPromoMessage = () => {
+    if (typeof navigator !== 'undefined' && navigator.clipboard) {
+      navigator.clipboard.writeText(getPromoMessage());
+      setCopiedPromoText(true);
+      setTimeout(() => setCopiedPromoText(false), 3000);
+    }
+  };
+
+  const handleShareDedicatedTicketToLine = () => {
+    const text = getPromoMessage();
     const lineUrl = `https://line.me/R/msg/text/?${encodeURIComponent(text)}`;
     window.open(lineUrl, '_blank', 'noopener,noreferrer');
   };
@@ -456,6 +496,106 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
           </button>
         </motion.div>
       )}
+
+      {/* Brand Exclusive Public Ticket Registration Link Card */}
+      <div className="bg-gradient-to-r from-[#171512] via-[#121212] to-[#171512] border border-[#DFBA87]/30 rounded-xl p-5 md:p-6 shadow-2xl relative overflow-hidden">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-[#DFBA87]/5 rounded-full blur-3xl pointer-events-none" />
+        
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+          <div className="space-y-2 max-w-2xl">
+            <div className="flex items-center gap-2">
+              <span className="w-2 h-2 rounded-full bg-[#DFBA87] animate-pulse" />
+              <span className="text-[10px] uppercase font-mono tracking-[0.25em] text-[#DFBA87] font-semibold">
+                {t('公眾預約門票・品牌專屬方案', 'Public Registration • Dedicated Brand Scheme')}
+              </span>
+            </div>
+            <h3 className="text-base sm:text-lg font-serif-garamond text-white tracking-wide">
+              {brand.brand_name_zh || brand.name_zh || '貴品牌'} {t('專屬觀展預約連結', 'Exclusive Registration Link')}
+            </h3>
+            <p className="text-xs text-neutral-400 font-light leading-relaxed">
+              {t(
+                '大會全面採用「品牌專屬連結方案」。透過此連結登記之觀眾，其電子觀展憑證將永久銘刻【貴品牌名稱】，並要求入場時出示已追蹤貴品牌 Instagram！建議將此連結放置於品牌官方 IG 個人簡介、限時動態或 LINE 官方帳號進行宣傳。',
+                'All public visitors must register via brand-dedicated links. Passes minted via your link will permanently showcase your brand name and require visitors to follow your Instagram upon entry.'
+              )}
+            </p>
+            <div className="pt-1">
+              <div className="inline-flex items-center gap-2 bg-black/60 border border-white/10 rounded-md px-3 py-1.5 text-xs font-mono text-neutral-300 max-w-full">
+                <span className="truncate select-all text-[#DFBA87]">{getDedicatedTicketLink()}</span>
+                <a
+                  href={getDedicatedTicketLink()}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-neutral-400 hover:text-white transition-colors ml-1 shrink-0"
+                  title={t('開啟專屬預約頁面', 'Open dedicated registration page')}
+                >
+                  <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
+          </div>
+
+          {/* Action buttons */}
+          <div className="flex flex-wrap sm:flex-nowrap items-center gap-2 shrink-0">
+            {/* Copy Link Button */}
+            <button
+              type="button"
+              onClick={handleCopyTicketLink}
+              className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                copiedTicketLink
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                  : 'bg-[#DFBA87]/15 hover:bg-[#DFBA87]/25 text-[#DFBA87] border border-[#DFBA87]/40'
+              }`}
+            >
+              {copiedTicketLink ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span>{t('已複製連結！', 'Link Copied!')}</span>
+                </>
+              ) : (
+                <>
+                  <Copy className="w-4 h-4" />
+                  <span>{t('一鍵複製專屬連結', 'Copy Link')}</span>
+                </>
+              )}
+            </button>
+
+            {/* Copy Promo Message */}
+            <button
+              type="button"
+              onClick={handleCopyPromoMessage}
+              className={`px-3 py-2 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-all cursor-pointer shadow-sm ${
+                copiedPromoText
+                  ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/40'
+                  : 'bg-white/5 hover:bg-white/10 text-neutral-200 border border-white/10'
+              }`}
+              title={t('複製包含展會時間與地點的社群/LINE宣傳文案', 'Copy promotional message for social media / LINE')}
+            >
+              {copiedPromoText ? (
+                <>
+                  <Check className="w-4 h-4 text-emerald-400" />
+                  <span>{t('已複製宣傳文案！', 'Text Copied!')}</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-4 h-4" />
+                  <span>{t('複製宣傳文案', 'Copy Promo Text')}</span>
+                </>
+              )}
+            </button>
+
+            {/* Direct Share to LINE */}
+            <button
+              type="button"
+              onClick={handleShareDedicatedTicketToLine}
+              className="px-3 py-2 text-[#06C755] hover:bg-[#06C755]/15 border border-[#06C755]/30 hover:border-[#06C755] rounded-lg text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+              title={t('直接開啟 LINE 分享專屬預約邀請', 'Share dedicated invitation to LINE')}
+            >
+              <MessageSquare className="w-4 h-4 fill-[#06C755]/20" />
+              <span>LINE</span>
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div className="grid lg:grid-cols-3 gap-8">
         
