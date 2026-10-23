@@ -449,7 +449,7 @@ function TicketRegistrationContent() {
                                         </>
                                     ) : (
                                         <>
-                                            歡迎來到 VIS Contemporary Culture。<strong className="font-medium text-[#1A1A1A]">{activeBrand.name_zh}</strong> 誠摯邀請您蒞臨，與我們一同探索當代生活、設計與藝術交織的無界美學。
+                                            歡迎來到 VIS Contemporary Culture。<strong className="font-medium text-[#1A1A1A]">{activeBrand.name_zh}</strong> 誠摯邀請您蒞臨，與我們一起，從文化與人文美學出發，探索當代生活，體驗這一屬於品味人士的跨界盛會。
                                             <span className="block mt-1.5 text-[#1A1A1A] font-medium">
                                                 您的品牌專屬觀展名額已為您保留，請選擇預約時段並完成憑證領取。
                                             </span>
