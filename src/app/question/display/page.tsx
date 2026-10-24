@@ -191,8 +191,8 @@ export default function PerspectiveDisplayWall() {
 
   const getQuestionPrompt = (item: DisplayItem) => {
     if (item.question_prompt) return item.question_prompt;
-    if (item.question_id === 'q1') return '你認為，一個真正懂得欣賞美的社會，應該具備什麼樣的特質？';
-    if (item.question_id === 'q2') return '對你來說，美的事物，它的價值是什麼？一句話形容。';
+    if (item.question_id === 'q1') return '要讓台灣社會更懂得欣賞美，你認為我們最需要改變哪一個觀念？';
+    if (item.question_id === 'q2') return '對你來說，美曾經改變過你生活中的什麼？';
     if (item.question_id === 'q3') return '如果希望台灣成為一個更有美感的地方，你最希望大家開始重視什麼？';
     return '美，如何成為我們共同的價值？';
   };
