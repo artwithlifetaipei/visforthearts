@@ -15,7 +15,9 @@ import {
   AlertCircle,
   FileText,
   Upload,
-  Download
+  Download,
+  AlertTriangle,
+  ArrowRight
 } from 'lucide-react';
 
 function safeGetStorage(key: string): string | null {
@@ -54,6 +56,9 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
   });
 
   const [submitting, setSubmitting] = useState(false);
+  const [attemptedSubmit, setAttemptedSubmit] = useState(false);
+  const [agreeAllNotice, setAgreeAllNotice] = useState(false);
+
   const [signedData, setSignedData] = useState<any>(() => {
     const saved = brand?.id ? safeGetStorage(`vis_portal_compliance_${brand.id}`) : null;
     if (saved) {
@@ -94,7 +99,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
     };
   });
 
-  // New States for compliance requirements
+  // States for compliance requirements
   const [specialDeposit, setSpecialDeposit] = useState(() => signedData?.rule_deposit_forfeiture || false);
   const [specialDamage, setSpecialDamage] = useState(() => signedData?.rule_damage_compensation || false);
   const [specialRefund, setSpecialRefund] = useState(() => signedData?.rule_refund_policy || false);
@@ -115,6 +120,10 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
   const depositRef = useRef<HTMLDivElement>(null);
   const damageRef = useRef<HTMLDivElement>(null);
   const refundRef = useRef<HTMLDivElement>(null);
+  const nameInputRef = useRef<HTMLInputElement>(null);
+  const idInputRef = useRef<HTMLInputElement>(null);
+  const errorCardRef = useRef<HTMLDivElement>(null);
+  const specialClausesRef = useRef<HTMLDivElement>(null);
 
   // Check scrollability of containers dynamically
   useEffect(() => {
@@ -123,19 +132,19 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
     const checkScrollability = () => {
       if (depositRef.current) {
         const { scrollHeight, clientHeight } = depositRef.current;
-        if (scrollHeight <= clientHeight + 10) {
+        if (scrollHeight <= clientHeight + 40) {
           setScrolledDeposit(true);
         }
       }
       if (damageRef.current) {
         const { scrollHeight, clientHeight } = damageRef.current;
-        if (scrollHeight <= clientHeight + 10) {
+        if (scrollHeight <= clientHeight + 40) {
           setScrolledDamage(true);
         }
       }
       if (refundRef.current) {
         const { scrollHeight, clientHeight } = refundRef.current;
-        if (scrollHeight <= clientHeight + 10) {
+        if (scrollHeight <= clientHeight + 40) {
           setScrolledRefund(true);
         }
       }
@@ -155,10 +164,12 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
     const loadCompliance = async () => {
       try {
         let currentBrand = brand;
+        let userEmail = '';
+
         if (!currentBrand) {
           const { data: { session } } = await supabase.auth.getSession();
           if (session?.user?.email) {
-            const userEmail = session.user.email.toLowerCase().trim();
+            userEmail = session.user.email.toLowerCase().trim();
             const { data } = await supabase
               .from('exhibitor_brands')
               .select('*')
@@ -197,11 +208,29 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
           setBrand(currentBrand);
           safeSetStorage('vis_portal_brand_data', JSON.stringify(currentBrand));
 
-          const { data: compliance } = await supabase
-            .from('exhibitor_compliance')
-            .select('*')
-            .eq('brand_id', currentBrand.id)
-            .maybeSingle();
+          // Try fetching existing compliance via server API first (RLS safe)
+          let compliance: any = null;
+          try {
+            const apiRes = await fetch(`/api/exhibitor/compliance?brand_id=${currentBrand.id}&email=${currentBrand.portal_email || userEmail}`);
+            if (apiRes.ok) {
+              const apiJson = await apiRes.json();
+              if (apiJson.compliance) {
+                compliance = apiJson.compliance;
+              }
+            }
+          } catch (e) {
+            console.warn('API compliance fetch failed, falling back to direct db:', e);
+          }
+
+          // Fallback direct DB fetch
+          if (!compliance) {
+            const { data } = await supabase
+              .from('exhibitor_compliance')
+              .select('*')
+              .eq('brand_id', currentBrand.id)
+              .maybeSingle();
+            compliance = data;
+          }
           
           if (compliance) {
             setSignedData(compliance);
@@ -254,6 +283,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
     setRules(prev => ({ ...prev, [name]: !prev[name] }));
   };
 
+  // Comprehensive "Agree All" that unlocks and agrees to all terms and guides user to signature
   const handleAgreeAll = () => {
     if (signedData) return;
     const allTrue = {
@@ -265,13 +295,32 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
       rule_return_inspection: true,
     };
     setRules(allTrue);
+    setScrolledDeposit(true);
+    setScrolledDamage(true);
+    setScrolledRefund(true);
+    setSpecialDeposit(true);
+    setSpecialDamage(true);
+    setSpecialRefund(true);
+    setIsLegalRepresentative(true);
+    setPrivacyConsent(true);
+    setAgreeAllNotice(true);
+    setAttemptedSubmit(false);
+    setErrorMessage('');
+
+    // Smoothly focus on legal name input
+    setTimeout(() => {
+      if (!signedName.trim() && nameInputRef.current) {
+        nameInputRef.current.focus();
+        nameInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 200);
   };
 
   const handleScroll = (type: 'deposit' | 'damage' | 'refund', e: React.UIEvent<HTMLDivElement>) => {
     if (signedData) return;
     const target = e.currentTarget;
-    // Check if scrolled to bottom (within 10px buffer)
-    if (target.scrollHeight - target.scrollTop <= target.clientHeight + 10) {
+    // Check if scrolled near bottom (within generous 40px buffer)
+    if (target.scrollHeight - target.scrollTop <= target.clientHeight + 40) {
       if (type === 'deposit') {
         setScrolledDeposit(true);
       } else if (type === 'damage') {
@@ -338,87 +387,161 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
     }
   };
 
-  const allChecked = Object.values(rules).every(Boolean);
+  // Validation states
+  const allRulesChecked = Object.values(rules).every(Boolean);
+  const specialClausesChecked = specialDeposit && specialDamage && specialRefund;
+  const isNameValid = physicalContractUrl ? true : signedName.trim().length > 0;
+  const isIdValid = physicalContractUrl ? true : signerIdNumber.trim().length > 0;
+  const isRepValid = physicalContractUrl ? true : isLegalRepresentative;
+  const isPrivacyValid = privacyConsent;
+
+  const isFormComplete = physicalContractUrl 
+    ? isPrivacyValid 
+    : (allRulesChecked && specialClausesChecked && isNameValid && isIdValid && isRepValid && isPrivacyValid);
+
+  const getMissingValidationItems = () => {
+    if (physicalContractUrl) {
+      const items: string[] = [];
+      if (!isPrivacyValid) items.push('請勾選同意《隱私權政策與個資蒐集聲明》');
+      return items;
+    }
+    const items: string[] = [];
+    if (!allRulesChecked) {
+      const uncheckedCount = Object.values(rules).filter(v => !v).length;
+      items.push(`尚有 ${uncheckedCount} 項參展規範基本條款未確認同意 (可點擊上方「一鍵全數同意」)`);
+    }
+    if (!specialClausesChecked) {
+      const missingSpecials: string[] = [];
+      if (!specialDeposit) missingSpecials.push('特別條款 A (場地維護與保證金)');
+      if (!specialDamage) missingSpecials.push('特別條款 B (古蹟場地毀損賠償)');
+      if (!specialRefund) missingSpecials.push('特別條款 C (退費與展位取消規範)');
+      items.push(`法律重大特別條款未全數勾選（缺少：${missingSpecials.join('、')}）`);
+    }
+    if (!isNameValid) items.push('請填寫授權簽署人法定姓名');
+    if (!isIdValid) items.push('請填寫授權簽署人身分證字號');
+    if (!isRepValid) items.push('請勾選確認為法定代理人或已取得充分授權');
+    if (!isPrivacyValid) items.push('請勾選同意《隱私權政策與個資蒐集聲明》');
+    return items;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!brand || signedData) return;
+    if (submitting || signedData) return;
 
-    if (physicalContractUrl) {
-      // Physical contract flow validation
-      if (!privacyConsent) {
-        setErrorMessage('請勾選並同意《隱私權政策與個資蒐集聲明》。');
-        return;
-      }
-    } else {
-      // Online signing flow validation
-      if (!allChecked) {
-        setErrorMessage('請勾選並同意所有參展規範條款。');
-        return;
-      }
+    setAttemptedSubmit(true);
 
-      if (!specialDeposit || !specialDamage || !specialRefund) {
-        setErrorMessage('請詳閱並勾選同意「場地設施維護與保證金規範」、「古蹟場地毀損賠償」與「參展費退費與展位取消規範」三項特別重大條款。');
-        return;
-      }
+    if (!brand) {
+      setErrorMessage('系統尚未讀取到品牌資料，請重新整理頁面或重新登入後台。');
+      return;
+    }
 
-      if (signedName.trim() === '') {
-        setErrorMessage('請填寫授權簽署人姓名。');
-        return;
+    const missing = getMissingValidationItems();
+    if (missing.length > 0) {
+      if (errorCardRef.current) {
+        errorCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (!isNameValid && nameInputRef.current) {
+        nameInputRef.current.focus();
+        nameInputRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else if (!specialClausesChecked && specialClausesRef.current) {
+        specialClausesRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
       }
-
-      if (signerIdNumber.trim() === '') {
-        setErrorMessage('請填寫授權簽署人身分證字號。');
-        return;
-      }
-
-      if (!isLegalRepresentative) {
-        setErrorMessage('請確認並勾選「本人確認為參展品牌之法定代理人，或已取得充分授權」核取方塊。');
-        return;
-      }
-
-      if (!privacyConsent) {
-        setErrorMessage('請勾選並同意《隱私權政策與個資蒐集聲明》。');
-        return;
-      }
+      return;
     }
 
     setSubmitting(true);
     setErrorMessage('');
 
-    try {
-      const payload = {
-        brand_id: brand.id,
-        rule_booth: rules.rule_booth,
-        rule_conduct: rules.rule_conduct,
-        rule_liability: rules.rule_liability,
-        rule_exit: rules.rule_exit,
-        rule_ip: rules.rule_ip,
-        rule_return_inspection: rules.rule_return_inspection,
-        rule_deposit_forfeiture: specialDeposit,
-        rule_damage_compensation: specialDamage,
-        rule_refund_policy: specialRefund,
-        signed_name: signedName.trim() || null,
-        signer_id_number: signerIdNumber.trim() || null,
-        is_legal_representative: isLegalRepresentative,
-        privacy_consent: privacyConsent,
-        physical_contract_url: physicalContractUrl || null,
-        signed_at: new Date().toISOString(),
-      };
+    const payload = {
+      brand_id: brand.id,
+      portal_email: brand.portal_email || '',
+      rule_booth: rules.rule_booth,
+      rule_conduct: rules.rule_conduct,
+      rule_liability: rules.rule_liability,
+      rule_exit: rules.rule_exit,
+      rule_ip: rules.rule_ip,
+      rule_return_inspection: rules.rule_return_inspection,
+      specialDeposit,
+      specialDamage,
+      specialRefund,
+      signedName: signedName.trim(),
+      signerIdNumber: signerIdNumber.trim().toUpperCase(),
+      isLegalRepresentative,
+      privacyConsent,
+      physicalContractUrl: physicalContractUrl || null,
+    };
 
+    try {
+      // 1. Submit via server API handler for privileged upsert & FK auto-healing
+      const res = await fetch('/api/exhibitor/compliance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
+      const resJson = await res.json();
+
+      if (res.ok && resJson.success && resJson.compliance) {
+        setSignedData(resJson.compliance);
+        safeSetStorage(`vis_portal_compliance_${resJson.compliance.brand_id}`, JSON.stringify(resJson.compliance));
+        if (brand.id !== resJson.compliance.brand_id) {
+          const updatedBrand = { ...brand, id: resJson.compliance.brand_id };
+          setBrand(updatedBrand);
+          safeSetStorage('vis_portal_brand_data', JSON.stringify(updatedBrand));
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      if (!res.ok && resJson.error && res.status === 400) {
+        setErrorMessage(resJson.error);
+        if (errorCardRef.current) {
+          errorCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        return;
+      }
+
+      console.warn('API returned non-200, attempting client Supabase upsert fallback:', resJson);
+
+      // 2. Direct Supabase Upsert Fallback
       const { data, error } = await supabase
         .from('exhibitor_compliance')
-        .insert(payload)
+        .upsert({
+          brand_id: brand.id,
+          rule_booth: rules.rule_booth,
+          rule_conduct: rules.rule_conduct,
+          rule_liability: rules.rule_liability,
+          rule_exit: rules.rule_exit,
+          rule_ip: rules.rule_ip,
+          rule_return_inspection: rules.rule_return_inspection,
+          rule_deposit_forfeiture: specialDeposit,
+          rule_damage_compensation: specialDamage,
+          rule_refund_policy: specialRefund,
+          signed_name: signedName.trim() || null,
+          signer_id_number: signerIdNumber.trim().toUpperCase() || null,
+          is_legal_representative: isLegalRepresentative,
+          privacy_consent: privacyConsent,
+          physical_contract_url: physicalContractUrl || null,
+          signed_at: new Date().toISOString(),
+        }, { onConflict: 'brand_id' })
         .select()
         .single();
 
       if (error) {
-        setErrorMessage(`儲存失敗: ${error.message}`);
+        setErrorMessage(`合約送出失敗: ${resJson?.error || error.message}`);
+        if (errorCardRef.current) {
+          errorCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
       } else {
         setSignedData(data);
+        safeSetStorage(`vis_portal_compliance_${brand.id}`, JSON.stringify(data));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     } catch (err: any) {
-      setErrorMessage('系統連線異常。');
+      console.error('Submission exception:', err);
+      setErrorMessage(`系統送出異常 (${err.message || '連線逾時'})，請檢查網路連線或稍後再試。`);
+      if (errorCardRef.current) {
+        errorCardRef.current.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     } finally {
       setSubmitting(false);
     }
@@ -549,25 +672,18 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
               違規行為之類型與處置 (備忘錄第八條)
             </h4>
             <ul className="list-disc pl-5 space-y-1 text-neutral-400">
-              <li><span className="text-white">噪音喧嘩：</span>禁止高聲喧嘩、未經核准使用擴音設備或播放音樂音量過大。</li>
-              <li><span className="text-white">展位超界與動線安全：</span>超出劃定範圍陳列、阻擋消防通道或緊急出口。</li>
-              <li><span className="text-white">活動違規：</span>未經事前書面核准擅自舉辦講座、表演、直播或商業攝影。</li>
-              <li>
-                <strong className="text-rose-400 font-medium">重大違規即時處理：</strong>
-                經警告後仍持續或重複違規、破壞古蹟場地、對大會形象或VIP體驗造成重大損害、或涉及假貨侵權者，大會得<strong className="text-white">不經催告立即終止合約，要求撤展</strong>，已繳費用概不退還。
-              </li>
+              <li>若有超出展位範圍、未依規定處理垃圾、未經核可舉辦活動、製造噪音等違規情形，大會將先行勸告並給予合理改善期限。</li>
+              <li>逾期未改善者，大會得進行必要處置（包括但不限於移除違規物品、限制部分活動），因此產生之費用由品牌方負擔。</li>
+              <li>情節重大嚴重影響展會營運或公共安全者，大會得終止其參展資格並要求即刻撤展，已繳費用概不退還。</li>
             </ul>
           </div>
           <div>
             <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
               <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
-              乙方不得單方終止合約 (備忘錄第十條)
+              合約效力與終止規範 (備忘錄第十條)
             </h4>
-            <p className="text-neutral-400 mb-2">
-              自本合約成立日起，品牌方<strong className="text-white">不得以任何理由單方終止、解除、撤銷或拒絕履行</strong>本合約。未達預期銷售成果、未獲額外宣傳資源、內部營運決策變動或市場變化等均不得作為解約理由。
-            </p>
             <p className="text-neutral-400">
-              拒絕進場、未完成設置或提前撤離均視為重大違約，大會將沒收全額費用，並得向品牌方請求包含行政、場地、招商損失及商譽損害在內之一切損害賠償。
+              本備忘錄自雙方簽署完成之日起生效，至展會結束且所有費用與保證金清算完畢之日止。除不可抗力或雙方書面同意外，任一方均不得單方終止本備忘錄。
             </p>
           </div>
         </div>
@@ -575,28 +691,19 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
     },
     {
       id: 'rule_ip' as const,
-      title: '五、合作保密、支持裁量與法律管轄 Confidentiality, Support & Jurisdiction',
-      summary: '保護大會商業機密與價格條件、定義大會支持資源裁量權，以及約定準據法與管轄法院。',
+      title: '五、智財保障、大會資源裁量與管轄法院 Intellectual Property & Jurisdiction',
+      summary: '保障展出商品之原創與合法授權，授予大會合理宣傳推廣權限，並載明準據法與第一審管轄法院。',
       content: (
         <div className="space-y-4 text-neutral-300 text-xs font-light leading-relaxed">
           <div>
             <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
               <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
-              合作資訊保密條款 (備忘錄第七條)
+              智慧財產權與授權 (備忘錄第七條)
             </h4>
-            <ul className="list-disc pl-5 space-y-1.5 text-neutral-400">
-              <li>
-                <strong className="text-white">保密範圍：</strong>
-                本合約所載之展費金額、條件、折扣、大會內部招商策略、品牌分級、資源配置、VIP導入與媒體安排等任何未公開資訊，品牌方負有嚴格保密義務。
-              </li>
-              <li>
-                <strong className="text-white">禁止行為：</strong>
-                禁止向其他參展品牌、第三人揭露價格或合作條件，或於公開/半公開場合比較散布價格政策。
-              </li>
-              <li>
-                <strong className="text-rose-400 font-medium">違約後果：</strong>
-                違反保密義務者，大會得不經催告立即終止合約、沒收費用，並請求因此所生之一切損害賠償。保密義務自合約成立日起生效，且於<strong className="text-white">合約終止後持續有效三年</strong>。
-              </li>
+            <ul className="list-disc pl-5 space-y-1 text-neutral-400">
+              <li>參展品牌保證其展出之所有商品、作品、設計、商標及宣傳品均擁有合法之智慧財產權或已取得合法授權。</li>
+              <li>嚴禁展出、販售任何仿冒、侵權或來源不明之商品；若有侵權爭議，品牌方應自負全責。</li>
+              <li>品牌方同意授權大會於展會宣傳、紀錄、報導之目的範圍內，非專屬、無償使用其品牌名稱、Logo 及現場展品照片與影像。</li>
             </ul>
           </div>
           <div>
@@ -649,8 +756,10 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
     }
   ];
 
+  const missingItems = getMissingValidationItems();
+
   return (
-    <div className="max-w-4xl mx-auto space-y-8 font-sans text-white pb-12">
+    <div className="max-w-4xl mx-auto space-y-8 font-sans text-white pb-16">
       
       {/* Header Banner */}
       <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#1c1917] to-[#0c0a09] border border-white/10 p-6 md:p-8">
@@ -671,7 +780,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
             <div className="text-right hidden md:block">
               <span className="block text-[10px] text-neutral-500 uppercase tracking-widest font-mono">Current Status</span>
               <span className={`text-xs font-semibold ${signedData ? 'text-emerald-400' : 'text-amber-400'}`}>
-                {signedData ? '● 已簽署 Completed' : '○ 待簽署 Pending'}
+                {signedData ? '● 已完成備忘錄簽署 Completed' : '○ 待簽署合約 Pending'}
               </span>
             </div>
           </div>
@@ -683,20 +792,23 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
         <motion.div 
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          className="relative overflow-hidden bg-emerald-500/[0.03] border border-emerald-500/25 rounded-2xl p-6 md:p-8 space-y-6"
+          className="relative overflow-hidden bg-emerald-500/[0.04] border border-emerald-500/30 rounded-2xl p-6 md:p-8 space-y-6"
         >
           <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl"></div>
           
           <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-emerald-400 flex-shrink-0">
+            <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0 shadow-lg shadow-emerald-500/10">
               <ShieldCheck className="w-6 h-6" />
             </div>
             <div className="space-y-1">
-              <h2 className="text-lg font-medium text-white tracking-wide">
-                {signedData.physical_contract_url ? '實體備忘錄合約用印檔案已提交' : '大會參展規範備忘錄簽署完成'}
+              <h2 className="text-lg font-medium text-white tracking-wide flex items-center gap-2">
+                <span>{signedData.physical_contract_url ? '實體備忘錄合約用印檔案已提交存查' : '大會參展規範備忘錄電子簽署已完成'}</span>
+                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded font-mono">
+                  正式締約生效
+                </span>
               </h2>
               <p className="text-xs text-neutral-400 font-light max-w-xl leading-relaxed">
-                貴品牌已成功簽署參展備忘錄。此線上合約具有正式之法律拘束力。如有任何疑問，請透過大會官方群組與您的專屬展商專員聯絡。
+                貴品牌已成功簽署參展規範備忘錄。此線上合約具有正式之法律拘束力。如有任何展務疑問，請透過大會官方群組與您的專屬專員聯絡。
               </p>
             </div>
           </div>
@@ -704,7 +816,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
           <div className="grid md:grid-cols-3 gap-4 bg-white/[0.02] border border-white/5 rounded-xl p-5 text-xs font-mono">
             <div>
               <span className="text-neutral-500 block text-[9px] uppercase tracking-wider mb-1">簽署品牌 Brand Name</span>
-              <span className="text-white font-medium">{brand?.brand_name_zh} ({brand?.brand_name_en})</span>
+              <span className="text-white font-medium">{brand?.brand_name_zh} ({brand?.brand_name_en || ''})</span>
             </div>
             <div>
               <span className="text-neutral-500 block text-[9px] uppercase tracking-wider mb-1">
@@ -746,7 +858,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                   </span>
                 </div>
                 <div>
-                  <span className="text-neutral-500 block text-[9px] uppercase tracking-wider mb-1">特別條款簽署 Special Clauses</span>
+                  <span className="text-neutral-500 block text-[9px] uppercase tracking-wider mb-1">特別重大條款 Special Clauses</span>
                   <span className="text-emerald-400 font-medium">✓ 已同意重大條款 (A, B & C)</span>
                 </div>
               </>
@@ -758,31 +870,60 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
         <div className="space-y-6">
           
           {/* Quick Action bar to Agree all */}
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 rounded-xl bg-white/[0.02] border border-white/5">
-            <div className="flex items-center gap-2">
-              <CheckSquare className="w-4 h-4 text-[#DFBA87]" />
-              <span className="text-xs text-neutral-300 font-light">為了方便您快速閱讀與確認，您可以展開各段落查閱，或一鍵勾選六項基本規範。</span>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 p-4 md:p-5 rounded-xl bg-gradient-to-r from-[#DFBA87]/10 via-[#C9A96E]/5 to-transparent border border-[#DFBA87]/25 shadow-lg shadow-black/20">
+            <div className="flex items-start gap-3">
+              <CheckSquare className="w-5 h-5 text-[#DFBA87] flex-shrink-0 mt-0.5" />
+              <div className="space-y-0.5">
+                <span className="text-xs text-white font-medium block">一鍵全數同意條款 (推薦快速簽署流程)</span>
+                <span className="text-[11px] text-neutral-400 font-light block">
+                  點擊右側按鈕即可一鍵勾選所有基本規範與特別重大條款，接著直接填寫簽署人姓名及身分證即可快速送出。
+                </span>
+              </div>
             </div>
             <button
               type="button"
               onClick={handleAgreeAll}
-              className="px-4 py-1.5 rounded bg-white/5 border border-white/10 text-white text-xs hover:bg-[#C9A96E]/20 hover:border-[#C9A96E]/30 transition-all cursor-pointer font-medium uppercase tracking-wider"
+              className="px-4 py-2 rounded-lg bg-[#C9A96E] hover:bg-[#B39359] text-white text-xs transition-all cursor-pointer font-semibold uppercase tracking-wider whitespace-nowrap shadow-md shadow-[#C9A96E]/20 flex items-center gap-1.5"
             >
-              一鍵勾選基本條款 Agree Basics
+              <Check className="w-4 h-4 stroke-[2.5px]" /> 一鍵全數同意條款 Agree All
             </button>
           </div>
+
+          {agreeAllNotice && (
+            <motion.div
+              initial={{ opacity: 0, y: -8 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center justify-between gap-3"
+            >
+              <div className="flex items-center gap-2">
+                <Check className="w-4 h-4 text-emerald-400 stroke-[3px]" />
+                <span>已全數勾選所有合約規範與特別重大條款！請在下方填寫【簽署人法定姓名】與【身分證字號】即可直接送出。</span>
+              </div>
+              <button 
+                type="button" 
+                onClick={() => setAgreeAllNotice(false)}
+                className="text-emerald-400 hover:text-white text-[11px] underline"
+              >
+                我知道了
+              </button>
+            </motion.div>
+          )}
 
           {/* Standard five clauses */}
           <div className="space-y-4">
             {sections.map((sec) => {
               const isExpanded = expandedSections[sec.id];
               const isChecked = rules[sec.id];
+              const isMissing = attemptedSubmit && !isChecked;
+
               return (
                 <div 
                   key={sec.id}
                   className={`border rounded-xl transition-all duration-300 overflow-hidden ${
                     isChecked 
-                      ? 'bg-white/[0.03] border-[#C9A96E]/25 shadow-lg shadow-black/10' 
+                      ? 'bg-white/[0.03] border-[#C9A96E]/30 shadow-lg shadow-black/10' 
+                      : isMissing
+                      ? 'bg-rose-500/[0.03] border-rose-500/40 ring-1 ring-rose-500/20'
                       : 'bg-white/[0.01] border-white/5 hover:border-white/10'
                   }`}
                 >
@@ -798,6 +939,8 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                         className={`w-5 h-5 rounded border flex items-center justify-center transition-all flex-shrink-0 ${
                           isChecked 
                             ? 'bg-[#C9A96E] border-[#C9A96E] text-white' 
+                            : isMissing
+                            ? 'border-rose-500 bg-rose-500/10 text-rose-400'
                             : 'border-white/20 hover:border-[#C9A96E]/50'
                         }`}
                       >
@@ -805,7 +948,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                       </div>
                       
                       <div className="space-y-1">
-                        <h3 className={`text-xs md:text-sm font-medium tracking-wide transition-colors ${isChecked ? 'text-[#DFBA87]' : 'text-neutral-200'}`}>
+                        <h3 className={`text-xs md:text-sm font-medium tracking-wide transition-colors ${isChecked ? 'text-[#DFBA87]' : isMissing ? 'text-rose-300' : 'text-neutral-200'}`}>
                           {sec.title}
                         </h3>
                         <p className="text-[11px] text-neutral-500 font-light truncate max-w-[280px] sm:max-w-xl md:max-w-2xl">
@@ -815,8 +958,14 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                     </div>
 
                     <div className="flex items-center gap-3">
-                      <span className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded ${isChecked ? 'bg-emerald-500/10 text-emerald-400' : 'bg-neutral-800 text-neutral-400'}`}>
-                        {isChecked ? 'Accepted' : 'Unchecked'}
+                      <span className={`text-[10px] uppercase font-mono px-2 py-0.5 rounded ${
+                        isChecked 
+                          ? 'bg-emerald-500/10 text-emerald-400' 
+                          : isMissing
+                          ? 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
+                          : 'bg-neutral-800 text-neutral-400'
+                      }`}>
+                        {isChecked ? 'Accepted' : isMissing ? 'Required' : 'Unchecked'}
                       </span>
                       <ChevronDown className={`w-4 h-4 text-neutral-500 transition-transform duration-300 ${isExpanded ? 'rotate-180' : ''}`} />
                     </div>
@@ -865,26 +1014,37 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
             })}
           </div>
 
-          {/* Special Clauses block - Scroll required */}
-          <div className="bg-[#110f0e] border border-rose-500/15 rounded-xl p-5 md:p-6 space-y-6 relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/[0.02] rounded-full blur-2xl"></div>
+          {/* Special Clauses block */}
+          <div ref={specialClausesRef} className="bg-[#110f0e] border border-rose-500/20 rounded-xl p-5 md:p-6 space-y-6 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-rose-500/[0.03] rounded-full blur-2xl"></div>
             
             <div className="space-y-1">
               <h3 className="text-sm font-semibold tracking-wider text-rose-400 uppercase flex items-center gap-2">
-                <AlertCircle className="w-4.5 h-4.5 text-rose-400" /> 法律重大特別條款 (強制滾動至底部解鎖)
+                <AlertCircle className="w-4.5 h-4.5 text-rose-400" /> 法律重大特別條款 (強制閱讀確認)
               </h3>
               <p className="text-[11px] text-neutral-400 leading-relaxed font-light">
-                依法律實務與風險合規性，以下兩項條款涉及重大權益。請分別將文字方塊滾動至最底部，以解鎖個別複選框。
+                依法律實務與古蹟展場風險合規性，以下三項條款涉及重大權益。請詳閱文字說明並個別勾選同意。
               </p>
             </div>
             
             {/* Special Clause A: Facility Care & Deposit Refund */}
-            <div className="space-y-2.5">
-              <div className="flex justify-between items-center">
+            <div className={`space-y-2.5 p-3.5 rounded-lg transition-all ${attemptedSubmit && !specialDeposit ? 'bg-rose-500/[0.04] border border-rose-500/30' : ''}`}>
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <span className="text-xs font-semibold text-neutral-200">特別條款 A：場地設施維護與保證金規範 Facility Care & Deposit Terms</span>
-                <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${scrolledDeposit ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25' : 'bg-neutral-800 text-neutral-400'}`}>
-                  {scrolledDeposit ? '✓ 已解鎖 Unlocked' : '請向下滾動閱讀至底部'}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScrolledDeposit(true);
+                    setSpecialDeposit(true);
+                  }}
+                  className={`text-[10px] px-2.5 py-1 rounded font-mono transition-all cursor-pointer self-start sm:self-auto ${
+                    specialDeposit 
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25' 
+                      : 'bg-white/10 hover:bg-[#C9A96E]/20 text-neutral-300 hover:text-white border border-white/10'
+                  }`}
+                >
+                  {specialDeposit ? '✓ 已確認同意 Agreed' : (scrolledDeposit ? '點擊勾選同意 Agree' : '點擊快速閱畢並同意')}
+                </button>
               </div>
               <div 
                 ref={depositRef}
@@ -898,30 +1058,49 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
               <div className="flex items-center gap-3 pt-1">
                 <div 
                   onClick={() => {
-                    if (scrolledDeposit) {
-                      setSpecialDeposit(!specialDeposit);
-                    }
+                    setScrolledDeposit(true);
+                    setSpecialDeposit(!specialDeposit);
                   }}
-                  className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all ${
-                    !scrolledDeposit ? 'bg-neutral-800 border-neutral-700 cursor-not-allowed text-neutral-600' :
-                    specialDeposit ? 'bg-rose-500/80 border-rose-500 text-white cursor-pointer' : 'border-white/20 hover:border-rose-500/50 cursor-pointer'
+                  className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${
+                    specialDeposit 
+                      ? 'bg-rose-500/80 border-rose-500 text-white' 
+                      : attemptedSubmit && !specialDeposit
+                      ? 'border-rose-500 bg-rose-500/20'
+                      : 'border-white/20 hover:border-rose-500/50'
                   }`}
                 >
                   {specialDeposit && <Check className="w-3.5 h-3.5 stroke-[3px]" />}
                 </div>
-                <label className={`text-xs select-none ${!scrolledDeposit ? 'text-neutral-500 cursor-not-allowed' : 'text-neutral-300 cursor-pointer'}`}>
+                <label 
+                  onClick={() => {
+                    setScrolledDeposit(true);
+                    setSpecialDeposit(!specialDeposit);
+                  }}
+                  className={`text-xs select-none cursor-pointer ${attemptedSubmit && !specialDeposit ? 'text-rose-300 font-medium' : 'text-neutral-300'}`}
+                >
                   本人已詳閱並同意「特別條款 A：場地設施維護與保證金規範」 *
                 </label>
               </div>
             </div>
 
             {/* Special Clause B: Historic site damage */}
-            <div className="space-y-2.5">
-              <div className="flex justify-between items-center">
+            <div className={`space-y-2.5 p-3.5 rounded-lg transition-all ${attemptedSubmit && !specialDamage ? 'bg-rose-500/[0.04] border border-rose-500/30' : ''}`}>
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <span className="text-xs font-semibold text-neutral-200">特別條款 B：古蹟場地毀損賠償 Historical Site Damage Compensation</span>
-                <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${scrolledDamage ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25' : 'bg-neutral-800 text-neutral-400'}`}>
-                  {scrolledDamage ? '✓ 已解鎖 Unlocked' : '請向下滾動閱讀至底部'}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScrolledDamage(true);
+                    setSpecialDamage(true);
+                  }}
+                  className={`text-[10px] px-2.5 py-1 rounded font-mono transition-all cursor-pointer self-start sm:self-auto ${
+                    specialDamage 
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25' 
+                      : 'bg-white/10 hover:bg-[#C9A96E]/20 text-neutral-300 hover:text-white border border-white/10'
+                  }`}
+                >
+                  {specialDamage ? '✓ 已確認同意 Agreed' : (scrolledDamage ? '點擊勾選同意 Agree' : '點擊快速閱畢並同意')}
+                </button>
               </div>
               <div 
                 ref={damageRef}
@@ -935,30 +1114,49 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
               <div className="flex items-center gap-3 pt-1">
                 <div 
                   onClick={() => {
-                    if (scrolledDamage) {
-                      setSpecialDamage(!specialDamage);
-                    }
+                    setScrolledDamage(true);
+                    setSpecialDamage(!specialDamage);
                   }}
-                  className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all ${
-                    !scrolledDamage ? 'bg-neutral-800 border-neutral-700 cursor-not-allowed text-neutral-600' :
-                    specialDamage ? 'bg-rose-500/80 border-rose-500 text-white cursor-pointer' : 'border-white/20 hover:border-rose-500/50 cursor-pointer'
+                  className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${
+                    specialDamage 
+                      ? 'bg-rose-500/80 border-rose-500 text-white' 
+                      : attemptedSubmit && !specialDamage
+                      ? 'border-rose-500 bg-rose-500/20'
+                      : 'border-white/20 hover:border-rose-500/50'
                   }`}
                 >
                   {specialDamage && <Check className="w-3.5 h-3.5 stroke-[3px]" />}
                 </div>
-                <label className={`text-xs select-none ${!scrolledDamage ? 'text-neutral-500 cursor-not-allowed' : 'text-neutral-300 cursor-pointer'}`}>
+                <label 
+                  onClick={() => {
+                    setScrolledDamage(true);
+                    setSpecialDamage(!specialDamage);
+                  }}
+                  className={`text-xs select-none cursor-pointer ${attemptedSubmit && !specialDamage ? 'text-rose-300 font-medium' : 'text-neutral-300'}`}
+                >
                   本人已詳閱並同意「特別條款 B：古蹟場地毀損賠償」 *
                 </label>
               </div>
             </div>
 
             {/* Special Clause C: Refund and cancellation policy */}
-            <div className="space-y-2.5">
-              <div className="flex justify-between items-center">
+            <div className={`space-y-2.5 p-3.5 rounded-lg transition-all ${attemptedSubmit && !specialRefund ? 'bg-rose-500/[0.04] border border-rose-500/30' : ''}`}>
+              <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-2">
                 <span className="text-xs font-semibold text-neutral-200">特別條款 C：參展費退費與展位取消規範 Refund & Cancellation Policy</span>
-                <span className={`text-[10px] px-2 py-0.5 rounded font-mono ${scrolledRefund ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25' : 'bg-neutral-800 text-neutral-400'}`}>
-                  {scrolledRefund ? '✓ 已解鎖 Unlocked' : '請向下滾動閱讀至底部'}
-                </span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setScrolledRefund(true);
+                    setSpecialRefund(true);
+                  }}
+                  className={`text-[10px] px-2.5 py-1 rounded font-mono transition-all cursor-pointer self-start sm:self-auto ${
+                    specialRefund 
+                      ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/25' 
+                      : 'bg-white/10 hover:bg-[#C9A96E]/20 text-neutral-300 hover:text-white border border-white/10'
+                  }`}
+                >
+                  {specialRefund ? '✓ 已確認同意 Agreed' : (scrolledRefund ? '點擊勾選同意 Agree' : '點擊快速閱畢並同意')}
+                </button>
               </div>
               <div 
                 ref={refundRef}
@@ -987,18 +1185,26 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
               <div className="flex items-center gap-3 pt-1">
                 <div 
                   onClick={() => {
-                    if (scrolledRefund) {
-                      setSpecialRefund(!specialRefund);
-                    }
+                    setScrolledRefund(true);
+                    setSpecialRefund(!specialRefund);
                   }}
-                  className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all ${
-                    !scrolledRefund ? 'bg-neutral-800 border-neutral-700 cursor-not-allowed text-neutral-600' :
-                    specialRefund ? 'bg-rose-500/80 border-rose-500 text-white cursor-pointer' : 'border-white/20 hover:border-rose-500/50 cursor-pointer'
+                  className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${
+                    specialRefund 
+                      ? 'bg-rose-500/80 border-rose-500 text-white' 
+                      : attemptedSubmit && !specialRefund
+                      ? 'border-rose-500 bg-rose-500/20'
+                      : 'border-white/20 hover:border-rose-500/50'
                   }`}
                 >
                   {specialRefund && <Check className="w-3.5 h-3.5 stroke-[3px]" />}
                 </div>
-                <label className={`text-xs select-none ${!scrolledRefund ? 'text-neutral-500 cursor-not-allowed' : 'text-neutral-300 cursor-pointer'}`}>
+                <label 
+                  onClick={() => {
+                    setScrolledRefund(true);
+                    setSpecialRefund(!specialRefund);
+                  }}
+                  className={`text-xs select-none cursor-pointer ${attemptedSubmit && !specialRefund ? 'text-rose-300 font-medium' : 'text-neutral-300'}`}
+                >
                   本人已詳閱並同意「特別條款 C：參展費退費與展位取消規範」 *
                 </label>
               </div>
@@ -1033,13 +1239,6 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                   </span>
                 </div>
               </div>
-
-              {errorMessage && (
-                <div className="flex items-center gap-2 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/20 p-3.5 rounded-lg font-mono">
-                  <AlertCircle className="w-4.5 h-4.5 flex-shrink-0" />
-                  <span>{errorMessage}</span>
-                </div>
-              )}
 
               {/* Physical Contract Alternative Section */}
               <div className="bg-white/[0.02] border border-dashed border-white/10 rounded-xl p-4 md:p-5 space-y-4">
@@ -1115,16 +1314,25 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                     </label>
                     <div className="relative">
                       <input 
+                        ref={nameInputRef}
                         type="text" 
                         value={signedName}
                         onChange={(e) => setSignedName(e.target.value)}
                         placeholder={physicalContractUrl ? "（使用實體合約，免填此欄）" : "請輸入法定代表人或授權簽署人姓名"}
-                        className="w-full text-xs border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded-lg pl-10 pr-4 py-3 outline-none text-white transition-colors"
+                        className={`w-full text-xs border rounded-lg pl-10 pr-4 py-3 outline-none text-white transition-colors ${
+                          attemptedSubmit && !physicalContractUrl && !isNameValid
+                            ? 'border-rose-500 bg-rose-500/10 focus:border-rose-400'
+                            : 'border-white/10 focus:border-[#C9A96E] bg-white/5'
+                        }`}
                         disabled={!!physicalContractUrl}
-                        required={!physicalContractUrl}
                       />
-                      <Signature className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3.5" />
+                      <Signature className={`w-4 h-4 absolute left-3.5 top-3.5 ${attemptedSubmit && !physicalContractUrl && !isNameValid ? 'text-rose-400' : 'text-neutral-500'}`} />
                     </div>
+                    {attemptedSubmit && !physicalContractUrl && !isNameValid && (
+                      <p className="text-[11px] text-rose-400 flex items-center gap-1 font-mono">
+                        <AlertCircle className="w-3 h-3" /> 請填寫授權簽署人法定姓名
+                      </p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
@@ -1133,70 +1341,150 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                     </label>
                     <div className="relative">
                       <input 
+                        ref={idInputRef}
                         type="text" 
                         value={signerIdNumber}
                         onChange={(e) => setSignerIdNumber(e.target.value)}
                         placeholder={physicalContractUrl ? "（使用實體合約，免填此欄）" : "請輸入身分證字號 (僅供合約核實使用)"}
-                        className="w-full text-xs border border-white/10 focus:border-[#C9A96E] bg-white/5 rounded-lg pl-10 pr-4 py-3 outline-none text-white transition-colors font-mono"
+                        className={`w-full text-xs border rounded-lg pl-10 pr-4 py-3 outline-none text-white transition-colors font-mono ${
+                          attemptedSubmit && !physicalContractUrl && !isIdValid
+                            ? 'border-rose-500 bg-rose-500/10 focus:border-rose-400'
+                            : 'border-white/10 focus:border-[#C9A96E] bg-white/5'
+                        }`}
                         disabled={!!physicalContractUrl}
-                        required={!physicalContractUrl}
                       />
-                      <FileText className="w-4 h-4 text-neutral-500 absolute left-3.5 top-3.5" />
+                      <FileText className={`w-4 h-4 absolute left-3.5 top-3.5 ${attemptedSubmit && !physicalContractUrl && !isIdValid ? 'text-rose-400' : 'text-neutral-500'}`} />
                     </div>
+                    {attemptedSubmit && !physicalContractUrl && !isIdValid && (
+                      <p className="text-[11px] text-rose-400 flex items-center gap-1 font-mono">
+                        <AlertCircle className="w-3 h-3" /> 請填寫授權簽署人身分證字號
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                <div className="flex items-start gap-3">
+                <div className={`p-3 rounded-lg transition-all flex items-start gap-3 ${
+                  attemptedSubmit && !physicalContractUrl && !isRepValid ? 'bg-rose-500/10 border border-rose-500/30' : ''
+                }`}>
                   <div 
                     onClick={() => {
                       if (!physicalContractUrl) {
                         setIsLegalRepresentative(!isLegalRepresentative);
                       }
                     }}
-                    className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all ${
-                      isLegalRepresentative ? 'bg-[#C9A96E] border-[#C9A96E] text-white cursor-pointer' : 'border-white/20 hover:border-[#C9A96E]/50 cursor-pointer'
+                    className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${
+                      isLegalRepresentative 
+                        ? 'bg-[#C9A96E] border-[#C9A96E] text-white' 
+                        : attemptedSubmit && !physicalContractUrl && !isRepValid
+                        ? 'border-rose-500 bg-rose-500/20'
+                        : 'border-white/20 hover:border-[#C9A96E]/50'
                     }`}
                   >
                     {isLegalRepresentative && <Check className="w-3.5 h-3.5 stroke-[3px]" />}
                   </div>
-                  <label className="text-xs text-neutral-300 cursor-pointer select-none leading-normal">
+                  <label 
+                    onClick={() => {
+                      if (!physicalContractUrl) {
+                        setIsLegalRepresentative(!isLegalRepresentative);
+                      }
+                    }}
+                    className={`text-xs cursor-pointer select-none leading-normal ${
+                      attemptedSubmit && !physicalContractUrl && !isRepValid ? 'text-rose-300 font-medium' : 'text-neutral-300'
+                    }`}
+                  >
                     本人確認為參展品牌之法定代理人，或已取得法定代理人之充分授權，有權代表本公司簽署此備忘錄。 *
                   </label>
                 </div>
               </div>
 
-              {/* General Consent (Always enabled, because they still submit the form) */}
-              <div className="flex items-start gap-3 border-t border-white/5 pt-4">
+              {/* General Consent */}
+              <div className={`flex items-start gap-3 border-t border-white/5 pt-4 p-3 rounded-lg transition-all ${
+                attemptedSubmit && !isPrivacyValid ? 'bg-rose-500/10 border border-rose-500/30' : ''
+              }`}>
                 <div 
                   onClick={() => {
                     setPrivacyConsent(!privacyConsent);
                   }}
-                  className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all ${
-                    privacyConsent ? 'bg-[#C9A96E] border-[#C9A96E] text-white cursor-pointer' : 'border-white/20 hover:border-[#C9A96E]/50 cursor-pointer'
+                  className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 transition-all cursor-pointer ${
+                    privacyConsent 
+                      ? 'bg-[#C9A96E] border-[#C9A96E] text-white' 
+                      : attemptedSubmit && !isPrivacyValid
+                      ? 'border-rose-500 bg-rose-500/20'
+                      : 'border-white/20 hover:border-[#C9A96E]/50'
                   }`}
                 >
                   {privacyConsent && <Check className="w-3.5 h-3.5 stroke-[3px]" />}
                 </div>
-                <div className="text-xs text-neutral-400 select-none leading-normal">
-                  本人確認並同意 <strong className="text-neutral-300">《隱私權政策與個資蒐集聲明》</strong>。主辦單位承諾：本表單所蒐集之身分證字號與用印合約檔案，僅供本屆大展締約、法務備查與身分核實使用，並將採用完善的加密存儲措施保護，本展會結束後 60 日內將對此類機敏性資料進行去識別化或全數刪除。 *
+                <div 
+                  onClick={() => setPrivacyConsent(!privacyConsent)}
+                  className={`text-xs select-none leading-normal cursor-pointer ${
+                    attemptedSubmit && !isPrivacyValid ? 'text-rose-200' : 'text-neutral-400'
+                  }`}
+                >
+                  本人確認並同意 <strong className="text-neutral-200 underline">《隱私權政策與個資蒐集聲明》</strong>。主辦單位承諾：本表單所蒐集之身分證字號與用印合約檔案，僅供本屆大展締約、法務備查與身分核實使用，並將採用完善的加密存儲措施保護，本展會結束後 60 日內將對此類機敏性資料進行去識別化或全數刪除。 *
                 </div>
               </div>
+
+              {/* Interactive Validation Feedback Card */}
+              {attemptedSubmit && missingItems.length > 0 && (
+                <div ref={errorCardRef} className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-300 space-y-2">
+                  <div className="flex items-center gap-2 font-semibold text-rose-400 text-xs">
+                    <AlertTriangle className="w-4 h-4 flex-shrink-0" />
+                    <span>尚有 {missingItems.length} 項簽署要件未完成，請補充後送出：</span>
+                  </div>
+                  <ul className="list-disc pl-5 space-y-1 text-xs text-neutral-300">
+                    {missingItems.map((item, idx) => (
+                      <li key={idx} className="leading-relaxed">{item}</li>
+                    ))}
+                  </ul>
+                  <div className="pt-1 flex items-center gap-2">
+                    <button
+                      type="button"
+                      onClick={handleAgreeAll}
+                      className="text-[11px] bg-rose-500/20 hover:bg-rose-500/30 text-rose-200 px-3 py-1 rounded border border-rose-500/40 font-medium transition-all cursor-pointer flex items-center gap-1"
+                    >
+                      <Check className="w-3 h-3" /> 一鍵全數同意所有條款
+                    </button>
+                    <span className="text-[10px] text-neutral-400">（點擊後只需補填姓名及身分證）</span>
+                  </div>
+                </div>
+              )}
+
+              {/* Server / System Error Message */}
+              {errorMessage && (
+                <div className="flex items-center gap-2 text-xs text-rose-400 bg-rose-500/10 border border-rose-500/30 p-4 rounded-lg font-mono">
+                  <AlertCircle className="w-4.5 h-4.5 flex-shrink-0" />
+                  <span>{errorMessage}</span>
+                </div>
+              )}
 
               {/* Submit button */}
               <div className="pt-2">
                 <button
                   type="submit"
-                  disabled={submitting || (!physicalContractUrl && (!allChecked || !specialDeposit || !specialDamage || !specialRefund || signedName.trim() === '' || signerIdNumber.trim() === '' || !isLegalRepresentative)) || !privacyConsent}
-                  className="w-full bg-[#C9A96E] hover:bg-[#B39359] disabled:bg-neutral-800 disabled:text-neutral-500 text-white py-3 rounded-lg text-xs font-semibold tracking-[0.15em] uppercase transition-all flex items-center justify-center gap-2 cursor-pointer disabled:cursor-not-allowed hover:shadow-lg hover:shadow-[#C9A96E]/10"
+                  disabled={submitting}
+                  className={`w-full py-3.5 rounded-lg text-xs font-semibold tracking-[0.15em] uppercase transition-all flex items-center justify-center gap-2 shadow-lg cursor-pointer ${
+                    submitting
+                      ? 'bg-neutral-800 text-neutral-400 cursor-not-allowed'
+                      : isFormComplete
+                      ? 'bg-[#C9A96E] hover:bg-[#B39359] text-white hover:shadow-[#C9A96E]/20'
+                      : 'bg-[#C9A96E]/90 hover:bg-[#C9A96E] text-white hover:shadow-[#C9A96E]/15'
+                  }`}
                 >
                   {submitting ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
-                      合約送出中 Submitting...
+                      合約儲存與簽章驗證中 SUBMITTING...
+                    </>
+                  ) : isFormComplete ? (
+                    <>
+                      <ShieldCheck className="w-4 h-4" />
+                      確認並提交備忘錄簽署 COMMIT SIGNATURE
                     </>
                   ) : (
                     <>
-                      確認並提交備忘錄簽署 COMMIT SIGNATURE
+                      <ArrowRight className="w-4 h-4" />
+                      檢查並提交備忘錄簽署 VERIFY & SIGN
                     </>
                   )}
                 </button>
