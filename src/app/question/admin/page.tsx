@@ -104,6 +104,30 @@ export default function PerspectiveAdminPage() {
     }
   };
 
+  // Permanently delete submission
+  const handleDelete = async (id: string, name: string) => {
+    if (!confirm(`確定要永久刪除「${name}」的這則觀點嗎？此動作無法復原。`)) {
+      return;
+    }
+    try {
+      setSavingAction(true);
+      const res = await fetch(`/api/perspectives/admin?id=${id}`, {
+        method: 'DELETE',
+      });
+      const data = await res.json();
+      if (data.success) {
+        showNotification('✓ 觀點已成功永久刪除！');
+        fetchAdminData();
+      } else {
+        alert(data.error || '刪除失敗');
+      }
+    } catch (err) {
+      alert('刪除失敗，請重試');
+    } finally {
+      setSavingAction(false);
+    }
+  };
+
   // Save Edit Modal
   const handleSaveEdit = async () => {
     if (!editingItem) return;
@@ -712,6 +736,18 @@ export default function PerspectiveAdminPage() {
                       >
                         <Edit3 className="w-3.5 h-3.5" />
                         <span>潤飾</span>
+                      </button>
+
+                      {/* Permanent Delete Button */}
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(item.id, item.display_name || item.original_name)}
+                        disabled={savingAction}
+                        className="px-2.5 py-1.5 rounded-lg bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 hover:text-white text-xs font-medium border border-rose-500/20 flex items-center gap-1 transition-colors cursor-pointer"
+                        title="永久刪除此觀點"
+                      >
+                        <Trash2 className="w-3.5 h-3.5 text-rose-400" />
+                        <span>刪除</span>
                       </button>
                     </div>
                   </div>

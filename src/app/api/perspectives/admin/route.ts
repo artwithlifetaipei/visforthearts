@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import {
   getAllSubmissions,
   updateSubmission,
+  deleteSubmission,
   createSubmission,
   getDisplaySettings,
   updateDisplaySettings,
@@ -138,6 +139,9 @@ export async function PATCH(req: Request) {
       payload = { status: 'archived', display_enabled: false };
     } else if (action === 'withdraw') {
       payload = { withdrawn_at: new Date().toISOString(), display_enabled: false };
+    } else if (action === 'delete') {
+      await deleteSubmission(id);
+      return NextResponse.json({ success: true, deletedId: id });
     } else if (action === 'edit') {
       payload = {
         display_name: patch?.display_name,
@@ -206,6 +210,31 @@ export async function POST(req: Request) {
     }
 
     return NextResponse.json({ success: true, item: created });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: err.message || 'Internal Server Error' },
+      { status: 500 }
+    );
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const { searchParams } = new URL(req.url);
+    let id = searchParams.get('id');
+    if (!id) {
+      try {
+        const body = await req.json();
+        id = body.id;
+      } catch {}
+    }
+
+    if (!id) {
+      return NextResponse.json({ error: 'Missing submission ID' }, { status: 400 });
+    }
+
+    await deleteSubmission(id);
+    return NextResponse.json({ success: true, deletedId: id });
   } catch (err: any) {
     return NextResponse.json(
       { error: err.message || 'Internal Server Error' },

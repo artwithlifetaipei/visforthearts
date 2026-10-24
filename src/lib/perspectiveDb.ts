@@ -32,29 +32,6 @@ export const DEFAULT_DISPLAY_SETTINGS: PerspectiveDisplaySettings = {
 // Curated Initial Perspectives (Approved & Display On)
 export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
   {
-    id: 'sub-001',
-    campaign_id: DEFAULT_CAMPAIGN.id,
-    source: 'EDITORIAL',
-    type: 'vis_people',
-    original_name: 'Amelie Kuo',
-    display_name: 'Amelie Kuo',
-    original_answer: '工藝的溫度與觸感，以及人與人之間真實凝視的深刻。',
-    display_answer: '工藝的溫度與觸感，以及人與人之間真實凝視的深刻。',
-    role_title: 'VIS Co-Founder & Curatorial Lead',
-    status: 'approved',
-    display_enabled: true,
-    display_order: 1,
-    featured: true,
-    question_id: 'q2',
-    question_prompt: '對你來說，美的事物，它的價值是什麼？一句話形容。',
-    moderation_flags: [],
-    consent_version: '2027-v2',
-    consented_at: '2026-10-21T08:00:00Z',
-    submitted_at: '2026-10-21T08:00:00Z',
-    created_at: '2026-10-21T08:00:00Z',
-    updated_at: '2026-10-21T08:00:00Z',
-  },
-  {
     id: 'sub-003',
     campaign_id: DEFAULT_CAMPAIGN.id,
     source: 'EDITORIAL',
@@ -66,7 +43,7 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     role_title: 'VIS 2027 策展團隊',
     status: 'approved',
     display_enabled: true,
-    display_order: 2,
+    display_order: 1,
     featured: true,
     question_id: 'q3',
     question_prompt: '如果希望台灣成為一個更有美感的地方，你最希望大家開始重視什麼？',
@@ -89,7 +66,7 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     role_title: '參展品牌設計總監',
     status: 'approved',
     display_enabled: true,
-    display_order: 3,
+    display_order: 2,
     featured: true,
     question_id: 'q1',
     question_prompt: '你認為，一個真正懂得欣賞美的社會，應該具備什麼樣的特質？',
@@ -112,7 +89,7 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     role_title: null,
     status: 'approved',
     display_enabled: true,
-    display_order: 4,
+    display_order: 3,
     featured: false,
     question_id: 'q3',
     question_prompt: '如果希望台灣成為一個更有美感的地方，你最希望大家開始重視什麼？',
@@ -150,7 +127,16 @@ function readLocalStore(): LocalStoreSchema {
     const filePath = getLocalStorePath();
     if (fs.existsSync(filePath)) {
       const content = fs.readFileSync(filePath, 'utf8');
-      return JSON.parse(content);
+      const store: LocalStoreSchema = JSON.parse(content);
+      if (store && Array.isArray(store.submissions)) {
+        store.submissions = store.submissions.filter(
+          s =>
+            s.id !== 'sub-001' &&
+            !s.original_answer?.includes('工藝的溫度與觸感') &&
+            !s.display_answer?.includes('工藝的溫度與觸感')
+        );
+      }
+      return store;
     }
   } catch (err) {
     console.warn('Error reading local perspective store:', err);
@@ -602,4 +588,25 @@ export async function updateSubmission(
   }
 
   return updated;
+}
+
+// Permanently delete a single submission
+export async function deleteSubmission(id: string): Promise<boolean> {
+  const local = readLocalStore();
+  const index = local.submissions.findIndex(s => s.id === id);
+  if (index !== -1) {
+    local.submissions.splice(index, 1);
+    local.displaySettings.content_version = (local.displaySettings.content_version || 1) + 1;
+    local.displaySettings.updated_at = new Date().toISOString();
+    writeLocalStore(local);
+  }
+
+  const supabase = getSupabaseClient();
+  try {
+    await supabase.from('perspective_submissions').delete().eq('id', id);
+  } catch (err) {
+    console.warn('Supabase deleteSubmission warning:', err);
+  }
+
+  return true;
 }
