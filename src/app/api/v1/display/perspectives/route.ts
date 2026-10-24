@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { getDisplayPerspectives } from '@/lib/perspectiveDb';
 
 export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 
 export async function GET(req: Request) {
   try {
@@ -13,8 +14,10 @@ export async function GET(req: Request) {
     return NextResponse.json(result, {
       status: 200,
       headers: {
-        'Cache-Control': 'public, max-age=10, s-maxage=30, stale-while-revalidate=60',
-        'ETag': `W/"version-${result.campaign.content_version}"`,
+        'Cache-Control': 'no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0',
+        'Pragma': 'no-cache',
+        'Expires': '0',
+        'Surrogate-Control': 'no-store',
       },
     });
   } catch (err: any) {

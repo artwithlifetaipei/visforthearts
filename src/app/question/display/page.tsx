@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Maximize2, Minimize2, 
-  X, ArrowUp, ArrowUpRight
+  X, ArrowUp, ArrowUpRight, Sparkles
 } from 'lucide-react';
 import Link from 'next/link';
 import { QRCodeSVG } from 'qrcode.react';
@@ -50,25 +50,24 @@ export default function PerspectiveDisplayWall() {
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   const cachedDataRef = useRef<DisplayApiResponse | null>(null);
-  const contentVersionRef = useRef<number>(0);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Fetch Display API
+  // Fetch Display API (Always fetch freshest items, no-cache)
   const fetchDisplayData = async () => {
     try {
-      const res = await fetch('/api/perspectives/display', { cache: 'no-store' });
+      const res = await fetch(`/api/perspectives/display?t=${Date.now()}`, { 
+        cache: 'no-store',
+        headers: {
+          'Pragma': 'no-cache',
+          'Cache-Control': 'no-cache, no-store, must-revalidate',
+        }
+      });
       if (!res.ok) throw new Error('Network response error');
       const json: DisplayApiResponse = await res.json();
 
-      if (json && json.items) {
-        if (json.campaign.content_version !== contentVersionRef.current) {
-          contentVersionRef.current = json.campaign.content_version;
-          setData(json);
-          cachedDataRef.current = json;
-        } else if (!data) {
-          setData(json);
-          cachedDataRef.current = json;
-        }
+      if (json && Array.isArray(json.items)) {
+        setData(json);
+        cachedDataRef.current = json;
       }
     } catch (err) {
       console.warn('API sync warning, keeping offline cache (LED-008):', err);
@@ -78,11 +77,16 @@ export default function PerspectiveDisplayWall() {
     }
   };
 
-  // Initial fetch and 30s auto-refresh polling (LED-007)
+  // Initial fetch, 8s auto-refresh polling, and immediate refetch on tab focus
   useEffect(() => {
     fetchDisplayData();
-    const interval = setInterval(fetchDisplayData, 30000);
-    return () => clearInterval(interval);
+    const interval = setInterval(fetchDisplayData, 8000);
+    const onFocus = () => fetchDisplayData();
+    window.addEventListener('focus', onFocus);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
   }, []);
 
   // Fullscreen toggle
@@ -194,36 +198,30 @@ export default function PerspectiveDisplayWall() {
   };
 
   return (
-    <div className="min-h-screen bg-[#F6F3ED] text-[#1C1814] font-sans selection:bg-[#DFBA87] selection:text-black relative overflow-x-hidden pb-24">
+    <div className="min-h-screen bg-[#0A0908] text-[#F3EFEA] font-sans selection:bg-[#DFBA87] selection:text-black relative overflow-x-hidden pb-24">
       
       {/* ─────────────────────────────────────────────────────────────
-          1. FULL-BLEED ARCHITECTURAL BACKGROUND FROM VIP LOBBY
+          1. FULL-BLEED AUTHENTIC ARCHITECTURAL BACKGROUND (VIP LOBBY)
       ───────────────────────────────────────────────────────────── */}
       <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
         <img
           src="/vip_lobby_bg.jpg"
           alt=""
           className="w-full h-full object-cover object-center"
-          style={{ filter: 'brightness(0.42) saturate(0.8)' }}
         />
-        {/* Warm ivory / champagne gradient overlay preserving authentic architectural lighting */}
-        <div
-          className="absolute inset-0"
-          style={{
-            background: 'linear-gradient(180deg, rgba(246,243,237,0.85) 0%, rgba(240,235,225,0.65) 40%, rgba(246,243,237,0.92) 100%)'
-          }}
-        />
-        {/* Subtle gold ambient glow top */}
+        {/* Dark moody architectural gradient overlay matching reference */}
+        <div className="absolute inset-0 bg-gradient-to-b from-black/80 via-black/55 to-black/90" />
+        {/* Subtle warm gold ambient vignette */}
         <div 
           className="absolute inset-0" 
-          style={{ background: 'radial-gradient(ellipse at 50% 0%, rgba(223,186,135,0.18) 0%, transparent 65%)' }} 
+          style={{ background: 'radial-gradient(circle at 50% 20%, rgba(223,186,135,0.14) 0%, transparent 75%)' }} 
         />
       </div>
 
       {/* ─────────────────────────────────────────────────────────────
           2. EXHIBITION MASTHEAD (SLEEK & MINIMAL PER UI/UX PRO MAX)
       ───────────────────────────────────────────────────────────── */}
-      <header className="sticky top-0 z-30 border-b border-[#E5DDD0]/80 bg-[#F6F3ED]/85 backdrop-blur-xl transition-all shadow-xs">
+      <header className="sticky top-0 z-30 border-b border-white/10 bg-black/50 backdrop-blur-xl transition-all shadow-sm">
         <div className="max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 py-3.5 sm:py-4 space-y-3 sm:space-y-4">
           
           {/* Top Bar: VIS Logo (Left) + Scannable QR Code & Controls (Right) */}
@@ -239,15 +237,15 @@ export default function PerspectiveDisplayWall() {
                 <img 
                   src="/vis_logo.png" 
                   alt="VIS" 
-                  className="h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-2xs"
+                  className="h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-sm brightness-110"
                 />
               </Link>
-              <div className="hidden sm:block h-7 sm:h-9 w-px bg-[#D8CFBF]" />
+              <div className="hidden sm:block h-7 sm:h-9 w-px bg-white/20" />
               <div className="hidden sm:flex flex-col justify-center space-y-0.5">
-                <span className="text-[11px] sm:text-xs font-mono tracking-[0.22em] uppercase text-[#8C6226] font-semibold">
+                <span className="text-[11px] sm:text-xs font-mono tracking-[0.22em] uppercase text-[#DFBA87] font-semibold">
                   The Question of the Year
                 </span>
-                <span className="text-xs sm:text-sm font-serif text-[#3D332A] tracking-[0.16em] font-medium">
+                <span className="text-xs sm:text-sm font-serif text-white/90 tracking-[0.16em] font-medium">
                   年度文化命題
                 </span>
               </div>
@@ -260,7 +258,7 @@ export default function PerspectiveDisplayWall() {
               <button
                 type="button"
                 onClick={toggleFullscreen}
-                className="p-2 sm:p-2.5 rounded-full bg-white/80 hover:bg-[#DFBA87] hover:text-black text-[#4A3F35] border border-[#E0D7C8] transition-all duration-300 cursor-pointer shadow-2xs"
+                className="p-2 sm:p-2.5 rounded-full bg-white/10 hover:bg-[#DFBA87] hover:text-black text-neutral-300 border border-white/20 transition-all duration-300 cursor-pointer shadow-xs"
                 title="切換全螢幕 (快捷鍵: 按 F)"
               >
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
@@ -269,11 +267,11 @@ export default function PerspectiveDisplayWall() {
               {/* The Prominent Scannable QR Code Card (Direct Scan for Visitors) */}
               <div
                 onClick={() => setShowQrModal(true)}
-                className="group relative flex items-center gap-3 sm:gap-4 bg-white/95 hover:bg-white backdrop-blur-xl border border-[#DFBA87] hover:border-[#B58544] rounded-2xl p-2.5 sm:p-3 shadow-md hover:shadow-xl hover:shadow-[#DFBA87]/20 transition-all duration-300 cursor-pointer ring-1 ring-[#DFBA87]/30"
+                className="group relative flex items-center gap-3 sm:gap-4 bg-black/60 hover:bg-black/80 backdrop-blur-xl border border-[#DFBA87]/50 hover:border-[#DFBA87] rounded-2xl p-2.5 sm:p-3 shadow-xl hover:shadow-2xl hover:shadow-[#DFBA87]/20 transition-all duration-300 cursor-pointer ring-1 ring-[#DFBA87]/30"
                 title="手機直接掃描 QR Code 即時參與 · 點擊可放大全螢幕展示"
               >
                 {/* Large High-Contrast QR Code */}
-                <div className="bg-white p-2 rounded-xl border border-[#EDE5D8] shadow-xs group-hover:scale-[1.02] transition-transform duration-300 flex-shrink-0">
+                <div className="bg-white p-2 rounded-xl border border-white/20 shadow-xs group-hover:scale-[1.02] transition-transform duration-300 flex-shrink-0">
                   <QRCodeSVG
                     value={submissionUrl}
                     size={110}
@@ -289,61 +287,46 @@ export default function PerspectiveDisplayWall() {
                   <div className="flex items-center gap-1.5">
                     <span className="relative flex h-2.5 w-2.5">
                       <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#DFBA87] opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#8C6226]" />
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#DFBA87]" />
                     </span>
-                    <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.18em] uppercase text-[#8C6226] font-bold whitespace-nowrap">
+                    <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.18em] uppercase text-[#DFBA87] font-bold whitespace-nowrap">
                       SCAN TO PARTICIPATE
                     </span>
                   </div>
 
-                  <div className="text-sm sm:text-base font-serif font-semibold text-[#1C1814] tracking-wider leading-tight group-hover:text-[#8C6226] transition-colors whitespace-nowrap">
+                  <div className="text-sm sm:text-base font-serif font-semibold text-white tracking-wider leading-tight group-hover:text-[#DFBA87] transition-colors whitespace-nowrap">
                     手機掃碼參與作答
                   </div>
 
-                  <div className="text-[11px] sm:text-xs font-mono text-[#7A6B5C] tracking-tight flex items-center gap-1 whitespace-nowrap">
-                    <span>即時登牆現場共創</span>
-                    <ArrowUpRight className="w-3.5 h-3.5 text-[#8C6226] group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform duration-300" />
+                  <div className="text-[10px] sm:text-[11px] text-neutral-400 font-sans tracking-wide leading-tight flex items-center gap-1">
+                    <span>即時上傳觀點</span>
+                    <span className="text-[#DFBA87]">✦</span>
+                    <span>大會現場輪播</span>
                   </div>
                 </div>
               </div>
 
             </div>
           </div>
-
-          {/* Central Exhibition Banner: Generous Breathing Room */}
-          <div className="text-center max-w-4xl mx-auto space-y-2 pt-1 pb-1 sm:pt-2 sm:pb-2">
-            <h1 className="text-xs sm:text-sm font-serif tracking-[0.28em] uppercase text-[#8C6226] font-medium">
-              HOW CAN AESTHETICS BECOME OUR SHARED VALUE?
-            </h1>
-            <h2 className="text-2xl sm:text-3xl md:text-4xl font-serif text-[#1C1814] tracking-[0.08em] font-normal drop-shadow-xs">
-              美，如何成為我們共同的價值？
-            </h2>
-            <div className="w-8 h-[1px] bg-[#DFBA87] mx-auto mt-2.5 rounded-full opacity-70" />
-          </div>
-
         </div>
       </header>
 
       {/* ─────────────────────────────────────────────────────────────
-          3. MAIN CANVAS: LIVING PERSPECTIVE WALL (BORDERLESS EDITORIAL TYPOGRAPHY)
-             - No boxy rectangular cards or plastic widget frames
-             - Words float organically on the warm architectural canvas
-             - Curated rhythm: featured perspectives command wide presence
-             - Contains strictly: Question, Answer, Name
-          ───────────────────────────────────────────────────────────── */}
-      <main className="max-w-[1640px] mx-auto px-6 sm:px-10 lg:px-16 pt-10 sm:pt-16 pb-24 relative z-10">
+          3. MAIN PERSPECTIVES STREAM
+      ───────────────────────────────────────────────────────────── */}
+      <main className="relative z-10 max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12">
         {isEmergency ? (
-          /* Emergency Broadcast Card (LED-010) */
+          /* Emergency Broadcast Mode */
           <motion.div
-            initial={{ opacity: 0, scale: 0.96 }}
+            initial={{ opacity: 0, scale: 0.98 }}
             animate={{ opacity: 1, scale: 1 }}
-            className="text-center max-w-3xl mx-auto space-y-6 bg-white/90 border border-amber-500/40 p-12 sm:p-16 rounded-3xl shadow-2xl my-12 backdrop-blur-md"
+            className="text-center max-w-3xl mx-auto space-y-6 bg-black/70 border border-[#DFBA87]/40 p-12 sm:p-16 rounded-3xl shadow-2xl my-12 backdrop-blur-xl"
           >
             <div className="space-y-3">
-              <h1 className="text-2xl sm:text-3xl font-serif text-[#1C1814] tracking-wider">
+              <h1 className="text-2xl sm:text-3xl font-serif text-white tracking-wider">
                 {data?.display.emergency_message_en || 'VIS 2027 — HOW CAN AESTHETICS BECOME OUR SHARED VALUE?'}
               </h1>
-              <p className="text-lg text-[#8C6226] font-serif tracking-widest">
+              <p className="text-lg text-[#DFBA87] font-serif tracking-widest">
                 {data?.display.emergency_message_zh || 'VIS 2027 當代生活文化大展 · 美，如何成為我們共同的價值？'}
               </p>
             </div>
@@ -351,22 +334,16 @@ export default function PerspectiveDisplayWall() {
         ) : items.length === 0 ? (
           /* Empty State */
           <div className="text-center max-w-lg mx-auto py-24 space-y-5">
-            <h3 className="text-xl font-serif text-[#1C1814]">尚無觀點展示</h3>
+            <h3 className="text-xl font-serif text-white">尚無觀點展示</h3>
             <button
               onClick={() => setShowQrModal(true)}
-              className="px-6 py-2.5 rounded-full bg-[#DFBA87] text-[#1C1814] text-xs font-bold hover:bg-[#cf9e5e] shadow-md shadow-[#DFBA87]/20 transition-colors cursor-pointer"
+              className="px-6 py-2.5 rounded-full bg-[#DFBA87] text-[#14120E] text-xs font-bold hover:bg-[#cf9e5e] shadow-md shadow-[#DFBA87]/20 transition-colors cursor-pointer"
             >
               立即掃碼參與
             </button>
           </div>
         ) : (
-          /* ─────────────────────────────────────────────────────────
-             BORDERLESS ARCHITECTURAL TYPOGRAPHY FLOW
-             - Zero card boxes, zero plastic borders
-             - Featured perspectives: dramatic wide presence & gold left rule
-             - Standard perspectives: elegant literary serif stream
-             - Strictly displays: Question, Answer, Name
-          ────────────────────────────────────────────────────────── */
+          /* Borderless Architectural Typography Flow */
           <motion.div 
             layout
             className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 lg:gap-x-16 gap-y-12 lg:gap-y-16 items-start"
@@ -385,15 +362,15 @@ export default function PerspectiveDisplayWall() {
                   onClick={() => setSelectedItem(item)}
                   className={
                     isFeatured
-                      ? "col-span-1 md:col-span-2 group relative cursor-pointer p-6 sm:p-8 -m-3 sm:-m-4 rounded-2xl hover:bg-white/40 transition-all duration-500 backdrop-blur-[2px] flex flex-col justify-between"
-                      : "col-span-1 group relative cursor-pointer p-6 sm:p-7 -m-3 sm:-m-4 rounded-2xl hover:bg-white/35 transition-all duration-500 backdrop-blur-[2px] flex flex-col justify-between"
+                      ? "col-span-1 md:col-span-2 group relative cursor-pointer p-6 sm:p-8 -m-3 sm:-m-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-[#DFBA87]/30 hover:border-[#DFBA87]/60 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-xl"
+                      : "col-span-1 group relative cursor-pointer p-6 sm:p-7 -m-3 sm:-m-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 hover:border-[#DFBA87]/40 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-lg"
                   }
                 >
                   <div className="space-y-3.5">
                     {/* 1. 問題 (Question) */}
                     <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-[#8C6226] opacity-80" />
-                      <p className="text-xs sm:text-[13px] font-serif text-[#8C6226] tracking-wider font-medium leading-relaxed">
+                      <span className="w-1.5 h-1.5 rounded-full bg-[#DFBA87]" />
+                      <p className="text-xs sm:text-[13px] font-serif text-[#DFBA87] tracking-wider font-medium leading-relaxed">
                         {questionText}
                       </p>
                     </div>
@@ -402,12 +379,12 @@ export default function PerspectiveDisplayWall() {
                     <div className={
                       isFeatured 
                         ? "border-l-2 border-[#DFBA87] pl-5 sm:pl-7 my-3 sm:my-4" 
-                        : "border-l border-[#D8CFBF] pl-4 sm:pl-5 my-2.5 sm:my-3"
+                        : "border-l border-white/20 pl-4 sm:pl-5 my-2.5 sm:my-3"
                     }>
                       <blockquote className={
                         isFeatured 
-                          ? "text-2xl sm:text-3xl lg:text-[2.2rem] font-serif text-[#1C1814] leading-[1.48] tracking-wide font-normal group-hover:text-[#7D541D] transition-colors duration-300 drop-shadow-2xs" 
-                          : "text-base sm:text-lg lg:text-xl font-serif text-[#2B231D] leading-[1.68] tracking-wide font-normal group-hover:text-[#1C1814] transition-colors duration-300"
+                          ? "text-2xl sm:text-3xl lg:text-[2.2rem] font-serif text-white leading-[1.48] tracking-wide font-normal group-hover:text-[#F3E2C8] transition-colors duration-300 drop-shadow-sm" 
+                          : "text-base sm:text-lg lg:text-xl font-serif text-white/90 leading-[1.68] tracking-wide font-normal group-hover:text-white transition-colors duration-300"
                       }>
                         “{item.answer}”
                       </blockquote>
@@ -418,16 +395,16 @@ export default function PerspectiveDisplayWall() {
                   <div className="flex items-center justify-end mt-4 sm:mt-5 flex-wrap gap-x-2">
                     <span className={
                       isFeatured
-                        ? "text-base sm:text-lg font-serif text-[#875F24] font-medium tracking-widest"
-                        : "text-xs sm:text-sm font-serif text-[#574D43] font-medium tracking-wider"
+                        ? "text-base sm:text-lg font-serif text-[#DFBA87] font-medium tracking-widest"
+                        : "text-xs sm:text-sm font-serif text-neutral-300 font-medium tracking-wider"
                     }>
                       — {item.name}
                     </span>
                     {item.role_title && (
                       <span className={
                         isFeatured
-                          ? "text-xs sm:text-sm font-sans text-[#8C6226]/85 font-normal tracking-wide"
-                          : "text-[11px] sm:text-xs font-sans text-[#574D43]/80 font-normal"
+                          ? "text-xs sm:text-sm font-sans text-neutral-300 font-normal tracking-wide"
+                          : "text-[11px] sm:text-xs font-sans text-neutral-400 font-normal"
                       }>
                         · {item.role_title}
                       </span>
@@ -435,7 +412,7 @@ export default function PerspectiveDisplayWall() {
                   </div>
 
                   {/* Baseline Hairline Separator */}
-                  <div className="w-full h-px bg-gradient-to-r from-transparent via-[#DFBA87]/40 to-transparent mt-6 sm:mt-8 group-hover:via-[#B58544]/60 transition-all duration-500" />
+                  <div className="w-full h-px bg-gradient-to-r from-transparent via-[#DFBA87]/30 to-transparent mt-6 sm:mt-8 group-hover:via-[#DFBA87]/60 transition-all duration-500" />
                 </motion.article>
               );
             })}
@@ -451,7 +428,7 @@ export default function PerspectiveDisplayWall() {
           <button
             type="button"
             onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="p-3 rounded-full bg-white/90 hover:bg-white border border-[#DFBA87]/60 text-[#875F24] hover:text-[#1C1814] transition-all shadow-lg shadow-[#DFBA87]/15 backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95"
+            className="p-3 rounded-full bg-black/70 hover:bg-[#DFBA87] hover:text-black border border-[#DFBA87]/50 text-[#DFBA87] transition-all shadow-lg shadow-black/50 backdrop-blur-xl cursor-pointer hover:scale-105 active:scale-95"
             title="回到頂部"
           >
             <ArrowUp className="w-4 h-4" />
@@ -460,52 +437,53 @@ export default function PerspectiveDisplayWall() {
       )}
 
       {/* ─────────────────────────────────────────────────────────────
-          MODAL A: CINEMATIC SPOTLIGHT VIEW FOR ANY PERSPECTIVE
-          Only displays: Question, Answer, Name
+          MODAL A: FULL PERSPECTIVE VIEW
       ───────────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {selectedItem && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 sm:p-8 bg-black/60 backdrop-blur-xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
             <motion.div
-              initial={{ opacity: 0, scale: 0.95, y: 16 }}
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.95, y: 16 }}
-              transition={{ duration: 0.35, ease: [0.22, 1, 0.36, 1] }}
-              className="relative max-w-3xl w-full bg-[#FAF7F2] border-2 border-[#DFBA87]/60 rounded-3xl p-8 sm:p-14 shadow-2xl space-y-7 overflow-hidden text-[#1C1814]"
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+              className="relative max-w-2xl w-full bg-[#141210] border border-[#DFBA87]/40 rounded-3xl p-8 sm:p-12 space-y-8 shadow-2xl text-white"
             >
-              {/* Top ambient gold light */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[400px] h-[200px] bg-[#DFBA87]/20 rounded-full blur-3xl pointer-events-none" />
-
               {/* Close Button */}
               <button
                 type="button"
                 onClick={() => setSelectedItem(null)}
-                className="absolute top-6 right-6 p-2 rounded-full bg-black/5 hover:bg-black/10 text-[#4A3F35] hover:text-[#1C1814] transition-colors cursor-pointer"
-                title="關閉 (ESC)"
+                className="absolute top-6 right-6 p-2 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="關閉"
               >
                 <X className="w-5 h-5" />
               </button>
 
               {/* 1. 問題 (Question) */}
-              <div className="p-3.5 rounded-2xl bg-[#FAF2E6] border border-[#DFBA87]/50 text-xs sm:text-sm text-[#8C6226] font-serif leading-relaxed font-medium">
-                {getQuestionPrompt(selectedItem)}
+              <div className="space-y-1">
+                <div className="text-[11px] font-mono tracking-widest text-[#DFBA87] uppercase font-semibold">
+                  PERSPECTIVE ON
+                </div>
+                <h3 className="text-sm sm:text-base font-serif text-[#DFBA87] font-medium leading-relaxed">
+                  {getQuestionPrompt(selectedItem)}
+                </h3>
               </div>
 
-              {/* 2. 答案 (Answer) */}
-              <div className="space-y-4">
-                <span className="text-[#DFBA87] font-serif text-5xl leading-none block -mb-4">“</span>
-                <blockquote className="text-2xl sm:text-4xl md:text-5xl font-serif text-[#1C1814] leading-snug md:leading-tight tracking-wide font-normal">
+              {/* 2. 答案 (Answer Quote) */}
+              <div className="relative pl-6 sm:pl-8 border-l-2 border-[#DFBA87] py-2">
+                <span className="text-[#DFBA87]/30 font-serif text-5xl leading-none block -mb-4">“</span>
+                <blockquote className="text-xl sm:text-2xl md:text-3xl font-serif text-white leading-relaxed font-normal">
                   {selectedItem.answer}
                 </blockquote>
-                <span className="text-[#DFBA87] font-serif text-5xl leading-none block text-right -mt-4">”</span>
+                <span className="text-[#DFBA87]/30 font-serif text-5xl leading-none block text-right -mt-4">”</span>
               </div>
 
               {/* 3. 名字 (Name) & 職稱 (Role) */}
-              <div className="pt-6 border-t border-[#E5DDD0] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div className="text-xl sm:text-2xl font-serif text-[#875F24] font-medium tracking-wider flex items-center gap-2 flex-wrap">
+              <div className="pt-6 border-t border-white/10 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="text-xl sm:text-2xl font-serif text-[#DFBA87] font-medium tracking-wider flex items-center gap-2 flex-wrap">
                   <span>— {selectedItem.name}</span>
                   {selectedItem.role_title && (
-                    <span className="text-sm sm:text-base font-sans text-[#8C6226]/80 font-normal">
+                    <span className="text-sm sm:text-base font-sans text-neutral-300 font-normal">
                       · {selectedItem.role_title}
                     </span>
                   )}
@@ -514,7 +492,7 @@ export default function PerspectiveDisplayWall() {
                 <button
                   type="button"
                   onClick={() => setSelectedItem(null)}
-                  className="px-5 py-2.5 rounded-xl bg-[#DFBA87] text-[#1C1814] text-xs font-bold hover:bg-[#cf9e5e] shadow-md shadow-[#DFBA87]/25 transition-colors cursor-pointer self-start sm:self-auto"
+                  className="px-5 py-2.5 rounded-xl bg-[#DFBA87] text-[#14120E] text-xs font-bold hover:bg-[#cf9e5e] shadow-md shadow-[#DFBA87]/25 transition-colors cursor-pointer self-start sm:self-auto"
                 >
                   返回 The Question of the Year · 年度文化命題
                 </button>
@@ -525,68 +503,72 @@ export default function PerspectiveDisplayWall() {
       </AnimatePresence>
 
       {/* ─────────────────────────────────────────────────────────────
-          MODAL B: PARTICIPATION QR CODE MODAL (ENLARGED PRESENTATION)
+          MODAL B: PARTICIPATION QR CODE MODAL
       ───────────────────────────────────────────────────────────── */}
       <AnimatePresence>
         {showQrModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xl">
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-xl">
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 12 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 12 }}
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              className="relative max-w-md w-full bg-[#FAF7F2] border border-[#DFBA87]/60 rounded-3xl p-8 sm:p-10 text-center space-y-6 shadow-2xl text-[#1C1814] overflow-hidden"
+              className="relative max-w-md w-full bg-[#141210] border border-[#DFBA87]/50 rounded-3xl p-8 sm:p-10 text-center space-y-6 shadow-2xl text-white overflow-hidden"
             >
               {/* Top ambient gold light */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[150px] bg-[#DFBA87]/25 rounded-full blur-3xl pointer-events-none" />
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[350px] h-[150px] bg-[#DFBA87]/20 rounded-full blur-3xl pointer-events-none" />
 
               <button
                 type="button"
                 onClick={() => setShowQrModal(false)}
-                className="absolute top-5 right-5 p-2 rounded-full bg-black/5 hover:bg-black/10 text-[#7A6B5C] hover:text-[#1C1814] transition-colors cursor-pointer"
-                title="關閉視窗 (ESC)"
+                className="absolute top-5 right-5 p-2 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition-colors cursor-pointer"
+                title="關閉"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <div className="space-y-2 pt-2">
-                <span className="text-[10.5px] font-mono tracking-[0.22em] uppercase text-[#8C6226] block font-semibold">
-                  THE QUESTION OF THE YEAR · 年度文化命題
+              <div className="space-y-1.5 pt-2">
+                <span className="text-[10px] font-mono tracking-[0.25em] text-[#DFBA87] uppercase font-bold">
+                  LIVE PARTICIPATION
                 </span>
-                <h3 className="text-xl sm:text-2xl font-serif text-[#1C1814] font-normal">
-                  美，如何成為我們共同的價值？
+                <h3 className="text-xl sm:text-2xl font-serif text-white font-medium">
+                  手機掃描 QR Code 參與作答
                 </h3>
-                <p className="text-xs text-[#7A6B5C] font-serif leading-relaxed max-w-xs mx-auto">
-                  拿起手機相機掃描，立即選題填寫你的觀點，審核後即時同步登牆播映。
+                <p className="text-xs text-neutral-300 font-light max-w-xs mx-auto pt-1 leading-relaxed">
+                  打開手機相機對準下方條碼，即可直接開啟文化命題問答頁面
                 </p>
               </div>
 
-              {/* QR Code Container */}
-              <div className="p-6 bg-white rounded-2xl inline-block shadow-md border border-[#E5DDD0] ring-1 ring-[#DFBA87]/20">
+              {/* Jumbo High-Contrast QR Code */}
+              <div className="inline-block p-4 sm:p-5 bg-white rounded-3xl border border-white/20 shadow-2xl">
                 <QRCodeSVG
                   value={submissionUrl}
-                  size={220}
+                  size={240}
                   level="H"
                   includeMargin={false}
-                  fgColor="#1C1814"
+                  fgColor="#000000"
+                  className="w-52 h-52 sm:w-60 sm:h-60"
                 />
               </div>
 
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/80 border border-[#E5DDD0] text-[11px] font-mono text-[#7A6B5C]">
-                <span>{submissionUrl.replace(/^https?:\/\//, '')}</span>
+              <div className="space-y-2 pt-1 text-center">
+                <div className="text-[11px] font-mono text-[#DFBA87] flex items-center justify-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-[#DFBA87]" />
+                  <span>提交後即刻匯入現場觀點之牆動態聯播</span>
+                </div>
+                <div className="text-[10px] text-neutral-400 font-sans">
+                  亦可直接造訪：visforthearts.com/question
+                </div>
               </div>
-
-              <button
-                type="button"
-                onClick={() => setShowQrModal(false)}
-                className="w-full py-3 rounded-xl bg-white hover:bg-[#FAF2E6] text-[#1C1814] text-xs font-mono font-medium transition-colors border border-[#D8CFBF] hover:border-[#DFBA87] cursor-pointer shadow-2xs"
-              >
-                關閉視窗 (ESC)
-              </button>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
+
+      {/* Footer */}
+      <footer className="relative z-10 border-t border-white/10 py-6 px-4 text-center text-xs text-neutral-400 font-mono bg-black/50 backdrop-blur-md">
+        <div>VIS Contemporary Culture · Perspective Live Display 2027 · Taipei Zhongshan Hall</div>
+      </footer>
 
     </div>
   );
