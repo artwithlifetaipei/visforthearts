@@ -1240,6 +1240,25 @@ export default function ExhibitorAdminPage() {
           {/* TAB 1: APPLICATIONS MANAGER */}
           {activeTab === 'applications' && (
             <div className="space-y-6">
+              {/* Making Project Notice Banner */}
+              {makingProjectApplications.length > 0 && (
+                <div className="bg-gradient-to-r from-[#DFBA87]/15 to-[#DFBA87]/5 border border-[#DFBA87]/30 rounded-lg p-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex items-center gap-2.5 text-xs text-[#DFBA87]">
+                    <Sparkles className="w-4 h-4 text-[#DFBA87] shrink-0" />
+                    <span>
+                      提醒：大會系統現有 <strong>{makingProjectApplications.length} 件「造物計畫」</strong> 申請案（位於獨立專區管理）。
+                    </span>
+                  </div>
+                  <button
+                    onClick={() => setActiveTab('making-project')}
+                    className="text-xs font-semibold bg-[#DFBA87] hover:bg-[#DFBA87]/90 text-black px-3.5 py-1.5 rounded transition-colors inline-flex items-center gap-1.5 self-start sm:self-auto shrink-0 shadow-sm"
+                  >
+                    <span>切換至造物計畫專區</span>
+                    <span>→</span>
+                  </button>
+                </div>
+              )}
+
               {/* App Status Filters & CSV Export */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div className="flex gap-2 text-xs overflow-x-auto pb-1 sm:pb-0">
@@ -1698,8 +1717,16 @@ export default function ExhibitorAdminPage() {
 
               {/* Applications Table */}
               {filteredMakingProjectApps.length === 0 ? (
-                <div className="text-center py-12 text-neutral-500 text-xs font-light">
-                  無符合篩選條件的「造物計畫」申請案。
+                <div className="text-center py-12 text-neutral-400 text-xs font-light space-y-3 bg-white/[0.01] rounded-lg border border-dashed border-white/5 p-6">
+                  <p>目前在「{appFilter === 'pending' ? '待審核' : appFilter === 'approved' ? '已通過' : appFilter === 'rejected' ? '已拒絕' : '全部'}」篩選下無符合條件的「造物計畫」申請案。</p>
+                  {makingProjectApplications.length > 0 && appFilter !== 'all' && (
+                    <button
+                      onClick={() => setAppFilter('all')}
+                      className="px-4 py-2 rounded bg-[#C9A96E]/20 hover:bg-[#C9A96E]/30 text-[#DFBA87] text-xs font-medium transition-colors border border-[#C9A96E]/30"
+                    >
+                      點擊切換為「全部」以檢視現有 {makingProjectApplications.length} 件申請案
+                    </button>
+                  )}
                 </div>
               ) : (
                 <div className="border border-white/5 rounded overflow-x-auto">

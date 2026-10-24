@@ -123,12 +123,14 @@ export async function POST(request: NextRequest) {
       .select()
       .single();
 
+    let finalInsertedData = insertedData;
+
     if (dbError) {
       console.error('Primary database insert error:', dbError);
       // Resilient Fallback Retry
       try {
         const fallbackClient = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!);
-        const { error: retryError } = await fallbackClient
+        const { data: retryData, error: retryError } = await fallbackClient
           .from('exhibitor_applications')
           .insert({
             brand_name_zh,
@@ -150,12 +152,15 @@ export async function POST(request: NextRequest) {
             deposit_proof_url,
             status: 'pending',
             deposit_paid: false,
-          });
+          })
+          .select()
+          .single();
 
         if (retryError) {
           console.error('Fallback retry error:', retryError);
           return NextResponse.json({ success: false, error: `資料庫儲存失敗: ${dbError.message}` }, { status: 500 });
         }
+        finalInsertedData = retryData;
       } catch (fallbackException) {
         console.error('Fallback exception:', fallbackException);
         return NextResponse.json({ success: false, error: `資料庫儲存失敗: ${dbError.message}` }, { status: 500 });
@@ -172,7 +177,7 @@ export async function POST(request: NextRequest) {
           .filter(Boolean);
         const adminEmails = Array.from(new Set([...DEFAULT_ADMIN_EMAILS, ...configuredAdmins]));
 
-        const appRecordId = insertedData?.id || '';
+        const appRecordId = finalInsertedData?.id || insertedData?.id || '';
         const siteBaseUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://www.visforthearts.com';
         const proofViewUrl = appRecordId 
           ? `${siteBaseUrl}/api/exhibitor/proof?id=${appRecordId}` 
@@ -430,7 +435,9 @@ export async function POST(request: NextRequest) {
         const gmailAppPassword = process.env.GMAIL_APP_PASSWORD?.replace(/\s+/g, '');
         if (gmailUser && gmailAppPassword) {
           const transporter = nodemailer.createTransport({
-            service: 'gmail',
+            host: 'smtp.gmail.com',
+            port: 465,
+            secure: true,
             auth: {
               user: gmailUser,
               pass: gmailAppPassword,
@@ -540,7 +547,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ 
       success: true, 
-      applicationId: insertedData.id,
+      applicationId: finalInsertedData?.id || insertedData?.id || '',
       deposit_proof_url 
     });
 

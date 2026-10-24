@@ -137,18 +137,68 @@ export default function MakingProjectPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Convert image to base64 with auto-compression
+  // Restore draft from localStorage if present
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('vis_making_draft');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && typeof parsed === 'object') {
+            setFormData(prev => ({
+              ...prev,
+              ...parsed,
+              deposit_proof_base64: '',
+              deposit_proof_filename: '',
+            }));
+          }
+        }
+      } catch (e) {
+        console.warn('Draft restore error:', e);
+      }
+    }
+  }, []);
+
+  // Auto-save form fields to localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const { deposit_proof_base64, ...rest } = formData;
+        localStorage.setItem('vis_making_draft', JSON.stringify(rest));
+      } catch (e) {}
+    }
+  }, [formData]);
+
+  // Convert image to base64 with auto-compression (supports image & PDF)
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      alert(lang === 'zh' ? '請上傳圖片檔案 (PNG, JPEG, WebP)' : 'Please upload an image file (PNG, JPEG, WebP)');
+    const isPdf = file.type === 'application/pdf' || file.name.toLowerCase().endsWith('.pdf');
+    const isImage = file.type.startsWith('image/');
+
+    if (!isImage && !isPdf) {
+      alert(lang === 'zh' ? '請上傳圖片或 PDF 檔案 (PNG, JPEG, WebP, PDF)' : 'Please upload an image or PDF file (PNG, JPEG, WebP, PDF)');
       return;
     }
 
     if (file.size > 15 * 1024 * 1024) {
       alert(lang === 'zh' ? '檔案不能超過 15MB' : 'File size cannot exceed 15MB.');
+      return;
+    }
+
+    if (isPdf) {
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        const rawDataUrl = event.target?.result as string;
+        setPreviewImage('pdf');
+        setFormData(prev => ({
+          ...prev,
+          deposit_proof_base64: rawDataUrl,
+          deposit_proof_filename: file.name,
+        }));
+      };
+      reader.readAsDataURL(file);
       return;
     }
 
@@ -250,6 +300,7 @@ export default function MakingProjectPage() {
 
       const result = await response.json();
       if (result.success) {
+        try { localStorage.removeItem('vis_making_draft'); } catch (e) {}
         setSubmitSuccess(true);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       } else {
@@ -1576,29 +1627,36 @@ export default function MakingProjectPage() {
                     {/* Upload Section */}
                     <div>
                       <label className="block text-xs font-semibold tracking-wider text-[#0D0D0D]/80 uppercase mb-3">
-                        {lang === 'zh' ? '上傳參展費匯款憑證截圖 *' : 'Upload Remittance Proof *'}
+                        {lang === 'zh' ? '上傳參展費匯款憑證截圖或 PDF *' : 'Upload Remittance Proof (Image or PDF) *'}
                       </label>
                       <div className="border-2 border-dashed border-[#0D0D0D]/20 hover:border-[#C9A96E] p-8 text-center bg-[#FAF9F6] transition-colors relative">
                         <input
                           type="file"
-                          accept="image/png, image/jpeg, image/webp"
+                          accept="image/png, image/jpeg, image/webp, application/pdf"
                           onChange={handleImageUpload}
                           className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
                         />
                         {previewImage ? (
                           <div className="space-y-3">
-                            <img
-                              src={previewImage}
-                              alt="Proof preview"
-                              className="max-h-48 mx-auto rounded border border-[#0D0D0D]/10 shadow-sm"
-                            />
-                            <p className="text-xs text-emerald-700 font-medium">✓ 憑證圖檔已載入，點擊可重新更換</p>
+                            {previewImage === 'pdf' ? (
+                              <div className="p-4 bg-emerald-500/10 border border-emerald-500/30 rounded max-w-sm mx-auto text-emerald-800 text-xs flex items-center justify-center gap-2">
+                                <FileText className="w-5 h-5 text-emerald-600 shrink-0" />
+                                <span className="font-mono truncate">{formData.deposit_proof_filename || '匯款憑證.pdf'}</span>
+                              </div>
+                            ) : (
+                              <img
+                                src={previewImage}
+                                alt="Proof preview"
+                                className="max-h-48 mx-auto rounded border border-[#0D0D0D]/10 shadow-sm"
+                              />
+                            )}
+                            <p className="text-xs text-emerald-700 font-medium">✓ 憑證檔案已載入，點擊可重新更換</p>
                           </div>
                         ) : (
                           <div className="space-y-2">
                             <Upload className="w-8 h-8 mx-auto text-[#8C7853] stroke-[1.5]" />
-                            <p className="text-xs text-[#0D0D0D]/80">點擊或拖曳匯款截圖至此處上傳</p>
-                            <p className="text-[10px] text-[#0D0D0D]/40 font-mono">支援 JPG, PNG, WEBP（檔案不超過 15MB）</p>
+                            <p className="text-xs text-[#0D0D0D]/80">點擊或拖曳匯款截圖/收據至此處上傳</p>
+                            <p className="text-[10px] text-[#0D0D0D]/40 font-mono">支援 JPG, PNG, WEBP, PDF（檔案不超過 15MB）</p>
                           </div>
                         )}
                       </div>
@@ -1707,6 +1765,21 @@ export default function MakingProjectPage() {
                       </label>
                     </div>
                   </div>
+                )}
+
+                {/* Helpful guidance if button is disabled */}
+                {!isStepValid() && currentStep < 4 && (
+                  <p className="text-[11.5px] text-amber-800/90 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded text-right mt-4 leading-relaxed">
+                    {currentStep === 1 && (lang === 'zh' ? '※ 請填妥中文品牌、英文品牌、聯絡人、Email 與通訊地址即可進入下一步。' : '※ Please complete all required profile fields to proceed.')}
+                    {currentStep === 2 && formData.concept_brief.length > 250 && (lang === 'zh' ? `※ 核心理念簡述已超過 250 字上限（目前 ${formData.concept_brief.length} 字），請精簡後即可進入下一步。` : `※ Concept brief exceeds 250 chars (${formData.concept_brief.length}/250). Please shorten to proceed.`)}
+                    {currentStep === 2 && formData.concept_brief.trim() === '' && (lang === 'zh' ? '※ 請填寫核心造物理念簡述（250 字內）即可進入下一步。' : '※ Please provide your concept brief to proceed.')}
+                    {currentStep === 3 && !formData.deposit_proof_base64 && (lang === 'zh' ? '※ 請先上傳匯款憑證截圖或 PDF 檔案即可進入下一步。' : '※ Please upload payment proof to proceed.')}
+                  </p>
+                )}
+                {currentStep === 4 && (!agreeTerms1 || !agreeTerms2) && (
+                  <p className="text-[11.5px] text-amber-800/90 bg-amber-500/10 border border-amber-500/20 px-3 py-2 rounded text-right mt-4 leading-relaxed">
+                    {lang === 'zh' ? '※ 請勾選上方兩項條款確認同意書即可送出申請。' : '※ Please check both agreement boxes above to enable submit.'}
+                  </p>
                 )}
 
                 {/* ── Wizard Bottom Buttons ── */}
