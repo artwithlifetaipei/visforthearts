@@ -50,6 +50,7 @@ export async function POST(req: Request) {
     const body = await req.json();
     const { 
       display_name, 
+      role_title,
       answer, 
       question_id, 
       question_prompt, 
@@ -100,7 +101,8 @@ export async function POST(req: Request) {
     }
 
     // 2. Automated flag detection
-    const flags = [...detectFlags(nameStr), ...detectFlags(answerStr)];
+    const roleStr = role_title ? String(role_title).trim().substring(0, 50) : null;
+    const flags = [...detectFlags(nameStr), ...(roleStr ? detectFlags(roleStr) : []), ...detectFlags(answerStr)];
 
     // 3. Create submission in Pending state (OBJ-002, RULE-001)
     const result = await createSubmission({
@@ -108,6 +110,7 @@ export async function POST(req: Request) {
       source: 'PUBLIC',
       type: 'visitor',
       display_name: nameStr,
+      role_title: roleStr,
       answer: answerStr,
       question_id: question_id || null,
       question_prompt: question_prompt || null,
@@ -123,6 +126,7 @@ export async function POST(req: Request) {
         status: result.status,
         submitted_at: result.submitted_at,
         display_name: result.display_name,
+        role_title: result.role_title,
         answer: result.original_answer,
         message: '您的觀點已成功送出，經大會審核後將於現場播放展示。',
       },

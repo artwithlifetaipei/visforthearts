@@ -414,8 +414,8 @@ export default function PerspectiveDisplayWall() {
                     </div>
                   </div>
 
-                  {/* 3. 名字 (Name) */}
-                  <div className="flex items-center justify-end mt-4 sm:mt-5">
+                  {/* 3. 名字 (Name) & 職稱 (Role) */}
+                  <div className="flex items-center justify-end mt-4 sm:mt-5 flex-wrap gap-x-2">
                     <span className={
                       isFeatured
                         ? "text-base sm:text-lg font-serif text-[#875F24] font-medium tracking-widest"
@@ -423,6 +423,15 @@ export default function PerspectiveDisplayWall() {
                     }>
                       — {item.name}
                     </span>
+                    {item.role_title && (
+                      <span className={
+                        isFeatured
+                          ? "text-xs sm:text-sm font-sans text-[#8C6226]/85 font-normal tracking-wide"
+                          : "text-[11px] sm:text-xs font-sans text-[#574D43]/80 font-normal"
+                      }>
+                        · {item.role_title}
+                      </span>
+                    )}
                   </div>
 
                   {/* Baseline Hairline Separator */}
@@ -491,16 +500,21 @@ export default function PerspectiveDisplayWall() {
                 <span className="text-[#DFBA87] font-serif text-5xl leading-none block text-right -mt-4">”</span>
               </div>
 
-              {/* 3. 名字 (Name) */}
-              <div className="pt-6 border-t border-[#E5DDD0] flex items-center justify-between">
-                <div className="text-xl sm:text-2xl font-serif text-[#875F24] font-medium tracking-wider">
-                  — {selectedItem.name}
+              {/* 3. 名字 (Name) & 職稱 (Role) */}
+              <div className="pt-6 border-t border-[#E5DDD0] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="text-xl sm:text-2xl font-serif text-[#875F24] font-medium tracking-wider flex items-center gap-2 flex-wrap">
+                  <span>— {selectedItem.name}</span>
+                  {selectedItem.role_title && (
+                    <span className="text-sm sm:text-base font-sans text-[#8C6226]/80 font-normal">
+                      · {selectedItem.role_title}
+                    </span>
+                  )}
                 </div>
 
                 <button
                   type="button"
                   onClick={() => setSelectedItem(null)}
-                  className="px-5 py-2.5 rounded-xl bg-[#DFBA87] text-[#1C1814] text-xs font-bold hover:bg-[#cf9e5e] shadow-md shadow-[#DFBA87]/25 transition-colors cursor-pointer"
+                  className="px-5 py-2.5 rounded-xl bg-[#DFBA87] text-[#1C1814] text-xs font-bold hover:bg-[#cf9e5e] shadow-md shadow-[#DFBA87]/25 transition-colors cursor-pointer self-start sm:self-auto"
                 >
                   返回 The Question of the Year · 年度文化命題
                 </button>

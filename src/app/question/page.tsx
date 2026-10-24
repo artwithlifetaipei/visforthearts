@@ -13,12 +13,14 @@ export default function QuestionPage() {
   const [lang, setLang] = useState<'zh' | 'en'>('zh');
   const [selectedQuestionId, setSelectedQuestionId] = useState<string>('q1');
   const [displayName, setDisplayName] = useState('');
+  const [roleTitle, setRoleTitle] = useState('');
   const [answer, setAnswer] = useState('');
   const [consent, setConsent] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState('');
   const [submittedData, setSubmittedData] = useState<{
     displayName: string;
+    roleTitle?: string | null;
     answer: string;
     questionPrompt: string;
     submittedAt: string;
@@ -30,6 +32,7 @@ export default function QuestionPage() {
   const activeQuestion = ANNUAL_SUB_QUESTIONS.find(q => q.id === selectedQuestionId) || ANNUAL_SUB_QUESTIONS[0];
 
   const nameCharCount = displayName.trim().length;
+  const roleCharCount = roleTitle.trim().length;
   const answerCharCount = answer.trim().length;
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -42,6 +45,10 @@ export default function QuestionPage() {
     }
     if (displayName.trim().length > 30) {
       setErrorMessage(t('姓名或顯示名稱不得超過 30 個字元。', 'Display name cannot exceed 30 characters.'));
+      return;
+    }
+    if (roleTitle.trim().length > 40) {
+      setErrorMessage(t('職業/職稱不得超過 40 個字元。', 'Profession/Title cannot exceed 40 characters.'));
       return;
     }
     if (!answer.trim()) {
@@ -66,6 +73,7 @@ export default function QuestionPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           display_name: displayName.trim(),
+          role_title: roleTitle.trim() || null,
           answer: answer.trim(),
           question_id: activeQuestion.id,
           question_prompt: lang === 'zh' ? activeQuestion.question_zh : activeQuestion.question_en,
@@ -83,12 +91,14 @@ export default function QuestionPage() {
 
       setSubmittedData({
         displayName: displayName.trim(),
+        roleTitle: roleTitle.trim() || null,
         answer: answer.trim(),
         questionPrompt: lang === 'zh' ? activeQuestion.question_zh : activeQuestion.question_en,
         submittedAt: new Date().toLocaleTimeString(lang === 'zh' ? 'zh-TW' : 'en-US', { hour12: false }),
       });
       // Reset form fields
       setDisplayName('');
+      setRoleTitle('');
       setAnswer('');
       setConsent(false);
     } catch (err: any) {
@@ -220,7 +230,12 @@ export default function QuestionPage() {
                 </blockquote>
 
                 <div className="text-xs text-neutral-400 font-medium text-right font-sans pt-1">
-                  — {submittedData.displayName}
+                  <span>— {submittedData.displayName}</span>
+                  {submittedData.roleTitle && (
+                    <span className="text-[#DFBA87] ml-1.5 font-normal">
+                      · {submittedData.roleTitle}
+                    </span>
+                  )}
                 </div>
               </div>
 
@@ -327,27 +342,54 @@ export default function QuestionPage() {
                   <span>{t('步驟二：填寫你的姓名與回答觀點', 'Step 2: Enter Your Name and Perspective')}</span>
                 </div>
 
-                {/* Display Name */}
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between text-xs">
-                    <label htmlFor="display_name" className="text-white font-medium flex items-center gap-1">
-                      <span>{t('姓名或希望顯示的名稱', 'Name or Display Name')}</span>
-                      <span className="text-[#DFBA87]">*</span>
-                    </label>
-                    <span className="text-[11px] font-mono text-neutral-400">
-                      {nameCharCount} / 30 {t('字', 'chars')}
-                    </span>
+                {/* Display Name & Role Title Grid */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Display Name */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <label htmlFor="display_name" className="text-white font-medium flex items-center gap-1">
+                        <span>{t('姓名或希望顯示的名稱', 'Name or Display Name')}</span>
+                        <span className="text-[#DFBA87]">*</span>
+                      </label>
+                      <span className="text-[11px] font-mono text-neutral-400">
+                        {nameCharCount} / 30 {t('字', 'chars')}
+                      </span>
+                    </div>
+                    <input
+                      id="display_name"
+                      type="text"
+                      value={displayName}
+                      onChange={(e) => setDisplayName(e.target.value.substring(0, 30))}
+                      placeholder={t('您的姓名或稱謂（例：Amelie、林先生）', 'Your name or display name')}
+                      className="w-full bg-white/[0.06] hover:bg-white/[0.09] focus:bg-black/60 border border-white/20 focus:border-[#DFBA87] focus:ring-1 focus:ring-[#DFBA87]/40 rounded-xl px-4 py-3 text-sm text-white placeholder-white/35 focus:outline-none shadow-inner transition-all font-sans"
+                      maxLength={30}
+                      required
+                    />
                   </div>
-                  <input
-                    id="display_name"
-                    type="text"
-                    value={displayName}
-                    onChange={(e) => setDisplayName(e.target.value.substring(0, 30))}
-                    placeholder={t('您的姓名或稱謂（例如：Amelie、建築愛好者、匿名觀展者）', 'Your name or display name')}
-                    className="w-full bg-white/[0.06] hover:bg-white/[0.09] focus:bg-black/60 border border-white/20 focus:border-[#DFBA87] focus:ring-1 focus:ring-[#DFBA87]/40 rounded-xl px-4 py-3 text-sm text-white placeholder-white/35 focus:outline-none shadow-inner transition-all font-sans"
-                    maxLength={30}
-                    required
-                  />
+
+                  {/* Profession / Role Title (Optional) */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <label htmlFor="role_title" className="text-white font-medium flex items-center gap-1.5">
+                        <span>{t('職業 / 職稱', 'Profession / Title')}</span>
+                        <span className="text-[10px] font-mono text-[#DFBA87]/90 bg-[#DFBA87]/15 px-1.5 py-0.5 rounded border border-[#DFBA87]/30">
+                          {t('選填', 'Optional')}
+                        </span>
+                      </label>
+                      <span className="text-[11px] font-mono text-neutral-400">
+                        {roleCharCount} / 40 {t('字', 'chars')}
+                      </span>
+                    </div>
+                    <input
+                      id="role_title"
+                      type="text"
+                      value={roleTitle}
+                      onChange={(e) => setRoleTitle(e.target.value.substring(0, 40))}
+                      placeholder={t('例：建築設計師、品牌創辦人、學生', 'e.g. Architect, Founder, Student')}
+                      className="w-full bg-white/[0.06] hover:bg-white/[0.09] focus:bg-black/60 border border-white/20 focus:border-[#DFBA87] focus:ring-1 focus:ring-[#DFBA87]/40 rounded-xl px-4 py-3 text-sm text-white placeholder-white/35 focus:outline-none shadow-inner transition-all font-sans"
+                      maxLength={40}
+                    />
+                  </div>
                 </div>
 
                 {/* Perspective Answer */}
