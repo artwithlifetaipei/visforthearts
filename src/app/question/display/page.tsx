@@ -192,7 +192,7 @@ export default function PerspectiveDisplayWall() {
   const getQuestionPrompt = (item: DisplayItem) => {
     if (item.question_prompt) return item.question_prompt;
     if (item.question_id === 'q1') return '你覺得什麼樣的人，很有品味？';
-    if (item.question_id === 'q2') return '如果可以讓台灣的一個地方變得更美，你會先選哪裡？';
+    if (item.question_id === 'q2') return '如果可以讓生活中，或是台灣的一個地方變得更美，你會先選哪裡？';
     if (item.question_id === 'q3') return '如果希望台灣成為一個更有美感的地方，你最希望大家開始重視什麼？';
     return '美，如何成為我們共同的價值？';
   };

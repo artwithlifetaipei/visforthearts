@@ -46,12 +46,12 @@ export const ANNUAL_SUB_QUESTIONS: AnnualSubQuestion[] = [
   {
     id: 'q2',
     order: 2,
-    question_zh: '如果可以讓台灣的一個地方變得更美，你會先選哪裡？',
-    question_en: 'If you could make one place in Taiwan more beautiful, which would you choose first?',
+    question_zh: '如果可以讓生活中，或是台灣的一個地方變得更美，你會先選哪裡？',
+    question_en: 'If you could make a place in your daily life or in Taiwan more beautiful, which would you choose first?',
     short_label_zh: '地方的改變',
     short_label_en: 'Transforming a Place',
-    placeholder_zh: '請分享如果可以讓台灣的一個地方變得更美，你會先選哪裡？你希望那裡發生什麼改變...',
-    placeholder_en: 'Share which place in Taiwan you would choose to make more beautiful and why...',
+    placeholder_zh: '請分享如果可以讓生活中，或是台灣的一個地方變得更美，你會先選哪裡？你希望那裡發生什麼改變...',
+    placeholder_en: 'Share which place in your life or in Taiwan you would choose to make more beautiful and why...',
   },
   {
     id: 'q3',

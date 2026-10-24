@@ -207,6 +207,6 @@ INSERT INTO public.perspective_submissions (
     3,
     true,
     'q2',
-    '如果可以讓台灣的一個地方變得更美，你會先選哪裡？'
+    '如果可以讓生活中，或是台灣的一個地方變得更美，你會先選哪裡？'
 )
 ON CONFLICT DO NOTHING;

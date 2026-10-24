@@ -94,7 +94,7 @@ export const SEED_PERSPECTIVES: PerspectiveSubmission[] = [
     display_order: 3,
     featured: true,
     question_id: 'q2',
-    question_prompt: '如果可以讓台灣的一個地方變得更美，你會先選哪裡？',
+    question_prompt: '如果可以讓生活中，或是台灣的一個地方變得更美，你會先選哪裡？',
     moderation_flags: [],
     consent_version: '2027-v2',
     consented_at: '2026-10-21T10:00:00Z',
