@@ -153,50 +153,60 @@ INSERT INTO public.perspective_display_settings (
     1
 ) ON CONFLICT DO NOTHING;
 
--- 9. Seed Curated Perspectives (10 High-Quality Perspectives)
+-- 9. Add Question Columns if missing
+ALTER TABLE public.perspective_submissions ADD COLUMN IF NOT EXISTS question_id TEXT;
+ALTER TABLE public.perspective_submissions ADD COLUMN IF NOT EXISTS question_prompt TEXT;
+
+-- 10. Seed Curated Perspectives (3 Official Curated Perspectives)
 INSERT INTO public.perspective_submissions (
-    campaign_id, source, type, original_name, display_name, original_answer, display_answer, role_title, status, display_enabled, display_order, featured
+    campaign_id, source, type, original_name, display_name, original_answer, display_answer, role_title, status, display_enabled, display_order, featured, question_id, question_prompt
 ) VALUES
 (
     'e3c23114-61b9-4674-8898-0c367ad10827',
     'EDITORIAL',
     'vis_people',
-    'VIS Curatorial Team',
-    'VIS 策展團隊',
-    '對歷史紋理的敬畏，以及在古蹟中山堂中重新萌芽的原創文化勇氣。',
-    '對歷史紋理的敬畏，以及在古蹟中山堂中重新萌芽的原創文化勇氣。',
-    'VIS 2027 策展小組',
-    'approved',
-    true,
-    2,
-    true
-),
-(
-    'e3c23114-61b9-4674-8898-0c367ad10827',
-    'INTERVIEW',
-    'exhibitor',
-    'Norman',
-    'Norman',
-    '在講求速度與效率的當代，依然願意緩慢打磨、專注雕琢一件事的執著。',
-    '在講求速度與效率的當代，依然願意緩慢打磨、專注雕琢一件事的執著。',
-    '參展品牌設計總監',
-    'approved',
-    true,
-    3,
-    true
-),
-(
-    'e3c23114-61b9-4674-8898-0c367ad10827',
-    'PUBLIC',
-    'visitor',
-    '匿名觀展者',
-    '匿名觀展者',
-    '孩子眼眸中對世界純粹的好奇心，以及對大自然原始森林的敬畏之情。',
-    '孩子眼眸中對世界純粹的好奇心，以及對大自然原始森林的敬畏之情。',
+    'Amelie KUO',
+    'Amelie KUO',
+    '希望台灣能讓更多人擁有理解美的能力，而不只是追求好看的結果。因為真正改變一個地方的，從來不只是創造美的人，還有懂得欣賞美的人。',
+    '希望台灣能讓更多人擁有理解美的能力，而不只是追求好看的結果。因為真正改變一個地方的，從來不只是創造美的人，還有懂得欣賞美的人。',
     NULL,
     'approved',
     true,
-    4,
-    false
+    1,
+    true,
+    'q3',
+    '如果希望台灣成為一個更有美感的地方，你最希望大家開始重視什麼？'
+),
+(
+    'e3c23114-61b9-4674-8898-0c367ad10827',
+    'EDITORIAL',
+    'visitor',
+    '匿名',
+    '匿名',
+    '真正的美感素養，不是知道什麼是美，而是能說出自己為什麼覺得美。',
+    '真正的美感素養，不是知道什麼是美，而是能說出自己為什麼覺得美。',
+    NULL,
+    'approved',
+    true,
+    2,
+    true,
+    'q1',
+    '你認為，一個真正懂得欣賞美的社會，應該具備什麼樣的特質？'
+),
+(
+    'e3c23114-61b9-4674-8898-0c367ad10827',
+    'EDITORIAL',
+    'vis_people',
+    'VIS 小隊',
+    'VIS 小隊',
+    '讓生活變得開心🤍🤍',
+    '讓生活變得開心🤍🤍',
+    NULL,
+    'approved',
+    true,
+    3,
+    true,
+    'q2',
+    '對你來說，美的事物，它的價值是什麼？一句話形容。'
 )
 ON CONFLICT DO NOTHING;
