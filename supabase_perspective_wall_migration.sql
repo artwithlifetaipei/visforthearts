@@ -191,7 +191,7 @@ INSERT INTO public.perspective_submissions (
     2,
     true,
     'q1',
-    '要讓台灣社會更懂得欣賞美，你認為我們最需要改變哪一個觀念？'
+    '你覺得什麼樣的人，很有品味？'
 ),
 (
     'e3c23114-61b9-4674-8898-0c367ad10827',
@@ -207,6 +207,6 @@ INSERT INTO public.perspective_submissions (
     3,
     true,
     'q2',
-    '對你來說，美曾經改變過你生活中的什麼？'
+    '如果可以讓台灣的一個地方變得更美，你會先選哪裡？'
 )
 ON CONFLICT DO NOTHING;
