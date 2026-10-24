@@ -2170,7 +2170,31 @@ export default function ExhibitorAdminPage() {
           {activeTab === 'media' && (() => {
             const imageAssets = mediaAssets.filter((a) => a.file_type !== 'pr_qa_submission' && a.file_type !== 'brand_logo_transparent');
             const logoAssets = mediaAssets.filter((a) => a.file_type === 'brand_logo_transparent');
-            const qaSubmissions = mediaAssets.filter((a) => a.file_type === 'pr_qa_submission');
+
+            // Parse and strictly validate PR Q&A submissions
+            const allQaSubmissions = mediaAssets
+              .filter((a) => a.file_type === 'pr_qa_submission')
+              .map((sub) => {
+                let parsed: any = {};
+                try {
+                  parsed = typeof sub.file_url === 'string' ? JSON.parse(sub.file_url) : (sub.file_url || {});
+                } catch {}
+                const brandName = sub.exhibitor_brands?.brand_name_zh || sub.exhibitor_brands?.brand_name_en || '參展品牌';
+                let filledCount = 0;
+                (['q1', 'q2', 'q3', 'q4', 'q5'] as const).forEach(k => {
+                  if ((parsed[k] || '').trim().length > 0) filledCount += 1;
+                });
+                return {
+                  ...sub,
+                  parsed,
+                  brandName,
+                  filledCount,
+                };
+              });
+
+            // STRICT FILTER: Only brands that actually answered at least 1 question count as "已回稿"
+            const qaSubmissions = allQaSubmissions.filter((sub) => sub.filledCount > 0);
+            const emptyDraftSubmissions = allQaSubmissions.filter((sub) => sub.filledCount === 0);
 
             const handleCopyQaText = (brandName: string, parsed: any, id: string) => {
               const text = `【VIS 2027 參展品牌深度專訪回稿 — ${brandName}】\n\n` +
@@ -2213,14 +2237,8 @@ export default function ExhibitorAdminPage() {
                   ) : (
                     <div className="space-y-3">
                       {qaSubmissions.map((sub) => {
-                        let parsed: any = {};
-                        try { parsed = JSON.parse(sub.file_url || '{}'); } catch {}
-                        const brandName = sub.exhibitor_brands?.brand_name_zh || '參展品牌';
+                        const { parsed, brandName, filledCount } = sub;
                         const isExpanded = expandedQaId === sub.id;
-                        let filledCount = 0;
-                        ['q1', 'q2', 'q3', 'q4', 'q5'].forEach(k => {
-                          if ((parsed[k] || '').trim().length > 0) filledCount += 1;
-                        });
 
                         return (
                           <div 
@@ -2232,8 +2250,12 @@ export default function ExhibitorAdminPage() {
                               className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 cursor-pointer bg-white/[0.01] hover:bg-white/[0.03]"
                             >
                               <div className="flex items-center gap-3">
-                                <span className="w-7 h-7 rounded-lg bg-[#DFBA87]/15 border border-[#DFBA87]/30 text-[#DFBA87] text-xs font-mono font-bold flex items-center justify-center">
-                                  {filledCount}/5
+                                <span className={`px-2.5 py-1 rounded-lg text-xs font-mono font-bold flex items-center justify-center border ${
+                                  filledCount === 5 
+                                    ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-400' 
+                                    : 'bg-[#DFBA87]/15 border-[#DFBA87]/30 text-[#DFBA87]'
+                                }`}>
+                                  {filledCount}/5 {filledCount === 5 ? '全數填畢' : '已回稿'}
                                 </span>
                                 <div>
                                   <div className="text-sm font-semibold text-white tracking-wide">
@@ -2305,6 +2327,12 @@ export default function ExhibitorAdminPage() {
                           </div>
                         );
                       })}
+                    </div>
+                  )}
+
+                  {emptyDraftSubmissions.length > 0 && (
+                    <div className="p-3 bg-white/[0.02] border border-white/5 rounded-lg text-neutral-500 text-xs flex items-center justify-between">
+                      <span>💡 另有 {emptyDraftSubmissions.length} 家品牌曾開啟專題提問但尚未填寫答題內容，不列入已回稿統計中。</span>
                     </div>
                   )}
                 </div>

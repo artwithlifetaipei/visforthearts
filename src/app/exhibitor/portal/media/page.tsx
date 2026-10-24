@@ -282,6 +282,18 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
   // Save Q&A Draft or Final Submission
   const handleSaveQa = async (isFinalSubmit: boolean = false) => {
     if (!brand?.id || savingQa) return;
+
+    if (isFinalSubmit) {
+      let filledCount = 0;
+      (['q1', 'q2', 'q3', 'q4', 'q5'] as const).forEach(k => {
+        if ((qaAnswers[k] || '').trim().length > 0) filledCount += 1;
+      });
+      if (filledCount === 0) {
+        alert(lang === 'zh' ? '請至少填寫一題題目後再點擊確認完成。' : 'Please answer at least one question before confirming complete.');
+        return;
+      }
+    }
+
     setSavingQa(true);
     setQaMessage({ text: '', type: '' });
 

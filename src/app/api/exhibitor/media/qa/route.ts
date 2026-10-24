@@ -80,11 +80,21 @@ export async function POST(req: Request) {
             }
         }
 
+        let filledCount = 0;
+        ['q1', 'q2', 'q3', 'q4', 'q5'].forEach(k => {
+            if ((answers?.[k] || '').trim().length > 0) filledCount += 1;
+        });
+
+        if (isSubmitted && filledCount === 0) {
+            return NextResponse.json({ error: '請至少填寫一題題目後再點擊確認完成。' }, { status: 400 });
+        }
+
         const nowIso = new Date().toISOString();
         const payload = {
             ...answers,
+            filledCount,
             lastSavedAt: nowIso,
-            isSubmitted: !!isSubmitted,
+            isSubmitted: !!isSubmitted && filledCount > 0,
         };
 
         const fileContent = JSON.stringify(payload);
