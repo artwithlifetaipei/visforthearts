@@ -48,9 +48,28 @@ export default function PerspectiveDisplayWall() {
   const [isAutoScroll, setIsAutoScroll] = useState(true);
   const [isPausedByUser, setIsPausedByUser] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
+  const [cursorVisible, setCursorVisible] = useState(true);
 
   const cachedDataRef = useRef<DisplayApiResponse | null>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const cursorTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Auto-hide cursor on exhibition displays when inactive for 3.5s
+  useEffect(() => {
+    const handleMouseMove = () => {
+      setCursorVisible(true);
+      if (cursorTimerRef.current) clearTimeout(cursorTimerRef.current);
+      cursorTimerRef.current = setTimeout(() => {
+        setCursorVisible(false);
+      }, 3500);
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      if (cursorTimerRef.current) clearTimeout(cursorTimerRef.current);
+    };
+  }, []);
 
   // Fetch Display API (Always fetch freshest items, no-cache)
   const fetchDisplayData = async () => {
@@ -198,7 +217,7 @@ export default function PerspectiveDisplayWall() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0908] text-[#F3EFEA] font-sans selection:bg-[#DFBA87] selection:text-black relative overflow-x-hidden pb-24">
+    <div className={`min-h-screen bg-[#0A0908] text-[#F3EFEA] font-sans selection:bg-[#DFBA87] selection:text-black relative overflow-x-hidden pb-24 transition-all ${cursorVisible ? '' : 'cursor-none'}`}>
       
       {/* ─────────────────────────────────────────────────────────────
           1. FULL-BLEED AUTHENTIC ARCHITECTURAL BACKGROUND (VIP LOBBY)
@@ -346,7 +365,7 @@ export default function PerspectiveDisplayWall() {
           /* Borderless Architectural Typography Flow */
           <motion.div 
             layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 lg:gap-x-16 gap-y-12 lg:gap-y-16 items-start"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 portrait:grid-cols-1 portrait:md:grid-cols-1 portrait:lg:grid-cols-1 gap-x-12 lg:gap-x-16 gap-y-12 lg:gap-y-16 portrait:gap-y-16 items-start max-w-[1720px] mx-auto portrait:max-w-4xl"
           >
             {items.map((item, idx) => {
               const isFeatured = Boolean(item.featured);
@@ -362,15 +381,15 @@ export default function PerspectiveDisplayWall() {
                   onClick={() => setSelectedItem(item)}
                   className={
                     isFeatured
-                      ? "col-span-1 md:col-span-2 group relative cursor-pointer p-6 sm:p-8 -m-3 sm:-m-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-[#DFBA87]/30 hover:border-[#DFBA87]/60 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-xl"
-                      : "col-span-1 group relative cursor-pointer p-6 sm:p-7 -m-3 sm:-m-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 hover:border-[#DFBA87]/40 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-lg"
+                      ? "col-span-1 md:col-span-2 portrait:col-span-1 group relative cursor-pointer p-6 sm:p-8 portrait:p-10 -m-3 sm:-m-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-[#DFBA87]/30 hover:border-[#DFBA87]/60 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-xl"
+                      : "col-span-1 portrait:col-span-1 group relative cursor-pointer p-6 sm:p-7 portrait:p-9 -m-3 sm:-m-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 hover:border-[#DFBA87]/40 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-lg"
                   }
                 >
-                  <div className="space-y-3.5">
+                  <div className="space-y-3.5 portrait:space-y-4">
                     {/* 1. 問題 (Question) */}
                     <div className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#DFBA87]" />
-                      <p className="text-xs sm:text-[13px] font-serif text-[#DFBA87] tracking-wider font-medium leading-relaxed">
+                      <p className="text-xs sm:text-[13px] portrait:text-sm sm:portrait:text-base font-serif text-[#DFBA87] tracking-wider font-medium leading-relaxed">
                         {questionText}
                       </p>
                     </div>
@@ -378,13 +397,13 @@ export default function PerspectiveDisplayWall() {
                     {/* 2. 答案 (Answer Quote with architectural left line) */}
                     <div className={
                       isFeatured 
-                        ? "border-l-2 border-[#DFBA87] pl-5 sm:pl-7 my-3 sm:my-4" 
-                        : "border-l border-white/20 pl-4 sm:pl-5 my-2.5 sm:my-3"
+                        ? "border-l-2 border-[#DFBA87] pl-5 sm:pl-7 portrait:pl-8 my-3 sm:my-4 portrait:my-5" 
+                        : "border-l border-white/20 pl-4 sm:pl-5 portrait:pl-6 my-2.5 sm:my-3 portrait:my-4"
                     }>
                       <blockquote className={
                         isFeatured 
-                          ? "text-2xl sm:text-3xl lg:text-[2.2rem] font-serif text-white leading-[1.48] tracking-wide font-normal group-hover:text-[#F3E2C8] transition-colors duration-300 drop-shadow-sm" 
-                          : "text-base sm:text-lg lg:text-xl font-serif text-white/90 leading-[1.68] tracking-wide font-normal group-hover:text-white transition-colors duration-300"
+                          ? "text-2xl sm:text-3xl lg:text-[2.2rem] portrait:text-3xl sm:portrait:text-4xl lg:portrait:text-[2.6rem] font-serif text-white leading-[1.48] portrait:leading-[1.45] tracking-wide font-normal group-hover:text-[#F3E2C8] transition-colors duration-300 drop-shadow-sm" 
+                          : "text-base sm:text-lg lg:text-xl portrait:text-2xl sm:portrait:text-3xl font-serif text-white/90 leading-[1.68] portrait:leading-[1.55] tracking-wide font-normal group-hover:text-white transition-colors duration-300"
                       }>
                         “{item.answer}”
                       </blockquote>
@@ -392,19 +411,19 @@ export default function PerspectiveDisplayWall() {
                   </div>
 
                   {/* 3. 名字 (Name) & 職稱 (Role) */}
-                  <div className="flex items-center justify-end mt-4 sm:mt-5 flex-wrap gap-x-2">
+                  <div className="flex items-center justify-end mt-4 sm:mt-5 portrait:mt-6 flex-wrap gap-x-2">
                     <span className={
                       isFeatured
-                        ? "text-base sm:text-lg font-serif text-[#DFBA87] font-medium tracking-widest"
-                        : "text-xs sm:text-sm font-serif text-neutral-300 font-medium tracking-wider"
+                        ? "text-base sm:text-lg portrait:text-xl font-serif text-[#DFBA87] font-medium tracking-widest"
+                        : "text-xs sm:text-sm portrait:text-base font-serif text-neutral-300 font-medium tracking-wider"
                     }>
                       — {item.name}
                     </span>
                     {item.role_title && (
                       <span className={
                         isFeatured
-                          ? "text-xs sm:text-sm font-sans text-neutral-300 font-normal tracking-wide"
-                          : "text-[11px] sm:text-xs font-sans text-neutral-400 font-normal"
+                          ? "text-xs sm:text-sm portrait:text-base font-sans text-neutral-300 font-normal tracking-wide"
+                          : "text-[11px] sm:text-xs portrait:text-sm font-sans text-neutral-400 font-normal"
                       }>
                         · {item.role_title}
                       </span>
@@ -412,7 +431,7 @@ export default function PerspectiveDisplayWall() {
                   </div>
 
                   {/* Baseline Hairline Separator */}
-                  <div className="w-full h-px bg-gradient-to-r from-transparent via-[#DFBA87]/30 to-transparent mt-6 sm:mt-8 group-hover:via-[#DFBA87]/60 transition-all duration-500" />
+                  <div className="w-full h-px bg-gradient-to-r from-transparent via-[#DFBA87]/30 to-transparent mt-6 sm:mt-8 portrait:mt-8 group-hover:via-[#DFBA87]/60 transition-all duration-500" />
                 </motion.article>
               );
             })}
