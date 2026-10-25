@@ -8,7 +8,7 @@ import { motion } from 'framer-motion';
 import { 
   Calendar, CreditCard, Award, ClipboardCheck, Users, 
   Image as ImageIcon, HelpCircle, Check, Clock, AlertTriangle,
-  Building2, Copy 
+  Building2, Copy, Mail, Lock, CheckCircle2
 } from 'lucide-react';
 
 function safeGetStorage(key: string): string | null {
@@ -61,6 +61,52 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   const [qaCount, setQaCount] = useState(0);
   const [hasLogo, setHasLogo] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState(false);
+
+  // Email binding state
+  const isTemporaryEmail = Boolean(brand?.portal_email?.endsWith('@visforthearts.com'));
+  const [showEmailBinding, setShowEmailBinding] = useState(false);
+  const [bindingEmail, setBindingEmail] = useState('');
+  const [bindingPassword, setBindingPassword] = useState('');
+  const [bindingSubmitting, setBindingSubmitting] = useState(false);
+  const [bindingSuccessMsg, setBindingSuccessMsg] = useState('');
+  const [bindingErrorMsg, setBindingErrorMsg] = useState('');
+
+  const handleBindEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!bindingEmail.trim() || !brand) return;
+
+    setBindingSubmitting(true);
+    setBindingErrorMsg('');
+    setBindingSuccessMsg('');
+
+    try {
+      const res = await fetch('/api/exhibitor/update-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand_id: brand.id,
+          new_email: bindingEmail.trim(),
+          new_password: bindingPassword.trim() || undefined,
+        }),
+      });
+
+      const resJson = await res.json();
+      if (!res.ok || resJson.error) {
+        setBindingErrorMsg(resJson.error || '綁定失敗，請稍候再試');
+      } else {
+        const updatedBrand = { ...brand, portal_email: resJson.portal_email };
+        setBrand(updatedBrand);
+        safeSetStorage('vis_portal_brand_data', JSON.stringify(updatedBrand));
+        setBindingSuccessMsg(`✓ 電子信箱已成功綁定為：${resJson.portal_email}！未來您可直接以此信箱登入後台。`);
+        setBindingEmail('');
+        setBindingPassword('');
+      }
+    } catch (err: any) {
+      setBindingErrorMsg(`連線異常 (${err.message})，請檢查網路連線。`);
+    } finally {
+      setBindingSubmitting(false);
+    }
+  };
 
   const copyToClipboard = (text: string) => {
     if (typeof navigator !== 'undefined' && navigator.clipboard) {
@@ -327,6 +373,123 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
           <Award className="w-4 h-4" />
           <span>展位: {formatBoothDisplay(brand.booth_type, brand.zone_id)} ({zone?.nameZh || '大會特展'})</span>
         </div>
+      </div>
+
+      {/* Email Binding Banner */}
+      <div className={`p-5 rounded-xl border transition-all ${
+        isTemporaryEmail 
+          ? 'bg-gradient-to-r from-amber-500/10 via-[#C9A96E]/10 to-transparent border-[#DFBA87]/30 shadow-lg' 
+          : 'bg-white/[0.02] border-white/5'
+      }`}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-start gap-3">
+            <div className={`w-9 h-9 rounded-lg flex items-center justify-center shrink-0 ${
+              isTemporaryEmail ? 'bg-[#DFBA87]/20 text-[#DFBA87]' : 'bg-white/5 text-neutral-400'
+            }`}>
+              <Mail className="w-5 h-5" />
+            </div>
+            <div className="space-y-1">
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-semibold tracking-wide text-white">
+                  {isTemporaryEmail ? '填入您的個人/公司常用電子信箱' : '參展商聯絡與登入信箱'}
+                </h3>
+                {isTemporaryEmail && (
+                  <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-2 py-0.5 rounded font-mono">
+                    建議綁定
+                  </span>
+                )}
+              </div>
+              <p className="text-xs text-neutral-400 font-light leading-relaxed max-w-xl">
+                {isTemporaryEmail 
+                  ? `目前使用的是大會為您預設的專屬臨時帳號（${brand.portal_email}）。請在下方輸入您的常用 Email 即可完成綁定，未來可直接使用個人信箱登入後台並接收重要展務通知！`
+                  : `目前綁定之聯絡與登入信箱：${brand.portal_email}`}
+              </p>
+            </div>
+          </div>
+
+          {!isTemporaryEmail && !showEmailBinding && (
+            <button
+              type="button"
+              onClick={() => setShowEmailBinding(true)}
+              className="text-xs text-[#DFBA87] hover:text-white border border-[#DFBA87]/30 hover:border-[#DFBA87] px-3.5 py-1.5 rounded transition-all whitespace-nowrap self-start sm:self-auto font-medium cursor-pointer"
+            >
+              更換綁定信箱
+            </button>
+          )}
+        </div>
+
+        {bindingSuccessMsg && (
+          <div className="mt-4 p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+            <span>{bindingSuccessMsg}</span>
+          </div>
+        )}
+
+        {(isTemporaryEmail || showEmailBinding) && (
+          <form onSubmit={handleBindEmailSubmit} className="mt-4 pt-4 border-t border-white/5 space-y-3">
+            {bindingErrorMsg && (
+              <div className="p-3 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2 font-mono">
+                <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                <span>{bindingErrorMsg}</span>
+              </div>
+            )}
+
+            <div className="grid sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <label className="block text-[11px] text-neutral-300 font-medium">
+                  您的正式電子信箱 OFFICIAL EMAIL *
+                </label>
+                <div className="relative">
+                  <input
+                    type="email"
+                    required
+                    value={bindingEmail}
+                    onChange={(e) => setBindingEmail(e.target.value)}
+                    placeholder="請輸入常用信箱（如 name@gmail.com）"
+                    className="w-full text-xs bg-white/5 border border-white/10 focus:border-[#DFBA87] rounded-lg pl-9 pr-3 py-2.5 outline-none text-white transition-all placeholder:text-neutral-500 font-mono"
+                  />
+                  <Mail className="w-4 h-4 text-neutral-500 absolute left-3 top-3" />
+                </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <label className="block text-[11px] text-neutral-300 font-medium">
+                  自訂登入密碼 PASSWORD (選填，至少 6 碼)
+                </label>
+                <div className="relative">
+                  <input
+                    type="password"
+                    value={bindingPassword}
+                    onChange={(e) => setBindingPassword(e.target.value)}
+                    placeholder="留空則沿用現有密碼"
+                    minLength={6}
+                    className="w-full text-xs bg-white/5 border border-white/10 focus:border-[#DFBA87] rounded-lg pl-9 pr-3 py-2.5 outline-none text-white transition-all placeholder:text-neutral-500 font-mono"
+                  />
+                  <Lock className="w-4 h-4 text-neutral-500 absolute left-3 top-3" />
+                </div>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 pt-1">
+              <button
+                type="submit"
+                disabled={bindingSubmitting || !bindingEmail.trim()}
+                className="bg-[#C9A96E] hover:bg-[#B39359] disabled:bg-neutral-800 disabled:text-neutral-500 text-white text-xs px-4 py-2 rounded-lg font-semibold tracking-wider transition-all cursor-pointer disabled:cursor-not-allowed flex items-center gap-1.5 shadow-md shadow-[#C9A96E]/20"
+              >
+                {bindingSubmitting ? '更新綁定中...' : '確認綁定並更新信箱 Bind Email'}
+              </button>
+              {!isTemporaryEmail && (
+                <button
+                  type="button"
+                  onClick={() => setShowEmailBinding(false)}
+                  className="text-xs text-neutral-500 hover:text-white px-3 py-2 cursor-pointer"
+                >
+                  取消
+                </button>
+              )}
+            </div>
+          </form>
+        )}
       </div>
 
       {/* Progress Bar Card */}
