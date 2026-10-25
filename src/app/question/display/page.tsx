@@ -48,25 +48,44 @@ export default function PerspectiveDisplayWall() {
   const [isAutoScroll, setIsAutoScroll] = useState(true);
   const [isPausedByUser, setIsPausedByUser] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [cursorVisible, setCursorVisible] = useState(true);
+  const [isPortrait, setIsPortrait] = useState(false);
+  const [isCursorIdle, setIsCursorIdle] = useState(false);
 
   const cachedDataRef = useRef<DisplayApiResponse | null>(null);
   const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const cursorTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Auto-hide cursor on exhibition displays when inactive for 3.5s
+  // Auto-detect portrait orientation (tuned for 1328x2080 mm vertical exhibition LED)
   useEffect(() => {
-    const handleMouseMove = () => {
-      setCursorVisible(true);
+    const checkOrientation = () => {
+      const portrait = window.innerHeight > window.innerWidth || window.matchMedia('(orientation: portrait)').matches;
+      setIsPortrait(portrait);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
+
+  // Idle mouse cursor hide (ensures no stray cursor on exhibition LED wall after 3.5s)
+  useEffect(() => {
+    const onMouseMove = () => {
+      setIsCursorIdle(false);
       if (cursorTimerRef.current) clearTimeout(cursorTimerRef.current);
       cursorTimerRef.current = setTimeout(() => {
-        setCursorVisible(false);
+        setIsCursorIdle(true);
       }, 3500);
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mousemove', onMouseMove);
+    cursorTimerRef.current = setTimeout(() => setIsCursorIdle(true), 3500);
+
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mousemove', onMouseMove);
       if (cursorTimerRef.current) clearTimeout(cursorTimerRef.current);
     };
   }, []);
@@ -124,6 +143,8 @@ export default function PerspectiveDisplayWall() {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'f' || e.key === 'F') {
         toggleFullscreen();
+      } else if (e.key === 'q' || e.key === 'Q') {
+        setShowQrModal(prev => !prev);
       } else if (e.key === 'Escape') {
         if (selectedItem) setSelectedItem(null);
         if (showQrModal) setShowQrModal(false);
@@ -217,7 +238,7 @@ export default function PerspectiveDisplayWall() {
   };
 
   return (
-    <div className={`min-h-screen bg-[#0A0908] text-[#F3EFEA] font-sans selection:bg-[#DFBA87] selection:text-black relative overflow-x-hidden pb-24 transition-all ${cursorVisible ? '' : 'cursor-none'}`}>
+    <div className={`min-h-screen bg-[#0A0908] text-[#F3EFEA] font-sans selection:bg-[#DFBA87] selection:text-black relative overflow-x-hidden ${isPortrait ? 'pb-52' : 'pb-24'} transition-all ${isCursorIdle ? 'cursor-none' : ''}`}>
       
       {/* ─────────────────────────────────────────────────────────────
           1. FULL-BLEED AUTHENTIC ARCHITECTURAL BACKGROUND (VIP LOBBY)
@@ -255,7 +276,7 @@ export default function PerspectiveDisplayWall() {
               >
                 <img 
                   src="/vis_logo.png" 
-                  alt="VIS" 
+                  alt="VIS Contemporary Culture" 
                   className="h-12 sm:h-14 md:h-16 w-auto object-contain drop-shadow-sm brightness-110"
                 />
               </Link>
@@ -270,7 +291,7 @@ export default function PerspectiveDisplayWall() {
               </div>
             </div>
 
-            {/* Top-Right: Prominent Direct-Scan QR Code Card + Fullscreen Button */}
+            {/* Top-Right: Fullscreen button + QR card/trigger */}
             <div className="flex items-center gap-3 sm:gap-4">
               
               {/* Fullscreen Button */}
@@ -283,47 +304,60 @@ export default function PerspectiveDisplayWall() {
                 {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
               </button>
 
-              {/* The Prominent Scannable QR Code Card (Direct Scan for Visitors) */}
-              <div
-                onClick={() => setShowQrModal(true)}
-                className="group relative flex items-center gap-3 sm:gap-4 bg-black/60 hover:bg-black/80 backdrop-blur-xl border border-[#DFBA87]/50 hover:border-[#DFBA87] rounded-2xl p-2.5 sm:p-3 shadow-xl hover:shadow-2xl hover:shadow-[#DFBA87]/20 transition-all duration-300 cursor-pointer ring-1 ring-[#DFBA87]/30"
-                title="手機直接掃描 QR Code 即時參與 · 點擊可放大全螢幕展示"
-              >
-                {/* Large High-Contrast QR Code */}
-                <div className="bg-white p-2 rounded-xl border border-white/20 shadow-xs group-hover:scale-[1.02] transition-transform duration-300 flex-shrink-0">
-                  <QRCodeSVG
-                    value={submissionUrl}
-                    size={110}
-                    level="H"
-                    includeMargin={false}
-                    fgColor="#111111"
-                    className="w-20 h-20 sm:w-24 sm:h-24 md:w-[104px] md:h-[104px]"
-                  />
+              {/* In Landscape mode: Prominent Scannable QR Code Card in header */}
+              {!isPortrait ? (
+                <div
+                  onClick={() => setShowQrModal(true)}
+                  className="group relative flex items-center gap-3 sm:gap-4 bg-black/60 hover:bg-black/80 backdrop-blur-xl border border-[#DFBA87]/50 hover:border-[#DFBA87] rounded-2xl p-2.5 sm:p-3 shadow-xl hover:shadow-2xl hover:shadow-[#DFBA87]/20 transition-all duration-300 cursor-pointer ring-1 ring-[#DFBA87]/30"
+                  title="手機直接掃描 QR Code 即時參與 · 點擊可放大全螢幕展示"
+                >
+                  {/* Large High-Contrast QR Code */}
+                  <div className="bg-white p-2 rounded-xl border border-white/20 shadow-xs group-hover:scale-[1.02] transition-transform duration-300 flex-shrink-0">
+                    <QRCodeSVG
+                      value={submissionUrl}
+                      size={110}
+                      level="H"
+                      includeMargin={false}
+                      fgColor="#111111"
+                      className="w-20 h-20 sm:w-24 sm:h-24 md:w-[104px] md:h-[104px]"
+                    />
+                  </div>
+
+                  {/* Direct Action Guidance Typography */}
+                  <div className="flex flex-col justify-center text-left space-y-1 pr-1 sm:pr-2">
+                    <div className="flex items-center gap-1.5">
+                      <span className="relative flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#DFBA87] opacity-75" />
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#DFBA87]" />
+                      </span>
+                      <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.18em] uppercase text-[#DFBA87] font-bold whitespace-nowrap">
+                        SCAN TO PARTICIPATE
+                      </span>
+                    </div>
+
+                    <div className="text-sm sm:text-base font-serif font-semibold text-white tracking-wider leading-tight group-hover:text-[#DFBA87] transition-colors whitespace-nowrap">
+                      手機掃碼參與作答
+                    </div>
+
+                    <div className="text-[10px] sm:text-[11px] text-neutral-400 font-sans tracking-wide leading-tight flex items-center gap-1">
+                      <span>即時上傳觀點</span>
+                      <span className="text-[#DFBA87]">✦</span>
+                      <span>大會現場輪播</span>
+                    </div>
+                  </div>
                 </div>
-
-                {/* Direct Action Guidance Typography */}
-                <div className="flex flex-col justify-center text-left space-y-1 pr-1 sm:pr-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className="relative flex h-2.5 w-2.5">
-                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#DFBA87] opacity-75" />
-                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[#DFBA87]" />
-                    </span>
-                    <span className="text-[10px] sm:text-[11px] font-mono tracking-[0.18em] uppercase text-[#DFBA87] font-bold whitespace-nowrap">
-                      SCAN TO PARTICIPATE
-                    </span>
-                  </div>
-
-                  <div className="text-sm sm:text-base font-serif font-semibold text-white tracking-wider leading-tight group-hover:text-[#DFBA87] transition-colors whitespace-nowrap">
-                    手機掃碼參與作答
-                  </div>
-
-                  <div className="text-[10px] sm:text-[11px] text-neutral-400 font-sans tracking-wide leading-tight flex items-center gap-1">
-                    <span>即時上傳觀點</span>
-                    <span className="text-[#DFBA87]">✦</span>
-                    <span>大會現場輪播</span>
-                  </div>
-                </div>
-              </div>
+              ) : (
+                /* In Portrait mode: Sleek QR Code Fullscreen Modal Trigger (since main scannable dock is at bottom eye-level) */
+                <button
+                  type="button"
+                  onClick={() => setShowQrModal(true)}
+                  className="flex items-center gap-2.5 px-3.5 py-2 rounded-xl bg-black/60 hover:bg-black/80 backdrop-blur-xl border border-[#DFBA87]/50 text-[#DFBA87] text-xs font-mono tracking-wider transition-all shadow-md cursor-pointer"
+                  title="全螢幕 QR Code (快捷鍵: 按 Q)"
+                >
+                  <Sparkles className="w-3.5 h-3.5" />
+                  <span className="font-sans font-medium">全螢幕條碼 (Q)</span>
+                </button>
+              )}
 
             </div>
           </div>
@@ -333,7 +367,7 @@ export default function PerspectiveDisplayWall() {
       {/* ─────────────────────────────────────────────────────────────
           3. MAIN PERSPECTIVES STREAM
       ───────────────────────────────────────────────────────────── */}
-      <main className="relative z-10 max-w-[1720px] mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12">
+      <main className={`relative z-10 mx-auto px-4 sm:px-8 lg:px-12 pt-8 sm:pt-12 ${isPortrait ? 'max-w-4xl' : 'max-w-[1720px]'}`}>
         {isEmergency ? (
           /* Emergency Broadcast Mode */
           <motion.div
@@ -362,10 +396,14 @@ export default function PerspectiveDisplayWall() {
             </button>
           </div>
         ) : (
-          /* Borderless Architectural Typography Flow */
+          /* Perspectives Layout: Adaptive for Vertical LED Poster (1328x2080mm) & Horizontal Screens */
           <motion.div 
             layout
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 portrait:grid-cols-1 portrait:md:grid-cols-1 portrait:lg:grid-cols-1 gap-x-12 lg:gap-x-16 gap-y-12 lg:gap-y-16 portrait:gap-y-16 items-start max-w-[1720px] mx-auto portrait:max-w-4xl"
+            className={
+              isPortrait
+                ? `flex flex-col gap-y-12 sm:gap-y-16 ${items.length <= 4 ? 'min-h-[calc(100vh-340px)] justify-evenly' : ''}`
+                : "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-12 lg:gap-x-16 gap-y-12 lg:gap-y-16 items-start"
+            }
           >
             {items.map((item, idx) => {
               const isFeatured = Boolean(item.featured);
@@ -380,16 +418,20 @@ export default function PerspectiveDisplayWall() {
                   transition={{ duration: 0.6, delay: Math.min(idx * 0.05, 0.5) }}
                   onClick={() => setSelectedItem(item)}
                   className={
-                    isFeatured
-                      ? "col-span-1 md:col-span-2 portrait:col-span-1 group relative cursor-pointer p-6 sm:p-8 portrait:p-10 -m-3 sm:-m-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-[#DFBA87]/30 hover:border-[#DFBA87]/60 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-xl"
-                      : "col-span-1 portrait:col-span-1 group relative cursor-pointer p-6 sm:p-7 portrait:p-9 -m-3 sm:-m-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 hover:border-[#DFBA87]/40 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-lg"
+                    isPortrait
+                      ? isFeatured
+                        ? "w-full group relative cursor-pointer p-8 sm:p-10 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-[#DFBA87]/40 hover:border-[#DFBA87]/70 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-xl"
+                        : "w-full group relative cursor-pointer p-7 sm:p-9 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 hover:border-[#DFBA87]/40 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-lg"
+                      : isFeatured
+                        ? "col-span-1 md:col-span-2 group relative cursor-pointer p-6 sm:p-8 -m-3 sm:-m-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.08] border border-[#DFBA87]/30 hover:border-[#DFBA87]/60 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-xl"
+                        : "col-span-1 group relative cursor-pointer p-6 sm:p-7 -m-3 sm:-m-4 rounded-2xl bg-white/[0.02] hover:bg-white/[0.06] border border-white/10 hover:border-[#DFBA87]/40 transition-all duration-500 backdrop-blur-md flex flex-col justify-between shadow-lg"
                   }
                 >
-                  <div className="space-y-3.5 portrait:space-y-4">
+                  <div className="space-y-4">
                     {/* 1. 問題 (Question) */}
                     <div className="flex items-center gap-2">
                       <span className="w-1.5 h-1.5 rounded-full bg-[#DFBA87]" />
-                      <p className="text-xs sm:text-[13px] portrait:text-sm sm:portrait:text-base font-serif text-[#DFBA87] tracking-wider font-medium leading-relaxed">
+                      <p className={`font-serif text-[#DFBA87] tracking-wider font-medium leading-relaxed ${isPortrait ? 'text-sm sm:text-base' : 'text-xs sm:text-[13px]'}`}>
                         {questionText}
                       </p>
                     </div>
@@ -397,13 +439,17 @@ export default function PerspectiveDisplayWall() {
                     {/* 2. 答案 (Answer Quote with architectural left line) */}
                     <div className={
                       isFeatured 
-                        ? "border-l-2 border-[#DFBA87] pl-5 sm:pl-7 portrait:pl-8 my-3 sm:my-4 portrait:my-5" 
-                        : "border-l border-white/20 pl-4 sm:pl-5 portrait:pl-6 my-2.5 sm:my-3 portrait:my-4"
+                        ? `border-l-2 border-[#DFBA87] ${isPortrait ? 'pl-6 sm:pl-8 my-4 sm:my-5' : 'pl-5 sm:pl-7 my-3 sm:my-4'}`
+                        : `border-l border-white/20 ${isPortrait ? 'pl-5 sm:pl-7 my-3 sm:my-4' : 'pl-4 sm:pl-5 my-2.5 sm:my-3'}`
                     }>
                       <blockquote className={
                         isFeatured 
-                          ? "text-2xl sm:text-3xl lg:text-[2.2rem] portrait:text-3xl sm:portrait:text-4xl lg:portrait:text-[2.6rem] font-serif text-white leading-[1.48] portrait:leading-[1.45] tracking-wide font-normal group-hover:text-[#F3E2C8] transition-colors duration-300 drop-shadow-sm" 
-                          : "text-base sm:text-lg lg:text-xl portrait:text-2xl sm:portrait:text-3xl font-serif text-white/90 leading-[1.68] portrait:leading-[1.55] tracking-wide font-normal group-hover:text-white transition-colors duration-300"
+                          ? isPortrait
+                            ? "text-3xl sm:text-4xl lg:text-[2.6rem] font-serif text-white leading-[1.45] tracking-wide font-normal group-hover:text-[#F3E2C8] transition-colors duration-300 drop-shadow-md"
+                            : "text-2xl sm:text-3xl lg:text-[2.2rem] font-serif text-white leading-[1.48] tracking-wide font-normal group-hover:text-[#F3E2C8] transition-colors duration-300 drop-shadow-sm" 
+                          : isPortrait
+                            ? "text-2xl sm:text-3xl font-serif text-white/95 leading-[1.6] tracking-wide font-normal group-hover:text-white transition-colors duration-300"
+                            : "text-base sm:text-lg lg:text-xl font-serif text-white/90 leading-[1.68] tracking-wide font-normal group-hover:text-white transition-colors duration-300"
                       }>
                         “{item.answer}”
                       </blockquote>
@@ -411,19 +457,27 @@ export default function PerspectiveDisplayWall() {
                   </div>
 
                   {/* 3. 名字 (Name) & 職稱 (Role) */}
-                  <div className="flex items-center justify-end mt-4 sm:mt-5 portrait:mt-6 flex-wrap gap-x-2">
+                  <div className={`flex items-center justify-end flex-wrap gap-x-2 ${isPortrait ? 'mt-6 sm:mt-8' : 'mt-4 sm:mt-5'}`}>
                     <span className={
                       isFeatured
-                        ? "text-base sm:text-lg portrait:text-xl font-serif text-[#DFBA87] font-medium tracking-widest"
-                        : "text-xs sm:text-sm portrait:text-base font-serif text-neutral-300 font-medium tracking-wider"
+                        ? isPortrait
+                          ? "text-lg sm:text-xl md:text-2xl font-serif text-[#DFBA87] font-medium tracking-widest"
+                          : "text-base sm:text-lg font-serif text-[#DFBA87] font-medium tracking-widest"
+                        : isPortrait
+                          ? "text-base sm:text-lg font-serif text-neutral-300 font-medium tracking-wider"
+                          : "text-xs sm:text-sm font-serif text-neutral-300 font-medium tracking-wider"
                     }>
                       — {item.name}
                     </span>
                     {item.role_title && (
                       <span className={
                         isFeatured
-                          ? "text-xs sm:text-sm portrait:text-base font-sans text-neutral-300 font-normal tracking-wide"
-                          : "text-[11px] sm:text-xs portrait:text-sm font-sans text-neutral-400 font-normal"
+                          ? isPortrait
+                            ? "text-sm sm:text-base font-sans text-neutral-300 font-normal tracking-wide"
+                            : "text-xs sm:text-sm font-sans text-neutral-300 font-normal tracking-wide"
+                          : isPortrait
+                            ? "text-xs sm:text-sm font-sans text-neutral-400 font-normal"
+                            : "text-[11px] sm:text-xs font-sans text-neutral-400 font-normal"
                       }>
                         · {item.role_title}
                       </span>
@@ -431,13 +485,66 @@ export default function PerspectiveDisplayWall() {
                   </div>
 
                   {/* Baseline Hairline Separator */}
-                  <div className="w-full h-px bg-gradient-to-r from-transparent via-[#DFBA87]/30 to-transparent mt-6 sm:mt-8 portrait:mt-8 group-hover:via-[#DFBA87]/60 transition-all duration-500" />
+                  <div className="w-full h-px bg-gradient-to-r from-transparent via-[#DFBA87]/30 to-transparent mt-6 sm:mt-8 group-hover:via-[#DFBA87]/60 transition-all duration-500" />
                 </motion.article>
               );
             })}
           </motion.div>
         )}
       </main>
+
+      {/* ─────────────────────────────────────────────────────────────
+          PORTRAIT FIXED BOTTOM PARTICIPATION DOCK (GOLDEN EYE-LEVEL)
+          Tuned for CS Knight 1328x2080mm LED wall: puts QR code at
+          comfortable standing scanning distance (~110-130cm from floor)
+      ───────────────────────────────────────────────────────────── */}
+      {isPortrait && (
+        <aside 
+          aria-label="現場參與互動"
+          className="fixed bottom-0 inset-x-0 z-40 bg-black/85 backdrop-blur-2xl border-t border-[#DFBA87]/40 shadow-[0_-12px_40px_rgba(0,0,0,0.85)] px-6 py-4 transition-all"
+        >
+          <div className="max-w-4xl mx-auto flex items-center justify-between gap-6">
+            {/* Left: Live Interaction Prompt */}
+            <div className="flex items-center gap-4">
+              <div className="relative flex h-3.5 w-3.5 flex-shrink-0">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[#DFBA87] opacity-80" />
+                <span className="relative inline-flex rounded-full h-3.5 w-3.5 bg-[#DFBA87]" />
+              </div>
+              <div className="space-y-1">
+                <div className="text-[11px] sm:text-xs font-mono tracking-[0.2em] uppercase text-[#DFBA87] font-bold">
+                  LIVE INTERACTION · 現場互動參與
+                </div>
+                <div className="text-base sm:text-lg md:text-xl font-serif font-semibold text-white tracking-wider">
+                  手機掃描右側條碼，發表你的觀點
+                </div>
+                <div className="text-xs sm:text-sm text-neutral-300 font-sans tracking-wide">
+                  完成作答後，觀點將即時登上本展位大螢幕輪播
+                </div>
+              </div>
+            </div>
+
+            {/* Right: Jumbo High-Contrast Golden-Bordered QR Code */}
+            <div 
+              onClick={() => setShowQrModal(true)}
+              className="group flex items-center gap-3 bg-white p-2 sm:p-2.5 rounded-2xl border-2 border-[#DFBA87] shadow-xl hover:scale-105 transition-all cursor-pointer flex-shrink-0"
+              title="點擊放大條碼"
+            >
+              <QRCodeSVG
+                value={submissionUrl}
+                size={130}
+                level="H"
+                includeMargin={false}
+                fgColor="#000000"
+                className="w-24 h-24 sm:w-28 sm:h-28"
+              />
+              <div className="hidden sm:flex flex-col justify-center pr-1 text-black font-sans">
+                <span className="text-[11px] font-bold tracking-wider text-black/80">SCAN ME</span>
+                <span className="text-[10px] text-neutral-600">即開即答</span>
+              </div>
+            </div>
+          </div>
+        </aside>
+      )}
 
       {/* ─────────────────────────────────────────────────────────────
           4. UNOBTRUSIVE FLOATING CONTROLS (BOTTOM RIGHT)
