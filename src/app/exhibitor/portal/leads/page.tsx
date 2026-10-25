@@ -777,7 +777,7 @@ export default function ExhibitorLeadsPage() {
     const productTitles = matched.map(p => `《${p.title_zh}》`).join('、') || '現場鑑賞作品';
     const actions = (lead.follow_up_actions || []).join('、');
 
-    const text = `您好 ${guestName}！\n感謝您今日蒞臨 VIS 2027 博覽會【${brandName}】展位鑑賞交流。\n\n現場專員已為您將剛才討論的 ${productTitles} 收錄至您的專屬貴賓卡中。\n\n${actions ? `針對您現場提及的【${actions}】` : '關於作品的客製細節與正式報價'}，我們已為您備妥高解析細節型錄與方案。如需安排展後工作室鑑賞或確認規格，隨時歡迎直接以此訊息與我們私洽！\n\n✦ 您的專屬典藏回看：https://www.visforthearts.com/vip/dashboard\n\n期待展後能再次為您服務！\n— ${brandName} 敬上`;
+    const text = `您好 ${guestName}！\n感謝您今日蒞臨 VIS Contemporary Culture 2027【${brandName}】展位鑑賞交流。\n\n現場專員已為您將剛才討論的 ${productTitles} 收錄至您的專屬貴賓卡中。\n\n${actions ? `針對您現場提及的【${actions}】` : '關於作品的客製細節與正式報價'}，我們已為您備妥高解析細節型錄與方案。如需安排展後工作室鑑賞或確認規格，隨時歡迎直接以此訊息與我們私洽！\n\n✦ 您的專屬典藏回看：https://www.visforthearts.com/vip/dashboard\n\n期待展後能再次為您服務！\n— ${brandName} 敬上`;
 
     navigator.clipboard.writeText(text);
     setCopiedScriptId(lead.id);

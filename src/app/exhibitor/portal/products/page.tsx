@@ -851,7 +851,7 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
                 {/* Fair Branding Header (Booth Number Removed as Requested) */}
                 <div className="flex justify-between items-center border-b border-[#C9A96E]/20 pb-2.5 mb-4">
                   <span className="text-[8.5px] tracking-[0.35em] uppercase text-[#8C7853] font-mono font-medium">
-                    VIS CONTEMPORARY CULTURE FAIR 2027
+                    VIS CONTEMPORARY CULTURE 2027
                   </span>
                   <span className="text-[8px] uppercase tracking-widest text-neutral-400 font-mono">
                     EXHIBITION ARTWORK

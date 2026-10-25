@@ -283,7 +283,7 @@ export default function ArtworkDetailPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: `${product?.title_zh} — VIS Contemporary Culture Fair`,
+          title: `${product?.title_zh} — VIS Contemporary Culture`,
           text: `我在 VIS 2027 發現了 ${product?.brand_name_zh} 的《${product?.title_zh}》`,
           url: window.location.href,
         });
@@ -525,7 +525,7 @@ export default function ArtworkDetailPage() {
 
         {/* Fair Guarantees Footnote */}
         <div className="border-t border-neutral-200/60 pt-6 pb-8 text-center space-y-1.5 text-[10px] text-neutral-400 font-light">
-          <p>✦ VIS 2027 當代文化博覽會 參展品牌官方認證作品 ✦</p>
+          <p>✦ VIS Contemporary Culture 2027 參展品牌官方認證作品 ✦</p>
           <p>展會地點：台北中山堂 光復廳 ｜ 展期：2027/1/6 – 1/9</p>
         </div>
       </main>

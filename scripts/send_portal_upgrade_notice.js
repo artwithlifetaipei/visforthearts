@@ -94,7 +94,7 @@ function generateEmailHtml(applicant) {
 
         <div style="margin-top: 26px; padding-top: 18px; border-top: 1px solid #EEEEEE; font-size: 11.5px; color: #777777; line-height: 1.8;">
           若有任何其他需求，亦歡迎隨時回覆本信件或來信至 <a href="mailto:artwithlifetaipei@gmail.com" style="color: #8C7853; text-decoration: underline;">artwithlifetaipei@gmail.com</a>。<br/>
-          VIS 當代文化博覽會 策展秘書處 敬上
+          VIS Contemporary Culture 策展秘書處 敬上
         </div>
       </div>
 

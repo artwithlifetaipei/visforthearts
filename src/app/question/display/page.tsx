@@ -327,7 +327,7 @@ export default function PerspectiveDisplayWall() {
                 {data?.display.emergency_message_en || 'VIS 2027 — HOW CAN AESTHETICS BECOME OUR SHARED VALUE?'}
               </h1>
               <p className="text-lg text-[#DFBA87] font-serif tracking-widest">
-                {data?.display.emergency_message_zh || 'VIS 2027 當代生活文化大展 · 美，如何成為我們共同的價值？'}
+                {data?.display.emergency_message_zh || 'VIS Contemporary Culture 2027 · 美，如何成為我們共同的價值？'}
               </p>
             </div>
           </motion.div>

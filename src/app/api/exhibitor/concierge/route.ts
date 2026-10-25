@@ -241,8 +241,8 @@ export async function POST(req: Request) {
 
                             <!-- Footer -->
                             <div style="padding: 20px 24px; text-align: center; border-top: 1px solid #1a1a1a; background-color: #0a0a0a; font-size: 11px; color: #555;">
-                                <p style="margin: 0 0 4px 0;">VIS 2027 台北國際當代生活藝術博覽會 籌備委員會</p>
-                                <p style="margin: 0;">TAIPEI INTERNATIONAL CONTEMPORARY LIVING ART FAIR</p>
+                                <p style="margin: 0 0 4px 0;">VIS Contemporary Culture 2027 籌備委員會</p>
+                                <p style="margin: 0;">VIS CONTEMPORARY CULTURE 2027 ORGANIZING COMMITTEE</p>
                             </div>
 
                         </div>
