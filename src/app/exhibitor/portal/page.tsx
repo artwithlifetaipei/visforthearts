@@ -8,7 +8,8 @@ import { motion } from 'framer-motion';
 import { 
   Calendar, CreditCard, Award, ClipboardCheck, Users, 
   Image as ImageIcon, HelpCircle, Check, Clock, AlertTriangle,
-  Building2, Copy, Mail, Lock, CheckCircle2
+  Building2, Copy, Mail, Lock, CheckCircle2, Upload, Eye, X, 
+  FileText, Loader2
 } from 'lucide-react';
 
 function safeGetStorage(key: string): string | null {
@@ -61,6 +62,91 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   const [qaCount, setQaCount] = useState(0);
   const [hasLogo, setHasLogo] = useState(false);
   const [copiedAccount, setCopiedAccount] = useState(false);
+
+  // Payment proof states
+  const [paymentProof, setPaymentProof] = useState<any>(() => {
+    const saved = brand?.id ? safeGetStorage(`vis_portal_payment_proof_${brand.id}`) : null;
+    if (saved) {
+      try { return JSON.parse(saved); } catch { return null; }
+    }
+    return null;
+  });
+  const [showProofModal, setShowProofModal] = useState(false);
+  const [proofPreviewUrl, setProofPreviewUrl] = useState<string | null>(null);
+
+  const [proofFile, setProofFile] = useState<File | null>(null);
+  const [proofBase64, setProofBase64] = useState<string>('');
+  const [lastFiveDigits, setLastFiveDigits] = useState<string>('');
+  const [paymentDate, setPaymentDate] = useState<string>(new Date().toISOString().split('T')[0]);
+  const [paymentAmount, setPaymentAmount] = useState<string>('');
+  const [invoiceNote, setInvoiceNote] = useState<string>('');
+  const [proofSubmitting, setProofSubmitting] = useState(false);
+  const [proofSuccessMsg, setProofSuccessMsg] = useState('');
+  const [proofErrorMsg, setProofErrorMsg] = useState('');
+
+  const handleProofFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    if (file.size > 12 * 1024 * 1024) {
+      setProofErrorMsg('檔案大小請勿超過 12MB');
+      return;
+    }
+    setProofFile(file);
+    const reader = new FileReader();
+    reader.onload = () => {
+      setProofBase64(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const handleProofSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!brand) return;
+    if (!proofBase64 && !lastFiveDigits.trim()) {
+      setProofErrorMsg('請至少上傳匯款單截圖或填寫匯款末五碼。');
+      return;
+    }
+
+    setProofSubmitting(true);
+    setProofErrorMsg('');
+    setProofSuccessMsg('');
+
+    try {
+      const res = await fetch('/api/exhibitor/payment-proof', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand_id: brand.id,
+          email: brand.portal_email,
+          receipt_base64: proofBase64,
+          receipt_filename: proofFile?.name || 'remittance_slip.png',
+          last_five_digits: lastFiveDigits.trim(),
+          payment_date: paymentDate,
+          amount: paymentAmount ? Number(paymentAmount) : undefined,
+          note: invoiceNote.trim(),
+        }),
+      });
+
+      const resJson = await res.json();
+      if (!res.ok || resJson.error) {
+        setProofErrorMsg(resJson.error || '提交失敗，請檢查網路連線。');
+      } else {
+        setPaymentProof(resJson.proof);
+        safeSetStorage(`vis_portal_payment_proof_${brand.id}`, JSON.stringify(resJson.proof));
+        setProofSuccessMsg('✓ 匯款水單已成功送出！大會財務組將進行核帳查對。');
+        setTimeout(() => {
+          setShowProofModal(false);
+          setProofSuccessMsg('');
+          setProofFile(null);
+          setProofBase64('');
+        }, 1500);
+      }
+    } catch (err: any) {
+      setProofErrorMsg(`連線異常 (${err.message})，請檢查網路。`);
+    } finally {
+      setProofSubmitting(false);
+    }
+  };
 
   // Email binding state
   const isTemporaryEmail = Boolean(brand?.portal_email?.endsWith('@visforthearts.com'));
@@ -228,18 +314,28 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
               return 0;
             });
 
-          const [app, compliance, vipC, mediaC, qCount, hasLogoResult] = await Promise.all([
+          const proofPromise = fetch(`/api/exhibitor/payment-proof?brand_id=${currentBrand.id}&email=${encodeURIComponent(currentBrand.portal_email || '')}`)
+            .then(res => res.json())
+            .then(res => res.proof || null)
+            .catch(() => null);
+
+          const [app, compliance, vipC, mediaC, qCount, hasLogoResult, proofData] = await Promise.all([
             appPromise,
             compliancePromise,
             vipPromise,
             mediaPromise,
             qaPromise,
-            logoPromise
+            logoPromise,
+            proofPromise
           ]);
 
           if (app) {
             setAppData(app);
             safeSetStorage(`vis_portal_app_data_${currentBrand.id}`, JSON.stringify(app));
+          }
+          if (proofData) {
+            setPaymentProof(proofData);
+            safeSetStorage(`vis_portal_payment_proof_${currentBrand.id}`, JSON.stringify(proofData));
           }
           setComplianceSigned(!!compliance);
           setVipCount(vipC);
@@ -632,9 +728,21 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   <span className="text-[10px] font-semibold text-neutral-500 tracking-wider uppercase">項目 ITEM</span>
                   <h3 className="text-base text-white font-medium mt-0.5">展位費款項 (尾款)</h3>
                 </div>
-                <span className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-1 rounded uppercase font-semibold">
-                  待確認 Verifying
-                </span>
+                {paymentProof?.status === 'verified' ? (
+                  <span className="text-xs bg-emerald-500/15 border border-emerald-500/40 text-emerald-400 px-2.5 py-1 rounded font-semibold flex items-center gap-1.5 shadow-sm">
+                    <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                    <span>已核帳結清 Paid</span>
+                  </span>
+                ) : paymentProof ? (
+                  <span className="text-xs bg-amber-500/15 border border-amber-500/35 text-amber-300 px-2.5 py-1 rounded font-semibold flex items-center gap-1.5 shadow-sm">
+                    <Clock className="w-3.5 h-3.5 animate-pulse text-amber-400" />
+                    <span>水單已提交·對帳中 Verifying</span>
+                  </span>
+                ) : (
+                  <span className="text-xs bg-amber-500/10 border border-amber-500/20 text-amber-400 px-2 py-1 rounded uppercase font-semibold">
+                    待繳付 Pending Payment
+                  </span>
+                )}
               </div>
               <div className="mb-2">
                 <div className="flex items-baseline gap-2.5 flex-wrap">
@@ -746,11 +854,108 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                     </p>
                   </div>
 
-                  <div className="text-[10.5px] text-neutral-400 leading-relaxed pt-0.5 flex items-start gap-1.5">
-                    <span className="text-amber-400/90 flex-shrink-0">💡</span>
-                    <span>
-                      <strong>匯款後回報</strong>：匯付完成後請提供帳號末五碼與匯款日期至大會官方 LINE（<span className="text-[#DFBA87] font-mono select-all">@vis_culture</span>），大會核帳後即更新後台系統付訖狀態。
-                    </span>
+                  {/* ─────────────────────────────────────────────────────────────
+                      INTERACTIVE REMITTANCE PROOF & REPORTING COMPONENT
+                  ───────────────────────────────────────────────────────────── */}
+                  <div className="pt-2">
+                    {paymentProof ? (
+                      <div className="bg-black/60 border border-[#DFBA87]/40 rounded-xl p-4 space-y-3 shadow-lg">
+                        <div className="flex items-center justify-between border-b border-white/10 pb-2.5">
+                          <span className="text-xs font-semibold text-[#DFBA87] flex items-center gap-1.5">
+                            {paymentProof.status === 'verified' ? (
+                              <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                            ) : (
+                              <Clock className="w-4 h-4 text-amber-400 animate-pulse" />
+                            )}
+                            <span>{paymentProof.status === 'verified' ? '大會已確認核訖 (款項入帳完成)' : '已提交水單憑證 (大會財務對帳中)'}</span>
+                          </span>
+                          <span className="text-[10.5px] font-mono text-neutral-400">
+                            {paymentProof.submitted_at?.split('T')[0] || paymentProof.created_at?.split('T')[0]}
+                          </span>
+                        </div>
+
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2.5 bg-[#141414] rounded-lg p-3 text-xs border border-white/5">
+                          <div>
+                            <span className="text-[10px] text-neutral-500 block">匯款末五碼</span>
+                            <span className="font-mono text-sm font-bold text-white tracking-wider">
+                              {paymentProof.last_five_digits || '以水單為準'}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-neutral-500 block">匯付金額</span>
+                            <span className="font-mono text-sm font-bold text-[#DFBA87]">
+                              {paymentProof.amount ? `NT$ ${paymentProof.amount.toLocaleString()}` : `NT$ ${finalPayablePrice.toLocaleString()}`}
+                            </span>
+                          </div>
+                          <div>
+                            <span className="text-[10px] text-neutral-500 block">匯款日期</span>
+                            <span className="font-mono text-xs text-neutral-300 block mt-0.5">
+                              {paymentProof.payment_date || '-'}
+                            </span>
+                          </div>
+                        </div>
+
+                        {paymentProof.note && (
+                          <div className="text-[11px] text-neutral-300 bg-black/40 border border-white/5 rounded-md p-2.5">
+                            <span className="text-neutral-500">發票抬頭統編／備註：</span>
+                            <span className="text-white ml-1 font-mono">{paymentProof.note}</span>
+                          </div>
+                        )}
+
+                        <div className="flex items-center gap-2 pt-1 flex-wrap">
+                          {paymentProof.receipt_url && (
+                            <button
+                              type="button"
+                              onClick={() => setProofPreviewUrl(paymentProof.receipt_url)}
+                              className="px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-xs text-white border border-white/15 transition flex items-center gap-1.5 cursor-pointer shadow-xs"
+                            >
+                              <Eye className="w-3.5 h-3.5 text-[#DFBA87]" />
+                              <span>檢視已上傳水單</span>
+                            </button>
+                          )}
+                          {paymentProof.status !== 'verified' && (
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setLastFiveDigits(paymentProof.last_five_digits || '');
+                                setPaymentDate(paymentProof.payment_date || new Date().toISOString().split('T')[0]);
+                                setPaymentAmount(paymentProof.amount ? String(paymentProof.amount) : String(finalPayablePrice));
+                                setInvoiceNote(paymentProof.note || '');
+                                setShowProofModal(true);
+                              }}
+                              className="px-3.5 py-1.5 rounded-lg bg-[#DFBA87]/15 hover:bg-[#DFBA87]/25 text-xs text-[#DFBA87] border border-[#DFBA87]/35 transition flex items-center gap-1.5 cursor-pointer"
+                            >
+                              <Upload className="w-3.5 h-3.5" />
+                              <span>重新上傳／更正憑證</span>
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="bg-black/50 border border-dashed border-[#DFBA87]/40 rounded-xl p-4 space-y-3 shadow-md">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs font-semibold text-white flex items-center gap-1.5">
+                            <Upload className="w-4 h-4 text-[#DFBA87]" />
+                            <span>線上提交匯款水單／截圖回報</span>
+                          </span>
+                          <span className="text-[10.5px] text-amber-300 font-mono">支援圖片 / PDF</span>
+                        </div>
+                        <p className="text-[11px] text-neutral-400 font-light leading-relaxed">
+                          完成匯付後，可直接在此上傳銀行水單照片或網銀轉帳成功截圖，並填寫末五碼與發票需求。送出後大會財務組將即時進行對帳核驗。
+                        </p>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setPaymentAmount(String(finalPayablePrice));
+                            setShowProofModal(true);
+                          }}
+                          className="w-full py-2.5 px-4 rounded-lg bg-[#DFBA87] hover:bg-[#cf9e5e] text-[#14120E] font-bold text-xs transition flex items-center justify-center gap-2 shadow-lg shadow-[#DFBA87]/15 cursor-pointer active:scale-98"
+                        >
+                          <Upload className="w-4 h-4" />
+                          <span>上傳匯款水單／截圖回報 SUBMIT PROOF</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -770,6 +975,216 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
           </p>
         </div>
       </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          MODAL 1: UPLOAD REMITTANCE PROOF MODAL
+      ───────────────────────────────────────────────────────────── */}
+      {showProofModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md overflow-y-auto">
+          <div className="relative max-w-lg w-full bg-[#161514] border border-[#DFBA87]/50 rounded-2xl p-6 sm:p-8 space-y-5 shadow-2xl text-white my-8">
+            <button
+              type="button"
+              onClick={() => {
+                setShowProofModal(false);
+                setProofErrorMsg('');
+                setProofSuccessMsg('');
+              }}
+              className="absolute top-5 right-5 p-2 rounded-full text-neutral-400 hover:text-white hover:bg-white/10 transition cursor-pointer"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div>
+              <span className="text-[10px] font-mono tracking-[0.2em] text-[#DFBA87] uppercase font-bold">
+                REMITTANCE PROOF
+              </span>
+              <h3 className="text-lg font-serif text-white font-medium mt-0.5">
+                提交展位款項（尾款）匯款憑證
+              </h3>
+              <p className="text-xs text-neutral-400 mt-1">
+                請上傳轉帳明細截圖、匯款水單或拍照憑證，以利大會財務組查對核帳。
+              </p>
+            </div>
+
+            {proofErrorMsg && (
+              <div className="bg-red-500/10 border border-red-500/30 text-red-300 p-3 rounded-lg text-xs leading-relaxed">
+                {proofErrorMsg}
+              </div>
+            )}
+
+            {proofSuccessMsg && (
+              <div className="bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 p-3 rounded-lg text-xs leading-relaxed flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                <span>{proofSuccessMsg}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleProofSubmit} className="space-y-4">
+              
+              {/* File Dropzone / Picker */}
+              <div>
+                <label className="block text-xs font-medium text-neutral-300 mb-1.5">
+                  匯款水單／轉帳截圖檔案 (Image or PDF)
+                </label>
+                
+                {proofBase64 ? (
+                  <div className="relative rounded-xl border border-[#DFBA87]/40 bg-black/50 p-3 flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3 overflow-hidden">
+                      {proofBase64.startsWith('data:image') ? (
+                        <img 
+                          src={proofBase64} 
+                          alt="憑證預覽" 
+                          className="w-14 h-14 object-cover rounded-lg border border-white/10 flex-shrink-0" 
+                        />
+                      ) : (
+                        <div className="w-14 h-14 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0 text-[#DFBA87]">
+                          <FileText className="w-6 h-6" />
+                        </div>
+                      )}
+                      <div className="text-xs overflow-hidden">
+                        <div className="font-medium text-white truncate">{proofFile?.name || 'remittance_slip.png'}</div>
+                        <div className="text-[10px] text-neutral-400 font-mono mt-0.5">已載入待送出</div>
+                      </div>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setProofFile(null);
+                        setProofBase64('');
+                      }}
+                      className="p-1.5 rounded-lg text-neutral-400 hover:text-red-400 hover:bg-white/5 transition text-xs"
+                      title="移除檔案重新選擇"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                ) : (
+                  <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-white/20 hover:border-[#DFBA87]/60 rounded-xl cursor-pointer bg-black/30 hover:bg-black/50 transition">
+                    <Upload className="w-8 h-8 text-[#DFBA87] mb-2" />
+                    <span className="text-xs font-medium text-white">點擊選擇檔案 或 拖曳至此</span>
+                    <span className="text-[10.5px] text-neutral-400 mt-1">支援 JPG、PNG、WEBP、PDF (最大 12MB)</span>
+                    <input
+                      type="file"
+                      accept="image/*,application/pdf"
+                      onChange={handleProofFileChange}
+                      className="hidden"
+                    />
+                  </label>
+                )}
+              </div>
+
+              {/* Form inputs */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                <div>
+                  <label className="block text-xs text-neutral-300 mb-1">
+                    匯款帳號末五碼 <span className="text-[#DFBA87]">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    maxLength={10}
+                    value={lastFiveDigits}
+                    onChange={(e) => setLastFiveDigits(e.target.value)}
+                    placeholder="例如：56789"
+                    className="w-full px-3 py-2 bg-black/50 border border-white/15 focus:border-[#DFBA87] rounded-lg text-sm text-white font-mono focus:outline-none"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs text-neutral-300 mb-1">
+                    匯款日期 <span className="text-[#DFBA87]">*</span>
+                  </label>
+                  <input
+                    type="date"
+                    value={paymentDate}
+                    onChange={(e) => setPaymentDate(e.target.value)}
+                    className="w-full px-3 py-2 bg-black/50 border border-white/15 focus:border-[#DFBA87] rounded-lg text-sm text-white font-mono focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs text-neutral-300 mb-1">
+                  匯付金額 (NT$)
+                </label>
+                <input
+                  type="number"
+                  value={paymentAmount || String(finalPayablePrice)}
+                  onChange={(e) => setPaymentAmount(e.target.value)}
+                  className="w-full px-3 py-2 bg-black/50 border border-white/15 focus:border-[#DFBA87] rounded-lg text-sm text-[#DFBA87] font-mono font-semibold focus:outline-none"
+                />
+                <span className="text-[10.5px] text-neutral-500 mt-0.5 block">預設帶入本展位應繳金額</span>
+              </div>
+
+              <div>
+                <label className="block text-xs text-neutral-300 mb-1">
+                  發票開立需求／備註說明 (選填)
+                </label>
+                <textarea
+                  rows={2}
+                  value={invoiceNote}
+                  onChange={(e) => setInvoiceNote(e.target.value)}
+                  placeholder="若需開立三聯式發票，請填寫：公司發票抬頭、統一編號（需加計 5% 營業稅）"
+                  className="w-full px-3 py-2 bg-black/50 border border-white/15 focus:border-[#DFBA87] rounded-lg text-xs text-white focus:outline-none resize-none leading-relaxed"
+                />
+              </div>
+
+              {/* Action Buttons */}
+              <div className="pt-3 flex items-center justify-end gap-3 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setShowProofModal(false)}
+                  className="px-4 py-2 rounded-lg text-xs text-neutral-400 hover:text-white transition"
+                >
+                  取消
+                </button>
+                <button
+                  type="submit"
+                  disabled={proofSubmitting}
+                  className="px-5 py-2.5 rounded-lg bg-[#DFBA87] hover:bg-[#cf9e5e] text-[#14120E] font-bold text-xs transition flex items-center gap-2 shadow-md cursor-pointer disabled:opacity-50"
+                >
+                  {proofSubmitting ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <span>處理中...</span>
+                    </>
+                  ) : (
+                    <span>確認提交水單憑證</span>
+                  )}
+                </button>
+              </div>
+
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* ─────────────────────────────────────────────────────────────
+          MODAL 2: FULLSCREEN RECEIPT PREVIEW LIGHTBOX
+      ───────────────────────────────────────────────────────────── */}
+      {proofPreviewUrl && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-md">
+          <div className="relative max-w-3xl w-full max-h-[90vh] flex flex-col items-center justify-center">
+            <button
+              type="button"
+              onClick={() => setProofPreviewUrl(null)}
+              className="absolute -top-10 right-0 p-2 text-white hover:text-[#DFBA87] transition cursor-pointer"
+            >
+              <X className="w-6 h-6" />
+            </button>
+            <div className="bg-[#141414] border border-[#DFBA87]/40 rounded-2xl overflow-hidden shadow-2xl p-2 max-h-[85vh] overflow-y-auto w-full flex justify-center">
+              {proofPreviewUrl.startsWith('data:application/pdf') ? (
+                <iframe src={proofPreviewUrl} className="w-full h-[70vh] rounded" title="PDF 水單" />
+              ) : (
+                <img 
+                  src={proofPreviewUrl} 
+                  alt="匯款水單" 
+                  className="max-h-[80vh] w-auto object-contain rounded-lg shadow-md"
+                />
+              )}
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

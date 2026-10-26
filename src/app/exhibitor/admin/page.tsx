@@ -9,7 +9,7 @@ import {
   ShieldCheck, FileText, Users, Image as ImageIcon, CheckCircle, XCircle, 
   Download, Eye, Mail, Phone, Globe, Calendar, ExternalLink, Loader2, RefreshCw, ChevronDown, ChevronUp,
   Signature, FileCheck, Sparkles, Lock, LogOut, ArrowRight, AlertTriangle, Tag, Edit3, DollarSign,
-  Copy
+  Copy, Receipt, CheckCircle2
 } from 'lucide-react';
 import { ZONE_MAP, ALL_ZONES, formatBoothDisplay, normalizeBoothCode, getBoothPrice } from '@/lib/exhibitorConstants';
 
@@ -143,6 +143,40 @@ export default function ExhibitorAdminPage() {
   const [feeModalInput, setFeeModalInput] = useState<string>('');
   const [feeModalNote, setFeeModalNote] = useState<string>('');
   const [isSavingFee, setIsSavingFee] = useState(false);
+
+  // Booth Fee (Tail payment) proof review modal state
+  const [lightboxFeeProof, setLightboxFeeProof] = useState<any | null>(null);
+  const [isVerifyingProof, setIsVerifyingProof] = useState(false);
+
+  const handleVerifyPaymentProof = async (brandId: string, action: 'verify' | 'reject') => {
+    setIsVerifyingProof(true);
+    try {
+      const res = await fetch('/api/exhibitor/payment-proof', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ brand_id: brandId, action }),
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setMediaAssets((prev: any[]) => prev.map(m => {
+          if (m.brand_id === brandId && m.file_type === 'booth_fee_proof') {
+            return { ...m, file_url: JSON.stringify(data.proof) };
+          }
+          return m;
+        }));
+        if (lightboxFeeProof) {
+          setLightboxFeeProof({
+            ...lightboxFeeProof,
+            proof: { ...lightboxFeeProof.proof, status: action === 'verify' ? 'verified' : 'rejected' }
+          });
+        }
+      }
+    } catch (err) {
+      console.error('Error verifying payment proof:', err);
+    } finally {
+      setIsVerifyingProof(false);
+    }
+  };
 
   const openFeeModal = (app: any, mode: 'approve' | 'edit') => {
     setFeeModalApp(app);
@@ -1306,7 +1340,7 @@ export default function ExhibitorAdminPage() {
                       <tr className="bg-white/[0.02] border-b border-white/5 text-neutral-400">
                         <th className="p-4 font-semibold tracking-wide">品牌 (Brand Name)</th>
                         <th className="p-4 font-semibold tracking-wide">首選展區 / 規格</th>
-                        <th className="p-4 font-semibold tracking-wide">保證金憑證</th>
+                        <th className="p-4 font-semibold tracking-wide">保證金 / 尾款水單</th>
                         <th className="p-4 font-semibold tracking-wide">申請狀態</th>
                         <th className="p-4 font-semibold tracking-wide">提交時間</th>
                         <th className="p-4 font-semibold tracking-wide text-right">管理操作</th>
@@ -1348,26 +1382,72 @@ export default function ExhibitorAdminPage() {
                                 )}
                               </td>
                               <td className="p-4 font-light">
-                                <div className="flex items-center gap-2">
-                                  {app.deposit_proof_url ? (
-                                    <button
-                                      onClick={() => setLightboxApp(app)}
-                                      className="text-[#DFBA87] hover:underline flex items-center gap-1 font-medium"
-                                    >
-                                      <Eye className="w-3.5 h-3.5" /> 檢視憑證
-                                    </button>
-                                  ) : (
-                                    <span className="text-amber-400/80 text-[10px]">無憑證</span>
-                                  )}
-                                  <label className="text-[10px] text-[#DFBA87] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 border border-[#DFBA87]/30 px-2 py-0.5 rounded cursor-pointer transition-colors inline-flex items-center gap-1">
-                                    📷 上傳/更換
-                                    <input 
-                                      type="file" 
-                                      accept="image/*" 
-                                      className="hidden" 
-                                      onChange={(e) => handleUploadProofForApp(app.id, e)} 
-                                    />
-                                  </label>
+                                <div className="flex flex-col gap-1.5">
+                                  {/* 1. 保證金水單 */}
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="text-[10px] text-neutral-500 font-mono">保證金:</span>
+                                    {app.deposit_proof_url ? (
+                                      <button
+                                        onClick={() => setLightboxApp(app)}
+                                        className="text-[#DFBA87] hover:underline flex items-center gap-1 font-medium text-xs"
+                                        title="檢視保證金水單"
+                                      >
+                                        <Eye className="w-3 h-3" /> 水單
+                                      </button>
+                                    ) : (
+                                      <span className="text-amber-400/80 text-[10px]">無</span>
+                                    )}
+                                    <label className="text-[9px] text-[#DFBA87] bg-[#DFBA87]/10 hover:bg-[#DFBA87]/20 border border-[#DFBA87]/30 px-1 py-0.5 rounded cursor-pointer transition-colors inline-flex items-center" title="上傳或更換保證金水單">
+                                      📷
+                                      <input 
+                                        type="file" 
+                                        accept="image/*" 
+                                        className="hidden" 
+                                        onChange={(e) => handleUploadProofForApp(app.id, e)} 
+                                      />
+                                    </label>
+                                  </div>
+
+                                  {/* 2. 尾款水單 (Booth Fee Proof) */}
+                                  {(() => {
+                                    const feeAsset = mediaAssets.find((m: any) => 
+                                      (m.brand_id === app.id || m.exhibitor_brands?.id === app.id || m.exhibitor_brands?.portal_email === app.contact_email) && 
+                                      m.file_type === 'booth_fee_proof'
+                                    );
+                                    if (!feeAsset) {
+                                      return (
+                                        <div className="flex items-center gap-1.5 text-[10px] text-neutral-500">
+                                          <span className="font-mono">尾款:</span>
+                                          <span className="text-neutral-500">尚未提交</span>
+                                        </div>
+                                      );
+                                    }
+                                    let parsed: any = {};
+                                    try { parsed = JSON.parse(feeAsset.file_url); } catch { parsed = { receipt_url: feeAsset.file_url }; }
+                                    const isVerified = parsed.status === 'verified';
+
+                                    return (
+                                      <div className="flex items-center gap-1.5">
+                                        <span className="text-[10px] text-neutral-500 font-mono">尾款:</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => setLightboxFeeProof({ app, proof: parsed, assetId: feeAsset.id })}
+                                          className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-mono border transition-all cursor-pointer ${
+                                            isVerified
+                                              ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/20'
+                                              : 'text-amber-300 bg-amber-500/15 border-amber-500/40 hover:bg-amber-500/25 animate-pulse'
+                                          }`}
+                                          title="點擊查核尾款水單"
+                                        >
+                                          <Receipt className="w-2.5 h-2.5" />
+                                          <span>{isVerified ? '已核訖' : '待對帳'}</span>
+                                          {parsed.last_five_digits && (
+                                            <span className="text-neutral-400 font-normal">({parsed.last_five_digits})</span>
+                                          )}
+                                        </button>
+                                      </div>
+                                    );
+                                  })()}
                                 </div>
                               </td>
                               <td className="p-4">
@@ -2553,6 +2633,121 @@ export default function ExhibitorAdminPage() {
                         onChange={(e) => handleUploadProofForApp(lightboxApp.id, e)} 
                       />
                     </label>
+                  </div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Booth Fee Proof (尾款水單) Lightbox Modal */}
+      <AnimatePresence>
+        {lightboxFeeProof && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-3 md:p-6"
+            onClick={() => setLightboxFeeProof(null)}
+          >
+            <div 
+              className="bg-[#121212] border border-[#DFBA87]/40 rounded-xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Top Bar */}
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-white/[0.02]">
+                <div className="min-w-0 pr-4">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="text-sm font-semibold text-white tracking-wide truncate">
+                      【{lightboxFeeProof.app.brand_name_zh}】展位費尾款匯款憑證審查
+                    </span>
+                    <span className={`text-[10px] font-mono px-2 py-0.5 rounded border ${
+                      lightboxFeeProof.proof.status === 'verified'
+                        ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
+                        : 'text-amber-300 bg-amber-500/15 border-amber-500/40'
+                    }`}>
+                      {lightboxFeeProof.proof.status === 'verified' ? '✓ 已核訖' : '待查對'}
+                    </span>
+                  </div>
+                  <div className="text-xs text-neutral-400 font-mono mt-0.5 truncate">
+                    {lightboxFeeProof.app.brand_name_en} • 聯繫人：{lightboxFeeProof.app.contact_name} ({lightboxFeeProof.app.contact_email})
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  {lightboxFeeProof.proof.status !== 'verified' ? (
+                    <button
+                      type="button"
+                      disabled={isVerifyingProof}
+                      onClick={() => handleVerifyPaymentProof(lightboxFeeProof.app.id, 'verify')}
+                      className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-xs transition flex items-center gap-1.5 cursor-pointer shadow-md disabled:opacity-50"
+                    >
+                      {isVerifyingProof ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
+                      <span>確認核帳入帳 (Mark Verified)</span>
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      disabled={isVerifyingProof}
+                      onClick={() => handleVerifyPaymentProof(lightboxFeeProof.app.id, 'reject')}
+                      className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-neutral-300 text-xs transition cursor-pointer"
+                    >
+                      取消核訖狀態
+                    </button>
+                  )}
+                  <button 
+                    className="text-neutral-400 hover:text-white rounded-full p-1.5 transition-colors ml-1 cursor-pointer"
+                    onClick={() => setLightboxFeeProof(null)}
+                  >
+                    <XCircle className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Summary Bar */}
+              <div className="bg-[#181818] border-b border-white/5 px-5 py-2.5 grid grid-cols-2 sm:grid-cols-4 gap-3 text-xs">
+                <div>
+                  <span className="text-neutral-500 block text-[10px]">匯款末五碼</span>
+                  <span className="font-mono text-sm font-bold text-[#DFBA87]">
+                    {lightboxFeeProof.proof.last_five_digits || '依憑證圖檔'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-neutral-500 block text-[10px]">匯付金額</span>
+                  <span className="font-mono text-sm font-bold text-white">
+                    {lightboxFeeProof.proof.amount ? `NT$ ${lightboxFeeProof.proof.amount.toLocaleString()}` : '-'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-neutral-500 block text-[10px]">匯款日期</span>
+                  <span className="font-mono text-neutral-300">
+                    {lightboxFeeProof.proof.payment_date || '-'}
+                  </span>
+                </div>
+                <div>
+                  <span className="text-neutral-500 block text-[10px]">發票需求 / 備註</span>
+                  <span className="text-neutral-300 truncate block" title={lightboxFeeProof.proof.note}>
+                    {lightboxFeeProof.proof.note || '無特殊需求'}
+                  </span>
+                </div>
+              </div>
+
+              {/* Modal Image Body */}
+              <div className="flex-1 overflow-auto p-4 md:p-6 flex items-center justify-center bg-[#090909] min-h-[360px]">
+                {lightboxFeeProof.proof.receipt_url ? (
+                  lightboxFeeProof.proof.receipt_url.startsWith('data:application/pdf') ? (
+                    <iframe src={lightboxFeeProof.proof.receipt_url} className="w-full h-[70vh] rounded" title="PDF 水單" />
+                  ) : (
+                    <img 
+                      src={lightboxFeeProof.proof.receipt_url} 
+                      alt={`【${lightboxFeeProof.app.brand_name_zh}】尾款匯款憑證`}
+                      className="max-w-full max-h-[68vh] object-contain rounded-lg shadow-2xl border border-white/10"
+                    />
+                  )
+                ) : (
+                  <div className="text-center p-8 text-neutral-400">
+                    <p className="text-sm">品牌未附上傳截圖，提供末五碼：{lightboxFeeProof.proof.last_five_digits}</p>
                   </div>
                 )}
               </div>
