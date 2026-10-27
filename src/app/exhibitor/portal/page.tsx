@@ -282,8 +282,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             .from('exhibitor_media_assets')
             .select('*', { count: 'exact', head: true })
             .eq('brand_id', currentBrand.id)
-            .neq('file_type', 'pr_qa_submission')
-            .neq('file_type', 'brand_logo_transparent')
+            .not('file_type', 'in', '("pr_qa_submission","brand_logo_transparent","booth_fee_proof","compliance_contract","perspective_store_master")')
             .then(res => res.count || 0);
 
           const logoPromise = supabase

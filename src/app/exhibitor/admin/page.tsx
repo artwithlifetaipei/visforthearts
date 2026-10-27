@@ -120,22 +120,120 @@ export default function ExhibitorAdminPage() {
     }
     return [];
   });
-  const [mediaAssets, setMediaAssets] = useState<any[]>(() => {
-    if (typeof window !== 'undefined') {
-      try { const c = sessionStorage.getItem('vis_admin_media'); return c ? JSON.parse(c) : []; } catch { return []; }
-    }
-    return [];
-  });
+  const [mediaAssets, setMediaAssets] = useState<any[]>([]);
   
   // UI helper states
   const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
   const [expandedAppId, setExpandedAppId] = useState<string | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [lightboxApp, setLightboxApp] = useState<any | null>(null);
-  const [mediaLightboxUrl, setMediaLightboxUrl] = useState<string | null>(null);
+  const [mediaLightboxAsset, setMediaLightboxAsset] = useState<{ url: string; fileName: string; brandName: string } | null>(null);
   const [selectedPrefs, setSelectedPrefs] = useState<Record<string, number>>({});
   const [expandedQaId, setExpandedQaId] = useState<string | null>(null);
   const [copiedQaId, setCopiedQaId] = useState<string | null>(null);
+
+  // Convert data: URL or remote URL into a safe browser view/download action
+  const dataUrlToBlob = (dataUrl: string): Blob | null => {
+    try {
+      const parts = dataUrl.split(',');
+      if (parts.length < 2) return null;
+      const mimeMatch = parts[0].match(/:(.*?);/);
+      const mime = mimeMatch ? mimeMatch[1] : 'image/png';
+      const byteString = atob(parts[1]);
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let i = 0; i < byteString.length; i++) {
+        ia[i] = byteString.charCodeAt(i);
+      }
+      return new Blob([ab], { type: mime });
+    } catch {
+      return null;
+    }
+  };
+
+  const handleOpenAssetInNewTab = (url: string) => {
+    if (!url) return;
+    if (url.startsWith('data:')) {
+      const blob = dataUrlToBlob(url);
+      if (blob) {
+        const blobUrl = URL.createObjectURL(blob);
+        window.open(blobUrl, '_blank', 'noopener,noreferrer');
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+        return;
+      }
+    }
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
+  const handleDownloadAssetFile = async (url: string, fallbackName: string) => {
+    if (!url) return;
+    const safeName = fallbackName || `vis_asset_${Date.now()}.png`;
+    try {
+      if (url.startsWith('data:')) {
+        const blob = dataUrlToBlob(url);
+        if (blob) {
+          const blobUrl = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = blobUrl;
+          a.download = safeName;
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+          return;
+        }
+      } else {
+        const response = await fetch(url);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = blobUrl;
+        a.download = safeName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        setTimeout(() => URL.revokeObjectURL(blobUrl), 10000);
+        return;
+      }
+    } catch {
+      handleOpenAssetInNewTab(url);
+    }
+  };
+
+  const findFeeProofForApp = (app: any) => {
+    if (!app) return undefined;
+    const appEmail = (app.contact_email || '').toLowerCase().trim();
+    const appNameZh = (app.brand_name_zh || '').trim();
+    const appNameEn = (app.brand_name_en || '').toLowerCase().trim();
+    return mediaAssets.find((m: any) => {
+      if (m.file_type !== 'booth_fee_proof') return false;
+      if (m.brand_id === app.id || m.exhibitor_brands?.id === app.id) return true;
+      const brandEmail = (m.exhibitor_brands?.portal_email || '').toLowerCase().trim();
+      if (appEmail && brandEmail && appEmail === brandEmail) return true;
+      const brandNameZh = (m.exhibitor_brands?.brand_name_zh || '').trim();
+      if (appNameZh && brandNameZh && appNameZh === brandNameZh) return true;
+      const brandNameEn = (m.exhibitor_brands?.brand_name_en || '').toLowerCase().trim();
+      if (appNameEn && brandNameEn && appNameEn === brandNameEn) return true;
+      return false;
+    });
+  };
+
+  const findAppForMediaAsset = (asset: any) => {
+    if (!asset) return undefined;
+    const brandEmail = (asset.exhibitor_brands?.portal_email || '').toLowerCase().trim();
+    const brandNameZh = (asset.exhibitor_brands?.brand_name_zh || '').trim();
+    const brandNameEn = (asset.exhibitor_brands?.brand_name_en || '').toLowerCase().trim();
+    return applications.find((a: any) => {
+      if (a.id === asset.brand_id || a.id === asset.exhibitor_brands?.id) return true;
+      const appEmail = (a.contact_email || '').toLowerCase().trim();
+      if (appEmail && brandEmail && appEmail === brandEmail) return true;
+      const appNameZh = (a.brand_name_zh || '').trim();
+      if (appNameZh && brandNameZh && appNameZh === brandNameZh) return true;
+      const appNameEn = (a.brand_name_en || '').toLowerCase().trim();
+      if (appNameEn && brandNameEn && appNameEn === brandNameEn) return true;
+      return false;
+    });
+  };
 
   // Fee Adjustment Modal state
   const [feeModalApp, setFeeModalApp] = useState<any | null>(null);
@@ -404,11 +502,11 @@ export default function ExhibitorAdminPage() {
           .order('brand_name_zh', { ascending: true }),
         supabase
           .from('exhibitor_compliance')
-          .select('*, exhibitor_brands(brand_name_zh, brand_name_en)')
+          .select('*, exhibitor_brands(id, brand_name_zh, brand_name_en, portal_email)')
           .order('signed_at', { ascending: false }),
         supabase
           .from('exhibitor_media_assets')
-          .select('*, exhibitor_brands(brand_name_zh, brand_name_en)')
+          .select('*, exhibitor_brands(id, brand_name_zh, brand_name_en, portal_email, booth_type, zone_id)')
           .order('created_at', { ascending: false }),
       ]);
 
@@ -1234,7 +1332,12 @@ export default function ExhibitorAdminPage() {
             { id: 'making-project' as const, label: '造物計畫專區', icon: Sparkles, count: makingProjectApplications.length },
             { id: 'vip' as const, label: 'VIP 名單匯總', icon: Users, count: vipList.length },
             { id: 'compliance' as const, label: '守則簽署狀態', icon: CheckCircle, count: complianceList.length },
-            { id: 'media' as const, label: '媒體素材匯總', icon: ImageIcon, count: mediaAssets.length },
+            {
+              id: 'media' as const,
+              label: '媒體素材匯總',
+              icon: ImageIcon,
+              count: mediaAssets.filter((a) => !['perspective_store_master', 'compliance_contract'].includes(a.file_type)).length,
+            },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
@@ -1292,6 +1395,147 @@ export default function ExhibitorAdminPage() {
                   </button>
                 </div>
               )}
+
+              {/* Booth Fee Proof (尾款匯款證明) Quick Review Panel */}
+              {(() => {
+                const feeProofAssets = mediaAssets.filter((m: any) => m.file_type === 'booth_fee_proof');
+                if (feeProofAssets.length === 0) return null;
+
+                return (
+                  <div className="bg-[#15130F] border border-[#DFBA87]/35 rounded-xl p-4 md:p-5 space-y-3.5">
+                    <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/10 pb-3">
+                      <div className="flex items-center gap-2.5">
+                        <Receipt className="w-4 h-4 text-[#DFBA87]" />
+                        <div>
+                          <h3 className="text-xs md:text-sm font-semibold text-white tracking-wider">
+                            參展品牌尾款匯款證明／水單回報專區（共 {feeProofAssets.length} 筆已上傳）
+                          </h3>
+                          <p className="text-[11px] text-neutral-400 font-light mt-0.5">
+                            點擊水單縮圖或「檢視水單」可放大查對、下載原始匯款截圖，並一鍵標記「已核訖」。
+                          </p>
+                        </div>
+                      </div>
+                      <span className="text-[11px] font-mono text-[#DFBA87] bg-[#DFBA87]/10 border border-[#DFBA87]/30 px-2.5 py-1 rounded self-start sm:self-auto">
+                        已核訖 {feeProofAssets.filter((a: any) => { try { return JSON.parse(a.file_url).status === 'verified'; } catch { return false; } }).length} / {feeProofAssets.length}
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+                      {feeProofAssets.map((feeAsset: any) => {
+                        let parsed: any = {};
+                        try { parsed = JSON.parse(feeAsset.file_url); } catch { parsed = { receipt_url: feeAsset.file_url }; }
+                        const matchedApp = findAppForMediaAsset(feeAsset) || {
+                          id: feeAsset.brand_id,
+                          brand_name_zh: feeAsset.exhibitor_brands?.brand_name_zh || '參展品牌',
+                          brand_name_en: feeAsset.exhibitor_brands?.brand_name_en || '',
+                          contact_name: '',
+                          contact_email: feeAsset.exhibitor_brands?.portal_email || '',
+                        };
+                        const brandNameZh = matchedApp.brand_name_zh || feeAsset.exhibitor_brands?.brand_name_zh || '參展品牌';
+                        const brandNameEn = matchedApp.brand_name_en || feeAsset.exhibitor_brands?.brand_name_en || '';
+                        const isVerified = parsed.status === 'verified';
+                        const hasImage = typeof parsed.receipt_url === 'string' && parsed.receipt_url.length > 10;
+
+                        return (
+                          <div
+                            key={feeAsset.id}
+                            className="bg-[#0D0D0D] border border-white/10 hover:border-[#DFBA87]/40 rounded-lg p-3.5 flex flex-col justify-between gap-3 transition-all"
+                          >
+                            <div className="space-y-2.5">
+                              <div className="flex items-start justify-between gap-2">
+                                <div className="min-w-0">
+                                  <div className="text-xs font-semibold text-white truncate" title={brandNameZh}>
+                                    {brandNameZh}
+                                  </div>
+                                  {brandNameEn && (
+                                    <div className="text-[10px] text-neutral-400 font-mono truncate">{brandNameEn}</div>
+                                  )}
+                                </div>
+                                <span
+                                  className={`text-[10px] font-mono px-2 py-0.5 rounded border shrink-0 ${
+                                    isVerified
+                                      ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
+                                      : 'text-amber-300 bg-amber-500/15 border-amber-500/40'
+                                  }`}
+                                >
+                                  {isVerified ? '✓ 已核訖' : '● 待對帳'}
+                                </span>
+                              </div>
+
+                              {/* Thumbnail or Last 5 Digits Box */}
+                              {hasImage ? (
+                                <div
+                                  onClick={() => setLightboxFeeProof({ app: matchedApp, brandId: feeAsset.brand_id, proof: parsed, assetId: feeAsset.id })}
+                                  className="h-28 w-full rounded bg-neutral-900 border border-white/10 overflow-hidden cursor-pointer relative group flex items-center justify-center"
+                                >
+                                  <img
+                                    src={parsed.receipt_url}
+                                    alt={`${brandNameZh} 匯款憑證`}
+                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                  />
+                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-[11px] text-white font-medium gap-1">
+                                    <Eye className="w-3.5 h-3.5 text-[#DFBA87]" /> 點擊放大檢視水單
+                                  </div>
+                                </div>
+                              ) : (
+                                <div
+                                  onClick={() => setLightboxFeeProof({ app: matchedApp, brandId: feeAsset.brand_id, proof: parsed, assetId: feeAsset.id })}
+                                  className="h-28 w-full rounded bg-white/[0.02] border border-dashed border-white/15 flex flex-col items-center justify-center p-2 text-center cursor-pointer hover:border-[#DFBA87]/40 transition-colors"
+                                >
+                                  <span className="text-[10px] text-neutral-400">以帳號末五碼回報</span>
+                                  <span className="text-base font-mono font-bold text-[#DFBA87] mt-1 tracking-widest">
+                                    {parsed.last_five_digits || '未填寫'}
+                                  </span>
+                                </div>
+                              )}
+
+                              <div className="text-[11px] space-y-1 font-mono text-neutral-300 bg-white/[0.02] p-2 rounded border border-white/5">
+                                <div className="flex justify-between">
+                                  <span className="text-neutral-500">末五碼:</span>
+                                  <span className="text-[#DFBA87] font-bold">{parsed.last_five_digits || '見水單圖檔'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-neutral-500">匯款金額:</span>
+                                  <span>{parsed.amount ? `NT$ ${Number(parsed.amount).toLocaleString()}` : '-'}</span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span className="text-neutral-500">匯款日期:</span>
+                                  <span>{parsed.payment_date || '-'}</span>
+                                </div>
+                                {parsed.note && (
+                                  <div className="pt-1 border-t border-white/5 text-[10px] text-neutral-400 truncate" title={parsed.note}>
+                                    備註: {parsed.note}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-1.5 pt-1">
+                              <button
+                                type="button"
+                                onClick={() => setLightboxFeeProof({ app: matchedApp, brandId: feeAsset.brand_id, proof: parsed, assetId: feeAsset.id })}
+                                className="flex-1 py-1.5 px-2 rounded bg-[#DFBA87]/15 hover:bg-[#DFBA87] text-[#DFBA87] hover:text-black border border-[#DFBA87]/30 text-[11px] font-medium transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                              >
+                                <Eye className="w-3 h-3" /> 檢視查核
+                              </button>
+                              {hasImage && (
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownloadAssetFile(parsed.receipt_url, `尾款水單_${brandNameZh}_${feeAsset.file_name || 'receipt.png'}`)}
+                                  className="py-1.5 px-2.5 rounded bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white border border-white/10 text-[11px] transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                                  title="下載水單圖檔"
+                                >
+                                  <Download className="w-3 h-3" /> 下載
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* App Status Filters & CSV Export */}
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
@@ -1410,10 +1654,7 @@ export default function ExhibitorAdminPage() {
 
                                   {/* 2. 尾款水單 (Booth Fee Proof) */}
                                   {(() => {
-                                    const feeAsset = mediaAssets.find((m: any) => 
-                                      (m.brand_id === app.id || m.exhibitor_brands?.id === app.id || m.exhibitor_brands?.portal_email === app.contact_email) && 
-                                      m.file_type === 'booth_fee_proof'
-                                    );
+                                    const feeAsset = findFeeProofForApp(app);
                                     if (!feeAsset) {
                                       return (
                                         <div className="flex items-center gap-1.5 text-[10px] text-neutral-500">
@@ -1427,11 +1668,11 @@ export default function ExhibitorAdminPage() {
                                     const isVerified = parsed.status === 'verified';
 
                                     return (
-                                      <div className="flex items-center gap-1.5">
+                                      <div className="flex items-center gap-1.5 flex-wrap">
                                         <span className="text-[10px] text-neutral-500 font-mono">尾款:</span>
                                         <button
                                           type="button"
-                                          onClick={() => setLightboxFeeProof({ app, proof: parsed, assetId: feeAsset.id })}
+                                          onClick={() => setLightboxFeeProof({ app, brandId: feeAsset.brand_id, proof: parsed, assetId: feeAsset.id })}
                                           className={`inline-flex items-center gap-1 text-[10px] px-1.5 py-0.5 rounded font-mono border transition-all cursor-pointer ${
                                             isVerified
                                               ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30 hover:bg-emerald-500/20'
@@ -1440,9 +1681,9 @@ export default function ExhibitorAdminPage() {
                                           title="點擊查核尾款水單"
                                         >
                                           <Receipt className="w-2.5 h-2.5" />
-                                          <span>{isVerified ? '已核訖' : '待對帳'}</span>
+                                          <span>{isVerified ? '已核訖' : '檢視水單'}</span>
                                           {parsed.last_five_digits && (
-                                            <span className="text-neutral-400 font-normal">({parsed.last_five_digits})</span>
+                                            <span className="text-neutral-300 font-normal">({parsed.last_five_digits})</span>
                                           )}
                                         </button>
                                       </div>
@@ -2248,8 +2489,21 @@ export default function ExhibitorAdminPage() {
 
           {/* TAB 4: MEDIA ASSETS & PR Q&A */}
           {activeTab === 'media' && (() => {
-            const imageAssets = mediaAssets.filter((a) => a.file_type !== 'pr_qa_submission' && a.file_type !== 'brand_logo_transparent');
+            const NON_VISUAL_TYPES = [
+              'pr_qa_submission',
+              'brand_logo_transparent',
+              'booth_fee_proof',
+              'perspective_store_master',
+              'compliance_contract',
+            ];
+            const imageAssets = mediaAssets.filter(
+              (a) =>
+                !NON_VISUAL_TYPES.includes(a.file_type) &&
+                typeof a.file_url === 'string' &&
+                (a.file_url.startsWith('data:image/') || a.file_url.startsWith('http'))
+            );
             const logoAssets = mediaAssets.filter((a) => a.file_type === 'brand_logo_transparent');
+            const feeProofAssets = mediaAssets.filter((a) => a.file_type === 'booth_fee_proof');
 
             // Parse and strictly validate PR Q&A submissions
             const allQaSubmissions = mediaAssets
@@ -2449,7 +2703,8 @@ export default function ExhibitorAdminPage() {
                             className="bg-[#111111] border border-white/10 rounded-xl overflow-hidden hover:border-[#DFBA87]/40 transition-all flex flex-col justify-between"
                           >
                             <div 
-                              className="p-4 flex items-center justify-center min-h-[110px] relative"
+                              onClick={() => setMediaLightboxAsset({ url: logo.file_url, fileName: logo.file_name, brandName })}
+                              className="p-4 flex items-center justify-center min-h-[110px] relative cursor-pointer group"
                               style={{
                                 backgroundColor: '#0c0c0c',
                                 backgroundImage: 'repeating-conic-gradient(rgba(255, 255, 255, 0.08) 0% 25%, transparent 0% 50%)',
@@ -2459,33 +2714,41 @@ export default function ExhibitorAdminPage() {
                               <img 
                                 src={logo.file_url} 
                                 alt={brandName} 
-                                className="max-h-16 max-w-full object-contain filter drop-shadow-md"
+                                className="max-h-16 max-w-full object-contain filter drop-shadow-md group-hover:scale-105 transition-transform"
                               />
                             </div>
-                            <div className="p-3 bg-black/40 border-t border-white/5 space-y-1">
-                              <div className="flex items-center justify-between gap-1.5">
-                                <div className="text-xs font-semibold text-white truncate" title={brandName}>
-                                  {brandName}
+                            <div className="p-3 bg-black/40 border-t border-white/5 space-y-2">
+                              <div>
+                                <div className="flex items-center justify-between gap-1.5">
+                                  <div className="text-xs font-semibold text-white truncate" title={brandName}>
+                                    {brandName}
+                                  </div>
+                                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
+                                    Logo✓
+                                  </span>
                                 </div>
-                                <span className="text-[9px] font-mono px-1.5 py-0.2 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 shrink-0">
-                                  Logo✓
-                                </span>
-                              </div>
-                              {brandNameEn && (
-                                <div className="text-[10px] text-neutral-400 font-mono truncate">{brandNameEn}</div>
-                              )}
-                              <div className="flex items-center justify-between pt-1 text-[10px]">
-                                <span className="text-[9px] text-neutral-500 font-mono truncate max-w-[100px]">
+                                {brandNameEn && (
+                                  <div className="text-[10px] text-neutral-400 font-mono truncate">{brandNameEn}</div>
+                                )}
+                                <div className="text-[9px] text-neutral-500 font-mono truncate mt-0.5" title={logo.file_name}>
                                   {logo.file_name}
-                                </span>
-                                <a
-                                  href={logo.file_url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-[#DFBA87] hover:text-white flex items-center gap-0.5 font-mono transition-colors"
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 pt-1 border-t border-white/5">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenAssetInNewTab(logo.file_url)}
+                                  className="flex-1 py-1 px-2 rounded bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white text-[10px] font-mono transition-colors flex items-center justify-center gap-1 cursor-pointer"
                                 >
-                                  檢視原圖 ↗
-                                </a>
+                                  <ExternalLink className="w-3 h-3" /> 檢視
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownloadAssetFile(logo.file_url, `Logo_${brandName}_${logo.file_name}`)}
+                                  className="flex-1 py-1 px-2 rounded bg-[#DFBA87]/15 hover:bg-[#DFBA87] text-[#DFBA87] hover:text-black text-[10px] font-mono transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                                >
+                                  <Download className="w-3 h-3" /> 下載
+                                </button>
                               </div>
                             </div>
                           </div>
@@ -2503,7 +2766,7 @@ export default function ExhibitorAdminPage() {
                       品牌高解析視覺圖檔素材 ({imageAssets.length} 張)
                     </h3>
                     <span className="text-xs text-neutral-400 font-light mt-0.5 block">
-                      瀏覽所有品牌提交的高解析宣傳素材，大會公關小組下載編輯用。點擊圖片可放大檢視。
+                      瀏覽所有品牌提交的高解析宣傳素材，大會公關小組下載編輯用。點擊圖片可放大檢視或直接下載原圖。
                     </span>
                   </div>
 
@@ -2512,26 +2775,179 @@ export default function ExhibitorAdminPage() {
                       目前尚無任何品牌上傳視覺素材圖檔。
                     </div>
                   ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-6">
-                      {imageAssets.map((asset) => (
-                        <div 
-                          key={asset.id} 
-                          className="border border-white/5 bg-white/[0.01] rounded-lg overflow-hidden group hover:border-[#C9A96E]/30 transition-all cursor-pointer"
-                          onClick={() => setMediaLightboxUrl(asset.file_url)}
-                        >
-                          <div className="aspect-[4/3] overflow-hidden bg-neutral-900">
-                            <img 
-                              src={asset.file_url} 
-                              alt={asset.file_name} 
-                              className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
-                            />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                      {imageAssets.map((asset) => {
+                        const brandName = asset.exhibitor_brands?.brand_name_zh || asset.exhibitor_brands?.brand_name_en || '參展品牌';
+                        const brandNameEn = asset.exhibitor_brands?.brand_name_en;
+                        return (
+                          <div 
+                            key={asset.id} 
+                            className="border border-white/10 bg-[#141414] rounded-xl overflow-hidden group hover:border-[#C9A96E]/40 transition-all flex flex-col justify-between"
+                          >
+                            <div
+                              onClick={() => setMediaLightboxAsset({ url: asset.file_url, fileName: asset.file_name, brandName })}
+                              className="aspect-[4/3] overflow-hidden bg-neutral-900 cursor-pointer relative"
+                            >
+                              <img 
+                                src={asset.file_url} 
+                                alt={asset.file_name} 
+                                className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                              />
+                              <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs text-white font-medium gap-1.5">
+                                <Eye className="w-4 h-4 text-[#DFBA87]" /> 點擊放大預覽
+                              </div>
+                            </div>
+                            <div className="p-3.5 text-xs space-y-2.5">
+                              <div>
+                                <div className="font-semibold text-white truncate">{brandName}</div>
+                                {brandNameEn && (
+                                  <div className="text-[10px] text-neutral-400 font-mono truncate">{brandNameEn}</div>
+                                )}
+                                <div className="text-[10px] text-neutral-500 truncate mt-0.5 font-mono" title={asset.file_name}>
+                                  {asset.file_name}
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-1.5 pt-2 border-t border-white/5">
+                                <button
+                                  type="button"
+                                  onClick={() => setMediaLightboxAsset({ url: asset.file_url, fileName: asset.file_name, brandName })}
+                                  className="py-1.5 px-2.5 rounded bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white text-[11px] transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                                  title="放大檢視"
+                                >
+                                  <Eye className="w-3 h-3" /> 預覽
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenAssetInNewTab(asset.file_url)}
+                                  className="py-1.5 px-2.5 rounded bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white text-[11px] transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                                  title="在新分頁開啟原圖"
+                                >
+                                  <ExternalLink className="w-3 h-3" /> 原圖
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={() => handleDownloadAssetFile(asset.file_url, `${brandName}_${asset.file_name}`)}
+                                  className="flex-1 py-1.5 px-2.5 rounded bg-[#DFBA87]/15 hover:bg-[#DFBA87] text-[#DFBA87] hover:text-black border border-[#DFBA87]/30 text-[11px] font-medium transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                                  title="下載原始圖檔"
+                                >
+                                  <Download className="w-3 h-3" /> 下載圖檔
+                                </button>
+                              </div>
+                            </div>
                           </div>
-                          <div className="p-3 text-[10px]">
-                            <div className="font-semibold text-white truncate">{asset.exhibitor_brands?.brand_name_zh || '測試品牌'}</div>
-                            <div className="text-neutral-500 truncate mt-0.5 font-mono">{asset.file_name}</div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 4. Booth Fee Proof (展位尾款匯款證明歸檔) */}
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-white tracking-wider flex items-center gap-2">
+                        <Receipt className="w-4 h-4 text-[#DFBA87]" />
+                        參展品牌展位尾款匯款證明／水單憑證匯總 ({feeProofAssets.length} 筆已回報)
+                      </h3>
+                      <span className="text-xs text-neutral-400 font-light mt-0.5 block">
+                        參展品牌於協作平台回報之展位尾款匯款水單截圖與帳號末五碼紀錄，可點擊放大查核或直接下載水單圖檔。
+                      </span>
+                    </div>
+                  </div>
+
+                  {feeProofAssets.length === 0 ? (
+                    <div className="text-center py-8 text-neutral-500 text-xs font-light border border-dashed border-white/5 rounded-xl">
+                      目前尚無品牌上傳尾款匯款水單。
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                      {feeProofAssets.map((feeAsset: any) => {
+                        let parsed: any = {};
+                        try { parsed = JSON.parse(feeAsset.file_url); } catch { parsed = { receipt_url: feeAsset.file_url }; }
+                        const matchedApp = findAppForMediaAsset(feeAsset) || {
+                          id: feeAsset.brand_id,
+                          brand_name_zh: feeAsset.exhibitor_brands?.brand_name_zh || '參展品牌',
+                          brand_name_en: feeAsset.exhibitor_brands?.brand_name_en || '',
+                          contact_name: '',
+                          contact_email: feeAsset.exhibitor_brands?.portal_email || '',
+                        };
+                        const brandNameZh = matchedApp.brand_name_zh || feeAsset.exhibitor_brands?.brand_name_zh || '參展品牌';
+                        const isVerified = parsed.status === 'verified';
+                        const hasImage = typeof parsed.receipt_url === 'string' && parsed.receipt_url.length > 10;
+
+                        return (
+                          <div
+                            key={feeAsset.id}
+                            className="bg-[#141414] border border-white/10 hover:border-[#DFBA87]/40 rounded-xl overflow-hidden flex flex-col justify-between transition-all"
+                          >
+                            {hasImage ? (
+                              <div
+                                onClick={() => setLightboxFeeProof({ app: matchedApp, brandId: feeAsset.brand_id, proof: parsed, assetId: feeAsset.id })}
+                                className="aspect-[4/3] bg-neutral-900 overflow-hidden cursor-pointer relative group"
+                              >
+                                <img
+                                  src={parsed.receipt_url}
+                                  alt={`${brandNameZh} 匯款憑證`}
+                                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs text-white font-medium gap-1">
+                                  <Eye className="w-3.5 h-3.5 text-[#DFBA87]" /> 點擊放大查核
+                                </div>
+                              </div>
+                            ) : (
+                              <div
+                                onClick={() => setLightboxFeeProof({ app: matchedApp, brandId: feeAsset.brand_id, proof: parsed, assetId: feeAsset.id })}
+                                className="aspect-[4/3] bg-white/[0.02] border-b border-white/5 flex flex-col items-center justify-center p-4 text-center cursor-pointer"
+                              >
+                                <span className="text-[11px] text-neutral-400">以帳號末五碼回報</span>
+                                <span className="text-lg font-mono font-bold text-[#DFBA87] mt-1 tracking-widest">
+                                  {parsed.last_five_digits || '未填寫'}
+                                </span>
+                              </div>
+                            )}
+
+                            <div className="p-3.5 space-y-2.5 text-xs">
+                              <div className="flex items-center justify-between gap-2">
+                                <div className="font-semibold text-white truncate">{brandNameZh}</div>
+                                <span
+                                  className={`text-[10px] font-mono px-2 py-0.5 rounded border shrink-0 ${
+                                    isVerified
+                                      ? 'text-emerald-400 bg-emerald-500/10 border-emerald-500/30'
+                                      : 'text-amber-300 bg-amber-500/15 border-amber-500/40'
+                                  }`}
+                                >
+                                  {isVerified ? '✓ 已核訖' : '待對帳'}
+                                </span>
+                              </div>
+
+                              <div className="text-[11px] font-mono text-neutral-400 space-y-0.5">
+                                <div>末五碼：<span className="text-[#DFBA87] font-semibold">{parsed.last_five_digits || '見圖檔'}</span></div>
+                                <div>匯付金額：<span className="text-white">{parsed.amount ? `NT$ ${Number(parsed.amount).toLocaleString()}` : '-'}</span></div>
+                                {parsed.note && <div className="truncate" title={parsed.note}>備註：{parsed.note}</div>}
+                              </div>
+
+                              <div className="flex items-center gap-1.5 pt-2 border-t border-white/5">
+                                <button
+                                  type="button"
+                                  onClick={() => setLightboxFeeProof({ app: matchedApp, brandId: feeAsset.brand_id, proof: parsed, assetId: feeAsset.id })}
+                                  className="flex-1 py-1.5 px-2 rounded bg-[#DFBA87]/15 hover:bg-[#DFBA87] text-[#DFBA87] hover:text-black border border-[#DFBA87]/30 text-[11px] font-medium transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                                >
+                                  <Eye className="w-3 h-3" /> 查核水單
+                                </button>
+                                {hasImage && (
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDownloadAssetFile(parsed.receipt_url, `尾款水單_${brandNameZh}_${feeAsset.file_name || 'receipt.png'}`)}
+                                    className="py-1.5 px-2.5 rounded bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white border border-white/10 text-[11px] transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                                  >
+                                    <Download className="w-3 h-3" /> 下載
+                                  </button>
+                                )}
+                              </div>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -2671,16 +3087,36 @@ export default function ExhibitorAdminPage() {
                     </span>
                   </div>
                   <div className="text-xs text-neutral-400 font-mono mt-0.5 truncate">
-                    {lightboxFeeProof.app.brand_name_en} • 聯繫人：{lightboxFeeProof.app.contact_name} ({lightboxFeeProof.app.contact_email})
+                    {lightboxFeeProof.app.brand_name_en} {lightboxFeeProof.app.contact_email ? `• ${lightboxFeeProof.app.contact_email}` : ''}
                   </div>
                 </div>
 
-                <div className="flex items-center gap-2 flex-shrink-0">
+                <div className="flex items-center gap-2 flex-shrink-0 flex-wrap justify-end">
+                  {lightboxFeeProof.proof.receipt_url && (
+                    <>
+                      <button
+                        type="button"
+                        onClick={() => handleOpenAssetInNewTab(lightboxFeeProof.proof.receipt_url)}
+                        className="text-xs bg-white/5 hover:bg-white/15 text-neutral-300 px-3 py-1.5 rounded transition-all flex items-center gap-1.5 border border-white/10 cursor-pointer"
+                        title="在新分頁檢視原始大圖"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5" /> 開啟原圖
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDownloadAssetFile(lightboxFeeProof.proof.receipt_url, `尾款匯款憑證_${lightboxFeeProof.app.brand_name_zh}_2027.png`)}
+                        className="text-xs bg-white/5 hover:bg-white/15 text-neutral-300 px-3 py-1.5 rounded transition-all flex items-center gap-1.5 border border-white/10 cursor-pointer"
+                        title="下載水單圖檔"
+                      >
+                        <Download className="w-3.5 h-3.5" /> 下載水單
+                      </button>
+                    </>
+                  )}
                   {lightboxFeeProof.proof.status !== 'verified' ? (
                     <button
                       type="button"
                       disabled={isVerifyingProof}
-                      onClick={() => handleVerifyPaymentProof(lightboxFeeProof.app.id, 'verify')}
+                      onClick={() => handleVerifyPaymentProof(lightboxFeeProof.brandId || lightboxFeeProof.app.id, 'verify')}
                       className="px-3.5 py-1.5 rounded-lg bg-emerald-500 hover:bg-emerald-600 text-black font-semibold text-xs transition flex items-center gap-1.5 cursor-pointer shadow-md disabled:opacity-50"
                     >
                       {isVerifyingProof ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5" />}
@@ -2690,7 +3126,7 @@ export default function ExhibitorAdminPage() {
                     <button
                       type="button"
                       disabled={isVerifyingProof}
-                      onClick={() => handleVerifyPaymentProof(lightboxFeeProof.app.id, 'reject')}
+                      onClick={() => handleVerifyPaymentProof(lightboxFeeProof.brandId || lightboxFeeProof.app.id, 'reject')}
                       className="px-3 py-1.5 rounded-lg bg-white/10 hover:bg-white/20 text-neutral-300 text-xs transition cursor-pointer"
                     >
                       取消核訖狀態
@@ -2758,26 +3194,58 @@ export default function ExhibitorAdminPage() {
 
       {/* Media Assets Lightbox */}
       <AnimatePresence>
-        {mediaLightboxUrl && (
+        {mediaLightboxAsset && (
           <motion.div 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-sm flex items-center justify-center p-6 cursor-zoom-out"
-            onClick={() => setMediaLightboxUrl(null)}
+            className="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex flex-col items-center justify-center p-4 md:p-6"
+            onClick={() => setMediaLightboxAsset(null)}
           >
-            <button 
-              className="absolute top-4 right-4 bg-white/10 hover:bg-white/20 text-white rounded-full p-2"
-              onClick={() => setMediaLightboxUrl(null)}
-            >
-              <XCircle className="w-6 h-6" />
-            </button>
-            <img 
-              src={mediaLightboxUrl} 
-              alt="Media Asset" 
-              className="max-w-full max-h-[90vh] object-contain rounded shadow-2xl border border-white/10"
+            <div
+              className="bg-[#121212] border border-white/10 rounded-xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col overflow-hidden"
               onClick={(e) => e.stopPropagation()}
-            />
+            >
+              <div className="flex items-center justify-between px-5 py-3.5 border-b border-white/10 bg-white/[0.02]">
+                <div className="min-w-0 pr-4">
+                  <div className="text-sm font-semibold text-white truncate">
+                    【{mediaLightboxAsset.brandName}】媒體視覺素材檢視
+                  </div>
+                  <div className="text-xs text-neutral-400 font-mono truncate mt-0.5">
+                    {mediaLightboxAsset.fileName}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenAssetInNewTab(mediaLightboxAsset.url)}
+                    className="text-xs bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white px-3 py-1.5 rounded transition-all flex items-center gap-1.5 border border-white/10 cursor-pointer"
+                  >
+                    <ExternalLink className="w-3.5 h-3.5" /> 開啟原圖
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleDownloadAssetFile(mediaLightboxAsset.url, `${mediaLightboxAsset.brandName}_${mediaLightboxAsset.fileName}`)}
+                    className="text-xs bg-[#DFBA87] hover:bg-[#DFBA87]/90 text-black font-semibold px-3.5 py-1.5 rounded transition-all flex items-center gap-1.5 cursor-pointer"
+                  >
+                    <Download className="w-3.5 h-3.5" /> 下載圖檔
+                  </button>
+                  <button 
+                    className="text-neutral-400 hover:text-white rounded-full p-1.5 transition-colors ml-1 cursor-pointer"
+                    onClick={() => setMediaLightboxAsset(null)}
+                  >
+                    <XCircle className="w-6 h-6" />
+                  </button>
+                </div>
+              </div>
+              <div className="flex-1 overflow-auto p-4 md:p-6 flex items-center justify-center bg-[#090909] min-h-[360px]">
+                <img 
+                  src={mediaLightboxAsset.url} 
+                  alt={mediaLightboxAsset.fileName} 
+                  className="max-w-full max-h-[75vh] object-contain rounded shadow-2xl border border-white/10"
+                />
+              </div>
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

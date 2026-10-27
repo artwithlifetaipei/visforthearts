@@ -213,17 +213,19 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
           setBrand(currentBrand);
           safeSetStorage('vis_portal_brand_data', JSON.stringify(currentBrand));
 
-          // 1. Fetch visual image assets & transparent logo (exclude PR Q&A record)
+          // 1. Fetch visual image assets & transparent logo (exclude system JSON records)
           const { data: list } = await supabase
             .from('exhibitor_media_assets')
             .select('*')
             .eq('brand_id', currentBrand.id)
-            .neq('file_type', 'pr_qa_submission')
+            .not('file_type', 'in', '("pr_qa_submission","booth_fee_proof","compliance_contract","perspective_store_master")')
             .order('created_at', { ascending: false });
           
           const rawList = list || [];
           const logo = rawList.find((a: any) => a.file_type === 'brand_logo_transparent') || null;
-          const photos = rawList.filter((a: any) => a.file_type !== 'brand_logo_transparent');
+          const photos = rawList.filter((a: any) =>
+            !['brand_logo_transparent', 'pr_qa_submission', 'booth_fee_proof', 'compliance_contract', 'perspective_store_master'].includes(a.file_type)
+          );
 
           setLogoAsset(logo);
           setAssets(photos);
