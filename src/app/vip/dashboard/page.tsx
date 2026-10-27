@@ -246,7 +246,7 @@ export default function VIPDashboard() {
     const privileges = [
         { zh: '1/6 尊榮預展暨開幕晚會', en: 'Vernissage & Opening Night', granted: isSVIP },
         { zh: '1/7 – 1/9 展期優先快速通行', en: 'Priority Fast-Track Entry', granted: true },
-        { zh: '中山堂貴賓專屬櫃檯核驗', en: 'Dedicated VIP Reception', granted: true },
+        { zh: 'VIS 貴賓專屬櫃檯核驗', en: 'Dedicated VIP Reception', granted: true },
         { zh: '現場作品典藏・品牌管家服務', en: 'Scan & Save Concierge', granted: true },
     ];
 
@@ -701,7 +701,7 @@ export default function VIPDashboard() {
                                 <QRCodeSVG value={qrValue} size={176} level="H" includeMargin={false} fgColor="#14120E" />
                             </div>
 
-                            <p className="mt-4 text-sm text-white/85 text-center">請於中山堂貴賓專屬櫃檯出示此憑證</p>
+                            <p className="mt-4 text-sm text-white/85 text-center">請於 VIS 貴賓專屬櫃檯出示此憑證</p>
                             <p className="mt-1 text-[11px] font-mono tracking-wider text-white/40 text-center">
                                 動態憑證 · 每 30 秒自動更新 · {new Date().toLocaleTimeString([], { hour12: false })}
                             </p>
