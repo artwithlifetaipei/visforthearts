@@ -116,6 +116,81 @@ export async function POST(req: Request) {
                 message: 'VIP status approved and magic link sent successfully.' 
             });
 
+        } else if (action === 'update_tier') {
+            if (tier !== 'VIP' && tier !== 'SVIP') {
+                return NextResponse.json({ error: 'Invalid tier specified. Must be VIP or SVIP.' }, { status: 400 });
+            }
+
+            const { data: existingRows, error: checkErr } = await supabase
+                .from('vip_allowlist')
+                .select('id, email')
+                .ilike('email', targetEmail);
+
+            if (checkErr) {
+                return NextResponse.json({ error: `Query failed: ${checkErr.message}` }, { status: 500 });
+            }
+
+            if (existingRows && existingRows.length > 0) {
+                const { data: updateData, error: updateError } = await supabase
+                    .from('vip_allowlist')
+                    .update({ tier })
+                    .ilike('email', targetEmail)
+                    .select();
+
+                if (updateError || !updateData || updateData.length === 0) {
+                    console.error('Database update error during tier change:', updateError);
+                    return NextResponse.json({
+                        error: `Tier update failed: ${updateError?.message || 'No rows updated.'}`
+                    }, { status: 500 });
+                }
+            } else {
+                const { error: insertError } = await supabase
+                    .from('vip_allowlist')
+                    .insert({
+                        email: targetEmail,
+                        tier,
+                        status: 'Approved',
+                        role: 'VIP',
+                        rsvp_status: 'Confirmed'
+                    });
+
+                if (insertError) {
+                    return NextResponse.json({
+                        error: `Tier insert failed: ${insertError.message}`
+                    }, { status: 500 });
+                }
+            }
+
+            // Optional sync with exhibitor_vip_submissions if this email was invited by a brand
+            try {
+                const { data: subRows } = await supabase
+                    .from('exhibitor_vip_submissions')
+                    .select('id, vip_surname')
+                    .ilike('vip_email', targetEmail);
+
+                if (subRows && subRows.length > 0) {
+                    for (const sub of subRows) {
+                        const cleanSurname = (sub.vip_surname || '')
+                            .replace(/\s*\((S?VIP)\)/gi, '')
+                            .replace(/\s*\[(S?VIP)\]/gi, '')
+                            .trim();
+                        const newSurname = tier === 'SVIP' ? `${cleanSurname} (SVIP)` : cleanSurname;
+                        await supabase
+                            .from('exhibitor_vip_submissions')
+                            .update({ vip_surname: newSurname })
+                            .eq('id', sub.id);
+                    }
+                }
+            } catch (syncErr) {
+                console.warn('Optional exhibitor_vip_submissions sync warning:', syncErr);
+            }
+
+            return NextResponse.json({
+                success: true,
+                tier,
+                message: `Guest tier updated to ${tier} successfully.`
+            });
+
         } else if (action === 'reject') {
             // Set status to Rejected
             const { data: updateData, error: updateError } = await supabase

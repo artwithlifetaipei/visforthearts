@@ -117,11 +117,49 @@ export default function VIPAdminPage() {
     const [audienceFeedback, setAudienceFeedback] = useState('');
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [approvingEmail, setApprovingEmail] = useState('');
+    const [updatingTierEmail, setUpdatingTierEmail] = useState('');
+    const [audienceSearch, setAudienceSearch] = useState('');
+    const [audienceTierFilter, setAudienceTierFilter] = useState<'ALL' | 'VIP' | 'SVIP'>('ALL');
     const [selectedTiers, setSelectedTiers] = useState<Record<string, 'VIP' | 'SVIP'>>({});
 
     // Guest Profile States
     const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
     const [profilesSearch, setProfilesSearch] = useState('');
+
+    const handleUpdateTier = async (email: string, newTier: 'VIP' | 'SVIP') => {
+        if (!email || updatingTierEmail === email) return;
+        setUpdatingTierEmail(email);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token || '';
+
+            const res = await fetch('/api/vip/approve', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ applicationEmail: email, action: 'update_tier', tier: newTier })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || '更新貴賓身份別失敗');
+            } else {
+                setVipList(prev =>
+                    prev.map(item =>
+                        item.email?.toLowerCase().trim() === email.toLowerCase().trim()
+                            ? { ...item, tier: newTier }
+                            : item
+                    )
+                );
+                await fetchList();
+            }
+        } catch (err: any) {
+            alert(`更新身份別連線異常：${err.message || err}`);
+        } finally {
+            setUpdatingTierEmail('');
+        }
+    };
 
     const handleApproveStatus = async (email: string, action: 'approve' | 'reject', tier?: 'VIP' | 'SVIP') => {
         setApprovingEmail(email);
@@ -947,37 +985,113 @@ export default function VIPAdminPage() {
 
                             {/* Audience List */}
                             <div>
-                                <div className="flex items-baseline justify-between mb-6">
-                                    <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400 font-semibold">已核准貴賓與專業買家名單</h2>
-                                    <span className="text-[10px] tracking-widest text-neutral-600">{vipList.filter(vip => vip.status !== 'Pending').length} 位受眾成員</span>
+                                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+                                    <div className="flex items-baseline gap-3">
+                                        <h2 className="text-[10px] tracking-[0.4em] uppercase text-neutral-400 font-semibold">已核准貴賓與專業買家名單</h2>
+                                        <span className="text-[10px] tracking-widest text-neutral-600">{vipList.filter(vip => vip.status !== 'Pending').length} 位受眾成員</span>
+                                    </div>
+                                    <div className="flex items-center gap-3 flex-wrap">
+                                        {/* Tier Filter Pills */}
+                                        <div className="inline-flex items-center bg-neutral-950 border border-neutral-800 p-0.5 rounded-sm text-[9px] tracking-widest uppercase">
+                                            {(['ALL', 'SVIP', 'VIP'] as const).map((f) => (
+                                                <button
+                                                    key={f}
+                                                    type="button"
+                                                    onClick={() => setAudienceTierFilter(f)}
+                                                    className={`px-2.5 py-1 transition-all cursor-pointer ${
+                                                        audienceTierFilter === f
+                                                            ? 'bg-[#DFBA87] text-black font-bold'
+                                                            : 'text-neutral-500 hover:text-neutral-300'
+                                                    }`}
+                                                >
+                                                    {f === 'ALL' ? '全部' : f === 'SVIP' ? '✦ SVIP' : 'VIP'}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {/* Search Box */}
+                                        <div className="border-b border-neutral-800 focus-within:border-[#DFBA87] transition-colors duration-300">
+                                            <input
+                                                type="text"
+                                                placeholder="搜尋姓名 / EMAIL..."
+                                                value={audienceSearch}
+                                                onChange={(e) => setAudienceSearch(e.target.value)}
+                                                className="py-1 bg-transparent outline-none text-xs tracking-widest placeholder:text-neutral-600 text-white w-44"
+                                            />
+                                        </div>
+                                    </div>
                                 </div>
 
                                 <div className="space-y-2">
                                     <AnimatePresence>
-                                        {vipList.filter(vip => vip.status !== 'Pending').map((vip, i) => (
+                                        {vipList
+                                            .filter(vip => vip.status !== 'Pending')
+                                            .filter(vip => audienceTierFilter === 'ALL' || vip.tier === audienceTierFilter)
+                                            .filter(vip => {
+                                                if (!audienceSearch.trim()) return true;
+                                                const q = audienceSearch.toLowerCase().trim();
+                                                return (
+                                                    vip.email?.toLowerCase().includes(q) ||
+                                                    (vip.name && vip.name.toLowerCase().includes(q)) ||
+                                                    (vip.role && vip.role.toLowerCase().includes(q))
+                                                );
+                                            })
+                                            .map((vip, i) => (
                                             <motion.div
                                                 key={vip.id}
                                                 initial={{ opacity: 0, x: -10 }}
                                                 animate={{ opacity: 1, x: 0 }}
                                                 exit={{ opacity: 0, x: 10 }}
                                                 transition={{ duration: 0.3, delay: Math.min(i * 0.03, 0.3) }}
-                                                className="flex items-center justify-between bg-neutral-900/40 border border-neutral-800/40 px-6 py-4 hover:border-neutral-700 transition-colors duration-300"
+                                                className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-900/40 border border-neutral-800/40 px-6 py-4 hover:border-neutral-700 transition-colors duration-300"
                                             >
-                                                <div className="flex items-center gap-4 flex-wrap md:flex-nowrap">
-                                                    <div className={`text-[8px] px-2 py-0.5 border ${vip.tier === 'SVIP' ? 'border-[#DFBA87] text-[#DFBA87]' : 'border-neutral-700 text-neutral-400'} tracking-tighter`}>
-                                                        {vip.tier}
+                                                <div className="flex items-center gap-3 flex-wrap md:flex-nowrap">
+                                                    <div className={`text-[9px] font-bold px-2.5 py-0.5 border ${vip.tier === 'SVIP' ? 'border-[#DFBA87] text-[#DFBA87] bg-[#DFBA87]/10' : 'border-neutral-700 text-neutral-300 bg-neutral-800/40'} tracking-wider`}>
+                                                        {vip.tier === 'SVIP' ? '✦ SVIP' : 'VIP'}
                                                     </div>
                                                     <div className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-300 uppercase tracking-widest font-mono">
                                                         {vip.role === 'Professional Buyer' ? 'BUYER 專業買家' : vip.role}
                                                     </div>
-                                                    <div className="ml-2">
+                                                    <div className="ml-1">
                                                         <p className="text-xs tracking-wider text-white font-mono">{vip.email}</p>
                                                         {vip.name && (
                                                             <p className="text-[10px] tracking-widest text-neutral-400 mt-1">{vip.name}</p>
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className="flex items-center gap-6">
+                                                <div className="flex items-center gap-5 flex-wrap sm:flex-nowrap justify-end">
+                                                    {/* Post-Approval VIP / SVIP Identity Switcher */}
+                                                    <div className="flex flex-col items-end gap-1">
+                                                        <span className="text-[8px] text-neutral-500 uppercase tracking-widest">身份別切換</span>
+                                                        <div className="inline-flex items-center gap-1 bg-black/60 border border-neutral-800 p-0.5 rounded-sm">
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => vip.tier !== 'VIP' && handleUpdateTier(vip.email, 'VIP')}
+                                                                disabled={updatingTierEmail === vip.email}
+                                                                className={`px-2.5 py-1 text-[9px] tracking-widest uppercase transition-all cursor-pointer rounded-xs ${
+                                                                    vip.tier === 'VIP'
+                                                                        ? 'bg-neutral-200 text-black font-bold shadow-xs'
+                                                                        : 'text-neutral-500 hover:text-neutral-200'
+                                                                } disabled:opacity-50`}
+                                                                title="切換為一般 VIP（1/7–1/9 展期優先通行）"
+                                                            >
+                                                                {updatingTierEmail === vip.email && vip.tier !== 'VIP' ? '...' : 'VIP'}
+                                                            </button>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => vip.tier !== 'SVIP' && handleUpdateTier(vip.email, 'SVIP')}
+                                                                disabled={updatingTierEmail === vip.email}
+                                                                className={`px-2.5 py-1 text-[9px] tracking-widest uppercase transition-all cursor-pointer rounded-xs ${
+                                                                    vip.tier === 'SVIP'
+                                                                        ? 'bg-gradient-to-r from-amber-500 to-[#DFBA87] text-black font-bold shadow-xs'
+                                                                        : 'text-neutral-500 hover:text-[#DFBA87]'
+                                                                } disabled:opacity-50`}
+                                                                title="切換為 SVIP 榮譽貴賓（含 1/6 開幕晚會與預展專屬通行）"
+                                                            >
+                                                                {updatingTierEmail === vip.email && vip.tier !== 'SVIP' ? '...' : '✦ SVIP'}
+                                                            </button>
+                                                        </div>
+                                                    </div>
+
                                                     <div className="text-right">
                                                         <p className="text-[8px] text-neutral-500 uppercase tracking-widest">RSVP 狀態</p>
                                                         <p className={`text-[10px] tracking-wider font-mono mt-0.5 ${vip.rsvp_status === 'Confirmed' ? 'text-emerald-400' : 'text-neutral-400'}`}>
@@ -987,7 +1101,7 @@ export default function VIPAdminPage() {
                                                     <button
                                                         onClick={() => handleDeleteAudience(vip.id, vip.email)}
                                                         disabled={deletingId === vip.id}
-                                                        className="text-[9px] tracking-widest uppercase text-neutral-500 hover:text-rose-400 transition-colors duration-300 disabled:opacity-50"
+                                                        className="text-[9px] tracking-widest uppercase text-neutral-500 hover:text-rose-400 transition-colors duration-300 disabled:opacity-50 cursor-pointer"
                                                     >
                                                         {deletingId === vip.id ? '移除中' : '移除'}
                                                     </button>
@@ -1129,9 +1243,39 @@ export default function VIPAdminPage() {
                                                         <td className="py-4 text-[#DFBA87] font-light">{u.name}</td>
                                                         <td className="py-4 text-neutral-300">{u.email}</td>
                                                         <td className="py-4">
-                                                            <span className="text-[10px] px-2 py-0.5 border border-neutral-800 text-neutral-400 uppercase">
-                                                                {u.tier} | {u.crm_role}
-                                                            </span>
+                                                            <div className="flex items-center gap-2 flex-wrap">
+                                                                <div className="inline-flex items-center gap-0.5 bg-black/60 border border-neutral-800 p-0.5 rounded-sm">
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => u.tier !== 'VIP' && handleUpdateTier(u.email, 'VIP')}
+                                                                        disabled={updatingTierEmail === u.email}
+                                                                        className={`px-2 py-0.5 text-[9px] tracking-wider uppercase transition-all cursor-pointer ${
+                                                                            u.tier === 'VIP'
+                                                                                ? 'bg-neutral-200 text-black font-bold'
+                                                                                : 'text-neutral-500 hover:text-neutral-200'
+                                                                        } disabled:opacity-50`}
+                                                                        title="切換為 VIP"
+                                                                    >
+                                                                        VIP
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => u.tier !== 'SVIP' && handleUpdateTier(u.email, 'SVIP')}
+                                                                        disabled={updatingTierEmail === u.email}
+                                                                        className={`px-2 py-0.5 text-[9px] tracking-wider uppercase transition-all cursor-pointer ${
+                                                                            u.tier === 'SVIP'
+                                                                                ? 'bg-gradient-to-r from-amber-500 to-[#DFBA87] text-black font-bold'
+                                                                                : 'text-neutral-500 hover:text-[#DFBA87]'
+                                                                        } disabled:opacity-50`}
+                                                                        title="切換為 SVIP"
+                                                                    >
+                                                                        ✦ SVIP
+                                                                    </button>
+                                                                </div>
+                                                                <span className="text-[10px] px-2 py-0.5 border border-neutral-800 text-neutral-400 uppercase">
+                                                                    {u.crm_role}
+                                                                </span>
+                                                            </div>
                                                         </td>
                                                         <td className="py-4 text-neutral-400 font-mono">{u.birthdate || '-'}</td>
                                                         <td className="py-4 text-neutral-300">{u.identity_type || '-'}</td>
