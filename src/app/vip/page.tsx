@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
+import { Sparkles, Crown, Gem, CheckCircle2, ArrowLeft, Mail } from 'lucide-react';
 
 const formatVipError = (msg: string, lang: 'zh' | 'en'): string => {
   if (!msg) return '';
@@ -149,165 +151,208 @@ export default function VIPLoginPage() {
 
     if (!isMounted) {
         return (
-            <div className="min-h-screen bg-[#FAF9F6] flex items-center justify-center text-[#C9A96E]">
-                <div className="text-center font-sans">
-                    <div className="w-8 h-8 border-t-2 border-[#C9A96E] rounded-full animate-spin mx-auto mb-4"></div>
-                    <p className="text-xs font-light tracking-[0.2em] uppercase text-[#1A1A1A]">載入中 Loading...</p>
-                </div>
+            <div className="min-h-screen bg-[#0A0908] flex flex-col items-center justify-center gap-4 text-[#DFBA87]">
+                <img src="/vis_logo_white.png" alt="VIS" className="h-12 w-12 object-contain opacity-80 animate-pulse" />
+                <p className="text-[11px] font-mono tracking-[0.35em] uppercase text-[#DFBA87]/80">載入中 · Loading</p>
             </div>
         );
     }
 
     return (
-        <div className="min-h-screen bg-[#FAF9F6] flex flex-col p-6 font-sans relative overflow-x-hidden">
-            {/* Atmospheric Background Blurs */}
-            <div className="absolute top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
-                <div className="absolute top-[-10%] left-[-10%] w-[40vw] h-[40vw] bg-[#DFBA87]/5 rounded-full blur-[100px]"></div>
-                <div className="absolute bottom-[-10%] right-[-10%] w-[50vw] h-[50vw] bg-black/5 rounded-full blur-[120px]"></div>
+        <div className="min-h-screen bg-[#0A0908] text-[#F3EFEA] flex flex-col justify-between font-sans relative overflow-x-hidden selection:bg-[#DFBA87] selection:text-black">
+            {/* Full-bleed architectural background matching 年度文化命題 */}
+            <div className="fixed inset-0 w-full h-full pointer-events-none z-0">
+                <img src="/vip_lobby_bg.jpg" alt="" className="w-full h-full object-cover object-center" />
+                <div className="absolute inset-0 bg-gradient-to-b from-black/82 via-black/55 to-black/92" />
+                <div
+                    className="absolute inset-0"
+                    style={{ background: 'radial-gradient(circle at 50% 25%, rgba(223,186,135,0.15) 0%, transparent 72%)' }}
+                />
             </div>
 
-            <div className="flex-1 flex flex-col items-center justify-center w-full">
-                <motion.div 
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 1.2, ease: [0.16, 1, 0.3, 1] }}
-                    className="w-full max-w-md text-center relative z-10"
-                >
+            {/* Top Navigation Bar */}
+            <header className="relative z-20 border-b border-white/10 bg-black/40 backdrop-blur-xl px-4 sm:px-8 py-4">
+                <div className="max-w-3xl mx-auto flex items-center justify-between">
+                    <Link
+                        href="/"
+                        className="flex items-center gap-2 text-xs text-neutral-300 hover:text-white font-medium transition-colors group"
+                    >
+                        <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
+                        <span>返回 VIS 官網首頁</span>
+                    </Link>
+
+                    <div className="flex items-center gap-2.5">
+                        <img src="/vis_logo_white.png" alt="VIS Contemporary Culture" className="h-7 w-7 object-contain" />
+                        <span className="text-xs font-mono tracking-[0.28em] uppercase text-[#DFBA87]">VIP Portal</span>
+                    </div>
+                </div>
+            </header>
+
+            <main className="flex-grow flex flex-col items-center justify-center px-5 py-10 sm:py-16 relative z-10 max-w-2xl mx-auto w-full">
+                {/* Identity Pillar Header */}
                 <motion.div
-                    initial={{ scale: 0.9, opacity: 0 }}
-                    animate={{ scale: 1, opacity: 1 }}
-                    transition={{ duration: 1.5, delay: 0.2, ease: "easeOut" }}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
+                    className="text-center space-y-3.5 mb-8 sm:mb-10"
                 >
-                    <img 
-                        src="https://img1.wsimg.com/isteam/ip/e6b4acac-1653-4d0e-9e55-ed5572206955/VIS%20LOGO_%E5%B7%A5%E4%BD%9C%E5%8D%80%E5%9F%9F%201%20(1).png" 
-                        alt="VIS" 
-                        className="h-16 mx-auto mb-12 opacity-90"
-                    />
+                    <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#DFBA87]/15 border border-[#DFBA87]/40 text-[#DFBA87] text-[11px] sm:text-xs font-mono tracking-widest uppercase font-semibold backdrop-blur-md">
+                        <Sparkles className="w-3.5 h-3.5 text-[#DFBA87]" />
+                        <span>VIS Contemporary Culture 2027</span>
+                    </div>
+
+                    <div className="space-y-2 pt-1">
+                        <h2 className="text-lg sm:text-xl md:text-2xl font-serif text-[#DFBA87] font-medium tracking-[0.14em] sm:tracking-[0.2em] flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
+                            <span>VIP / SVIP Exclusive Lounge</span>
+                            <span className="hidden sm:inline text-[#DFBA87]/60">·</span>
+                            <span className="text-white/90 font-normal tracking-[0.16em]">貴賓專屬禮遇門戶</span>
+                        </h2>
+                        <div className="w-10 h-[1px] bg-[#DFBA87] mx-auto mt-2.5 rounded-full opacity-60" />
+                    </div>
+
+                    <h1 className="text-2xl sm:text-3xl md:text-4xl font-serif text-white leading-tight font-medium tracking-wide drop-shadow-md pt-1">
+                        驗證貴賓身份・開啟專屬數位憑證
+                    </h1>
                 </motion.div>
 
-                <h1 className="text-3xl font-serif text-[#1A1A1A] mb-2 tracking-tight">
-                    Digital Portal
-                </h1>
-                <AnimatePresence mode="wait">
-                    {!isSent ? (
-                        <motion.form 
-                            key="login"
-                            initial={{ opacity: 0, filter: "blur(10px)" }}
-                            animate={{ opacity: 1, filter: "blur(0px)" }}
-                            exit={{ opacity: 0, filter: "blur(10px)", y: -20 }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                            onSubmit={handleLogin} 
-                            className="space-y-12"
-                        >
-                            <div className="mb-10 mt-2">
-                                <h1 className="text-[15px] font-serif tracking-[0.1em] text-[#DFBA87] uppercase">
-                                    VIP / SVIP Exclusive Access
-                                </h1>
-                            </div>
-                            
-                            <p className="text-[#666666] text-[15px] leading-[2.2] tracking-widest mb-12 font-light">
-                                請輸入您的電子信箱以驗證貴賓身份。<br/>
-                                系統將為您開啟專屬的貴賓門卡與禮遇空間。<br/>
-                                <span className="opacity-60 text-[13.5px] mt-4 block italic font-serif">
-                                    Enter your email to verify your VIP status and unlock your<br/>
-                                    exclusive digital key and premium benefits.
-                                </span>
-                            </p>
-                            
-                            <div className="relative border-b border-[#E5E5E5] focus-within:border-[#1A1A1A] transition-colors duration-500 group">
-                                <input
-                                    type="email"
-                                    placeholder="EMAIL ADDRESS"
-                                    required
-                                    className="w-full py-4 bg-transparent outline-none text-xs tracking-widest uppercase placeholder:text-[#CCCCCC] text-center text-[#1A1A1A]"
-                                    value={email}
-                                    onChange={(e) => setEmail(e.target.value)}
-                                    disabled={isLoading}
-                                />
-                                <div className="absolute bottom-[-1px] left-1/2 w-0 h-[1px] bg-[#1A1A1A] transition-all duration-500 group-focus-within:w-full group-focus-within:left-0"></div>
-                            </div>
+                {/* Dual VIP Tier Identity Preview Cards */}
+                <div className="w-full grid grid-cols-1 sm:grid-cols-2 gap-3.5 mb-6 text-left">
+                    <div className="p-4 sm:p-5 rounded-2xl bg-black/50 backdrop-blur-xl border border-[#DFBA87]/40 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-[0.18em] text-[#14120E] bg-gradient-to-r from-[#F7E7C8] via-[#DFBA87] to-[#A87F45]">
+                                <Crown className="w-3 h-3" />
+                                <span>SVIP</span>
+                            </span>
+                            <span className="text-[11px] font-mono text-[#DFBA87]">2027.01.06 – 01.09</span>
+                        </div>
+                        <p className="text-sm font-serif text-white font-medium pt-1">SVIP 榮譽貴賓 · Honorary Guest</p>
+                        <p className="text-xs text-neutral-300 font-light leading-relaxed">
+                            享 1/6 尊榮預展暨開幕晚會專屬入場資格，以及全展期優先快速通行。
+                        </p>
+                    </div>
 
-                            <motion.button
-                                whileHover={{ scale: 0.98 }}
-                                whileTap={{ scale: 0.95 }}
-                                type="submit"
-                                disabled={isLoading}
-                                className="w-full py-5 bg-[#1A1A1A] text-white text-[10px] tracking-[0.4em] uppercase transition-all duration-500 disabled:opacity-50 shadow-2xl shadow-black/10 hover:shadow-black/20"
+                    <div className="p-4 sm:p-5 rounded-2xl bg-black/50 backdrop-blur-xl border border-[#DAD4CA]/35 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold tracking-[0.18em] text-[#14120E] bg-gradient-to-r from-white via-[#DAD4CA] to-[#8F887D]">
+                                <Gem className="w-3 h-3" />
+                                <span>VIP</span>
+                            </span>
+                            <span className="text-[11px] font-mono text-[#DAD4CA]">2027.01.07 – 01.09</span>
+                        </div>
+                        <p className="text-sm font-serif text-white font-medium pt-1">VIP 展期貴賓 · Distinguished Guest</p>
+                        <p className="text-xs text-neutral-300 font-light leading-relaxed">
+                            享 1/7 至 1/9 公眾展期優先快速通行與現場作品典藏管家服務。
+                        </p>
+                    </div>
+                </div>
+
+                {/* Glassmorphic Authentication Box */}
+                <div className="w-full bg-black/60 backdrop-blur-2xl border border-white/15 rounded-3xl p-6 sm:p-9 shadow-2xl shadow-black/80">
+                    <AnimatePresence mode="wait">
+                        {!isSent ? (
+                            <motion.form
+                                key="login"
+                                initial={{ opacity: 0, y: 10 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -10 }}
+                                transition={{ duration: 0.5 }}
+                                onSubmit={handleLogin}
+                                className="space-y-6"
                             >
-                                {isLoading ? (
-                                    <span className="flex items-center justify-center gap-3">
-                                        <div className="w-3 h-3 border-r-transparent border-[1.5px] border-white rounded-full animate-spin"></div>
-                                        Authenticating
-                                    </span>
-                                ) : 'Authenticate'}
-                            </motion.button>
-                        </motion.form>
-                    ) : (
-                        <motion.div 
-                            key="success"
-                            initial={{ opacity: 0, scale: 0.95, filter: "blur(10px)" }}
-                            animate={{ opacity: 1, scale: 1, filter: "blur(0px)" }}
-                            transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
-                            className="space-y-10"
-                        >
-                            <div className="py-10 flex justify-center">
-                                <motion.div 
-                                    initial={{ scale: 0, rotate: -90 }}
-                                    animate={{ scale: 1, rotate: 0 }}
-                                    transition={{ type: "spring", damping: 15, stiffness: 100, delay: 0.2 }}
-                                    className="w-16 h-16 rounded-full border-[0.5px] border-[#DFBA87] flex items-center justify-center bg-white shadow-xl shadow-[#DFBA87]/10"
+                                <div className="space-y-2 text-center">
+                                    <p className="text-sm sm:text-base text-neutral-200 leading-relaxed font-light">
+                                        請輸入您受邀登記之電子信箱，系統將自動辨識您的 <strong className="text-[#DFBA87] font-medium">SVIP / VIP</strong> 貴賓身份並寄發專屬登入連結。
+                                    </p>
+                                    <p className="text-xs text-neutral-400 font-serif italic">
+                                        Enter your invited email address to verify your guest tier and unlock your digital pass.
+                                    </p>
+                                </div>
+
+                                <div className="space-y-2">
+                                    <label htmlFor="vip_email" className="text-xs text-white/80 font-medium flex items-center gap-1.5">
+                                        <Mail className="w-3.5 h-3.5 text-[#DFBA87]" />
+                                        <span>受邀貴賓電子信箱 · Invited Email Address</span>
+                                    </label>
+                                    <input
+                                        id="vip_email"
+                                        type="email"
+                                        placeholder="name@example.com"
+                                        required
+                                        className="w-full bg-white/[0.06] hover:bg-white/[0.09] focus:bg-black/60 border border-white/20 focus:border-[#DFBA87] focus:ring-1 focus:ring-[#DFBA87]/40 rounded-xl px-4 py-3.5 text-sm text-white placeholder-white/35 focus:outline-none transition-all font-sans"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        disabled={isLoading}
+                                    />
+                                </div>
+
+                                <motion.button
+                                    whileHover={{ scale: 0.99 }}
+                                    whileTap={{ scale: 0.97 }}
+                                    type="submit"
+                                    disabled={isLoading}
+                                    className="w-full py-4 px-6 rounded-2xl bg-gradient-to-r from-[#DFBA87] to-[#C9A26A] hover:from-[#E5C799] hover:to-[#D4B07B] text-[#14120E] text-xs sm:text-sm font-bold tracking-[0.25em] uppercase transition-all shadow-xl shadow-[#DFBA87]/20 disabled:opacity-50 cursor-pointer"
                                 >
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#DFBA87" strokeWidth="1" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M20 6L9 17L4 12" />
-                                    </svg>
-                                </motion.div>
-                            </div>
-                            <div className="space-y-4">
-                                <h3 className="text-sm font-serif text-[#1A1A1A] tracking-wider">Invitation Sent</h3>
-                                <p className="text-[#666666] text-xs leading-[2] tracking-wider max-w-[280px] mx-auto font-light">
-                                    {message}
-                                </p>
-                            </div>
-                            <button
-                                onClick={() => setIsSent(false)}
-                                className="text-[9px] tracking-[0.3em] uppercase text-[#999999] hover:text-[#1A1A1A] transition-colors duration-300 border-b border-transparent hover:border-[#1A1A1A] pb-1"
+                                    {isLoading ? (
+                                        <span className="flex items-center justify-center gap-3">
+                                            <span className="w-3.5 h-3.5 border-r-transparent border-2 border-[#14120E] rounded-full animate-spin" />
+                                            <span>正在驗證貴賓名單 · Authenticating...</span>
+                                        </span>
+                                    ) : (
+                                        '驗證身份並取得專屬通行連結 · Authenticate'
+                                    )}
+                                </motion.button>
+                            </motion.form>
+                        ) : (
+                            <motion.div
+                                key="success"
+                                initial={{ opacity: 0, scale: 0.96 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 0.5 }}
+                                className="text-center space-y-6 py-4"
                             >
-                                Back to login
-                            </button>
+                                <div className="w-14 h-14 rounded-full bg-emerald-500/15 border border-emerald-400/40 text-emerald-400 flex items-center justify-center mx-auto">
+                                    <CheckCircle2 className="w-7 h-7" />
+                                </div>
+                                <div className="space-y-2">
+                                    <h3 className="text-xl font-serif text-white tracking-wide">專屬邀請連結已寄出 · Invitation Sent</h3>
+                                    <p className="text-xs sm:text-sm text-neutral-300 leading-relaxed max-w-md mx-auto font-light">
+                                        {message}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setIsSent(false)}
+                                    className="px-6 py-2.5 rounded-xl bg-white/[0.08] hover:bg-white/[0.16] border border-white/20 text-xs text-neutral-200 hover:text-white tracking-wider transition-all cursor-pointer"
+                                >
+                                    返回重新輸入信箱 · Back to Login
+                                </button>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {message && !isSent && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="mt-5 p-3.5 rounded-xl bg-rose-950/60 border border-rose-500/40 text-xs text-rose-200 leading-relaxed text-center whitespace-pre-line"
+                        >
+                            {message}
                         </motion.div>
                     )}
-                </AnimatePresence>
+                </div>
+            </main>
 
-                {message && !isSent && (
-                    <motion.p 
-                        initial={{ opacity: 0, y: 10 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        className="mt-8 text-[10px] text-red-500/80 tracking-widest font-light"
-                    >
-                        {message}
-                    </motion.p>
-                )}
-                </motion.div>
-            </div>
-
-            <motion.footer 
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 1.5, delay: 0.5 }}
-                className="w-full text-center mt-12 shrink-0 relative z-10 pb-4"
-            >
-                <div className="w-6 h-[1px] bg-[#E5E5E5] mx-auto mb-6 transition-all duration-700 hover:w-12"></div>
-                <p className="text-[10px] text-[#666666] font-light tracking-wider text-center mt-6 leading-relaxed">
-                    若註冊/登入發生任何問題，請來信至{' '}
-                    <a href="mailto:artwithlifetaipei@gmail.com" className="text-[#DFBA87] underline hover:text-[#1A1A1A] transition-colors">
-                        artwithlifetaipei@gmail.com
+            <footer className="relative z-10 border-t border-white/10 py-6 px-4 text-center text-xs text-neutral-400 bg-black/40 backdrop-blur-md space-y-1.5">
+                <p>
+                    若登入發生任何問題，歡迎來信至{' '}
+                    <a href="mailto:visvipteam@gmail.com" className="text-[#DFBA87] underline underline-offset-4 hover:text-white transition-colors">
+                        visvipteam@gmail.com
                     </a>
-                    ，將有專人協助您。
+                    ，將有貴賓專人協助您。
                 </p>
-                <p className="text-[9px] tracking-[0.4em] text-[#999999] uppercase font-light mt-4">
-                    &copy; 2026 VIS Contemporary Culture <span className="mx-2 opacity-30">|</span> PORTAL
+                <p className="text-[11px] font-mono tracking-[0.25em] text-neutral-500 uppercase">
+                    &copy; 2027 VIS Contemporary Culture · VIP Lounge
                 </p>
-            </motion.footer>
+            </footer>
         </div>
     );
 }
