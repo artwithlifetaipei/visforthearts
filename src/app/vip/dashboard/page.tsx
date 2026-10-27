@@ -513,7 +513,7 @@ export default function VIPDashboard() {
                     <div className="flex items-center gap-3 min-w-0">
                         <img src="/vis_logo_white.png" alt="VIS Contemporary Culture" className="h-9 w-9 object-contain shrink-0" />
                         <div className="hidden sm:block leading-tight">
-                            <p className="text-[11px] font-mono tracking-[0.3em] uppercase text-white/50">VIP Lounge</p>
+                            <p className="text-[11px] font-mono tracking-[0.3em] uppercase text-white/50">VIP Portal</p>
                             <p className="text-sm font-serif text-white/90 tracking-wide">貴賓專屬門戶</p>
                         </div>
                     </div>
@@ -587,13 +587,6 @@ export default function VIPDashboard() {
                         </h1>
                         <span className="hidden sm:block h-px w-16 md:w-24" style={{ background: `linear-gradient(270deg, transparent, ${tier.accentLine})` }} />
                     </div>
-
-                    <h2 className="mt-5 text-xl sm:text-2xl md:text-3xl font-serif text-white tracking-[0.12em] flex items-center justify-center gap-3 flex-wrap">
-                        <TierIcon className="w-5 h-5 sm:w-6 sm:h-6" style={{ color: tier.accent }} />
-                        <span>{tier.zh}</span>
-                        <span style={{ color: tier.accent }} className="opacity-70">·</span>
-                        <span className="font-normal" style={{ color: tier.accent }}>{tier.en}</span>
-                    </h2>
 
                     {/* Dual Identity Pill Bar: Tier Pass + Personal Collector/Professional Identity */}
                     <div className="mt-5 flex flex-wrap items-center justify-center gap-2.5 sm:gap-3">

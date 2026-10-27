@@ -203,7 +203,7 @@ export default function VIPLoginPage() {
 
                     <div className="space-y-2 pt-1">
                         <h2 className="text-lg sm:text-xl md:text-2xl font-serif text-[#DFBA87] font-medium tracking-[0.14em] sm:tracking-[0.2em] flex items-center justify-center gap-2 sm:gap-3 flex-wrap">
-                            <span>VIP / SVIP Exclusive Lounge</span>
+                            <span>VIP / SVIP Exclusive Portal</span>
                             <span className="hidden sm:inline text-[#DFBA87]/60">·</span>
                             <span className="text-white/90 font-normal tracking-[0.16em]">貴賓專屬禮遇門戶</span>
                         </h2>
@@ -350,7 +350,7 @@ export default function VIPLoginPage() {
                     ，將有貴賓專人協助您。
                 </p>
                 <p className="text-[11px] font-mono tracking-[0.25em] text-neutral-500 uppercase">
-                    &copy; 2027 VIS Contemporary Culture · VIP Lounge
+                    &copy; 2027 VIS Contemporary Culture · VIP Portal
                 </p>
             </footer>
         </div>
