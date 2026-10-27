@@ -254,7 +254,7 @@ export default function VIPDashboard() {
         { date: '1/6', week: '三', time: '18:00 – 21:00', zh: 'VIP 預展暨開幕晚會', en: 'Vernissage & Opening Night', granted: isSVIP },
         { date: '1/7', week: '四', time: '12:00 – 18:00', zh: '公眾展期', en: 'Fair Day', granted: true },
         { date: '1/8', week: '五', time: '12:00 – 18:00', zh: '公眾展期', en: 'Fair Day', granted: true },
-        { date: '1/9', week: '六', time: '12:00 – 19:00', zh: '公眾展期・閉幕日', en: 'Closing Day', granted: true },
+        { date: '1/9', week: '六', time: '13:00 – 19:00', zh: '公眾展期・閉幕日', en: 'Closing Day', granted: true },
     ];
 
     const glassCard = 'bg-black/55 backdrop-blur-2xl border border-white/12 rounded-3xl shadow-2xl shadow-black/70';

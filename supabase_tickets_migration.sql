@@ -94,11 +94,11 @@ CREATE POLICY "Allow admin all on ticket_waitlist" ON public.ticket_waitlist
 -- 10. Seed Initial Slots
 INSERT INTO public.ticket_slots (id, date_str, name_zh, name_en, time_range, max_tickets, booked_tickets)
 VALUES 
-('slot_1', '2027/1/9 (六)', '午後漫遊場(I)', 'Afternoon Stroll (I)', '12:00 - 14:30', 500, 0),
-('slot_2', '2027/1/9 (六)', '午後漫遊場(II)', 'Afternoon Stroll (II)', '14:30 - 17:00', 500, 0),
-('slot_3', '2027/1/10 (日)', '午後漫遊場(I)', 'Afternoon Stroll (I)', '12:00 - 14:30', 500, 0),
-('slot_4', '2027/1/10 (日)', '午後漫遊場(II)', 'Afternoon Stroll (II)', '14:30 - 17:00', 500, 0),
-('slot_5', '2027/1/10 (日)', '星光探索場(I)', 'Starlight Exploration (I)', '18:00 - 20:00', 500, 0)
+('slot_1', '2027/1/8 (五)', '午後漫遊場(I)', 'Afternoon Stroll (I)', '12:00 - 15:00', 60, 0),
+('slot_2', '2027/1/8 (五)', '午後漫遊場(II)', 'Afternoon Stroll (II)', '15:00 - 18:00', 60, 0),
+('slot_3', '2027/1/9 (六)', '午後漫遊場(I)', 'Afternoon Stroll (I)', '13:00 - 15:00', 60, 0),
+('slot_4', '2027/1/9 (六)', '午後漫遊場(II)', 'Afternoon Stroll (II)', '15:00 - 18:00', 60, 0),
+('slot_5', '2027/1/9 (六)', '星光探索場(I)', 'Starlight Exploration (I)', '18:00 - 19:00', 60, 0)
 ON CONFLICT (id) DO UPDATE SET
     date_str = EXCLUDED.date_str,
     name_zh = EXCLUDED.name_zh,
