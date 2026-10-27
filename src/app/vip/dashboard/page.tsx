@@ -694,7 +694,7 @@ export default function VIPDashboard() {
                                     {tier.code}
                                 </span>
                                 <p className="mt-3 text-2xl font-serif text-white tracking-wide truncate">{displayName}</p>
-                                <p className="mt-1 text-sm text-neutral-300">{tier.zh} · {tier.passZh}</p>
+                                <p className="mt-1 text-sm text-neutral-300">{tier.passZh}</p>
                             </div>
 
                             <div className="mt-6 p-4 bg-white rounded-2xl shadow-xl shadow-black/50">
@@ -1133,7 +1133,7 @@ export default function VIPDashboard() {
                                     </span>
                                 </div>
                                 <p className="mt-4 text-lg font-serif">{displayName}</p>
-                                <p className="text-xs text-neutral-400">{tier.zh} · {tier.passZh}</p>
+                                <p className="text-xs text-neutral-400">{tier.passZh}</p>
                                 <div className="mt-4 grid grid-cols-2 gap-3 text-xs">
                                     <div>
                                         <p className="text-[11px] tracking-[0.25em] uppercase text-neutral-500">Event</p>
