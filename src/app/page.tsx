@@ -829,8 +829,30 @@ export default function LandingPage() {
                 }
                 .metric-card.full-width {
                     background: linear-gradient(180deg, #FFFFFF 0%, #FAF8F3 100%);
-                    padding: 1.75rem 2rem;
+                    padding: 1.65rem 1.5rem 1.4rem;
                     border: 1px solid rgba(201, 169, 110, 0.35);
+                }
+                .emerging-collector-pill {
+                    margin-top: 0.85rem;
+                    padding-top: 0.75rem;
+                    border-top: 1px dashed rgba(201, 169, 110, 0.35);
+                    width: 100%;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 0.2rem;
+                }
+                .emerging-collector-title {
+                    font-size: 0.82rem;
+                    letter-spacing: 0.08em;
+                    color: #8C7853;
+                    font-weight: 500;
+                }
+                .emerging-collector-desc {
+                    font-size: 0.74rem;
+                    letter-spacing: 0.05em;
+                    color: #666666;
+                    font-weight: 300;
                 }
                 .metric-number {
                     font-family: var(--font-serif);
@@ -1181,10 +1203,18 @@ export default function LandingPage() {
                                 </div>
                             </div>
 
-                            {/* 77% Power Base */}
+                            {/* 77% Power Base + Emerging Collectors Highlight */}
                             <div className="metric-card full-width">
                                 <span className="metric-number">77%</span>
                                 <span className="metric-label">{lang === 'zh' ? '一年購買預算80萬以上' : 'Annual Purchase Budget > 800k TWD'}</span>
+                                <div className="emerging-collector-pill">
+                                    <span className="emerging-collector-title">
+                                        {lang === 'zh' ? '✦ 匯聚高潛力「跨界新銳藏家」客群' : '✦ High-Potential Emerging Collectors'}
+                                    </span>
+                                    <span className="emerging-collector-desc">
+                                        {lang === 'zh' ? '具充沛預算與開放美學視野 ‧ 最易觸發破圈首購與長期典藏' : 'Affluent & Open-Minded · Prime for First-Time Acquisition'}
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1195,16 +1225,16 @@ export default function LandingPage() {
                         <h3 className="metrics-heading">{lang === 'zh' ? '精準客群 ‧ 關係延續' : 'Discerning Audience · Deep Connection'}</h3>
                         <p className={`metrics-p ${lang === 'zh' ? 'font-zh' : 'font-sans'}`} style={lang === 'en' ? { fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '0.85rem', lineHeight: '1.8', letterSpacing: '0.04em', color: '#666', fontWeight: 3, textTransform: 'none' } : {}}>
                             {lang === 'zh' ? (
-                                '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，並深耕「本地相互熟識的貴賓圈層社群」，憑藉圈層內部的高度信任與凝聚力量，為品牌篩選出最適合深度交流與口碑擴散的核心客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。'
+                                '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，並深耕「本地相互熟識的貴賓圈層社群」，憑藉圈層內部的高度信任與凝聚力量，為品牌篩選出最適合深度交流與口碑擴散的核心客群。此圈層更涵蓋極高比例「具充沛消費力、正開啟收藏之路的新銳藏家」——他們對生活美學高度敏銳且心態開放，不設限於傳統收藏框架，極易在熟識圈層的共鳴下觸發「破圈首購」。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係與長期客群累積，最為適合重視產品質量的高單價品牌。'
                             ) : (
-                                'Unlike conventional art fairs focusing on high foot traffic and transactional sales, VIS places paramount importance on audience caliber and cultivates a locally interconnected, mutually acquainted VIP community. Powered by the deep trust and cohesion within this inner circle, VIS connects high-ticket brands with discerning patrons for genuine engagement, word-of-mouth resonance, boutique visits, and long-term collector loyalty.'
+                                'Unlike conventional art fairs focusing on high foot traffic and transactional sales, VIS places paramount importance on audience caliber and cultivates a locally interconnected, mutually acquainted VIP community. Beyond seasoned collectors, this trusted circle features a high proportion of affluent emerging collectors—open-minded patrons with strong purchasing power who are uninhibited by traditional collecting conventions and eager to make their first meaningful acquisitions. This ecosystem drives genuine engagement, boutique visits, and enduring collector loyalty.'
                             )}
                         </p>
                         <p className={`metrics-highlight ${lang === 'zh' ? 'font-zh' : 'font-sans'}`} style={lang === 'en' ? { fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '0.9rem', lineHeight: '1.7', letterSpacing: '0.04em', color: '#1a1a1a', fontWeight: 4, textTransform: 'none' } : {}}>
                             {lang === 'zh' ? (
-                                'VIS 提供的不只是一個展位，而是以「本地相互熟識的貴賓圈層社群」之信任與凝聚力為核心，從客群導入到關係延續的品牌成長機制。'
+                                'VIS 提供的不只是一個展位，而是以「本地相互熟識的貴賓圈層社群」之信任與凝聚力為核心，協助品牌精準開拓高潛力新銳藏家、從破圈首購延伸至長期關係的品牌成長機制。'
                             ) : (
-                                'Anchored in the trust and cohesion of a locally interconnected VIP circle, VIS offers more than exhibition space—it is a complete brand growth mechanism from warm client introductions to enduring relationships.'
+                                'Anchored in the trust and cohesion of a locally interconnected VIP circle, VIS offers more than exhibition space—it is a complete brand growth mechanism that connects brands with high-potential emerging collectors, turning first-time acquisitions into enduring relationships.'
                             )}
                         </p>
                     </div>

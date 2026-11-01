@@ -73,8 +73,8 @@ export default function ExhibitorLandingPage() {
       heroCopy: '作為持續聚集著品味人士所建構而成的場域，\n在台灣，VIS 不只是一個博覽會，\n而是一個最適合「高客單價品牌」的導客解決方案。',
       countdownLabel: '申請截止倒數 COUNTDOWN TO DEADLINE',
       metricsHeading: '精準客群 ‧ 關係延續',
-      metricsP: '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，並深耕「本地相互熟識的貴賓圈層社群」，憑藉圈層內部的高度信任與凝聚力量，為品牌篩選出最適合深度交流與口碑擴散的核心客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。',
-      metricsHighlight: 'VIS 提供的不只是一個展位，而是以「本地相互熟識的貴賓圈層社群」之信任與凝聚力為核心，從客群導入到關係延續的品牌成長機制。',
+      metricsP: '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，並深耕「本地相互熟識的貴賓圈層社群」，憑藉圈層內部的高度信任與凝聚力量，為品牌篩選出最適合深度交流與口碑擴散的核心客群。此圈層更涵蓋極高比例「具充沛消費力、正開啟收藏之路的新銳藏家」——他們對生活美學高度敏銳且心態開放，不設限於傳統收藏框架，極易在熟識圈層的共鳴下觸發「破圈首購」。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係與長期客群累積，最為適合重視產品質量的高單價品牌。',
+      metricsHighlight: 'VIS 提供的不只是一個展位，而是以「本地相互熟識的貴賓圈層社群」之信任與凝聚力為核心，協助品牌精準開拓高潛力新銳藏家、從破圈首購延伸至長期關係的品牌成長機制。',
       m1Label: '具高消費力與品味貴賓',
       m2Label: '收藏人士',
       m3Label: '企業主',
@@ -122,8 +122,8 @@ export default function ExhibitorLandingPage() {
       heroCopy: 'As a curated gathering place for discerning individuals,\nVIS is more than a trade fair in Taiwan —\nit is the premier customer-acquisition platform for high-end brands.',
       countdownLabel: 'COUNTDOWN TO DEADLINE',
       metricsHeading: 'Discerning Audience · Deep Connection',
-      metricsP: 'Unlike conventional art fairs focusing on high foot traffic and transactional sales, VIS places paramount importance on audience caliber and cultivates a locally interconnected, mutually acquainted VIP community. Powered by the deep trust and cohesion within this inner circle, VIS connects high-ticket brands with discerning patrons for genuine engagement, word-of-mouth resonance, boutique visits, and long-term collector loyalty.',
-      metricsHighlight: "Anchored in the trust and cohesion of a locally interconnected VIP circle, VIS offers more than exhibition space—it is a complete brand growth mechanism from warm client introductions to enduring relationships.",
+      metricsP: 'Unlike conventional art fairs focusing on high foot traffic and transactional sales, VIS places paramount importance on audience caliber and cultivates a locally interconnected, mutually acquainted VIP community. Beyond seasoned collectors, this trusted circle features a high proportion of affluent emerging collectors—open-minded patrons with strong purchasing power who are uninhibited by traditional collecting conventions and eager to make their first meaningful acquisitions. This ecosystem drives genuine engagement, boutique visits, and enduring collector loyalty.',
+      metricsHighlight: "Anchored in the trust and cohesion of a locally interconnected VIP circle, VIS offers more than exhibition space—it is a complete brand growth mechanism that connects brands with high-potential emerging collectors, turning first-time acquisitions into enduring relationships.",
       m1Label: 'Taste VIPs & Affluent Guests',
       m2Label: 'Art Collectors',
       m3Label: 'Business Owners',
@@ -767,10 +767,18 @@ export default function ExhibitorLandingPage() {
                   </div>
                 </div>
 
-                {/* 77% Power Base */}
+                {/* 77% Power Base + Emerging Collectors Highlight */}
                 <div className="bg-gradient-to-b from-white to-[#FAF8F3] border border-[#C9A96E]/35 p-5 flex flex-col items-center justify-center text-center shadow-[0_6px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
                   <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">77%</span>
                   <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m5Label}</span>
+                  <div className="mt-3 pt-3 border-t border-dashed border-[#C9A96E]/35 w-full flex flex-col items-center gap-0.5">
+                    <span className="text-xs text-[#8C7853] font-medium tracking-wider">
+                      {lang === 'zh' ? '✦ 匯聚高潛力「跨界新銳藏家」客群' : '✦ High-Potential Emerging Collectors'}
+                    </span>
+                    <span className="text-[11px] text-[#666666] font-light tracking-wide">
+                      {lang === 'zh' ? '具充沛預算與開放美學視野 ‧ 最易觸發破圈首購與長期典藏' : 'Affluent & Open-Minded · Prime for First-Time Acquisition'}
+                    </span>
+                  </div>
                 </div>
               </div>
             </div>
