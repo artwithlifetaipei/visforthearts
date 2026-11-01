@@ -96,7 +96,7 @@ export default function ExhibitorAdminPage() {
   const router = useRouter();
   const [isAuthorized, setIsAuthorized] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<'applications' | 'making-project' | 'vip' | 'compliance' | 'media'>('applications');
+  const [activeTab, setActiveTab] = useState<'applications' | 'making-project' | 'vip' | 'compliance' | 'media' | 'sales'>('applications');
 
   // Admin Login States
   const [currentUserEmail, setCurrentUserEmail] = useState<string>('');
@@ -1336,7 +1336,13 @@ export default function ExhibitorAdminPage() {
               id: 'media' as const,
               label: '媒體素材匯總',
               icon: ImageIcon,
-              count: mediaAssets.filter((a) => !['perspective_store_master', 'compliance_contract'].includes(a.file_type)).length,
+              count: mediaAssets.filter((a) => !['perspective_store_master', 'compliance_contract', 'concierge_lead'].includes(a.file_type)).length,
+            },
+            {
+              id: 'sales' as const,
+              label: '現場消費與放行匯總',
+              icon: Receipt,
+              count: mediaAssets.filter((a) => a.file_type === 'concierge_lead').length,
             },
           ].map((tab) => {
             const Icon = tab.icon;
@@ -2495,6 +2501,7 @@ export default function ExhibitorAdminPage() {
               'booth_fee_proof',
               'perspective_store_master',
               'compliance_contract',
+              'concierge_lead',
             ];
             const imageAssets = mediaAssets.filter(
               (a) =>
@@ -2951,6 +2958,216 @@ export default function ExhibitorAdminPage() {
                     </div>
                   )}
                 </div>
+              </div>
+            );
+          })()}
+
+          {/* TAB 6: ONSITE SALES, EXIT PASSES & COLLECTOR ACQUISITIONS */}
+          {activeTab === 'sales' && (() => {
+            const allConciergeRecords = mediaAssets
+              .filter((a) => a.file_type === 'concierge_lead')
+              .map((a) => {
+                let parsed: any = {};
+                try {
+                  parsed = typeof a.file_url === 'string' ? JSON.parse(a.file_url) : (a.file_url || {});
+                } catch {}
+                return {
+                  id: a.id,
+                  brand_id: parsed.brand_id || a.brand_id,
+                  brand_name_zh: parsed.brand_name_zh || a.exhibitor_brands?.brand_name_zh || '參展品牌',
+                  booth_number: parsed.booth_number || a.exhibitor_brands?.booth_type || '',
+                  vip_email: parsed.vip_email || '',
+                  vip_name: parsed.vip_name || 'VIS 貴賓',
+                  vip_phone: parsed.vip_phone || '',
+                  vip_tier: parsed.vip_tier || 'VIP',
+                  record_type: parsed.record_type || 'inquiry',
+                  delivery_method: parsed.delivery_method || null,
+                  amount_bracket: parsed.amount_bracket || null,
+                  custom_item_title: parsed.custom_item_title || '',
+                  certificate_no: parsed.certificate_no || '',
+                  product_snapshots: Array.isArray(parsed.product_snapshots) ? parsed.product_snapshots : [],
+                  notes: parsed.notes || '',
+                  staff_email: parsed.staff_email || '',
+                  created_at: parsed.created_at || a.created_at,
+                };
+              });
+
+            const purchaseRecords = allConciergeRecords.filter(r => r.record_type === 'purchase');
+            const handCarryRecords = purchaseRecords.filter(r => r.delivery_method === 'hand_carry');
+            const postFairRecords = purchaseRecords.filter(r => r.delivery_method === 'post_fair_delivery');
+            const inquiryRecords = allConciergeRecords.filter(r => r.record_type !== 'purchase');
+
+            const exportSalesCSV = () => {
+              if (allConciergeRecords.length === 0) return;
+              const headers = ['登錄時間', '紀錄類型', '憑證編號', '交付/放行狀態', '成交金額區間', '品牌名稱', '展位', '貴賓姓名', '貴賓等級', '貴賓 Email', '典藏品項', '備註', '下屆貴賓卡資格'];
+              const rows = allConciergeRecords.map(r => {
+                const isP = r.record_type === 'purchase';
+                const items = [
+                  ...(r.custom_item_title ? [r.custom_item_title] : []),
+                  ...r.product_snapshots.map((s: any) => s.title_zh)
+                ].join('; ');
+                return [
+                  new Date(r.created_at).toLocaleString('zh-TW'),
+                  isP ? '現場成交典藏' : '鑑賞意向收錄',
+                  r.certificate_no || '-',
+                  isP ? (r.delivery_method === 'hand_carry' ? '現場提貨(離場放行證)' : '展後交付/訂購(官方預訂證)') : '-',
+                  r.amount_bracket || '-',
+                  `"${(r.brand_name_zh || '').replace(/"/g, '""')}"`,
+                  r.booth_number || '',
+                  `"${(r.vip_name || '').replace(/"/g, '""')}"`,
+                  r.vip_tier,
+                  r.vip_email,
+                  `"${items.replace(/"/g, '""')}"`,
+                  `"${(r.notes || '').replace(/"/g, '""')}"`,
+                  isP ? '優先續發下屆 VIP 卡' : '潛在藏家'
+                ];
+              });
+              const csv = '\uFEFF' + [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+              const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `VIS_2027_全場消費與出場放行總表_${new Date().toISOString().slice(0, 10)}.csv`);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            };
+
+            return (
+              <div className="space-y-6">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-white/10 pb-4">
+                  <div>
+                    <h2 className="text-lg font-serif text-white tracking-wide">
+                      💎 現場消費登錄、出場放行與活躍藏家總覽
+                    </h2>
+                    <p className="text-xs text-neutral-400 mt-1">
+                      即時彙整全場各參展品牌掃描貴賓入場碼登錄之「現場提貨放行證」、「展後交付／訂購官方憑證」與「成交金額區間」，並自動標記明年優先續發貴賓卡之活躍藏家名單。
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={exportSalesCSV}
+                    disabled={allConciergeRecords.length === 0}
+                    className="px-4 py-2 bg-[#DFBA87] hover:bg-[#c9a370] text-black font-semibold text-xs rounded flex items-center gap-1.5 transition cursor-pointer disabled:opacity-40 self-start md:self-auto"
+                  >
+                    <Download className="w-3.5 h-3.5" />
+                    <span>匯出全場消費與續發 VIP 總表 (CSV)</span>
+                  </button>
+                </div>
+
+                {/* Summary KPI Cards */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                  <div className="bg-[#141414] border border-emerald-500/30 rounded-xl p-4">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-emerald-400 font-semibold">🎉 全場已成交筆數</span>
+                    <div className="text-2xl font-serif text-emerald-400 mt-1">{purchaseRecords.length} 筆</div>
+                    <span className="text-[10px] text-neutral-400 mt-1 block">已自動納入下屆 VIP 續發名單</span>
+                  </div>
+                  <div className="bg-[#141414] border border-white/10 rounded-xl p-4">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-300">🟢 現場提貨・出場放行證</span>
+                    <div className="text-2xl font-serif text-white mt-1">{handCarryRecords.length} 張</div>
+                    <span className="text-[10px] text-neutral-500 mt-1 block">當場提走・出口核驗綠燈</span>
+                  </div>
+                  <div className="bg-[#141414] border border-white/10 rounded-xl p-4">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-[#DFBA87]">📦 展後交付／專屬訂購單</span>
+                    <div className="text-2xl font-serif text-[#DFBA87] mt-1">{postFairRecords.length} 張</div>
+                    <span className="text-[10px] text-neutral-500 mt-1 block">無法現場帶走・官方預訂存證</span>
+                  </div>
+                  <div className="bg-[#141414] border border-white/10 rounded-xl p-4">
+                    <span className="text-[10px] font-mono uppercase tracking-wider text-neutral-400">✨ 現場鑑賞意向收錄</span>
+                    <div className="text-2xl font-serif text-white mt-1">{inquiryRecords.length} 筆</div>
+                    <span className="text-[10px] text-neutral-500 mt-1 block">尚未結帳・展後私洽跟進</span>
+                  </div>
+                </div>
+
+                {/* Records Table */}
+                {allConciergeRecords.length === 0 ? (
+                  <div className="p-12 text-center border border-dashed border-white/10 rounded-xl text-xs text-neutral-400">
+                    目前尚無現場消費或接待登錄紀錄。展會期間各品牌透過「模組 F」掃描貴賓卡後，所有成交金額區間與放行憑證將即時顯示於此。
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto border border-white/10 rounded-xl">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-white/5 border-b border-white/10 text-[11px] font-mono uppercase text-neutral-400">
+                          <th className="p-3">時間 / 憑證號</th>
+                          <th className="p-3">參展品牌</th>
+                          <th className="p-3">藏家貴賓 (下屆續發資格)</th>
+                          <th className="p-3">交付 / 出場放行狀態</th>
+                          <th className="p-3">成交金額區間</th>
+                          <th className="p-3">典藏品項與備註</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-white/5">
+                        {allConciergeRecords.map((rec) => {
+                          const isP = rec.record_type === 'purchase';
+                          const isHC = rec.delivery_method === 'hand_carry';
+                          const items = [
+                            ...(rec.custom_item_title ? [rec.custom_item_title] : []),
+                            ...rec.product_snapshots.map((s: any) => s.title_zh)
+                          ].join('、');
+                          return (
+                            <tr key={rec.id} className="hover:bg-white/[0.02] transition-colors">
+                              <td className="p-3 font-mono whitespace-nowrap">
+                                <div className="text-white">
+                                  {new Date(rec.created_at).toLocaleString('zh-TW', { month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                                {rec.certificate_no && (
+                                  <div className="text-[10px] text-[#DFBA87] mt-0.5">{rec.certificate_no}</div>
+                                )}
+                              </td>
+                              <td className="p-3">
+                                <div className="font-medium text-white">{rec.brand_name_zh}</div>
+                                {rec.booth_number && <div className="text-[10px] text-neutral-500 font-mono">{rec.booth_number}</div>}
+                              </td>
+                              <td className="p-3">
+                                <div className="flex items-center gap-1.5">
+                                  <span className="font-medium text-white">{rec.vip_name}</span>
+                                  <span className="px-1.5 py-0.2 rounded text-[9px] font-mono bg-[#DFBA87]/20 text-[#DFBA87]">{rec.vip_tier}</span>
+                                </div>
+                                <div className="text-[11px] font-mono text-neutral-400">{rec.vip_email}</div>
+                                {isP && (
+                                  <span className="inline-block mt-1 text-[10px] text-emerald-400 font-medium">
+                                    ✦ 明年優先續發貴賓卡
+                                  </span>
+                                )}
+                              </td>
+                              <td className="p-3 whitespace-nowrap">
+                                {isP ? (
+                                  isHC ? (
+                                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                      🟢 現場提貨・出場放行證
+                                    </span>
+                                  ) : (
+                                    <span className="px-2.5 py-1 rounded-full text-[11px] font-semibold bg-[#DFBA87]/20 text-[#DFBA87] border border-[#DFBA87]/40">
+                                      📦 展後交付／訂購憑證
+                                    </span>
+                                  )
+                                ) : (
+                                  <span className="px-2 py-0.5 rounded text-[11px] bg-white/5 text-neutral-400">
+                                    ✨ 鑑賞意向收錄
+                                  </span>
+                                )}
+                              </td>
+                              <td className="p-3 font-mono whitespace-nowrap">
+                                {isP ? (
+                                  <span className="px-2.5 py-1 rounded bg-white/10 text-[#DFBA87] font-bold border border-white/15">
+                                    {rec.amount_bracket || '未指定'}
+                                  </span>
+                                ) : (
+                                  <span className="text-neutral-600">-</span>
+                                )}
+                              </td>
+                              <td className="p-3 max-w-xs">
+                                {items && <div className="text-white font-medium truncate" title={items}>{items}</div>}
+                                {rec.notes && <div className="text-[11px] text-neutral-400 italic truncate" title={rec.notes}>備註：{rec.notes}</div>}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
               </div>
             );
           })()}

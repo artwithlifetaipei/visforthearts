@@ -282,7 +282,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             .from('exhibitor_media_assets')
             .select('*', { count: 'exact', head: true })
             .eq('brand_id', currentBrand.id)
-            .not('file_type', 'in', '("pr_qa_submission","brand_logo_transparent","booth_fee_proof","compliance_contract","perspective_store_master")')
+            .not('file_type', 'in', '("pr_qa_submission","brand_logo_transparent","booth_fee_proof","compliance_contract","perspective_store_master","concierge_lead")')
             .then(res => res.count || 0);
 
           const logoPromise = supabase
@@ -629,6 +629,25 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
               * 微型曝光品牌 (T區) 不適用模組 C 與 D 之專屬禮遇
             </div>
           )}
+        </div>
+
+        {/* Module F Collector Checkout & Exit Pass Notice Banner */}
+        <div className="mt-4 pt-3.5 border-t border-white/5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-emerald-950/20 p-3 rounded-lg border border-emerald-500/25">
+          <div className="flex items-start sm:items-center gap-2.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse shrink-0 mt-1.5 sm:mt-0" />
+            <div className="text-xs leading-relaxed">
+              <span className="text-emerald-300 font-semibold mr-1.5">【模組 F 現場消費登錄＆出場放行憑證】：</span>
+              <span className="text-neutral-200 font-light">
+                貴賓消費時請主動詢問「<strong className="text-[#DFBA87]">請問有貴賓卡嗎？</strong>」並掃描其入場條碼（說明掃碼是幫助大會明年繼續發貴賓卡給他們），系統將即刻為客人核發《出場放行憑證》或《展後交付／訂購官方證明》！
+              </span>
+            </div>
+          </div>
+          <Link
+            href="/exhibitor/portal/leads"
+            className="text-xs text-emerald-300 hover:text-white underline underline-offset-4 flex items-center gap-1 font-medium shrink-0"
+          >
+            前往掃碼與話術教學 →
+          </Link>
         </div>
 
         {/* Module G Notice Banner */}

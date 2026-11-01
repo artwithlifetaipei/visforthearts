@@ -218,13 +218,13 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
             .from('exhibitor_media_assets')
             .select('*')
             .eq('brand_id', currentBrand.id)
-            .not('file_type', 'in', '("pr_qa_submission","booth_fee_proof","compliance_contract","perspective_store_master")')
+            .not('file_type', 'in', '("pr_qa_submission","booth_fee_proof","compliance_contract","perspective_store_master","concierge_lead")')
             .order('created_at', { ascending: false });
           
           const rawList = list || [];
           const logo = rawList.find((a: any) => a.file_type === 'brand_logo_transparent') || null;
           const photos = rawList.filter((a: any) =>
-            !['brand_logo_transparent', 'pr_qa_submission', 'booth_fee_proof', 'compliance_contract', 'perspective_store_master'].includes(a.file_type)
+            !['brand_logo_transparent', 'pr_qa_submission', 'booth_fee_proof', 'compliance_contract', 'perspective_store_master', 'concierge_lead'].includes(a.file_type)
           );
 
           setLogoAsset(logo);

@@ -36,6 +36,7 @@ export default function VIPDashboard() {
     const [userEmail, setUserEmail] = useState('');
     const [isWalletOpen, setIsWalletOpen] = useState(false);
     const [myCollections, setMyCollections] = useState<any[]>([]);
+    const [myPurchases, setMyPurchases] = useState<any[]>([]);
     const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
     const [showExploreModal, setShowExploreModal] = useState(false);
     const [isScannerOpen, setIsScannerOpen] = useState(false);
@@ -126,6 +127,19 @@ export default function VIPDashboard() {
                             collection_id: c.id,
                             collection_notes: c.notes
                         })).filter((item: any) => !!item?.id));
+                    }
+                } catch {
+                    // Non-blocking
+                }
+
+                // Fetch user's Official Acquisition & Exit Passes
+                try {
+                    const pRes = await fetch(`/api/exhibitor/concierge?vip_email=${encodeURIComponent(email)}`);
+                    if (pRes.ok) {
+                        const pJson = await pRes.json();
+                        if (Array.isArray(pJson.leads) && isMounted) {
+                            setMyPurchases(pJson.leads.filter((l: any) => l.record_type === 'purchase' || l.status === 'closed'));
+                        }
                     }
                 } catch {
                     // Non-blocking
@@ -702,6 +716,9 @@ export default function VIPDashboard() {
                             </div>
 
                             <p className="mt-4 text-sm text-white/85 text-center">請於 VIS 貴賓專屬櫃檯出示此憑證</p>
+                            <p className="mt-1.5 text-[11px] text-[#DFBA87] text-center leading-relaxed px-2">
+                                ✦ 於展位消費時出示此碼掃描，即可核發「出場放行／官方典藏憑證」並累積下屆貴賓卡續發資格
+                            </p>
                             <p className="mt-1 text-[11px] font-mono tracking-wider text-white/40 text-center">
                                 動態憑證 · 每 30 秒自動更新 · {new Date().toLocaleTimeString([], { hour12: false })}
                             </p>
@@ -806,6 +823,120 @@ export default function VIPDashboard() {
                         </div>
                     </motion.div>
                 </div>
+
+                {/* ── 02.5 Official Acquisition & Exit Pass Certificates ── */}
+                {myPurchases.length > 0 && (
+                    <motion.section
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.9, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
+                        className={`mt-6 ${glassCard} p-6 sm:p-8 border-[#DFBA87]/40`}
+                    >
+                        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-white/10 pb-5">
+                            <div>
+                                <p className={eyebrow} style={{ color: '#34d399' }}>Official Acquisition & Exit Pass</p>
+                                <h3 className="mt-1 text-xl font-serif text-white tracking-wide">
+                                    官方典藏登錄暨出場放行憑證 ({myPurchases.length})
+                                </h3>
+                                <p className="text-xs text-neutral-400 mt-1">
+                                    ✦ 您已解鎖「活躍藏家」資格，大會將於下屆優先為您核發 VIS 貴賓卡。現場提貨作品離場時請向出口人員出示下方綠燈憑證。
+                                </p>
+                            </div>
+                            <span className="px-3.5 py-1.5 rounded-full text-xs font-mono bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 self-start sm:self-auto">
+                                ✦ 下屆貴賓卡續發資格已登錄
+                            </span>
+                        </div>
+
+                        <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {myPurchases.map((rec) => {
+                                const isHandCarry = rec.delivery_method === 'hand_carry';
+                                const snapshots = Array.isArray(rec.product_snapshots) ? rec.product_snapshots : [];
+                                return (
+                                    <div
+                                        key={rec.id}
+                                        className={`p-5 rounded-2xl border relative overflow-hidden space-y-3 ${
+                                            isHandCarry
+                                                ? 'bg-emerald-950/25 border-emerald-500/45 shadow-lg shadow-emerald-950/30'
+                                                : 'bg-[#171410]/90 border-[#DFBA87]/45 shadow-lg shadow-black/40'
+                                        }`}
+                                    >
+                                        <div className="flex items-center justify-between gap-2 border-b border-white/10 pb-3">
+                                            <span
+                                                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold tracking-wider ${
+                                                    isHandCarry
+                                                        ? 'bg-emerald-400 text-black'
+                                                        : 'bg-[#DFBA87] text-black'
+                                                }`}
+                                            >
+                                                <span className={`w-2 h-2 rounded-full ${isHandCarry ? 'bg-black animate-ping' : 'bg-black'}`} />
+                                                <span>{isHandCarry ? '🟢 現場提貨・離場放行憑證 EXIT PASS' : '📦 展後交付／訂購・官方典藏憑證'}</span>
+                                            </span>
+                                            <span className="text-xs font-mono text-white/70">
+                                                {rec.certificate_no || 'VERIFIED'}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex items-baseline justify-between gap-2">
+                                            <div>
+                                                <p className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">典藏品牌 Brand</p>
+                                                <p className="text-base font-serif text-white font-medium mt-0.5">
+                                                    {rec.brand_name_zh} {rec.booth_number ? `(${rec.booth_number})` : ''}
+                                                </p>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-[11px] font-mono uppercase tracking-wider text-neutral-400">核發時間 Time</p>
+                                                <p className="text-xs font-mono text-neutral-300 mt-0.5">
+                                                    {new Date(rec.created_at).toLocaleString('zh-TW', {
+                                                        month: 'numeric',
+                                                        day: 'numeric',
+                                                        hour: '2-digit',
+                                                        minute: '2-digit'
+                                                    })}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {rec.custom_item_title && (
+                                            <div className="p-2.5 rounded-xl bg-black/40 border border-white/10 text-xs text-white">
+                                                <span className="text-[10px] font-mono text-[#DFBA87] block uppercase">Acquired Item · 典藏品項</span>
+                                                <span className="font-medium">{rec.custom_item_title}</span>
+                                            </div>
+                                        )}
+
+                                        {snapshots.length > 0 && (
+                                            <div className="space-y-1.5">
+                                                {snapshots.map((sp: any) => (
+                                                    <div key={sp.id} className="flex items-center gap-2.5 p-2 rounded-xl bg-black/40 border border-white/10">
+                                                        {sp.image && (
+                                                            <img src={sp.image} alt={sp.title_zh} className="w-10 h-10 rounded-lg object-cover shrink-0" />
+                                                        )}
+                                                        <div className="min-w-0 flex-1">
+                                                            <p className="text-xs font-serif text-white truncate">{sp.title_zh}</p>
+                                                            <p className="text-[10px] font-mono text-[#DFBA87]">{sp.category}</p>
+                                                        </div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        )}
+
+                                        {rec.notes && (
+                                            <p className="text-xs text-neutral-300 bg-black/30 p-2.5 rounded-lg border-l-2 border-[#DFBA87] italic">
+                                                交付備註：{rec.notes}
+                                            </p>
+                                        )}
+
+                                        <div className="pt-2 border-t border-white/10 flex items-center justify-between text-[11px] text-neutral-300">
+                                            <span>藏家：{rec.vip_name || displayName} ({tier.code})</span>
+                                            <span className={isHandCarry ? 'text-emerald-300 font-semibold' : 'text-[#DFBA87]'}>
+                                                {isHandCarry ? '✓ 出口安檢核驗放行' : '✓ 大會官方履約存證'}
+                                            </span>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </motion.section>
+                )}
 
                 {/* ── 03. My Collection ──────────────────────────────────── */}
                 <motion.section

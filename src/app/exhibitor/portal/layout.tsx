@@ -512,10 +512,10 @@ function ExhibitorPortalLayoutContent({ children }: { children: React.ReactNode 
         badge: lang === 'en' ? 'New' : '新功能',
       },
       {
-        name: lang === 'en' ? 'Module F — VIP Reception & Leads' : '模組 F — 現場貴賓接待與商機',
+        name: lang === 'en' ? 'Module F — Collector Checkout & Exit Pass' : '模組 F — 現場消費登錄與出場放行',
         href: '/exhibitor/portal/leads',
         icon: Sparkles,
-        badge: lang === 'en' ? 'VIP Concierge' : 'VIP管家',
+        badge: lang === 'en' ? 'Exit Pass' : '消費放行',
       },
       {
         name: lang === 'en' ? 'Module G — Public Registration Link' : '模組 G — 公眾專屬預約連結',
