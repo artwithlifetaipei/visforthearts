@@ -745,17 +745,17 @@ export default function MakingProjectPage() {
 
                   {/* Top Editorial Header */}
                   <div className="flex flex-col items-center text-center pb-5 border-b border-[#C9A96E]/25">
-                    <div className="inline-flex items-center gap-2.5 mb-2">
-                      <span className="w-6 h-[1px] bg-gradient-to-r from-transparent to-[#C9A96E]/70" />
-                      <span className="font-serif-garamond text-[11px] tracking-[0.28em] uppercase text-[#C9A96E] font-medium">
+                    <div className="inline-flex items-center justify-center gap-2 mb-2 whitespace-nowrap max-w-full">
+                      <span className="w-4 sm:w-6 h-[1px] flex-shrink-0 bg-gradient-to-r from-transparent to-[#C9A96E]/70" />
+                      <span className="font-serif-garamond text-[10px] sm:text-[11px] tracking-[0.2em] sm:tracking-[0.24em] uppercase text-[#C9A96E] font-medium whitespace-nowrap">
                         ✦ INNER CIRCLE COMMUNITY ✦
                       </span>
-                      <span className="w-6 h-[1px] bg-gradient-to-l from-transparent to-[#C9A96E]/70" />
+                      <span className="w-4 sm:w-6 h-[1px] flex-shrink-0 bg-gradient-to-l from-transparent to-[#C9A96E]/70" />
                     </div>
-                    <span className="font-serif-garamond text-lg sm:text-[21px] text-[#1A1A1A] font-normal tracking-[0.14em] mb-1">
+                    <span className="font-serif-garamond text-base sm:text-lg md:text-[20px] text-[#1A1A1A] font-normal tracking-[0.08em] sm:tracking-[0.12em] mb-1 whitespace-nowrap">
                       {lang === 'zh' ? '本地相互熟識的貴賓圈層社群' : 'Local Interconnected VIP Circle'}
                     </span>
-                    <span className="text-xs text-[#8C7853] font-light tracking-[0.1em]">
+                    <span className="text-[11px] sm:text-xs text-[#8C7853] font-light tracking-[0.06em] sm:tracking-[0.1em] whitespace-nowrap">
                       {lang === 'zh' ? '以熟識信任為基底 ‧ 帶動高凝聚口碑共鳴' : 'Built on Mutual Trust · Driving High-Cohesion Word of Mouth'}
                     </span>
                   </div>

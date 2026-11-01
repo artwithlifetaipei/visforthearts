@@ -587,12 +587,16 @@ export default function V2LandingPage() {
                 .circle-editorial-eyebrow {
                     display: inline-flex;
                     align-items: center;
-                    gap: 0.65rem;
+                    justify-content: center;
+                    gap: 0.5rem;
                     margin-bottom: 0.55rem;
+                    white-space: nowrap;
+                    max-width: 100%;
                 }
                 .circle-editorial-line {
-                    width: 24px;
+                    width: 18px;
                     height: 1px;
+                    flex-shrink: 0;
                     background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.7));
                 }
                 .circle-editorial-line.right {
@@ -600,25 +604,28 @@ export default function V2LandingPage() {
                 }
                 .circle-editorial-tag {
                     font-family: var(--v2-font-serif);
-                    font-size: 0.72rem;
-                    letter-spacing: 0.28em;
+                    font-size: clamp(0.58rem, 2.2vw, 0.7rem);
+                    letter-spacing: 0.22em;
                     text-transform: uppercase;
                     color: var(--v2-gold);
                     font-weight: 500;
+                    white-space: nowrap;
                 }
                 .circle-editorial-title {
                     font-family: var(--v2-font-serif);
-                    font-size: 1.35rem;
-                    letter-spacing: 0.14em;
+                    font-size: clamp(0.95rem, 3.8vw, 1.28rem);
+                    letter-spacing: 0.1em;
                     color: #1A1A1A;
                     font-weight: 400;
                     margin-bottom: 0.35rem;
+                    white-space: nowrap;
                 }
                 .circle-editorial-sub {
-                    font-size: 0.78rem;
-                    letter-spacing: 0.1em;
+                    font-size: clamp(0.68rem, 2.6vw, 0.78rem);
+                    letter-spacing: 0.08em;
                     color: #8C7853;
                     font-weight: 300;
+                    white-space: nowrap;
                 }
                 .metrics-quad-wrapper {
                     position: relative;
