@@ -738,46 +738,85 @@ export default function MakingProjectPage() {
             <div className="absolute inset-x-8 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/40 to-transparent pointer-events-none" />
 
             <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 relative">
-              {/* Left Column: 5 Metrics Cards Grid */}
-              <div className="w-full lg:w-1/2 grid grid-cols-2 gap-3.5 md:gap-4">
-                {/* Metric 1 */}
-                <div className="bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">71%</span>
-                  <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
-                    {lang === 'zh' ? '具高消費力與品味貴賓' : 'Discerning VIPs & High Net Worth'}
+              {/* Left Column: A+C Hybrid — Top Crown + 2x2 Interconnected Nexus + 77% Base */}
+              <div className="w-full lg:w-1/2 flex flex-col gap-3">
+                {/* C: Top Crown Header */}
+                <div className="bg-gradient-to-br from-[#161514] to-[#24211E] border border-[#C9A96E]/55 px-4 py-4 flex flex-col items-center justify-center text-center shadow-[0_12px_30px_rgba(20,18,15,0.12)] relative">
+                  <div className="flex items-center gap-2 mb-1">
+                    <svg width="26" height="13" viewBox="0 0 28 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <circle cx="8" cy="7" r="5.5" stroke="#C9A96E" strokeWidth="1.1" />
+                      <circle cx="14" cy="7" r="5.5" stroke="#C9A96E" strokeWidth="1.1" />
+                      <circle cx="20" cy="7" r="5.5" stroke="#C9A96E" strokeWidth="1.1" />
+                    </svg>
+                    <span className="font-serif-garamond text-[10px] sm:text-[11px] tracking-[0.24em] uppercase text-[#C9A96E]/90">
+                      INNER CIRCLE COMMUNITY
+                    </span>
+                  </div>
+                  <span className="text-sm sm:text-base text-[#FAF9F6] font-medium tracking-[0.12em] mb-0.5">
+                    {lang === 'zh' ? '本地相互熟識的貴賓圈層社群' : 'Local Interconnected VIP Circle'}
+                  </span>
+                  <span className="text-[11px] sm:text-xs text-[#C9A96E]/85 font-light tracking-[0.08em]">
+                    {lang === 'zh' ? '以熟識信任為基底 ‧ 帶動高凝聚口碑共鳴' : 'Built on Mutual Trust · Driving High-Cohesion Word of Mouth'}
                   </span>
                 </div>
 
-                {/* Metric 2 */}
-                <div className="bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">21%</span>
-                  <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
-                    {lang === 'zh' ? '收藏人士' : 'Art & Craft Collectors'}
-                  </span>
-                </div>
+                {/* C+A Enclosure */}
+                <div className="relative border border-[#C9A96E]/35 bg-white/50 p-3.5 sm:p-4 flex flex-col gap-3.5">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-[1px] h-3 bg-[#C9A96E]/60 pointer-events-none" />
+                  <div className="relative grid grid-cols-2 gap-3 sm:gap-3.5">
+                    {/* A: Central Interconnected Nexus Overlay */}
+                    <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center" aria-hidden="true">
+                      <div className="absolute w-[42%] h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/65 to-transparent" />
+                      <div className="absolute h-[46%] w-[1px] bg-gradient-to-b from-transparent via-[#C9A96E]/65 to-transparent" />
+                      <div className="w-10 h-10 rounded-full bg-[#FAF9F6] border border-[#C9A96E] shadow-[0_4px_14px_rgba(201,169,110,0.25),0_0_0_4px_rgba(250,249,246,0.9)] flex items-center justify-center">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                          <circle cx="9.5" cy="12" r="5.5" stroke="#C9A96E" strokeWidth="1.2" />
+                          <circle cx="14.5" cy="12" r="5.5" stroke="#C9A96E" strokeWidth="1.2" />
+                          <circle cx="12" cy="12" r="1.5" fill="#C9A96E" />
+                        </svg>
+                      </div>
+                    </div>
 
-                {/* Metric 3 */}
-                <div className="bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">34%</span>
-                  <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
-                    {lang === 'zh' ? '企業主' : 'Business Owners & Founders'}
-                  </span>
-                </div>
+                    {/* Metric 1 */}
+                    <div className="bg-white border border-[#C9A96E]/20 p-4 sm:p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                      <span className="font-serif-garamond text-3xl sm:text-4xl text-[#C9A96E] font-light leading-none mb-1.5">71%</span>
+                      <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
+                        {lang === 'zh' ? '具高消費力與品味貴賓' : 'Discerning VIPs & High Net Worth'}
+                      </span>
+                    </div>
 
-                {/* Metric 4 */}
-                <div className="bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">13%</span>
-                  <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
-                    {lang === 'zh' ? '媒體/意見領袖' : 'Press & Cultural KOLs'}
-                  </span>
-                </div>
+                    {/* Metric 2 */}
+                    <div className="bg-white border border-[#C9A96E]/20 p-4 sm:p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                      <span className="font-serif-garamond text-3xl sm:text-4xl text-[#C9A96E] font-light leading-none mb-1.5">21%</span>
+                      <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
+                        {lang === 'zh' ? '收藏人士' : 'Art & Craft Collectors'}
+                      </span>
+                    </div>
 
-                {/* Metric 5 (Full Width) */}
-                <div className="col-span-2 bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">77%</span>
-                  <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
-                    {lang === 'zh' ? '一年購買預算80萬以上' : 'Annual Purchase Budget > NT$800k'}
-                  </span>
+                    {/* Metric 3 */}
+                    <div className="bg-white border border-[#C9A96E]/20 p-4 sm:p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                      <span className="font-serif-garamond text-3xl sm:text-4xl text-[#C9A96E] font-light leading-none mb-1.5">34%</span>
+                      <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
+                        {lang === 'zh' ? '企業主' : 'Business Owners & Founders'}
+                      </span>
+                    </div>
+
+                    {/* Metric 4 */}
+                    <div className="bg-white border border-[#C9A96E]/20 p-4 sm:p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                      <span className="font-serif-garamond text-3xl sm:text-4xl text-[#C9A96E] font-light leading-none mb-1.5">13%</span>
+                      <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
+                        {lang === 'zh' ? '媒體/意見領袖' : 'Press & Cultural KOLs'}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Metric 5 (Full Width) */}
+                  <div className="bg-white border border-[#C9A96E]/20 border-t-[1.5px] border-t-[#C9A96E]/40 p-4 sm:p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                    <span className="font-serif-garamond text-3xl sm:text-4xl text-[#C9A96E] font-light leading-none mb-1.5">77%</span>
+                    <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
+                      {lang === 'zh' ? '一年購買預算80萬以上' : 'Annual Purchase Budget > NT$800k'}
+                    </span>
+                  </div>
                 </div>
               </div>
 
