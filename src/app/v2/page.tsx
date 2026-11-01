@@ -554,79 +554,77 @@ export default function V2LandingPage() {
                     width: 50%;
                     display: flex;
                     flex-direction: column;
-                    gap: 1.25rem;
                 }
-                .circle-crown-card {
-                    background: linear-gradient(135deg, #161514 0%, #24211E 100%);
-                    border: 1px solid rgba(201, 169, 110, 0.55);
-                    padding: 1.35rem 1.5rem;
+                .circle-editorial-frame {
+                    position: relative;
+                    background: rgba(255, 255, 255, 0.72);
+                    backdrop-filter: blur(12px);
+                    border: 1px solid rgba(201, 169, 110, 0.35);
+                    padding: 2.25rem 1.85rem 1.85rem;
+                    box-shadow: 0 20px 50px rgba(201, 169, 110, 0.05);
                     display: flex;
                     flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                    position: relative;
-                    box-shadow: 0 14px 35px rgba(20, 18, 15, 0.12);
-                    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+                    gap: 1.5rem;
                 }
-                .circle-crown-card:hover {
-                    transform: translateY(-3px);
-                    border-color: var(--v2-gold);
-                    box-shadow: 0 18px 45px rgba(201, 169, 110, 0.18);
-                }
-                .circle-crown-top {
-                    display: flex;
-                    align-items: center;
-                    gap: 0.65rem;
-                    margin-bottom: 0.45rem;
-                }
-                .circle-crown-tag {
-                    font-family: var(--v2-font-serif);
-                    font-size: 0.72rem;
-                    letter-spacing: 0.25em;
-                    text-transform: uppercase;
-                    color: var(--v2-gold);
-                    opacity: 0.9;
-                }
-                .circle-crown-title {
-                    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang TC", "Noto Sans TC", sans-serif;
-                    font-size: 1.12rem;
-                    letter-spacing: 0.12em;
-                    color: #FAF9F6;
-                    font-weight: 500;
-                    margin-bottom: 0.25rem;
-                }
-                .circle-crown-sub {
-                    font-size: 0.76rem;
-                    letter-spacing: 0.1em;
-                    color: rgba(201, 169, 110, 0.85);
-                    font-weight: 300;
-                }
-                .circle-enclosure {
-                    position: relative;
-                    border: 1px solid rgba(201, 169, 110, 0.32);
-                    background: rgba(255, 255, 255, 0.45);
-                    padding: 1.35rem;
-                    display: flex;
-                    flex-direction: column;
-                    gap: 1.25rem;
-                }
-                .circle-enclosure::before {
+                .circle-editorial-frame::before {
                     content: '';
                     position: absolute;
-                    top: -1.25rem;
-                    left: 50%;
-                    transform: translateX(-50%);
-                    width: 1px;
-                    height: 1.25rem;
-                    background: var(--v2-gold);
-                    opacity: 0.6;
+                    top: 0;
+                    left: 15%;
+                    right: 15%;
+                    height: 1.5px;
+                    background: linear-gradient(90deg, transparent, var(--v2-gold), transparent);
+                }
+                .circle-editorial-header {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    text-align: center;
+                    padding-bottom: 1.35rem;
+                    border-bottom: 1px solid rgba(201, 169, 110, 0.22);
+                    position: relative;
+                }
+                .circle-editorial-eyebrow {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 0.65rem;
+                    margin-bottom: 0.55rem;
+                }
+                .circle-editorial-line {
+                    width: 24px;
+                    height: 1px;
+                    background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.7));
+                }
+                .circle-editorial-line.right {
+                    background: linear-gradient(90deg, rgba(201, 169, 110, 0.7), transparent);
+                }
+                .circle-editorial-tag {
+                    font-family: var(--v2-font-serif);
+                    font-size: 0.72rem;
+                    letter-spacing: 0.28em;
+                    text-transform: uppercase;
+                    color: var(--v2-gold);
+                    font-weight: 500;
+                }
+                .circle-editorial-title {
+                    font-family: var(--v2-font-serif);
+                    font-size: 1.35rem;
+                    letter-spacing: 0.14em;
+                    color: #1A1A1A;
+                    font-weight: 400;
+                    margin-bottom: 0.35rem;
+                }
+                .circle-editorial-sub {
+                    font-size: 0.78rem;
+                    letter-spacing: 0.1em;
+                    color: #8C7853;
+                    font-weight: 300;
                 }
                 .metrics-quad-wrapper {
                     position: relative;
                     display: grid;
                     grid-template-columns: repeat(2, 1fr);
-                    gap: 1.25rem;
+                    gap: 1.35rem;
                 }
                 .quad-connector-lines {
                     position: absolute;
@@ -639,23 +637,23 @@ export default function V2LandingPage() {
                 }
                 .quad-connector-h {
                     position: absolute;
-                    width: 42%;
+                    width: 36%;
                     height: 1px;
-                    background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.65), transparent);
+                    background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.55), transparent);
                 }
                 .quad-connector-v {
                     position: absolute;
-                    height: 46%;
+                    height: 42%;
                     width: 1px;
-                    background: linear-gradient(180deg, transparent, rgba(201, 169, 110, 0.65), transparent);
+                    background: linear-gradient(180deg, transparent, rgba(201, 169, 110, 0.55), transparent);
                 }
                 .quad-center-node {
-                    width: 44px;
-                    height: 44px;
+                    width: 34px;
+                    height: 34px;
                     border-radius: 50%;
-                    background: #FAF9F6;
-                    border: 1px solid var(--v2-gold);
-                    box-shadow: 0 4px 16px rgba(201, 169, 110, 0.25), 0 0 0 4px rgba(250, 249, 246, 0.9);
+                    background: #FFFFFF;
+                    border: 1px solid rgba(201, 169, 110, 0.65);
+                    box-shadow: 0 4px 14px rgba(201, 169, 110, 0.18), 0 0 0 4px rgba(255, 255, 255, 0.85);
                     display: flex;
                     align-items: center;
                     justify-content: center;
@@ -663,14 +661,14 @@ export default function V2LandingPage() {
                 }
                 .metric-card {
                     background: #FFFFFF;
-                    border: 1px solid rgba(201, 169, 110, 0.18);
-                    padding: 1.65rem 1rem;
+                    border: 1px solid rgba(201, 169, 110, 0.2);
+                    padding: 1.75rem 1rem;
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: center;
                     text-align: center;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.02);
+                    box-shadow: 0 8px 25px rgba(0,0,0,0.015);
                     transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                     position: relative;
                     z-index: 1;
@@ -678,11 +676,12 @@ export default function V2LandingPage() {
                 .metric-card:hover {
                     transform: translateY(-4px);
                     border-color: var(--v2-gold);
-                    box-shadow: 0 15px 40px rgba(201, 169, 110, 0.08);
+                    box-shadow: 0 14px 35px rgba(201, 169, 110, 0.08);
                 }
                 .metric-card.full-width {
-                    padding: 1.65rem 2rem;
-                    border-top: 1.5px solid rgba(201, 169, 110, 0.35);
+                    background: linear-gradient(180deg, #FFFFFF 0%, #FAF8F3 100%);
+                    padding: 1.75rem 2rem;
+                    border: 1px solid rgba(201, 169, 110, 0.35);
                 }
                 .metric-number {
                     font-family: var(--v2-font-serif);
@@ -760,8 +759,8 @@ export default function V2LandingPage() {
                         grid-template-columns: repeat(2, 1fr);
                         gap: 0.75rem;
                     }
-                    .circle-enclosure {
-                        padding: 0.9rem;
+                    .circle-editorial-frame {
+                        padding: 1.5rem 1rem 1.15rem;
                     }
                     .metric-number {
                         font-size: 2.3rem;
@@ -826,35 +825,30 @@ export default function V2LandingPage() {
             <section className="about-metrics-section" id="about">
                 <div className="metrics-container">
                     <div className="metrics-grid">
-                        {/* C: Top Crown Header — Local Interconnected VIP Circle */}
-                        <div className="circle-crown-card">
-                            <div className="circle-crown-top">
-                                <svg width="28" height="14" viewBox="0 0 28 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <circle cx="8" cy="7" r="5.5" stroke="#C9A96E" strokeWidth="1.1" />
-                                    <circle cx="14" cy="7" r="5.5" stroke="#C9A96E" strokeWidth="1.1" />
-                                    <circle cx="20" cy="7" r="5.5" stroke="#C9A96E" strokeWidth="1.1" />
-                                </svg>
-                                <span className="circle-crown-tag">INNER CIRCLE COMMUNITY</span>
+                        <div className="circle-editorial-frame">
+                            {/* Unified Champagne-Gold Editorial Header */}
+                            <div className="circle-editorial-header">
+                                <div className="circle-editorial-eyebrow">
+                                    <span className="circle-editorial-line"></span>
+                                    <span className="circle-editorial-tag">✦ INNER CIRCLE COMMUNITY ✦</span>
+                                    <span className="circle-editorial-line right"></span>
+                                </div>
+                                <span className="circle-editorial-title">
+                                    {lang === 'zh' ? '本地相互熟識的貴賓圈層社群' : 'Local Interconnected VIP Circle'}
+                                </span>
+                                <span className="circle-editorial-sub">
+                                    {lang === 'zh' ? '以熟識信任為基底 ‧ 帶動高凝聚口碑共鳴' : 'Built on Mutual Trust · Driving High-Cohesion Word of Mouth'}
+                                </span>
                             </div>
-                            <span className="circle-crown-title">
-                                {lang === 'zh' ? '本地相互熟識的貴賓圈層社群' : 'Local Interconnected VIP Circle'}
-                            </span>
-                            <span className="circle-crown-sub">
-                                {lang === 'zh' ? '以熟識信任為基底 ‧ 帶動高凝聚口碑共鳴' : 'Built on Mutual Trust · Driving High-Cohesion Word of Mouth'}
-                            </span>
-                        </div>
 
-                        {/* C + A Enclosure: 2x2 Interconnected Identity Grid + Central Nexus + 77% Power Base */}
-                        <div className="circle-enclosure">
+                            {/* 2x2 Interconnected Identity Grid + Delicate Compass Star Nexus */}
                             <div className="metrics-quad-wrapper">
                                 <div className="quad-connector-lines" aria-hidden="true">
                                     <div className="quad-connector-h"></div>
                                     <div className="quad-connector-v"></div>
                                     <div className="quad-center-node" title={lang === 'zh' ? '相互熟識・圈層共鳴' : 'Interconnected VIP Nexus'}>
-                                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <circle cx="9.5" cy="12" r="5.5" stroke="#C9A96E" strokeWidth="1.2" />
-                                            <circle cx="14.5" cy="12" r="5.5" stroke="#C9A96E" strokeWidth="1.2" />
-                                            <circle cx="12" cy="12" r="1.5" fill="#C9A96E" />
+                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M12 3L14.2 9.8L21 12L14.2 14.2L12 21L9.8 14.2L3 12L9.8 9.8L12 3Z" stroke="#C9A96E" strokeWidth="1.3" fill="rgba(201,169,110,0.18)" />
                                         </svg>
                                     </div>
                                 </div>
@@ -875,6 +869,8 @@ export default function V2LandingPage() {
                                     <span className="metric-label">{lang === 'zh' ? '媒體/意見領袖' : 'Press & KOLs'}</span>
                                 </div>
                             </div>
+
+                            {/* 77% Power Base */}
                             <div className="metric-card full-width">
                                 <span className="metric-number">77%</span>
                                 <span className="metric-label">{lang === 'zh' ? '一年購買預算80萬以上' : 'Annual Purchase Budget > 800k TWD'}</span>

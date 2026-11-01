@@ -715,64 +715,61 @@ export default function ExhibitorLandingPage() {
           <div className="absolute inset-x-8 bottom-0 h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/40 to-transparent" />
           
           <div className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12">
-            {/* Left Column: A+C Hybrid — Top Crown + 2x2 Interconnected Nexus + 77% Base */}
-            <div className="w-full lg:w-1/2 flex flex-col gap-3">
-              {/* C: Top Crown Header */}
-              <div className="bg-gradient-to-br from-[#161514] to-[#24211E] border border-[#C9A96E]/55 px-4 py-4 flex flex-col items-center justify-center text-center shadow-[0_12px_30px_rgba(20,18,15,0.12)] relative">
-                <div className="flex items-center gap-2 mb-1">
-                  <svg width="26" height="13" viewBox="0 0 28 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="8" cy="7" r="5.5" stroke="#C9A96E" strokeWidth="1.1" />
-                    <circle cx="14" cy="7" r="5.5" stroke="#C9A96E" strokeWidth="1.1" />
-                    <circle cx="20" cy="7" r="5.5" stroke="#C9A96E" strokeWidth="1.1" />
-                  </svg>
-                  <span className="font-serif-garamond text-[10px] md:text-[11px] tracking-[0.24em] uppercase text-[#C9A96E]/90">
-                    INNER CIRCLE COMMUNITY
+            {/* Left Column: Unified Champagne-Gold Editorial Frame */}
+            <div className="w-full lg:w-1/2">
+              <div className="relative bg-white/75 backdrop-blur-md border border-[#C9A96E]/35 px-5 pt-7 pb-6 md:px-7 md:pt-8 md:pb-7 shadow-[0_20px_50px_rgba(201,169,110,0.05)] flex flex-col gap-5">
+                <div className="absolute top-0 inset-x-[15%] h-[1.5px] bg-gradient-to-r from-transparent via-[#C9A96E] to-transparent pointer-events-none" />
+
+                {/* Top Editorial Header */}
+                <div className="flex flex-col items-center text-center pb-5 border-b border-[#C9A96E]/25">
+                  <div className="inline-flex items-center gap-2.5 mb-2">
+                    <span className="w-6 h-[1px] bg-gradient-to-r from-transparent to-[#C9A96E]/70" />
+                    <span className="font-serif-garamond text-[11px] tracking-[0.28em] uppercase text-[#C9A96E] font-medium">
+                      ✦ INNER CIRCLE COMMUNITY ✦
+                    </span>
+                    <span className="w-6 h-[1px] bg-gradient-to-l from-transparent to-[#C9A96E]/70" />
+                  </div>
+                  <span className="font-serif-garamond text-lg md:text-[21px] text-[#1A1A1A] font-normal tracking-[0.14em] mb-1">
+                    {lang === 'zh' ? '本地相互熟識的貴賓圈層社群' : 'Local Interconnected VIP Circle'}
+                  </span>
+                  <span className="text-xs text-[#8C7853] font-light tracking-[0.1em]">
+                    {lang === 'zh' ? '以熟識信任為基底 ‧ 帶動高凝聚口碑共鳴' : 'Built on Mutual Trust · Driving High-Cohesion Word of Mouth'}
                   </span>
                 </div>
-                <span className="text-sm md:text-base text-[#FAF9F6] font-medium tracking-[0.12em] mb-0.5">
-                  {lang === 'zh' ? '本地相互熟識的貴賓圈層社群' : 'Local Interconnected VIP Circle'}
-                </span>
-                <span className="text-[11px] md:text-xs text-[#C9A96E]/85 font-light tracking-[0.08em]">
-                  {lang === 'zh' ? '以熟識信任為基底 ‧ 帶動高凝聚口碑共鳴' : 'Built on Mutual Trust · Driving High-Cohesion Word of Mouth'}
-                </span>
-              </div>
 
-              {/* C+A Enclosure */}
-              <div className="relative border border-[#C9A96E]/35 bg-white/50 p-3.5 md:p-4 flex flex-col gap-3.5">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 w-[1px] h-3 bg-[#C9A96E]/60 pointer-events-none" />
-                <div className="relative grid grid-cols-2 gap-3 md:gap-3.5">
-                  {/* A: Central Interconnected Nexus Overlay */}
+                {/* 2x2 Interconnected Identity Grid + Compass Star Nexus */}
+                <div className="relative grid grid-cols-2 gap-3.5 md:gap-4">
                   <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center" aria-hidden="true">
-                    <div className="absolute w-[42%] h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/65 to-transparent" />
-                    <div className="absolute h-[46%] w-[1px] bg-gradient-to-b from-transparent via-[#C9A96E]/65 to-transparent" />
-                    <div className="w-10 h-10 rounded-full bg-[#FAF9F6] border border-[#C9A96E] shadow-[0_4px_14px_rgba(201,169,110,0.25),0_0_0_4px_rgba(250,249,246,0.9)] flex items-center justify-center">
-                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <circle cx="9.5" cy="12" r="5.5" stroke="#C9A96E" strokeWidth="1.2" />
-                        <circle cx="14.5" cy="12" r="5.5" stroke="#C9A96E" strokeWidth="1.2" />
-                        <circle cx="12" cy="12" r="1.5" fill="#C9A96E" />
+                    <div className="absolute w-[36%] h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/55 to-transparent" />
+                    <div className="absolute h-[42%] w-[1px] bg-gradient-to-b from-transparent via-[#C9A96E]/55 to-transparent" />
+                    <div className="w-8 h-8 rounded-full bg-white border border-[#C9A96E]/65 shadow-[0_4px_14px_rgba(201,169,110,0.18),0_0_0_4px_rgba(255,255,255,0.85)] flex items-center justify-center">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 3L14.2 9.8L21 12L14.2 14.2L12 21L9.8 14.2L3 12L9.8 9.8L12 3Z" stroke="#C9A96E" strokeWidth="1.3" fill="rgba(201,169,110,0.18)" />
                       </svg>
                     </div>
                   </div>
 
-                  <div className="bg-white border border-[#C9A96E]/20 p-4 md:p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                    <span className="font-serif-garamond text-3xl md:text-4xl text-[#C9A96E] font-light leading-none mb-1.5">71%</span>
+                  <div className="bg-white border border-[#C9A96E]/20 p-5 flex flex-col items-center justify-center text-center shadow-[0_6px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                    <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">71%</span>
                     <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m1Label}</span>
                   </div>
-                  <div className="bg-white border border-[#C9A96E]/20 p-4 md:p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                    <span className="font-serif-garamond text-3xl md:text-4xl text-[#C9A96E] font-light leading-none mb-1.5">21%</span>
+                  <div className="bg-white border border-[#C9A96E]/20 p-5 flex flex-col items-center justify-center text-center shadow-[0_6px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                    <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">21%</span>
                     <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m2Label}</span>
                   </div>
-                  <div className="bg-white border border-[#C9A96E]/20 p-4 md:p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                    <span className="font-serif-garamond text-3xl md:text-4xl text-[#C9A96E] font-light leading-none mb-1.5">34%</span>
+                  <div className="bg-white border border-[#C9A96E]/20 p-5 flex flex-col items-center justify-center text-center shadow-[0_6px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                    <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">34%</span>
                     <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m3Label}</span>
                   </div>
-                  <div className="bg-white border border-[#C9A96E]/20 p-4 md:p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                    <span className="font-serif-garamond text-3xl md:text-4xl text-[#C9A96E] font-light leading-none mb-1.5">13%</span>
+                  <div className="bg-white border border-[#C9A96E]/20 p-5 flex flex-col items-center justify-center text-center shadow-[0_6px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                    <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">13%</span>
                     <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m4Label}</span>
                   </div>
                 </div>
-                <div className="bg-white border border-[#C9A96E]/20 border-t-[1.5px] border-t-[#C9A96E]/40 p-4 md:p-5 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                  <span className="font-serif-garamond text-3xl md:text-4xl text-[#C9A96E] font-light leading-none mb-1.5">77%</span>
+
+                {/* 77% Power Base */}
+                <div className="bg-gradient-to-b from-white to-[#FAF8F3] border border-[#C9A96E]/35 p-5 flex flex-col items-center justify-center text-center shadow-[0_6px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
+                  <span className="font-serif-garamond text-4xl md:text-5xl text-[#C9A96E] font-light leading-none mb-2">77%</span>
                   <span className="text-xs md:text-sm text-[#1a1a1a] font-normal whitespace-nowrap tracking-wider">{dict[lang].m5Label}</span>
                 </div>
               </div>
