@@ -774,7 +774,7 @@ export default function MakingProjectPage() {
 
                 {/* Metric 5 (Full Width) */}
                 <div className="col-span-2 bg-white border border-[#C9A96E]/20 p-5 sm:p-6 flex flex-col items-center justify-center text-center shadow-[0_4px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
-                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">67%</span>
+                  <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">77%</span>
                   <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
                     {lang === 'zh' ? '一年購買預算80萬以上' : 'Annual Purchase Budget > NT$800k'}
                   </span>
@@ -794,13 +794,13 @@ export default function MakingProjectPage() {
                 </h3>
                 <p className="text-xs sm:text-[13px] md:text-sm text-[#555555] leading-relaxed text-justify mb-5 tracking-wide font-sans-outfit font-light">
                   {lang === 'zh' 
-                    ? '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，篩選出適合品牌深度交流與展後延續的客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。' 
-                    : 'Unlike conventional craft markets focused on sheer foot traffic and immediate on-the-spot transactions, VIS places paramount importance on the caliber of our audience, curating a targeted collector base ideal for profound dialogues and lasting post-fair relationships. Participation benefits extend from live encounters into boutique visits, bespoke commissions, media exposure, cross-disciplinary collaborations, and enduring patron networks—making it the ideal platform for quality-focused, high-value artisanal brands.'}
+                    ? '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，並深耕「本地相互熟識的貴賓圈層社群」，憑藉圈層內部的高度信任與凝聚力量，為品牌篩選出最適合深度交流與口碑擴散的核心客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。' 
+                    : 'Unlike conventional craft markets focused on sheer foot traffic and immediate on-the-spot transactions, VIS places paramount importance on audience caliber and cultivates a locally interconnected, mutually acquainted VIP community. Powered by the deep trust and cohesion within this inner circle, VIS connects high-value artisanal brands with discerning patrons for profound dialogues, word-of-mouth resonance, boutique visits, bespoke commissions, and enduring collector relationships.'}
                 </p>
                 <div className="border-l-2 border-[#C9A96E] pl-4 py-1 italic font-serif-garamond text-sm sm:text-base text-[#C9A96E] leading-relaxed">
                   {lang === 'zh' 
-                    ? 'VIS 提供的 不只是一個展位，而是一套從客群導入到關係延續的品牌成長機制。' 
-                    : 'VIS offers more than an exhibition stall—it is an end-to-end brand growth mechanism, from client acquisition to enduring collector relationships.'}
+                    ? 'VIS 提供的不只是一個展位，而是以「本地相互熟識的貴賓圈層社群」之信任與凝聚力為核心，從客群導入到關係延續的品牌成長機制。' 
+                    : 'Anchored in the trust and cohesion of a locally interconnected VIP circle, VIS offers more than an exhibition stall—it is an end-to-end brand growth mechanism from warm client introductions to enduring collector relationships.'}
                 </div>
               </div>
             </div>

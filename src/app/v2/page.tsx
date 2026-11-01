@@ -729,7 +729,7 @@ export default function V2LandingPage() {
                             <span className="metric-label">{lang === 'zh' ? '媒體/意見領袖' : 'Press & KOLs'}</span>
                         </div>
                         <div className="metric-card full-width">
-                            <span className="metric-number">67%</span>
+                            <span className="metric-number">77%</span>
                             <span className="metric-label">{lang === 'zh' ? '一年購買預算80萬以上' : 'Annual Purchase Budget > 800k TWD'}</span>
                         </div>
                     </div>
@@ -740,16 +740,16 @@ export default function V2LandingPage() {
                         <h3 className="metrics-heading">{lang === 'zh' ? '精準客群 ‧ 關係延續' : 'Discerning Audience · Deep Connection'}</h3>
                         <p className={`metrics-p ${lang === 'zh' ? 'font-zh' : 'font-sans'}`} style={lang === 'en' ? { fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '0.85rem', lineHeight: '1.8', letterSpacing: '0.04em', color: '#666', fontWeight: 3, textTransform: 'none' } : {}}>
                             {lang === 'zh' ? (
-                                '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，篩選出適合品牌深度交流與展後延續的客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。'
+                                '不同於以大量人流與即時銷售為主的市集，VIS 高度重視客群品質，並深耕「本地相互熟識的貴賓圈層社群」，憑藉圈層內部的高度信任與凝聚力量，為品牌篩選出最適合深度交流與口碑擴散的核心客群。參展效益從現場接觸，進一步延伸至展後到店、收藏諮詢、媒體關係、跨界合作與長期客群累積，因此而最為適合重視產品質量的高單價品牌。'
                             ) : (
-                                'Unlike conventional art fairs focusing on high foot traffic and transactional sales, VIS curates an elite group of attendees, fostering genuine brand engagement that extends far beyond the exhibition floor. This targeted ecosystem is ideal for high-ticket brands seeking premium client acquisition, strategic partnerships, and long-term brand loyalty.'
+                                'Unlike conventional art fairs focusing on high foot traffic and transactional sales, VIS places paramount importance on audience caliber and cultivates a locally interconnected, mutually acquainted VIP community. Powered by the deep trust and cohesion within this inner circle, VIS connects high-ticket brands with discerning patrons for genuine engagement, word-of-mouth resonance, boutique visits, and long-term collector loyalty.'
                             )}
                         </p>
                         <p className={`metrics-highlight ${lang === 'zh' ? 'font-zh' : 'font-sans'}`} style={lang === 'en' ? { fontFamily: 'var(--font-sans)', fontStyle: 'normal', fontSize: '0.9rem', lineHeight: '1.7', letterSpacing: '0.04em', color: '#1a1a1a', fontWeight: 4, textTransform: 'none' } : {}}>
                             {lang === 'zh' ? (
-                                'VIS 提供的不只是一個展位，而是一套從客群導入到關係延續的品牌成長機制。'
+                                'VIS 提供的不只是一個展位，而是以「本地相互熟識的貴賓圈層社群」之信任與凝聚力為核心，從客群導入到關係延續的品牌成長機制。'
                             ) : (
-                                'By connecting the worlds of art, media, collecting, fashion, design, entrepreneurship and business leadership, VIS offers more than exhibition space, it\'s an access to a carefully cultivated network that can lead to collecting, editorial exposure, cross-disciplinary collaboration and international opportunities.'
+                                'Anchored in the trust and cohesion of a locally interconnected VIP circle, VIS offers more than exhibition space—it is a complete brand growth mechanism from warm client introductions to enduring relationships.'
                             )}
                         </p>
                     </div>
