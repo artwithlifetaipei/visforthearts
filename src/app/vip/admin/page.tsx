@@ -111,6 +111,7 @@ export default function VIPAdminPage() {
     const [vipList, setVipList] = useState<VIPEntry[]>([]);
     const [newEmail, setNewEmail] = useState('');
     const [newName, setNewName] = useState('');
+    const [newReferrer, setNewReferrer] = useState('');
     const [newTier, setNewTier] = useState<'VIP' | 'SVIP'>('VIP');
     const [newRole, setNewRole] = useState<string>('VIP');
     const [isAdding, setIsAdding] = useState(false);
@@ -118,6 +119,9 @@ export default function VIPAdminPage() {
     const [deletingId, setDeletingId] = useState<string | null>(null);
     const [approvingEmail, setApprovingEmail] = useState('');
     const [updatingTierEmail, setUpdatingTierEmail] = useState('');
+    const [editingRefEmail, setEditingRefEmail] = useState<string | null>(null);
+    const [editingRefInput, setEditingRefInput] = useState('');
+    const [updatingRefEmail, setUpdatingRefEmail] = useState('');
     const [audienceSearch, setAudienceSearch] = useState('');
     const [audienceTierFilter, setAudienceTierFilter] = useState<'ALL' | 'VIP' | 'SVIP'>('ALL');
     const [selectedTiers, setSelectedTiers] = useState<Record<string, 'VIP' | 'SVIP'>>({});
@@ -125,6 +129,44 @@ export default function VIPAdminPage() {
     // Guest Profile States
     const [registeredUsers, setRegisteredUsers] = useState<any[]>([]);
     const [profilesSearch, setProfilesSearch] = useState('');
+
+    const extractReferrerText = (role?: string): string => {
+        if (!role) return '';
+        const trimmed = role.trim();
+        if (trimmed.startsWith('推薦/代碼:')) return trimmed.replace(/^推薦\/代碼:\s*/, '').trim();
+        if (trimmed.startsWith('推薦人/推薦碼:')) return trimmed.replace(/^推薦人\/推薦碼:\s*/, '').trim();
+        if (trimmed === 'VIP' || trimmed === '自主登記貴賓') return '';
+        return trimmed;
+    };
+
+    const handleUpdateReferrer = async (email: string, referrerText: string) => {
+        if (!email || updatingRefEmail === email) return;
+        setUpdatingRefEmail(email);
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            const token = session?.access_token || '';
+
+            const res = await fetch('/api/vip/approve', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token}`
+                },
+                body: JSON.stringify({ applicationEmail: email, action: 'update_referrer', referrer: referrerText })
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                alert(data.error || '更新推薦人/推薦碼失敗');
+            } else {
+                setEditingRefEmail(null);
+                await fetchList();
+            }
+        } catch (err: any) {
+            alert(`更新推薦人連線異常：${err.message || err}`);
+        } finally {
+            setUpdatingRefEmail('');
+        }
+    };
 
     const handleUpdateTier = async (email: string, newTier: 'VIP' | 'SVIP') => {
         if (!email || updatingTierEmail === email) return;
@@ -239,11 +281,36 @@ export default function VIPAdminPage() {
     }, [isAuthorized, activeTab]);
 
     const fetchList = async () => {
-        const { data } = await supabase
-            .from('vip_allowlist')
-            .select('*')
-            .order('created_at', { ascending: false });
-        if (data) setVipList(data);
+        const [{ data: allowData }, { data: subData }] = await Promise.all([
+            supabase
+                .from('vip_allowlist')
+                .select('*')
+                .order('created_at', { ascending: false }),
+            supabase
+                .from('exhibitor_vip_submissions')
+                .select('vip_email, brand_name_zh')
+        ]);
+
+        const subMap = new Map<string, string>();
+        if (subData) {
+            for (const sub of subData) {
+                if (sub.vip_email && sub.brand_name_zh && sub.brand_name_zh !== 'AAA' && !sub.brand_name_zh.includes('測試')) {
+                    subMap.set(sub.vip_email.toLowerCase().trim(), sub.brand_name_zh);
+                }
+            }
+        }
+
+        if (allowData) {
+            const enriched = allowData.map((item: any) => {
+                const emailKey = (item.email || '').toLowerCase().trim();
+                const brandRef = subMap.get(emailKey);
+                if ((!item.role || item.role === 'VIP') && brandRef) {
+                    return { ...item, role: `推薦/代碼: ${brandRef}` };
+                }
+                return item;
+            });
+            setVipList(enriched);
+        }
     };
 
     const fetchRegisteredUsers = async () => {
@@ -258,24 +325,25 @@ export default function VIPAdminPage() {
         const allowlistMap = new Map(vipList.map(item => [item.email?.toLowerCase().trim(), item]));
         const mergedGuests = registeredUsers.map((u: any) => {
             const emailKey = u.email?.toLowerCase().trim();
-            const allowlistInfo = allowlistMap.get(emailKey) || {};
+            const allowlistInfo: any = allowlistMap.get(emailKey) || {};
+            const refText = extractReferrerText(allowlistInfo.role);
             return {
-                name: allowlistInfo.name || '未填寫',
+                name: allowlistInfo.name || u.first_name || '未填寫',
                 email: u.email,
                 tier: allowlistInfo.tier || 'VIP',
-                crm_role: allowlistInfo.crm_role || 'VIP 貴賓',
+                referrer: refText || (allowlistInfo.role === '自主登記貴賓' ? '無 (自主登記)' : '無 (大會直邀)'),
                 birthdate: u.birthdate,
                 identity_type: u.identity_type,
                 created_at: u.created_at
             };
         });
 
-        const headers = ['姓名', 'Email', '邀請層級 (Tier)', 'CRM 角色', '生日', '身份類別', '註冊時間'];
+        const headers = ['姓名', 'Email', '邀請層級 (Tier)', '推薦人/推薦碼', '生日', '身份類別', '註冊時間'];
         const rows = mergedGuests.map(g => [
             g.name,
             g.email,
             g.tier,
-            g.crm_role,
+            g.referrer,
             g.birthdate,
             g.identity_type,
             g.created_at ? new Date(g.created_at).toLocaleString() : ''
@@ -586,13 +654,17 @@ export default function VIPAdminPage() {
         setIsAdding(true);
         setAudienceFeedback('');
 
+        const finalRole = newReferrer.trim()
+            ? `推薦/代碼: ${newReferrer.trim()}`
+            : newRole;
+
         const { error } = await supabase
             .from('vip_allowlist')
             .insert({ 
                 email: newEmail.toLowerCase().trim(), 
                 name: newName.trim() || null,
                 tier: newTier,
-                role: newRole
+                role: finalRole
             });
 
         if (error) {
@@ -605,6 +677,7 @@ export default function VIPAdminPage() {
             setAudienceFeedback('✓ 已成功加入受眾名單。');
             setNewEmail('');
             setNewName('');
+            setNewReferrer('');
             await fetchList();
         }
         setIsAdding(false);
@@ -867,7 +940,17 @@ export default function VIPAdminPage() {
                                             </div>
                                         </div>
                                         <div>
-                                            <label className="block text-[8px] tracking-widest text-neutral-500 uppercase mb-3">身分標籤 / 受眾細分 (CRM Role)</label>
+                                            <label className="block text-[8px] tracking-widest text-neutral-500 uppercase mb-3">推薦人 / 推薦碼 (選填，如：品牌名或推薦人)</label>
+                                            <input
+                                                type="text"
+                                                placeholder="例如：RONI、Cwtch Pottery、艾蜜莉..."
+                                                value={newReferrer}
+                                                onChange={(e) => setNewReferrer(e.target.value)}
+                                                className="w-full py-3 bg-transparent outline-none text-xs tracking-widest placeholder:text-neutral-600 text-white border-b border-neutral-700 focus:border-[#DFBA87] transition-colors duration-300"
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-[8px] tracking-widest text-neutral-500 uppercase mb-3">身分標籤 / 受眾細分 (若未填推薦碼時適用)</label>
                                             <select
                                                 value={newRole}
                                                 onChange={(e) => setNewRole(e.target.value)}
@@ -929,15 +1012,18 @@ export default function VIPAdminPage() {
                                                             <span className="text-[10px] tracking-widest text-neutral-400">
                                                                 申請姓名：{vip.name || '未提供'}
                                                             </span>
-                                                            {vip.role && vip.role !== 'VIP' && (
-                                                                <span className={`text-[9px] px-2 py-0.5 rounded font-mono ${
-                                                                    vip.role.startsWith('推薦/代碼') 
-                                                                        ? 'bg-[#DFBA87]/20 text-[#DFBA87] border border-[#DFBA87]/40 font-semibold' 
-                                                                        : 'bg-white/5 text-neutral-300 border border-white/10'
-                                                                }`}>
-                                                                    {vip.role}
-                                                                </span>
-                                                            )}
+                                                            {(() => {
+                                                                const refText = extractReferrerText(vip.role);
+                                                                return refText ? (
+                                                                    <span className="text-[9px] px-2.5 py-0.5 rounded font-mono bg-[#DFBA87]/20 text-[#DFBA87] border border-[#DFBA87]/40 font-semibold">
+                                                                        ✦ 推薦人/推薦碼：{refText}
+                                                                    </span>
+                                                                ) : (
+                                                                    <span className="text-[9px] px-2 py-0.5 rounded font-mono bg-white/5 text-neutral-400 border border-white/10">
+                                                                        推薦人/推薦碼：無 (自主登記)
+                                                                    </span>
+                                                                );
+                                                            })()}
                                                         </div>
                                                     </div>
                                                 </div>
@@ -1048,9 +1134,70 @@ export default function VIPAdminPage() {
                                                     <div className={`text-[9px] font-bold px-2.5 py-0.5 border ${vip.tier === 'SVIP' ? 'border-[#DFBA87] text-[#DFBA87] bg-[#DFBA87]/10' : 'border-neutral-700 text-neutral-300 bg-neutral-800/40'} tracking-wider`}>
                                                         {vip.tier === 'SVIP' ? '✦ SVIP' : 'VIP'}
                                                     </div>
-                                                    <div className="text-[8px] px-2 py-0.5 bg-neutral-800 text-neutral-300 uppercase tracking-widest font-mono">
-                                                        {vip.role === 'Professional Buyer' ? 'BUYER 專業買家' : vip.role}
-                                                    </div>
+                                                    {(() => {
+                                                        const refText = extractReferrerText(vip.role);
+                                                        const isEditing = editingRefEmail === vip.email;
+                                                        if (isEditing) {
+                                                            return (
+                                                                <div className="inline-flex items-center gap-1.5 bg-black/80 border border-[#DFBA87]/50 px-2 py-1 rounded-xs">
+                                                                    <span className="text-[9px] text-[#DFBA87] font-mono whitespace-nowrap">推薦人/推薦碼:</span>
+                                                                    <input
+                                                                        type="text"
+                                                                        value={editingRefInput}
+                                                                        onChange={(e) => setEditingRefInput(e.target.value)}
+                                                                        onKeyDown={(e) => {
+                                                                            if (e.key === 'Enter') handleUpdateReferrer(vip.email, editingRefInput);
+                                                                            if (e.key === 'Escape') setEditingRefEmail(null);
+                                                                        }}
+                                                                        placeholder="輸入推薦人或品牌..."
+                                                                        autoFocus
+                                                                        className="bg-transparent text-[10px] text-white outline-none border-b border-neutral-700 focus:border-[#DFBA87] w-28 font-mono"
+                                                                    />
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => handleUpdateReferrer(vip.email, editingRefInput)}
+                                                                        disabled={updatingRefEmail === vip.email}
+                                                                        className="px-2 py-0.5 bg-[#DFBA87] text-black text-[9px] font-bold rounded-xs cursor-pointer disabled:opacity-50"
+                                                                    >
+                                                                        {updatingRefEmail === vip.email ? '...' : '儲存'}
+                                                                    </button>
+                                                                    <button
+                                                                        type="button"
+                                                                        onClick={() => setEditingRefEmail(null)}
+                                                                        className="text-[9px] text-neutral-400 hover:text-white px-1 cursor-pointer"
+                                                                    >
+                                                                        ✕
+                                                                    </button>
+                                                                </div>
+                                                            );
+                                                        }
+                                                        return refText ? (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setEditingRefEmail(vip.email);
+                                                                    setEditingRefInput(refText);
+                                                                }}
+                                                                title="點擊修改推薦人/推薦碼"
+                                                                className="text-[9px] px-2.5 py-0.5 bg-[#DFBA87]/15 hover:bg-[#DFBA87]/25 text-[#DFBA87] border border-[#DFBA87]/40 tracking-wider font-mono font-semibold flex items-center gap-1.5 transition-colors cursor-pointer rounded-xs"
+                                                            >
+                                                                <span>✦ 推薦人/推薦碼：{refText}</span>
+                                                                <span className="text-[8px] opacity-60">✎</span>
+                                                            </button>
+                                                        ) : (
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setEditingRefEmail(vip.email);
+                                                                    setEditingRefInput('');
+                                                                }}
+                                                                title="點擊新增或標註推薦人/推薦碼"
+                                                                className="text-[9px] px-2 py-0.5 bg-neutral-800/70 hover:bg-neutral-800 text-neutral-400 hover:text-[#DFBA87] border border-neutral-700/60 tracking-wider font-mono flex items-center gap-1 transition-colors cursor-pointer rounded-xs"
+                                                            >
+                                                                <span>推薦人/推薦碼：{vip.role === '自主登記貴賓' ? '無 (自主登記)' : '無 (點擊標註 ✎)'}</span>
+                                                            </button>
+                                                        );
+                                                    })()}
                                                     <div className="ml-1">
                                                         <p className="text-xs tracking-wider text-white font-mono">{vip.email}</p>
                                                         {vip.name && (
@@ -1209,7 +1356,7 @@ export default function VIPAdminPage() {
                                             <tr className="border-b border-neutral-900 text-neutral-500 text-[10px] tracking-[0.2em] uppercase font-light">
                                                 <th className="py-4 font-light">姓名</th>
                                                 <th className="py-4 font-light">Email</th>
-                                                <th className="py-4 font-light">等級 / CRM</th>
+                                                <th className="py-4 font-light">等級 / 推薦人・推薦碼</th>
                                                 <th className="py-4 font-light">生日</th>
                                                 <th className="py-4 font-light">身分別</th>
                                                 <th className="py-4 font-light">註冊時間</th>
@@ -1221,12 +1368,13 @@ export default function VIPAdminPage() {
                                                 const filtered = registeredUsers
                                                     .map(u => {
                                                         const emailKey = u.email?.toLowerCase().trim();
-                                                        const info = allowlistMap.get(emailKey) || {};
+                                                        const info: any = allowlistMap.get(emailKey) || {};
+                                                        const refText = extractReferrerText(info.role);
                                                         return {
                                                             ...u,
-                                                            name: info.name || '未填寫',
+                                                            name: info.name || u.first_name || '未填寫',
                                                             tier: info.tier || 'VIP',
-                                                            crm_role: info.crm_role || 'VIP 貴賓'
+                                                            referrer_label: refText ? `推薦人/推薦碼: ${refText}` : (info.role === '自主登記貴賓' ? '無推薦碼 (自主登記)' : '無推薦碼 (大會直邀)')
                                                         };
                                                     })
                                                     .filter(u => {
@@ -1234,6 +1382,7 @@ export default function VIPAdminPage() {
                                                         return (
                                                             u.email?.toLowerCase().includes(search) ||
                                                             u.name?.toLowerCase().includes(search) ||
+                                                            u.referrer_label?.toLowerCase().includes(search) ||
                                                             (u.identity_type && u.identity_type.toLowerCase().includes(search))
                                                         );
                                                     });
@@ -1272,8 +1421,12 @@ export default function VIPAdminPage() {
                                                                         ✦ SVIP
                                                                     </button>
                                                                 </div>
-                                                                <span className="text-[10px] px-2 py-0.5 border border-neutral-800 text-neutral-400 uppercase">
-                                                                    {u.crm_role}
+                                                                <span className={`text-[10px] px-2 py-0.5 border font-mono ${
+                                                                    u.referrer_label.startsWith('推薦人/推薦碼:')
+                                                                        ? 'border-[#DFBA87]/40 bg-[#DFBA87]/15 text-[#DFBA87] font-semibold'
+                                                                        : 'border-neutral-800 text-neutral-400'
+                                                                }`}>
+                                                                    {u.referrer_label}
                                                                 </span>
                                                             </div>
                                                         </td>

@@ -168,6 +168,7 @@ export async function POST(req: Request) {
 
         // 2. Real-time auto-activation: Upsert into vip_allowlist so the guest can log in instantly
         try {
+            const brandRefRole = brand_name_zh ? `推薦/代碼: ${brand_name_zh}` : 'VIP';
             await supabase
                 .from('vip_allowlist')
                 .upsert(
@@ -176,7 +177,7 @@ export async function POST(req: Request) {
                         name: `${cleanSurname} 氏`,
                         tier: selectedTier,
                         status: 'Approved',
-                        role: 'VIP',
+                        role: brandRefRole,
                         rsvp_status: 'Pending',
                     },
                     { onConflict: 'email' }

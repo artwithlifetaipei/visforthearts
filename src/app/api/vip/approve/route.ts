@@ -37,7 +37,7 @@ async function createSupabaseServerClient() {
 export async function POST(req: Request) {
     try {
         const body = await req.json();
-        const { applicationEmail, action, tier } = body; // action can be 'approve' or 'reject', tier can be 'VIP' or 'SVIP'
+        const { applicationEmail, action, tier, referrer } = body; // action can be 'approve', 'reject', 'update_tier', or 'update_referrer'
 
         if (!applicationEmail || !action) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 });
@@ -189,6 +189,30 @@ export async function POST(req: Request) {
                 success: true,
                 tier,
                 message: `Guest tier updated to ${tier} successfully.`
+            });
+
+        } else if (action === 'update_referrer') {
+            const cleanRef = (referrer || '').trim();
+            const newRole = cleanRef
+                ? (cleanRef.startsWith('推薦/代碼:') ? cleanRef : `推薦/代碼: ${cleanRef}`)
+                : 'VIP';
+
+            const { data: updateData, error: updateError } = await supabase
+                .from('vip_allowlist')
+                .update({ role: newRole })
+                .ilike('email', targetEmail)
+                .select();
+
+            if (updateError || !updateData || updateData.length === 0) {
+                return NextResponse.json({
+                    error: `Referrer update failed: ${updateError?.message || 'No rows updated.'}`
+                }, { status: 500 });
+            }
+
+            return NextResponse.json({
+                success: true,
+                role: newRole,
+                message: 'Referrer updated successfully.'
             });
 
         } else if (action === 'reject') {
