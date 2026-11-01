@@ -775,39 +775,6 @@ export default function LandingPage() {
                     grid-template-columns: repeat(2, 1fr);
                     gap: 1.35rem;
                 }
-                .quad-connector-lines {
-                    position: absolute;
-                    inset: 0;
-                    pointer-events: none;
-                    z-index: 2;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                .quad-connector-h {
-                    position: absolute;
-                    width: 36%;
-                    height: 1px;
-                    background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.55), transparent);
-                }
-                .quad-connector-v {
-                    position: absolute;
-                    height: 42%;
-                    width: 1px;
-                    background: linear-gradient(180deg, transparent, rgba(201, 169, 110, 0.55), transparent);
-                }
-                .quad-center-node {
-                    width: 34px;
-                    height: 34px;
-                    border-radius: 50%;
-                    background: #FFFFFF;
-                    border: 1px solid rgba(201, 169, 110, 0.65);
-                    box-shadow: 0 4px 14px rgba(201, 169, 110, 0.18), 0 0 0 4px rgba(255, 255, 255, 0.85);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 3;
-                }
                 .metric-card {
                     background: #FFFFFF;
                     border: 1px solid rgba(201, 169, 110, 0.2);
@@ -829,30 +796,8 @@ export default function LandingPage() {
                 }
                 .metric-card.full-width {
                     background: linear-gradient(180deg, #FFFFFF 0%, #FAF8F3 100%);
-                    padding: 1.65rem 1.5rem 1.4rem;
+                    padding: 1.75rem 2rem;
                     border: 1px solid rgba(201, 169, 110, 0.35);
-                }
-                .emerging-collector-pill {
-                    margin-top: 0.85rem;
-                    padding-top: 0.75rem;
-                    border-top: 1px dashed rgba(201, 169, 110, 0.35);
-                    width: 100%;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    gap: 0.2rem;
-                }
-                .emerging-collector-title {
-                    font-size: 0.82rem;
-                    letter-spacing: 0.08em;
-                    color: #8C7853;
-                    font-weight: 500;
-                }
-                .emerging-collector-desc {
-                    font-size: 0.74rem;
-                    letter-spacing: 0.05em;
-                    color: #666666;
-                    font-weight: 300;
                 }
                 .metric-number {
                     font-family: var(--font-serif);
@@ -1174,17 +1119,8 @@ export default function LandingPage() {
                                 </span>
                             </div>
 
-                            {/* 2x2 Interconnected Identity Grid + Delicate Compass Star Nexus */}
+                            {/* 2x2 Identity Grid */}
                             <div className="metrics-quad-wrapper">
-                                <div className="quad-connector-lines" aria-hidden="true">
-                                    <div className="quad-connector-h"></div>
-                                    <div className="quad-connector-v"></div>
-                                    <div className="quad-center-node" title={lang === 'zh' ? '相互熟識・圈層共鳴' : 'Interconnected VIP Nexus'}>
-                                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M12 3L14.2 9.8L21 12L14.2 14.2L12 21L9.8 14.2L3 12L9.8 9.8L12 3Z" stroke="#C9A96E" strokeWidth="1.3" fill="rgba(201,169,110,0.18)" />
-                                        </svg>
-                                    </div>
-                                </div>
                                 <div className="metric-card">
                                     <span className="metric-number">71%</span>
                                     <span className="metric-label">{lang === 'zh' ? '具高消費力與品味貴賓' : 'Taste VIPs & Affluent Guests'}</span>
@@ -1203,18 +1139,10 @@ export default function LandingPage() {
                                 </div>
                             </div>
 
-                            {/* 77% Power Base + Emerging Collectors Highlight */}
+                            {/* 77% Power Base */}
                             <div className="metric-card full-width">
                                 <span className="metric-number">77%</span>
                                 <span className="metric-label">{lang === 'zh' ? '一年購買預算80萬以上' : 'Annual Purchase Budget > 800k TWD'}</span>
-                                <div className="emerging-collector-pill">
-                                    <span className="emerging-collector-title">
-                                        {lang === 'zh' ? '✦ 匯聚高潛力「跨界新銳藏家」客群' : '✦ High-Potential Emerging Collectors'}
-                                    </span>
-                                    <span className="emerging-collector-desc">
-                                        {lang === 'zh' ? '具充沛預算與開放美學視野 ‧ 最易觸發破圈首購與長期典藏' : 'Affluent & Open-Minded · Prime for First-Time Acquisition'}
-                                    </span>
-                                </div>
                             </div>
                         </div>
                     </div>

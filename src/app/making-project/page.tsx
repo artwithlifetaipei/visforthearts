@@ -760,18 +760,8 @@ export default function MakingProjectPage() {
                     </span>
                   </div>
 
-                  {/* 2x2 Interconnected Identity Grid + Compass Star Nexus */}
+                  {/* 2x2 Identity Grid */}
                   <div className="relative grid grid-cols-2 gap-3.5 sm:gap-4">
-                    <div className="absolute inset-0 pointer-events-none z-10 flex items-center justify-center" aria-hidden="true">
-                      <div className="absolute w-[36%] h-[1px] bg-gradient-to-r from-transparent via-[#C9A96E]/55 to-transparent" />
-                      <div className="absolute h-[42%] w-[1px] bg-gradient-to-b from-transparent via-[#C9A96E]/55 to-transparent" />
-                      <div className="w-8 h-8 rounded-full bg-white border border-[#C9A96E]/65 shadow-[0_4px_14px_rgba(201,169,110,0.18),0_0_0_4px_rgba(255,255,255,0.85)] flex items-center justify-center">
-                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M12 3L14.2 9.8L21 12L14.2 14.2L12 21L9.8 14.2L3 12L9.8 9.8L12 3Z" stroke="#C9A96E" strokeWidth="1.3" fill="rgba(201,169,110,0.18)" />
-                        </svg>
-                      </div>
-                    </div>
-
                     {/* Metric 1 */}
                     <div className="bg-white border border-[#C9A96E]/20 p-5 flex flex-col items-center justify-center text-center shadow-[0_6px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
                       <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">71%</span>
@@ -805,20 +795,12 @@ export default function MakingProjectPage() {
                     </div>
                   </div>
 
-                  {/* Metric 5 (Full Width) + Emerging Collectors Highlight */}
+                  {/* Metric 5 (Full Width) */}
                   <div className="bg-gradient-to-b from-white to-[#FAF8F3] border border-[#C9A96E]/35 p-5 flex flex-col items-center justify-center text-center shadow-[0_6px_20px_rgba(0,0,0,0.015)] hover:border-[#C9A96E] hover:-translate-y-1 transition-all duration-300">
                     <span className="font-serif-garamond text-4xl sm:text-5xl text-[#C9A96E] font-light leading-none mb-2">77%</span>
                     <span className="text-xs sm:text-[13px] text-[#1a1a1a] font-normal tracking-wider">
                       {lang === 'zh' ? '一年購買預算80萬以上' : 'Annual Purchase Budget > NT$800k'}
                     </span>
-                    <div className="mt-3 pt-3 border-t border-dashed border-[#C9A96E]/35 w-full flex flex-col items-center gap-0.5">
-                      <span className="text-xs text-[#8C7853] font-medium tracking-wider">
-                        {lang === 'zh' ? '✦ 匯聚高潛力「跨界新銳藏家」客群' : '✦ High-Potential Emerging Collectors'}
-                      </span>
-                      <span className="text-[11px] text-[#666666] font-light tracking-wide">
-                        {lang === 'zh' ? '具充沛預算與開放美學視野 ‧ 最易觸發破圈首購與長期典藏' : 'Affluent & Open-Minded · Prime for First-Time Acquisition'}
-                      </span>
-                    </div>
                   </div>
                 </div>
               </div>
