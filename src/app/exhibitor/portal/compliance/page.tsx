@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
+import { prepareFileUpload, safeJson, fetchWithTimeout } from '@/lib/uploadUtils';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   FileCheck, 
@@ -338,56 +339,19 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
 
   const handlePhysicalContractUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file || !brand) return;
-
-    if (file.size > 2 * 1024 * 1024) {
-      setErrorMessage('單個檔案大小不能超過 2MB (實體掃描檔建議尺寸)。');
-      return;
-    }
 
     setUploading(true);
     setErrorMessage('');
 
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64Data = reader.result as string;
-
-        let fileUrl = '';
-        const fileExt = file.name.split('.').pop() || 'pdf';
-        const fileName = `${brand.id}/contract_${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-        
-        try {
-          const base64Clean = base64Data.split(',')[1];
-          const buffer = Buffer.from(base64Clean, 'base64');
-
-          const { data: uploadData, error: uploadError } = await supabase.storage
-            .from('exhibitor-media')
-            .upload(fileName, buffer, {
-              contentType: file.type,
-              upsert: true
-            });
-
-          if (uploadError) {
-            console.error('Storage upload error, falling back to base64:', uploadError);
-            fileUrl = base64Data; // fallback
-          } else {
-            const { data: publicUrlData } = supabase.storage
-              .from('exhibitor-media')
-              .getPublicUrl(fileName);
-            fileUrl = publicUrlData?.publicUrl || base64Data;
-          }
-        } catch (storageEx) {
-          console.error('Exception during storage upload, using base64 fallback:', storageEx);
-          fileUrl = base64Data;
-        }
-
-        setPhysicalContractUrl(fileUrl);
-        setUploading(false);
-      };
-      reader.readAsDataURL(file);
+      // Images are auto-compressed; PDFs are size-checked (server body limit ~4.5MB)
+      const prepared = await prepareFileUpload(file);
+      setPhysicalContractUrl(prepared.dataUrl);
     } catch (err: any) {
-      setErrorMessage('上傳過程中發生異常。');
+      setErrorMessage(err?.message || '上傳過程中發生異常，請重新選擇檔案。');
+    } finally {
       setUploading(false);
     }
   };
@@ -477,13 +441,13 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
 
     try {
       // 1. Submit via server API handler for privileged upsert & FK auto-healing
-      const res = await fetch('/api/exhibitor/compliance', {
+      const res = await fetchWithTimeout('/api/exhibitor/compliance', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
 
-      const resJson = await res.json();
+      const resJson = await safeJson(res);
 
       if (res.ok && resJson.success && resJson.compliance) {
         setSignedData(resJson.compliance);

@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { motion, AnimatePresence } from 'framer-motion';
 import { QRCodeSVG } from 'qrcode.react';
 import { formatBoothDisplay } from '@/lib/exhibitorConstants';
+import { prepareImageUpload, safeJson, fetchWithTimeout } from '@/lib/uploadUtils';
 import { 
   Package, Plus, Printer, ExternalLink, Trash2, Edit3, 
   Sparkles, Image as ImageIcon, CheckCircle2, AlertCircle, 
@@ -144,6 +145,17 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
 
   const fetchProducts = async (currentBrand: any) => {
     try {
+      const params = new URLSearchParams();
+      if (currentBrand?.id) params.set('brand_id', currentBrand.id);
+      if (currentBrand?.brand_name_zh) params.set('brand_name_zh', currentBrand.brand_name_zh);
+      const res = await fetchWithTimeout(`/api/exhibitor/products?${params.toString()}`);
+      const json = await safeJson(res);
+      if (res.ok && Array.isArray(json.products)) {
+        setProducts(json.products);
+        return;
+      }
+
+      // Fallback to direct client query
       const { data, error } = await supabase
         .from('exhibitor_products')
         .select('*')
@@ -213,60 +225,35 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0 || !brand) return;
+    if (!files || files.length === 0 || !brand) {
+      e.target.value = '';
+      return;
+    }
 
     const file = files[0];
-    if (!file.type.startsWith('image/')) {
-      alert('請上傳圖片檔案 (PNG, JPEG, WebP)');
-      return;
-    }
-
-    if (file.size > 5 * 1024 * 1024) {
-      alert('單張圖片檔案不能超過 5MB');
-      return;
-    }
-
+    e.target.value = '';
     setUploadingImage(true);
+    setMessage({ text: '', type: '' });
 
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        const base64Data = reader.result as string;
-        let fileUrl = base64Data;
-
-        try {
-          const fileExt = file.name.split('.').pop() || 'png';
-          const fileName = `products/${brand.id}/${Date.now()}_${Math.random().toString(36).substring(2, 7)}.${fileExt}`;
-          const base64Clean = base64Data.split(',')[1];
-          const buffer = Buffer.from(base64Clean, 'base64');
-
-          const { error: uploadError } = await supabase.storage
-            .from('exhibitor-media')
-            .upload(fileName, buffer, { contentType: file.type, upsert: true });
-
-          if (!uploadError) {
-            const { data: publicUrlData } = supabase.storage
-              .from('exhibitor-media')
-              .getPublicUrl(fileName);
-            if (publicUrlData?.publicUrl) {
-              fileUrl = publicUrlData.publicUrl;
-            }
-          }
-        } catch {
-          // fallback to base64
-        }
-
-        setFormData(prev => ({ ...prev, image_url: fileUrl }));
-        setUploadingImage(false);
-      };
-      reader.readAsDataURL(file);
-    } catch {
+      const prepared = await prepareImageUpload(file, {
+        maxDimension: 2000,
+        preserveTransparency: false,
+      });
+      setFormData(prev => ({ ...prev, image_url: prepared.dataUrl }));
+    } catch (err: any) {
+      setMessage({ text: err?.message || '圖片處理失敗，請重新選擇圖片。', type: 'error' });
+    } finally {
       setUploadingImage(false);
     }
   };
 
   const handleSaveProduct = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (uploadingImage) {
+      setMessage({ text: '圖片仍在處理中，請稍候 1–2 秒再送出。', type: 'error' });
+      return;
+    }
     if (!formData.title_zh.trim()) {
       setMessage({ text: '請填寫作品 / 商品中文名稱。', type: 'error' });
       return;
@@ -297,24 +284,22 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
     };
 
     try {
-      if (formData.id) {
-        // Update
-        const { error } = await supabase
-          .from('exhibitor_products')
-          .update(payload)
-          .eq('id', formData.id);
-
-        if (error) throw error;
-        setMessage({ text: '✓ 展品資訊更新成功！', type: 'success' });
-      } else {
-        // Insert
-        const { error } = await supabase
-          .from('exhibitor_products')
-          .insert(payload);
-
-        if (error) throw error;
-        setMessage({ text: '✓ 新展品上架成功！已為您生成專屬 QR Code 立牌', type: 'success' });
+      const res = await fetchWithTimeout('/api/exhibitor/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id: formData.id || null, payload }),
+      });
+      const json = await safeJson(res);
+      if (!res.ok || json.error) {
+        throw new Error(json.error || '儲存失敗');
       }
+
+      setMessage({
+        text: formData.id
+          ? '✓ 展品資訊更新成功！'
+          : '✓ 新展品上架成功！已為您生成專屬 QR Code 立牌',
+        type: 'success',
+      });
 
       await fetchProducts(brand);
       setTimeout(() => {
@@ -322,7 +307,7 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
       }, 1000);
     } catch (err: any) {
       console.error('Save product error:', err);
-      setMessage({ text: `儲存失敗: ${err.message || '請確認資料庫表格是否已建立'}`, type: 'error' });
+      setMessage({ text: `儲存失敗: ${err.message || '請稍後再試'}`, type: 'error' });
     } finally {
       setFormSubmitting(false);
     }
@@ -332,12 +317,15 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
     if (!confirm(`確定要刪除展品「${title}」嗎？刪除後對應的立牌 QR Code 將失效。`)) return;
 
     try {
-      const { error } = await supabase
-        .from('exhibitor_products')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
+      const res = await fetchWithTimeout('/api/exhibitor/products', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      });
+      const json = await safeJson(res);
+      if (!res.ok || json.error) {
+        throw new Error(json.error || '刪除失敗');
+      }
       setProducts(prev => prev.filter(p => p.id !== id));
     } catch (err: any) {
       alert(`刪除失敗: ${err.message}`);

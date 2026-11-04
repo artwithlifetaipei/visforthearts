@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { KEY_DATES, DEPOSIT_AMOUNT, ZONE_MAP, formatBoothDisplay, normalizeBoothCode, getBoothPrice } from '@/lib/exhibitorConstants';
+import { prepareFileUpload, safeJson, fetchWithTimeout } from '@/lib/uploadUtils';
 import { motion } from 'framer-motion';
 import { 
   Calendar, CreditCard, Award, ClipboardCheck, Users, 
@@ -84,24 +85,35 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   const [proofSuccessMsg, setProofSuccessMsg] = useState('');
   const [proofErrorMsg, setProofErrorMsg] = useState('');
 
-  const handleProofFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const [proofPreparing, setProofPreparing] = useState(false);
+
+  const handleProofFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    e.target.value = '';
     if (!file) return;
-    if (file.size > 12 * 1024 * 1024) {
-      setProofErrorMsg('檔案大小請勿超過 12MB');
-      return;
+    setProofErrorMsg('');
+    setProofPreparing(true);
+    try {
+      // Auto-compress large phone photos so the request never exceeds the server limit
+      const prepared = await prepareFileUpload(file);
+      setProofFile(new File([file], prepared.fileName, { type: prepared.mimeType }));
+      setProofBase64(prepared.dataUrl);
+    } catch (err: any) {
+      setProofFile(null);
+      setProofBase64('');
+      setProofErrorMsg(err?.message || '檔案處理失敗，請重新選擇。');
+    } finally {
+      setProofPreparing(false);
     }
-    setProofFile(file);
-    const reader = new FileReader();
-    reader.onload = () => {
-      setProofBase64(reader.result as string);
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleProofSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!brand) return;
+    if (proofPreparing) {
+      setProofErrorMsg('檔案仍在處理中，請稍候 1–2 秒再送出。');
+      return;
+    }
     if (!proofBase64 && !lastFiveDigits.trim()) {
       setProofErrorMsg('請至少上傳匯款單截圖或填寫匯款末五碼。');
       return;
@@ -112,7 +124,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
     setProofSuccessMsg('');
 
     try {
-      const res = await fetch('/api/exhibitor/payment-proof', {
+      const res = await fetchWithTimeout('/api/exhibitor/payment-proof', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -127,7 +139,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
         }),
       });
 
-      const resJson = await res.json();
+      const resJson = await safeJson(res);
       if (!res.ok || resJson.error) {
         setProofErrorMsg(resJson.error || '提交失敗，請檢查網路連線。');
       } else {
@@ -142,7 +154,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
         }, 1500);
       }
     } catch (err: any) {
-      setProofErrorMsg(`連線異常 (${err.message})，請檢查網路。`);
+      setProofErrorMsg(err?.message || '連線異常，請檢查網路後再試一次。');
     } finally {
       setProofSubmitting(false);
     }
@@ -1083,13 +1095,18 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   </div>
                 ) : (
                   <label className="flex flex-col items-center justify-center p-6 border-2 border-dashed border-white/20 hover:border-[#DFBA87]/60 rounded-xl cursor-pointer bg-black/30 hover:bg-black/50 transition">
-                    <Upload className="w-8 h-8 text-[#DFBA87] mb-2" />
-                    <span className="text-xs font-medium text-white">點擊選擇檔案 或 拖曳至此</span>
-                    <span className="text-[10.5px] text-neutral-400 mt-1">支援 JPG、PNG、WEBP、PDF (最大 12MB)</span>
+                    {proofPreparing ? (
+                      <Loader2 className="w-8 h-8 text-[#DFBA87] mb-2 animate-spin" />
+                    ) : (
+                      <Upload className="w-8 h-8 text-[#DFBA87] mb-2" />
+                    )}
+                    <span className="text-xs font-medium text-white">{proofPreparing ? '圖片自動壓縮處理中...' : '點擊選擇檔案 或 拖曳至此'}</span>
+                    <span className="text-[10.5px] text-neutral-400 mt-1">支援 JPG、PNG、WEBP（手機照片自動壓縮）、PDF (2MB 內)</span>
                     <input
                       type="file"
                       accept="image/*,application/pdf"
                       onChange={handleProofFileChange}
+                      disabled={proofPreparing}
                       className="hidden"
                     />
                   </label>
@@ -1162,7 +1179,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                 </button>
                 <button
                   type="submit"
-                  disabled={proofSubmitting}
+                  disabled={proofSubmitting || proofPreparing}
                   className="px-5 py-2.5 rounded-lg bg-[#DFBA87] hover:bg-[#cf9e5e] text-[#14120E] font-bold text-xs transition flex items-center gap-2 shadow-md cursor-pointer disabled:opacity-50"
                 >
                   {proofSubmitting ? (

@@ -9,6 +9,7 @@ import {
   AlertCircle, Clock, FileText, Check, HelpCircle, Send, Copy
 } from 'lucide-react';
 import { useExhibitorLanguage } from '@/lib/ExhibitorLanguageContext';
+import { prepareImageUpload, safeJson, fetchWithTimeout } from '@/lib/uploadUtils';
 
 function safeGetStorage(key: string): string | null {
   try {
@@ -388,9 +389,13 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
   // Brand Transparent Logo upload handling (Strictly 1 transparent image)
   const handleLogoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0 || !brand) return;
+    if (!files || files.length === 0 || !brand) {
+      e.target.value = '';
+      return;
+    }
 
     const file = files[0];
+    e.target.value = '';
     setLogoError('');
 
     // Strict validation: Must be PNG, SVG, or WebP
@@ -406,56 +411,41 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
           'Brand logo must have a transparent background. Please upload PNG, SVG, or WebP format (JPG/JPEG not supported).'
         )
       );
-      e.target.value = '';
-      return;
-    }
-
-    if (file.size > 3 * 1024 * 1024) {
-      setLogoError(t('Logo 檔案大小不能超過 3MB。', 'Logo file size cannot exceed 3MB.'));
-      e.target.value = '';
       return;
     }
 
     setUploadingLogo(true);
-    const safetyTimer = setTimeout(() => setUploadingLogo(false), 20000);
+    const safetyTimer = setTimeout(() => setUploadingLogo(false), 45000);
 
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        try {
-          const base64Data = reader.result as string;
-          const res = await fetch('/api/exhibitor/media/assets', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              brand_id: brand.id,
-              file_name: file.name,
-              file_type: 'brand_logo_transparent',
-              file_base64: base64Data,
-            }),
-          });
+      const prepared = await prepareImageUpload(file, {
+        maxDimension: 2000,
+        preserveTransparency: true,
+      });
 
-          const data = await res.json();
-          if (!res.ok || data.error) {
-            setLogoError(t(`上傳失敗: ${data.error || 'Server error'}`, `Upload failed: ${data.error || 'Server error'}`));
-          } else if (data.asset) {
-            setLogoAsset(data.asset);
-            safeSetStorage(`vis_portal_media_logo_${brand.id}`, JSON.stringify(data.asset));
-          }
-        } catch (postErr: any) {
-          setLogoError(t(`上傳過程異常: ${postErr.message}`, `Upload error: ${postErr.message}`));
-        } finally {
-          clearTimeout(safetyTimer);
-          setUploadingLogo(false);
-          e.target.value = '';
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch {
+      const res = await fetchWithTimeout('/api/exhibitor/media/assets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand_id: brand.id,
+          file_name: prepared.fileName,
+          file_type: 'brand_logo_transparent',
+          file_base64: prepared.dataUrl,
+        }),
+      });
+
+      const data = await safeJson(res);
+      if (!res.ok || data.error) {
+        setLogoError(t(`上傳失敗: ${data.error || 'Server error'}`, `Upload failed: ${data.error || 'Server error'}`));
+      } else if (data.asset) {
+        setLogoAsset(data.asset);
+        safeSetStorage(`vis_portal_media_logo_${brand.id}`, JSON.stringify(data.asset));
+      }
+    } catch (postErr: any) {
+      setLogoError(t(`上傳過程異常: ${postErr?.message || '請重試'}`, `Upload error: ${postErr?.message || 'Please retry'}`));
+    } finally {
       clearTimeout(safetyTimer);
-      setLogoError(t('上傳過程中發生異常，請重試。', 'An error occurred during upload. Please try again.'));
       setUploadingLogo(false);
-      e.target.value = '';
     }
   };
 
@@ -466,7 +456,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
     setLogoError('');
 
     try {
-      const res = await fetch('/api/exhibitor/media/assets', {
+      const res = await fetchWithTimeout('/api/exhibitor/media/assets', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -475,7 +465,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
         }),
       });
 
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!res.ok || data.error) {
         setLogoError(t(`刪除失敗: ${data.error || 'Delete failed'}`, `Delete failed: ${data.error || 'Delete failed'}`));
       } else {
@@ -492,64 +482,51 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
   // Image upload handling
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
-    if (!files || files.length === 0 || !brand) return;
+    if (!files || files.length === 0 || !brand) {
+      e.target.value = '';
+      return;
+    }
+
+    const file = files[0];
+    e.target.value = '';
 
     if (assets.length >= 5) {
       setErrorMessage(t('最多僅能上傳 5 張媒體素材。', 'Maximum of 5 media assets allowed.'));
       return;
     }
 
-    const file = files[0];
-    if (!file.type.startsWith('image/')) {
-      setErrorMessage(t('請上傳圖片檔案 (PNG, JPEG, WebP)。', 'Please upload an image file (PNG, JPEG, WebP).'));
-      return;
-    }
-
-    if (file.size > 3 * 1024 * 1024) {
-      setErrorMessage(t('單張圖片檔案不能超過 3MB。', 'Image file cannot exceed 3MB.'));
-      return;
-    }
-
     setUploading(true);
     setErrorMessage('');
-    const safetyTimer = setTimeout(() => setUploading(false), 20000);
+    const safetyTimer = setTimeout(() => setUploading(false), 45000);
 
     try {
-      const reader = new FileReader();
-      reader.onloadend = async () => {
-        try {
-          const base64Data = reader.result as string;
-          const res = await fetch('/api/exhibitor/media/assets', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              brand_id: brand.id,
-              file_name: file.name,
-              file_type: file.type,
-              file_base64: base64Data,
-            }),
-          });
+      const prepared = await prepareImageUpload(file, {
+        maxDimension: 2400,
+        preserveTransparency: false,
+      });
 
-          const data = await res.json();
-          if (!res.ok || data.error) {
-            setErrorMessage(t(`儲存失敗: ${data.error || 'Save failed'}`, `Save failed: ${data.error || 'Save failed'}`));
-          } else if (data.asset) {
-            setAssets(prev => [data.asset, ...prev]);
-          }
-        } catch (uploadErr: any) {
-          setErrorMessage(t(`上傳過程異常: ${uploadErr.message}`, `Upload error: ${uploadErr.message}`));
-        } finally {
-          clearTimeout(safetyTimer);
-          setUploading(false);
-          e.target.value = '';
-        }
-      };
-      reader.readAsDataURL(file);
-    } catch {
+      const res = await fetchWithTimeout('/api/exhibitor/media/assets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand_id: brand.id,
+          file_name: prepared.fileName,
+          file_type: prepared.mimeType,
+          file_base64: prepared.dataUrl,
+        }),
+      });
+
+      const data = await safeJson(res);
+      if (!res.ok || data.error) {
+        setErrorMessage(t(`儲存失敗: ${data.error || 'Save failed'}`, `Save failed: ${data.error || 'Save failed'}`));
+      } else if (data.asset) {
+        setAssets(prev => [data.asset, ...prev]);
+      }
+    } catch (uploadErr: any) {
+      setErrorMessage(t(`上傳過程異常: ${uploadErr?.message || '請重試'}`, `Upload error: ${uploadErr?.message || 'Please retry'}`));
+    } finally {
       clearTimeout(safetyTimer);
-      setErrorMessage(t('上傳過程中發生異常。', 'An error occurred during upload.'));
       setUploading(false);
-      e.target.value = '';
     }
   };
 
@@ -559,7 +536,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
     setErrorMessage('');
 
     try {
-      const res = await fetch('/api/exhibitor/media/assets', {
+      const res = await fetchWithTimeout('/api/exhibitor/media/assets', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -568,7 +545,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
         }),
       });
 
-      const data = await res.json();
+      const data = await safeJson(res);
       if (!res.ok || data.error) {
         setErrorMessage(t(`刪除記錄失敗: ${data.error || 'Delete failed'}`, `Delete failed: ${data.error || 'Delete failed'}`));
       } else {
