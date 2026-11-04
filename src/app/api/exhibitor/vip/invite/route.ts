@@ -105,6 +105,20 @@ export async function POST(req: Request) {
         // Use cached admin client directly to bypass RLS policies reliably and eliminate extra auth round-trips
         const supabase = await getAdminClient();
 
+        // 0. Prevent duplicate email within the same brand's VIP list
+        if (brand_id) {
+            const { data: existingVip } = await supabase
+                .from('exhibitor_vip_submissions')
+                .select('id')
+                .eq('brand_id', brand_id)
+                .ilike('vip_email', normalizedEmail)
+                .maybeSingle();
+
+            if (existingVip) {
+                return NextResponse.json({ error: '該電子信箱已在貴品牌的專屬邀請名單中' }, { status: 409 });
+            }
+        }
+
         // 1. Save submission into exhibitor_vip_submissions
         // Note: 'tier' column does not exist in exhibitor_vip_submissions schema cache.
         // The tier is cleanly encoded in vip_surname as '(SVIP)', which is parsed everywhere.
