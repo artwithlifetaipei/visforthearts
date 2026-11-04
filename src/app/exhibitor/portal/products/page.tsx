@@ -85,7 +85,12 @@ export default function ExhibitorProductsPage({ brand: parentBrand }: { brand?: 
       try {
         let currentBrand = brand;
         if (!currentBrand) {
-          const { data: { session } } = await supabase.auth.getSession();
+          const sessionPromise = supabase.auth.getSession();
+          const sessionTimeout = new Promise<any>((resolve) =>
+            setTimeout(() => resolve({ data: { session: null } }), 600)
+          );
+          const { data: sessionData } = await Promise.race([sessionPromise, sessionTimeout]);
+          const session = sessionData?.session;
           if (session?.user?.email) {
             const userEmail = session.user.email.toLowerCase().trim();
             const { data } = await supabase

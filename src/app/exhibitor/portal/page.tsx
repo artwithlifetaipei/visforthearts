@@ -207,8 +207,13 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
       try {
         let currentBrand = null;
 
-        // Fetch brand from current session to ensure we have the absolute latest data from DB
-        const { data: { session } } = await supabase.auth.getSession();
+        // Fetch brand from current session with 600ms timeout race to prevent iOS WebKit deadlock
+        const sessionPromise = supabase.auth.getSession();
+        const sessionTimeout = new Promise<any>((resolve) =>
+          setTimeout(() => resolve({ data: { session: null } }), 600)
+        );
+        const { data: sessionData } = await Promise.race([sessionPromise, sessionTimeout]);
+        const session = sessionData?.session;
         if (session?.user?.email) {
           const email = session.user.email.toLowerCase().trim();
           const { data } = await supabase

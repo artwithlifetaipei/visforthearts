@@ -131,7 +131,12 @@ function ExhibitorPortalLayoutContent({ children }: { children: React.ReactNode 
 
     const checkAuth = async () => {
       try {
-        const { data: { session: currentSession } } = await supabase.auth.getSession();
+        const sessionPromise = supabase.auth.getSession();
+        const sessionTimeout = new Promise<any>((resolve) =>
+          setTimeout(() => resolve({ data: { session: null } }), 600)
+        );
+        const { data: sessionData } = await Promise.race([sessionPromise, sessionTimeout]);
+        const currentSession = sessionData?.session;
         
         if (currentSession) {
           setSession(currentSession);

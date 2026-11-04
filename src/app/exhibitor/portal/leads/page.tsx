@@ -146,7 +146,12 @@ export default function ExhibitorLeadsPage() {
       setLoading(true);
       try {
         let currentBrand = brand;
-        const { data: { session } } = await supabase.auth.getSession();
+        const sessionPromise = supabase.auth.getSession();
+        const sessionTimeout = new Promise<any>((resolve) =>
+          setTimeout(() => resolve({ data: { session: null } }), 600)
+        );
+        const { data: sessionData } = await Promise.race([sessionPromise, sessionTimeout]);
+        const session = sessionData?.session;
         let currentEmail = '';
 
         if (session?.user?.email) {
