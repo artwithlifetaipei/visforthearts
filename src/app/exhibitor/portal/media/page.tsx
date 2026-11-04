@@ -160,6 +160,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
   });
 
   const [savingQa, setSavingQa] = useState(false);
+  const [savingQaType, setSavingQaType] = useState<'draft' | 'submit' | null>(null);
   const [qaMessage, setQaMessage] = useState<{ text: string; type: 'success' | 'error' | '' }>({ text: '', type: '' });
   const [activeTab, setActiveTab] = useState<'qa' | 'images'>('qa');
 
@@ -168,11 +169,20 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
   const isAllAnswered = answeredCount === PR_QUESTIONS.length;
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadBrandAndAssets = async () => {
       try {
         let currentBrand = brand;
         if (!currentBrand) {
-          const { data: { session } } = await supabase.auth.getSession();
+          // Safe session retrieval with 600ms timeout race to prevent iOS WebKit deadlock
+          const sessionPromise = supabase.auth.getSession();
+          const sessionTimeout = new Promise<any>((resolve) =>
+            setTimeout(() => resolve({ data: { session: null } }), 600)
+          );
+          const { data: sessionData } = await Promise.race([sessionPromise, sessionTimeout]);
+          const session = sessionData?.session;
+
           if (session?.user?.email) {
             const userEmail = session.user.email.toLowerCase().trim();
             const { data } = await supabase
@@ -209,65 +219,53 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
           }
         }
 
-        if (currentBrand) {
+        if (currentBrand && isMounted) {
           setBrand(currentBrand);
           safeSetStorage('vis_portal_brand_data', JSON.stringify(currentBrand));
 
-          // 1. Fetch visual image assets & transparent logo (exclude system JSON records)
-          const { data: list } = await supabase
-            .from('exhibitor_media_assets')
-            .select('*')
-            .eq('brand_id', currentBrand.id)
-            .not('file_type', 'in', '("pr_qa_submission","booth_fee_proof","compliance_contract","perspective_store_master","concierge_lead")')
-            .order('created_at', { ascending: false });
-          
-          const rawList = list || [];
-          const logo = rawList.find((a: any) => a.file_type === 'brand_logo_transparent') || null;
-          const photos = rawList.filter((a: any) =>
-            !['brand_logo_transparent', 'pr_qa_submission', 'booth_fee_proof', 'compliance_contract', 'perspective_store_master', 'concierge_lead'].includes(a.file_type)
-          );
-
-          setLogoAsset(logo);
-          setAssets(photos);
-          if (logo) {
-            safeSetStorage(`vis_portal_media_logo_${currentBrand.id}`, JSON.stringify(logo));
-          } else {
-            try { sessionStorage.removeItem(`vis_portal_media_logo_${currentBrand.id}`); } catch {}
+          // 1. Fetch visual image assets & transparent logo via robust server API
+          try {
+            const assetsRes = await fetch(`/api/exhibitor/media/assets?brand_id=${currentBrand.id}`);
+            if (assetsRes.ok) {
+              const assetsData = await assetsRes.json();
+              if (isMounted) {
+                setLogoAsset(assetsData.logo || null);
+                setAssets(assetsData.assets || []);
+                if (assetsData.logo) {
+                  safeSetStorage(`vis_portal_media_logo_${currentBrand.id}`, JSON.stringify(assetsData.logo));
+                }
+                safeSetStorage(`vis_portal_media_assets_${currentBrand.id}`, JSON.stringify(assetsData.assets || []));
+              }
+            }
+          } catch (assetsErr) {
+            console.warn('Assets fetch fallback to local cache:', assetsErr);
           }
-          safeSetStorage(`vis_portal_media_assets_${currentBrand.id}`, JSON.stringify(photos));
 
-          // 2. Fetch PR Q&A submission
-          const { data: qaAsset } = await supabase
-            .from('exhibitor_media_assets')
-            .select('*')
-            .eq('brand_id', currentBrand.id)
-            .eq('file_type', 'pr_qa_submission')
-            .maybeSingle();
-
-          if (qaAsset?.file_url) {
-            try {
-              const parsed = JSON.parse(qaAsset.file_url);
-              setQaAnswers(parsed);
-              safeSetStorage(`vis_portal_pr_qa_${currentBrand.id}`, JSON.stringify(parsed));
-            } catch (parseErr) {
-              console.warn('Failed to parse remote PR QA data:', parseErr);
+          // 2. Fetch PR Q&A submission via robust server API
+          try {
+            const qaRes = await fetch(`/api/exhibitor/media/qa?brand_id=${currentBrand.id}`);
+            if (qaRes.ok) {
+              const qaResData = await qaRes.json();
+              if (isMounted && qaResData.data) {
+                setQaAnswers(qaResData.data);
+                safeSetStorage(`vis_portal_pr_qa_${currentBrand.id}`, JSON.stringify(qaResData.data));
+              }
             }
-          } else {
-            // Restore from local cache if database record not created yet
-            const local = safeGetStorage(`vis_portal_pr_qa_${currentBrand.id}`);
-            if (local) {
-              try { setQaAnswers(JSON.parse(local)); } catch {}
-            }
+          } catch (qaErr) {
+            console.warn('QA fetch fallback to local cache:', qaErr);
           }
         }
       } catch (err) {
         console.error('Error fetching media data:', err);
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     loadBrandAndAssets();
+    return () => {
+      isMounted = false;
+    };
   }, [parentBrand]);
 
   // Handle Q&A field update
@@ -276,6 +274,11 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
       const updated = { ...prev, [field]: val };
       if (brand?.id) {
         safeSetStorage(`vis_portal_pr_qa_${brand.id}`, JSON.stringify(updated));
+        try {
+          if (typeof window !== 'undefined' && window.localStorage) {
+            window.localStorage.setItem(`vis_portal_pr_qa_${brand.id}`, JSON.stringify(updated));
+          }
+        } catch {}
       }
       return updated;
     });
@@ -297,7 +300,14 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
     }
 
     setSavingQa(true);
+    setSavingQaType(isFinalSubmit ? 'submit' : 'draft');
     setQaMessage({ text: '', type: '' });
+
+    // Master safety timeout to guarantee buttons never hang indefinitely on mobile WebKit
+    const safetyTimer = setTimeout(() => {
+      setSavingQa(false);
+      setSavingQaType(null);
+    }, 12000);
 
     const nowIso = new Date().toISOString();
     const payload: PrQaState = {
@@ -313,20 +323,9 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
         if (typeof window !== 'undefined' && window.localStorage) {
           window.localStorage.setItem(`vis_portal_pr_qa_${brand.id}`, JSON.stringify(payload));
         }
-      } catch {
-        // ignore
-      }
+      } catch {}
 
-      // 2. Obtain auth token if available
-      let token: string | null = null;
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        token = session?.access_token || null;
-      } catch {
-        // ignore
-      }
-
-      // 3. Dispatch to robust server API endpoint with 10s timeout guarantee
+      // 2. Dispatch to server API endpoint with 10s timeout guarantee
       const controller = new AbortController();
       const timeoutId = setTimeout(() => controller.abort(), 10000);
 
@@ -334,7 +333,6 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          ...(token ? { 'Authorization': `Bearer ${token}` } : {})
         },
         body: JSON.stringify({
           brand_id: brand.id,
@@ -368,7 +366,7 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
       setTimeout(() => setQaMessage({ text: '', type: '' }), 8000);
 
     } catch (ex: any) {
-      console.warn('API sync warning:', ex);
+      console.warn('API sync fallback to local storage:', ex);
       // Fallback: the draft is already saved in local storage
       setQaAnswers(payload);
       const timeStr = new Date().toLocaleTimeString(lang === 'en' ? 'en-US' : 'zh-TW', { hour12: false });
@@ -381,7 +379,9 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
       });
       setTimeout(() => setQaMessage({ text: '', type: '' }), 8000);
     } finally {
+      clearTimeout(safetyTimer);
       setSavingQa(false);
+      setSavingQaType(null);
     }
   };
 
@@ -417,113 +417,42 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
     }
 
     setUploadingLogo(true);
+    const safetyTimer = setTimeout(() => setUploadingLogo(false), 20000);
 
     try {
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const base64Data = reader.result as string;
-        let fileUrl = '';
-        const fileExt = file.name.split('.').pop() || (isSvg ? 'svg' : isWebp ? 'webp' : 'png');
-        const storagePath = `${brand.id}/logo_transparent_${Date.now()}.${fileExt}`;
-
         try {
-          // If previous logo exists in storage, clean it up
-          if (logoAsset?.file_url?.includes('exhibitor-media')) {
-            try {
-              const oldParts = logoAsset.file_url.split('exhibitor-media/');
-              if (oldParts.length === 2) {
-                await supabase.storage.from('exhibitor-media').remove([oldParts[1]]);
-              }
-            } catch (delErr) {
-              console.warn('Error removing old logo from storage:', delErr);
-            }
-          }
-
-          let uploadSuccess = false;
-          const { error: directUploadError } = await supabase.storage
-            .from('exhibitor-media')
-            .upload(storagePath, file, {
-              contentType: file.type || (isSvg ? 'image/svg+xml' : isWebp ? 'image/webp' : 'image/png'),
-              upsert: true
-            });
-
-          if (!directUploadError) {
-            uploadSuccess = true;
-          } else {
-            // Buffer fallback
-            try {
-              const base64Clean = base64Data.split(',')[1];
-              const buffer = Buffer.from(base64Clean, 'base64');
-              const { error: bufError } = await supabase.storage
-                .from('exhibitor-media')
-                .upload(storagePath, buffer, {
-                  contentType: file.type,
-                  upsert: true
-                });
-              if (!bufError) uploadSuccess = true;
-            } catch {}
-          }
-
-          if (uploadSuccess) {
-            const { data: publicUrlData } = supabase.storage
-              .from('exhibitor-media')
-              .getPublicUrl(storagePath);
-            fileUrl = publicUrlData?.publicUrl || base64Data;
-          } else {
-            fileUrl = base64Data;
-          }
-        } catch {
-          fileUrl = base64Data;
-        }
-
-        let savedRow: any = null;
-        if (logoAsset?.id) {
-          const { data, error } = await supabase
-            .from('exhibitor_media_assets')
-            .update({
-              file_url: fileUrl,
-              file_name: file.name,
-              file_type: 'brand_logo_transparent',
-              created_at: new Date().toISOString()
-            })
-            .eq('id', logoAsset.id)
-            .select()
-            .single();
-
-          if (error) {
-            setLogoError(t(`更新失敗: ${error.message}`, `Update failed: ${error.message}`));
-          } else {
-            savedRow = data;
-          }
-        } else {
-          const { data, error } = await supabase
-            .from('exhibitor_media_assets')
-            .insert({
+          const base64Data = reader.result as string;
+          const res = await fetch('/api/exhibitor/media/assets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
               brand_id: brand.id,
-              file_url: fileUrl,
               file_name: file.name,
               file_type: 'brand_logo_transparent',
-            })
-            .select()
-            .single();
+              file_base64: base64Data,
+            }),
+          });
 
-          if (error) {
-            setLogoError(t(`儲存失敗: ${error.message}`, `Save failed: ${error.message}`));
-          } else {
-            savedRow = data;
+          const data = await res.json();
+          if (!res.ok || data.error) {
+            setLogoError(t(`上傳失敗: ${data.error || 'Server error'}`, `Upload failed: ${data.error || 'Server error'}`));
+          } else if (data.asset) {
+            setLogoAsset(data.asset);
+            safeSetStorage(`vis_portal_media_logo_${brand.id}`, JSON.stringify(data.asset));
           }
+        } catch (postErr: any) {
+          setLogoError(t(`上傳過程異常: ${postErr.message}`, `Upload error: ${postErr.message}`));
+        } finally {
+          clearTimeout(safetyTimer);
+          setUploadingLogo(false);
+          e.target.value = '';
         }
-
-        if (savedRow) {
-          setLogoAsset(savedRow);
-          safeSetStorage(`vis_portal_media_logo_${brand.id}`, JSON.stringify(savedRow));
-        }
-
-        setUploadingLogo(false);
-        e.target.value = '';
       };
       reader.readAsDataURL(file);
     } catch {
+      clearTimeout(safetyTimer);
       setLogoError(t('上傳過程中發生異常，請重試。', 'An error occurred during upload. Please try again.'));
       setUploadingLogo(false);
       e.target.value = '';
@@ -537,24 +466,18 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
     setLogoError('');
 
     try {
-      if (logoAsset.file_url?.includes('exhibitor-media')) {
-        try {
-          const parts = logoAsset.file_url.split('exhibitor-media/');
-          if (parts.length === 2) {
-            await supabase.storage.from('exhibitor-media').remove([parts[1]]);
-          }
-        } catch (storageErr) {
-          console.warn('Storage deletion error:', storageErr);
-        }
-      }
+      const res = await fetch('/api/exhibitor/media/assets', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id: logoAsset.id,
+          brand_id: brand.id,
+        }),
+      });
 
-      const { error } = await supabase
-        .from('exhibitor_media_assets')
-        .delete()
-        .eq('id', logoAsset.id);
-
-      if (error) {
-        setLogoError(t(`刪除失敗: ${error.message}`, `Delete failed: ${error.message}`));
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setLogoError(t(`刪除失敗: ${data.error || 'Delete failed'}`, `Delete failed: ${data.error || 'Delete failed'}`));
       } else {
         setLogoAsset(null);
         try { sessionStorage.removeItem(`vis_portal_media_logo_${brand.id}`); } catch {}
@@ -589,92 +512,70 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
 
     setUploading(true);
     setErrorMessage('');
+    const safetyTimer = setTimeout(() => setUploading(false), 20000);
 
     try {
       const reader = new FileReader();
       reader.onloadend = async () => {
-        const base64Data = reader.result as string;
-        let fileUrl = '';
-        const fileExt = file.name.split('.').pop() || 'png';
-        const fileName = `${brand.id}/${Date.now()}_${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
-        
         try {
-          const base64Clean = base64Data.split(',')[1];
-          const buffer = Buffer.from(base64Clean, 'base64');
+          const base64Data = reader.result as string;
+          const res = await fetch('/api/exhibitor/media/assets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              brand_id: brand.id,
+              file_name: file.name,
+              file_type: file.type,
+              file_base64: base64Data,
+            }),
+          });
 
-          const { error: uploadError } = await supabase.storage
-            .from('exhibitor-media')
-            .upload(fileName, buffer, {
-              contentType: file.type,
-              upsert: true
-            });
-
-          if (uploadError) {
-            fileUrl = base64Data;
-          } else {
-            const { data: publicUrlData } = supabase.storage
-              .from('exhibitor-media')
-              .getPublicUrl(fileName);
-            fileUrl = publicUrlData?.publicUrl || base64Data;
+          const data = await res.json();
+          if (!res.ok || data.error) {
+            setErrorMessage(t(`儲存失敗: ${data.error || 'Save failed'}`, `Save failed: ${data.error || 'Save failed'}`));
+          } else if (data.asset) {
+            setAssets(prev => [data.asset, ...prev]);
           }
-        } catch {
-          fileUrl = base64Data;
+        } catch (uploadErr: any) {
+          setErrorMessage(t(`上傳過程異常: ${uploadErr.message}`, `Upload error: ${uploadErr.message}`));
+        } finally {
+          clearTimeout(safetyTimer);
+          setUploading(false);
+          e.target.value = '';
         }
-
-        const { data, error } = await supabase
-          .from('exhibitor_media_assets')
-          .insert({
-            brand_id: brand.id,
-            file_url: fileUrl,
-            file_name: file.name,
-            file_type: file.type,
-          })
-          .select()
-          .single();
-
-        if (error) {
-          setErrorMessage(t(`儲存失敗: ${error.message}`, `Save failed: ${error.message}`));
-        } else {
-          setAssets(prev => [data, ...prev]);
-        }
-        setUploading(false);
       };
       reader.readAsDataURL(file);
     } catch {
+      clearTimeout(safetyTimer);
       setErrorMessage(t('上傳過程中發生異常。', 'An error occurred during upload.'));
       setUploading(false);
+      e.target.value = '';
     }
   };
 
-  const handleDeleteAsset = async (id: string, fileUrl: string) => {
+  const handleDeleteAsset = async (id: string, _fileUrl?: string) => {
     if (deletingId || !brand) return;
     setDeletingId(id);
     setErrorMessage('');
 
     try {
-      if (fileUrl.includes('exhibitor-media')) {
-        try {
-          const parts = fileUrl.split('exhibitor-media/');
-          if (parts.length === 2) {
-            await supabase.storage.from('exhibitor-media').remove([parts[1]]);
-          }
-        } catch (ex) {
-          console.error('Error deleting from storage:', ex);
-        }
-      }
+      const res = await fetch('/api/exhibitor/media/assets', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          id,
+          brand_id: brand.id,
+        }),
+      });
 
-      const { error } = await supabase
-        .from('exhibitor_media_assets')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        setErrorMessage(t(`刪除記錄失敗: ${error.message}`, `Delete failed: ${error.message}`));
+      const data = await res.json();
+      if (!res.ok || data.error) {
+        setErrorMessage(t(`刪除記錄失敗: ${data.error || 'Delete failed'}`, `Delete failed: ${data.error || 'Delete failed'}`));
       } else {
         setAssets(prev => prev.filter(a => a.id !== id));
       }
-    } catch (ex) {
-      console.error(ex);
+    } catch (ex: any) {
+      setErrorMessage(t(`刪除過程異常: ${ex.message}`, `Delete error: ${ex.message}`));
     } finally {
       setDeletingId(null);
     }
@@ -921,8 +822,8 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
                 disabled={savingQa}
                 className="px-4 py-2 rounded-lg bg-white/10 hover:bg-white/15 text-white border border-white/15 text-xs font-semibold tracking-wider transition-all flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                {savingQa ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5 text-[#DFBA87]" />}
-                <span>{t('暫存全部草稿 (寫到一半可存)', 'Save All Drafts')}</span>
+                {savingQaType === 'draft' ? <Loader2 className="w-3.5 h-3.5 animate-spin text-[#DFBA87]" /> : <Save className="w-3.5 h-3.5 text-[#DFBA87]" />}
+                <span>{savingQaType === 'draft' ? t('儲存中...', 'Saving...') : t('暫存全部草稿 (寫到一半可存)', 'Save All Drafts')}</span>
               </button>
 
               <button
@@ -931,8 +832,8 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
                 disabled={savingQa}
                 className="px-5 py-2 rounded-lg bg-[#DFBA87] hover:bg-[#c9a370] text-black text-xs font-bold tracking-wider transition-all shadow-md flex items-center gap-1.5 cursor-pointer disabled:opacity-50"
               >
-                {savingQa ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
-                <span>{t('確認完成', 'Confirm Complete')}</span>
+                {savingQaType === 'submit' ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
+                <span>{savingQaType === 'submit' ? t('送出中...', 'Submitting...') : t('確認完成', 'Confirm Complete')}</span>
               </button>
             </div>
           </div>
@@ -1021,11 +922,15 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
                         type="button"
                         onClick={() => handleSaveQa(false)}
                         disabled={savingQa}
-                        className="text-neutral-400 hover:text-[#DFBA87] transition-colors flex items-center gap-1 font-medium cursor-pointer"
+                        className="text-neutral-400 hover:text-[#DFBA87] transition-colors flex items-center gap-1 font-medium cursor-pointer disabled:opacity-50"
                         title={t('暫存本題草稿', 'Save this answer')}
                       >
-                        <Save className="w-3 h-3" />
-                        <span>{t('暫存本題', 'Save Draft')}</span>
+                        {savingQaType === 'draft' ? (
+                          <Loader2 className="w-3 h-3 animate-spin text-[#DFBA87]" />
+                        ) : (
+                          <Save className="w-3 h-3" />
+                        )}
+                        <span>{savingQaType === 'draft' ? t('暫存中...', 'Saving...') : t('暫存本題', 'Save Draft')}</span>
                       </button>
                     </div>
                   </div>
@@ -1092,8 +997,8 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
                 disabled={savingQa}
                 className="px-6 py-2.5 rounded-lg bg-white/10 hover:bg-white/15 text-white border border-white/20 text-xs font-semibold tracking-wider transition-all flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
-                {savingQa ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4 text-[#DFBA87]" />}
-                <span>{t('暫存全部草稿 (寫到一半隨時可存)', 'Save Draft (Continue Later)')}</span>
+                {savingQaType === 'draft' ? <Loader2 className="w-4 h-4 animate-spin text-[#DFBA87]" /> : <Save className="w-4 h-4 text-[#DFBA87]" />}
+                <span>{savingQaType === 'draft' ? t('儲存中...', 'Saving...') : t('暫存全部草稿 (寫到一半隨時可存)', 'Save Draft (Continue Later)')}</span>
               </button>
 
               <button
@@ -1102,8 +1007,8 @@ export default function ExhibitorMediaPage({ brand: parentBrand }: { brand?: any
                 disabled={savingQa}
                 className="px-8 py-2.5 rounded-lg bg-[#DFBA87] hover:bg-[#c9a370] text-black text-xs font-bold tracking-widest uppercase transition-all shadow-lg flex items-center gap-2 cursor-pointer disabled:opacity-50"
               >
-                {savingQa ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
-                <span>{t('確認完成', 'Confirm Complete')}</span>
+                {savingQaType === 'submit' ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
+                <span>{savingQaType === 'submit' ? t('送出中...', 'Submitting...') : t('確認完成', 'Confirm Complete')}</span>
               </button>
             </div>
 
