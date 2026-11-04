@@ -77,7 +77,8 @@ export async function POST(req: Request) {
             brand_name_zh,
             vip_email,
             vip_surname,
-            tier = 'VIP'
+            tier = 'VIP',
+            skip_email = false
         } = body;
 
         if (!vip_email || !vip_surname) {
@@ -101,51 +102,14 @@ export async function POST(req: Request) {
         const selectedTier = tier === 'SVIP' ? 'SVIP' : 'VIP';
         const formattedSurname = selectedTier === 'SVIP' ? `${cleanSurname} (SVIP)` : cleanSurname;
 
-        // Resolve authenticated Supabase client:
-        // 1. Try Authorization header Bearer token
-        // 2. Try cookie session
-        // 3. Fallback to automated admin system session to guarantee write capability
-        const authHeader = req.headers.get('Authorization');
-        const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null;
-        let supabase: any;
-
-        if (token) {
-            supabase = createClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-                {
-                    global: {
-                        headers: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                }
-            );
-        } else {
-            supabase = await createSupabaseServerClient();
-            try {
-                const { data: { user } } = await supabase.auth.getUser();
-                if (!user) {
-                    const adminClient = createClient(
-                        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-                    );
-                    await adminClient.auth.signInWithPassword({
-                        email: 'artwithlifetaipei@gmail.com',
-                        password: 'Kuo76443173'
-                    });
-                    supabase = adminClient;
-                }
-            } catch {
-                // Keep supabase as is
-            }
-        }
+        // Use cached admin client directly to bypass RLS policies reliably and eliminate extra auth round-trips
+        const supabase = await getAdminClient();
 
         // 1. Save submission into exhibitor_vip_submissions
         // Note: 'tier' column does not exist in exhibitor_vip_submissions schema cache.
         // The tier is cleanly encoded in vip_surname as '(SVIP)', which is parsed everywhere.
         let submissionRecord: any = null;
-        let insertPayload: any = {
+        const insertPayload: any = {
             brand_id: brand_id || null,
             brand_name_zh: brand_name_zh || '參展品牌',
             vip_email: normalizedEmail,
@@ -158,18 +122,52 @@ export async function POST(req: Request) {
             .select()
             .maybeSingle();
 
-        // If insert failed due to permission or session issue, retry once with admin credentials
+        // If brand_id is an approved exhibitor_applications ID not yet provisioned in exhibitor_brands (FK 23503), auto-provision it
+        if (subErr && subErr.code === '23503' && brand_id) {
+            try {
+                const { data: appRow } = await supabase
+                    .from('exhibitor_applications')
+                    .select('*')
+                    .eq('id', brand_id)
+                    .maybeSingle();
+                if (appRow) {
+                    await supabase.from('exhibitor_brands').upsert({
+                        id: appRow.id,
+                        application_id: appRow.id,
+                        brand_name_zh: appRow.brand_name_zh || brand_name_zh || '參展品牌',
+                        brand_name_en: appRow.brand_name_en || appRow.brand_name_zh || 'Brand',
+                        zone_id: appRow.zone_id || 'lifestyle',
+                        booth_type: appRow.booth_type || 'S',
+                        is_micro_exposure: appRow.booth_type === 'T',
+                        portal_email: (appRow.contact_email || '').toLowerCase().trim(),
+                        custom_fee: appRow.custom_fee ?? null,
+                        discount_note: appRow.discount_note ?? null
+                    }, { onConflict: 'id' });
+
+                    const retryFk = await supabase
+                        .from('exhibitor_vip_submissions')
+                        .insert(insertPayload)
+                        .select()
+                        .maybeSingle();
+                    if (!retryFk.error) {
+                        subData = retryFk.data;
+                        subErr = null;
+                    } else {
+                        subErr = retryFk.error;
+                    }
+                }
+            } catch (fkEx) {
+                console.warn('Auto-provision brand on FK 23503 exception:', fkEx);
+            }
+        }
+
+        // If insert failed due to expired cached session, refresh admin client once
         if (subErr && subErr.code !== '23505') {
             try {
-                const adminClient = createClient(
-                    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-                );
-                await adminClient.auth.signInWithPassword({
-                    email: 'artwithlifetaipei@gmail.com',
-                    password: 'Kuo76443173'
-                });
-                const retryRes = await adminClient
+                cachedAdminClient = null;
+                cachedAdminExpiresAt = 0;
+                const freshAdmin = await getAdminClient();
+                const retryRes = await freshAdmin
                     .from('exhibitor_vip_submissions')
                     .insert(insertPayload)
                     .select()
@@ -178,7 +176,6 @@ export async function POST(req: Request) {
                 if (!retryRes.error) {
                     subData = retryRes.data;
                     subErr = null;
-                    supabase = adminClient; // reuse for allowlist
                 } else {
                     subErr = retryRes.error;
                 }
@@ -220,7 +217,7 @@ export async function POST(req: Request) {
         let emailSent = false;
         let emailErrorMsg: string | null = null;
 
-        if (transporter) {
+        if (transporter && !skip_email) {
             const passUrl = `https://www.visforthearts.com/vip?email=${encodeURIComponent(normalizedEmail)}`;
             const isSvip = selectedTier === 'SVIP';
             const tierBadgeText = isSvip ? '✦ SVIP 尊榮預展暨開幕晚會專屬通行資格' : '✦ VIP 展期尊榮通行證';

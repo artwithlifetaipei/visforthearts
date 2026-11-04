@@ -9,6 +9,7 @@ import {
   Loader2, Sparkles, CheckCircle2, Copy, Check, MessageSquare, Share2, ExternalLink
 } from 'lucide-react';
 import { useExhibitorLanguage } from '@/lib/ExhibitorLanguageContext';
+import { safeJson } from '@/lib/uploadUtils';
 
 function safeGetStorage(key: string): string | null {
   try {
@@ -263,10 +264,9 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
 
       // 2. Call dedicated backend invite API with timeout
       let result: any = null;
-      let emailSent = false;
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 12000);
+        const timeoutId = setTimeout(() => controller.abort(), 25000);
 
         const res = await fetch('/api/exhibitor/vip/invite', {
           method: 'POST',
@@ -281,8 +281,7 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
           }),
         });
         clearTimeout(timeoutId);
-        result = await res.json();
-        emailSent = !!result?.emailSent;
+        result = await safeJson(res);
       } catch (apiErr: any) {
         console.warn('API invite fetch warning, using client fallback:', apiErr);
       }
