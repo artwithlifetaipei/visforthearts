@@ -282,15 +282,18 @@ export async function POST(req: Request) {
             `;
 
             try {
-                await transporter.sendMail({
-                    from: `"VIS Contemporary Culture" <${gmailUser}>`,
-                    to: normalizedEmail,
-                    subject: subject,
-                    html: htmlContent
-                });
+                await Promise.race([
+                    transporter.sendMail({
+                        from: `"VIS Contemporary Culture" <${gmailUser}>`,
+                        to: normalizedEmail,
+                        subject: subject,
+                        html: htmlContent
+                    }),
+                    new Promise((_, reject) => setTimeout(() => reject(new Error('Email dispatch timeout')), 6000))
+                ]);
                 emailSent = true;
             } catch (mailErr: any) {
-                console.error('Failed to send branded VIP invite email:', mailErr);
+                console.warn('VIP email dispatch note:', mailErr?.message);
                 emailErrorMsg = mailErr?.message || 'Mail transport error';
             }
         }

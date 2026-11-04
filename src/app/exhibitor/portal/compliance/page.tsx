@@ -691,37 +691,65 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
     },
     {
       id: 'rule_ip' as const,
-      title: '五、智財保障、大會資源裁量與管轄法院 Intellectual Property & Jurisdiction',
-      summary: '保障展出商品之原創與合法授權，授予大會合理宣傳推廣權限，並載明準據法與第一審管轄法院。',
+      title: '五、品牌原創性承諾、杜絕批發與智慧財產權規範 Originality Guarantee, Anti-Wholesale Policy & IP Rights',
+      summary: '保證展品為獨立創作並絕無抄襲仿冒，大會嚴格婉拒任何常態性批發選品或非原創量產物，並載明送審一致性與侵權撤展罰則。',
       content: (
         <div className="space-y-4 text-neutral-300 text-xs font-light leading-relaxed">
           <div>
             <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
               <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
-              智慧財產權與授權 (備忘錄第七條)
-            </h4>
-            <ul className="list-disc pl-5 space-y-1 text-neutral-400">
-              <li>參展品牌保證其展出之所有商品、作品、設計、商標及宣傳品均擁有合法之智慧財產權或已取得合法授權。</li>
-              <li>嚴禁展出、販售任何仿冒、侵權或來源不明之商品；若有侵權爭議，品牌方應自負全責。</li>
-              <li>品牌方同意授權大會於展會宣傳、紀錄、報導之目的範圍內，非專屬、無償使用其品牌名稱、Logo 及現場展品照片與影像。</li>
-            </ul>
-          </div>
-          <div>
-            <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
-              <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
-              大會支持資源之裁量權 (備忘錄第九條)
+              品牌獨立創作與原創性承諾
             </h4>
             <p className="text-neutral-400">
-              大會對於是否提供額外支持資源（宣傳曝光、媒體引導、VIP參觀等）享有最高裁量權，該支持屬自願性善意行為。大會對個別展商之支持得有所不同，品牌方不得以「差別待遇」要求退費或補償。
+              為確保整體展會之藝術質量、策展定位與高端藏家觀展體驗，參展品牌鄭重保證：所有現場展出、陳列與銷售之物件，均須為該品牌獨立研發、設計、製作之原創作品（或具備完整合法授權之原創設計合作項目）。大會嚴格婉拒任何常態性批發選品、市售採購品、非原創之商業量產物件（Wholesale Goods & Generic Mass Products）或未經實質原創設計之貼牌代工品展出。為維護觀展體驗與品牌定位，敬請確保展品之原創性，大會全面謝絕非原創之批發性商業量產物。
             </p>
           </div>
           <div>
             <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
               <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
-              準據法與管轄法院 (備忘錄第十一條)
+              送審提案之一致性義務
             </h4>
             <p className="text-neutral-400">
-              本合約之成立、效力、解釋、履行及權利義務關係均以<strong className="text-white">中華民國法律</strong>為準據法。因合約所生爭議應先本於誠信原則協商，協商不成時，雙方同意以<strong className="text-[#DFBA87]">臺灣臺北地方法院</strong>為第一審合意管轄法院。
+              現場展出商品之美學風格、原創工藝與品類定位，必須與乙方原向大會策展委員會遞交並獲審查核准之申請內容（含作品圖錄與提案備忘）實質相符。未經大會策展委員會事先書面核准，乙方不得於展位現場擅自夾帶、陳列或推銷與原審提案不符之次級品、商業批發品、外部採購雜物或非原創選物。
+            </p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
+              <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
+              抄襲仿冒認定、即刻撤展與違約罰則
+            </h4>
+            <ul className="list-disc pl-5 space-y-1 text-neutral-400">
+              <li>參展品牌保證展品絕無侵害他人著作權、專利權、商標權、營業秘密、外觀設計或其他智慧財產權之情事。</li>
+              <li>展會期間若有展品經第三方具名舉證侵權、原作者抗議，或經大會策展委員會認定涉有重大抄襲、仿冒或顯係商業批發採購者，大會得要求品牌於 2 小時內提出原創設計歷程證明、專利商標證書或合法授權文件。</li>
+              <li>若品牌無法於時限內提供充分證明，或經大會審定確屬抄襲、非原創批發品者，大會得立即要求該物件下架並封存撤除；情節重大或拒不配合者，大會得逕行終止其參展資格、要求即刻撤出展位，且已繳納之參展費用與保證金全數不予退還，轉作違約賠償金，乙方絕無異議。</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
+              <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
+              商譽損害責任與消費者爭議承擔
+            </h4>
+            <ul className="list-disc pl-5 space-y-1 text-neutral-400">
+              <li>參展品牌若因抄襲、仿冒、展出非原創批發品或智慧財產權爭議，致使大會、展會品牌形象、公信力或現場其他參展單位之權益遭受損害者，品牌方須無條件承擔全部民刑事法律責任（包含但不限於第三方索賠、訴訟費、專業律師費），並應全額賠償大會因此所遭受之直接損害、公關修復支出與商譽損失。</li>
+              <li>參展單位對其現場展出及交易之展品負有絕對之物之瑕疵擔保、品質保證與真實性責任。如發生任何消費者退換貨爭議、產地不實、材質標示不符或原創真實性爭端，概由品牌方自負全責妥善處理解決，與主辦單位無涉。</li>
+            </ul>
+          </div>
+          <div>
+            <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
+              <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
+              展務宣傳與影像合理授權
+            </h4>
+            <p className="text-neutral-400">
+              品牌方同意授權大會於展會宣傳、紀錄、報導、官方網站、專刊出版之目的範圍內，非專屬、無償使用其品牌名稱、商標 Logo 及現場展品照片與影音紀錄。
+            </p>
+          </div>
+          <div>
+            <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
+              <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
+              準據法與合意管轄法院
+            </h4>
+            <p className="text-neutral-400">
+              本合約之成立、效力、解釋、履行及權利義務關係均以<strong className="text-white">中華民國法律</strong>為準據法。因合約所生爭議應先本於誠信原則協商，協商不成時，雙方合意以<strong className="text-[#DFBA87]">臺灣臺北地方法院</strong>為第一審管轄法院。
             </p>
           </div>
         </div>

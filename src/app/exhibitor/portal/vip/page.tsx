@@ -220,19 +220,34 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
     setSuccessNotice('');
 
     try {
-      const { data: { session: authSession } } = await supabase.auth.getSession();
-      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
-      if (authSession?.access_token) {
-        headers['Authorization'] = `Bearer ${authSession.access_token}`;
+      // 1. Retrieve access token safely with timeout to prevent mobile WebKit deadlock
+      let token: string | null = null;
+      try {
+        const sessionResult = await Promise.race([
+          supabase.auth.getSession(),
+          new Promise<any>((resolve) => setTimeout(() => resolve({ data: { session: null } }), 600))
+        ]);
+        token = sessionResult?.data?.session?.access_token || null;
+      } catch {
+        // Safe to ignore token timeout
       }
 
-      // Call dedicated backend invite API for instant auto-activation & branded email dispatch
+      const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+      if (token) {
+        headers['Authorization'] = `Bearer ${token}`;
+      }
+
+      // 2. Call dedicated backend invite API with timeout
       let result: any = null;
       let emailSent = false;
       try {
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
+
         const res = await fetch('/api/exhibitor/vip/invite', {
           method: 'POST',
           headers,
+          signal: controller.signal,
           body: JSON.stringify({
             brand_id: brand.id,
             brand_name_zh: brand.brand_name_zh,
@@ -241,9 +256,10 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
             tier: selectedTier,
           }),
         });
+        clearTimeout(timeoutId);
         result = await res.json();
-        emailSent = !!result.emailSent;
-      } catch (apiErr) {
+        emailSent = !!result?.emailSent;
+      } catch (apiErr: any) {
         console.warn('API invite fetch warning, using client fallback:', apiErr);
       }
 
@@ -315,7 +331,7 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
       setEmail('');
       setSelectedTier('VIP');
       
-      const emailNotice = result.emailSent 
+      const emailNotice = result?.emailSent 
         ? t('官方邀請函已即時發送至貴賓信箱！', 'Official invitation email sent immediately!')
         : t('已成功開通貴賓通行證！', 'VIP Pass successfully activated!');
       
