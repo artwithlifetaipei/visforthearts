@@ -4,6 +4,36 @@ import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import nodemailer from 'nodemailer';
 
+export const dynamic = 'force-dynamic';
+
+let cachedAdminClient: any = null;
+let cachedAdminExpiresAt = 0;
+
+async function getAdminClient() {
+    const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+    if (serviceKey) {
+        return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, serviceKey);
+    }
+    const now = Date.now();
+    if (cachedAdminClient && cachedAdminExpiresAt > now) {
+        return cachedAdminClient;
+    }
+    const adminClient = createClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+        { auth: { persistSession: false, autoRefreshToken: false } }
+    );
+    const { error } = await adminClient.auth.signInWithPassword({
+        email: 'artwithlifetaipei@gmail.com',
+        password: 'Kuo76443173'
+    });
+    if (!error) {
+        cachedAdminClient = adminClient;
+        cachedAdminExpiresAt = now + 30 * 60 * 1000;
+    }
+    return adminClient;
+}
+
 async function createSupabaseServerClient() {
     const cookieStore = await cookies();
     return createServerClient(
@@ -307,6 +337,95 @@ export async function POST(req: Request) {
 
     } catch (err: any) {
         console.error('Error in exhibitor VIP invite route:', err);
+        return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
+    }
+}
+
+export async function GET(req: Request) {
+    try {
+        const { searchParams } = new URL(req.url);
+        const brandId = searchParams.get('brand_id');
+
+        if (!brandId) {
+            return NextResponse.json({ error: 'Missing brand_id' }, { status: 400 });
+        }
+
+        const adminDb = await getAdminClient();
+        const { data: vips, error } = await adminDb
+            .from('exhibitor_vip_submissions')
+            .select('*')
+            .eq('brand_id', brandId)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error in GET VIPs:', error);
+            return NextResponse.json({ error: error.message }, { status: 500 });
+        }
+
+        return NextResponse.json({
+            success: true,
+            vips: vips || []
+        });
+
+    } catch (err: any) {
+        console.error('Exception in GET /api/exhibitor/vip/invite:', err);
+        return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
+    }
+}
+
+export async function DELETE(req: Request) {
+    try {
+        let id: string | null = null;
+        let brandId: string | null = null;
+
+        try {
+            const body = await req.json();
+            id = body.id;
+            brandId = body.brand_id;
+        } catch {
+            const { searchParams } = new URL(req.url);
+            id = searchParams.get('id');
+            brandId = searchParams.get('brand_id');
+        }
+
+        if (!id) {
+            return NextResponse.json({ error: 'Missing id' }, { status: 400 });
+        }
+
+        const adminDb = await getAdminClient();
+
+        const { data: row } = await adminDb
+            .from('exhibitor_vip_submissions')
+            .select('id, vip_email, brand_id')
+            .eq('id', id)
+            .maybeSingle();
+
+        if (row) {
+            let deleteQuery = adminDb
+                .from('exhibitor_vip_submissions')
+                .delete()
+                .eq('id', id);
+
+            if (brandId) {
+                deleteQuery = deleteQuery.eq('brand_id', brandId);
+            }
+
+            const { error: delErr } = await deleteQuery;
+            if (delErr) {
+                return NextResponse.json({ error: delErr.message }, { status: 500 });
+            }
+
+            if (row.vip_email) {
+                try {
+                    await adminDb.from('vip_allowlist').delete().eq('email', row.vip_email);
+                } catch {}
+            }
+        }
+
+        return NextResponse.json({ success: true, id });
+
+    } catch (err: any) {
+        console.error('Exception in DELETE /api/exhibitor/vip/invite:', err);
         return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
     }
 }

@@ -143,16 +143,35 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
           setBrand(currentBrand);
           safeSetStorage('vis_portal_brand_data', JSON.stringify(currentBrand));
           
-          // Fetch VIP submissions for this brand
-          const { data: list } = await supabase
-            .from('exhibitor_vip_submissions')
-            .select('*')
-            .eq('brand_id', currentBrand.id)
-            .order('created_at', { ascending: false });
-          
-          const vipList = list || [];
-          setVips(vipList);
-          safeSetStorage(`vis_portal_vip_list_${currentBrand.id}`, JSON.stringify(vipList));
+          // Fetch VIP submissions for this brand via robust server API
+          try {
+            const vipRes = await fetch(`/api/exhibitor/vip/invite?brand_id=${currentBrand.id}`);
+            if (vipRes.ok) {
+              const vipData = await vipRes.json();
+              const vipList = vipData.vips || [];
+              setVips(vipList);
+              safeSetStorage(`vis_portal_vip_list_${currentBrand.id}`, JSON.stringify(vipList));
+            } else {
+              // Fallback to client query if endpoint returns non-200
+              const { data: list } = await supabase
+                .from('exhibitor_vip_submissions')
+                .select('*')
+                .eq('brand_id', currentBrand.id)
+                .order('created_at', { ascending: false });
+              const vipList = list || [];
+              setVips(vipList);
+              safeSetStorage(`vis_portal_vip_list_${currentBrand.id}`, JSON.stringify(vipList));
+            }
+          } catch {
+            const { data: list } = await supabase
+              .from('exhibitor_vip_submissions')
+              .select('*')
+              .eq('brand_id', currentBrand.id)
+              .order('created_at', { ascending: false });
+            const vipList = list || [];
+            setVips(vipList);
+            safeSetStorage(`vis_portal_vip_list_${currentBrand.id}`, JSON.stringify(vipList));
+          }
         }
       } catch (err) {
         console.error('Error fetching VIP list:', err);
@@ -353,24 +372,26 @@ export default function ExhibitorVipPage({ brand: parentBrand }: { brand?: any }
   };
 
   const handleDeleteVip = async (id: string) => {
-    if (deletingId) return;
+    if (deletingId || !brand) return;
     setDeletingId(id);
 
     try {
-      const { error } = await supabase
-        .from('exhibitor_vip_submissions')
-        .delete()
-        .eq('id', id);
+      const res = await fetch('/api/exhibitor/vip/invite', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id, brand_id: brand.id }),
+      });
 
-      if (error) {
-        alert(t(`刪除失敗: ${error.message}`, `Failed to remove: ${error.message}`));
+      const resData = await res.json();
+      if (!res.ok || resData.error) {
+        alert(t(`刪除失敗: ${resData.error || 'Server error'}`, `Failed to remove: ${resData.error || 'Server error'}`));
       } else {
         const updated = vips.filter(v => v.id !== id);
         setVips(updated);
         safeSetStorage(`vis_portal_vip_list_${brand.id}`, JSON.stringify(updated));
       }
-    } catch (ex) {
-      console.error(ex);
+    } catch (ex: any) {
+      alert(t(`刪除過程異常: ${ex.message}`, `Error: ${ex.message}`));
     } finally {
       setDeletingId(null);
     }
