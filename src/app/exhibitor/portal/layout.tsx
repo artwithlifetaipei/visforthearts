@@ -8,7 +8,7 @@ import { formatBoothDisplay } from '@/lib/exhibitorConstants';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Menu, X, Calendar, FileCheck, Users, Image as ImageIcon, LogOut, ShieldCheck, 
-  HelpCircle, ArrowRight, Sparkles, Loader2, CheckCircle2, QrCode, Globe, Ticket
+  HelpCircle, ArrowRight, Sparkles, Loader2, CheckCircle2, QrCode, Globe, Ticket, AlertTriangle
 } from 'lucide-react';
 import { ExhibitorLanguageProvider, useExhibitorLanguage } from '@/lib/ExhibitorLanguageContext';
 
@@ -90,6 +90,20 @@ function ExhibitorPortalLayoutContent({ children }: { children: React.ReactNode 
   });
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [missingProfileCount, setMissingProfileCount] = useState<number>(0);
+
+  useEffect(() => {
+    if (!brandData?.id && !brandData?.portal_email && !userEmail) return;
+    const emailParam = brandData?.portal_email || userEmail || '';
+    fetch(`/api/exhibitor/profile?brand_id=${brandData?.id || ''}&email=${encodeURIComponent(emailParam)}`)
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data?.missingFields)) {
+          setMissingProfileCount(data.missingFields.length);
+        }
+      })
+      .catch(() => {});
+  }, [brandData?.id, brandData?.portal_email, userEmail, pathname]);
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -969,6 +983,35 @@ function ExhibitorPortalLayoutContent({ children }: { children: React.ReactNode 
             </button>
           </div>
         </header>
+
+        {/* Global Top Alert Banner on Subpages when Basic Profile is Incomplete */}
+        {missingProfileCount > 0 && pathname !== '/exhibitor/portal' && (
+          <div className="mb-6 p-4 rounded-xl bg-gradient-to-r from-amber-500/20 via-amber-500/10 to-transparent border-2 border-amber-400/60 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg shadow-amber-500/10">
+            <div className="flex items-start gap-3">
+              <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5 animate-pulse" />
+              <div className="text-xs leading-relaxed">
+                <span className="font-bold text-amber-300 block sm:inline mr-1.5">
+                  {t(
+                    `【大會重要提醒】貴品牌尚有 ${missingProfileCount} 項「參展品牌基本資料」待補填寫：`,
+                    `[Important Notice] Your brand has ${missingProfileCount} required profile fields to complete:`
+                  )}
+                </span>
+                <span className="text-neutral-200 font-light">
+                  {t(
+                    '貴品牌為大會直接開通席位（或原申請表尚有缺漏欄位），請點擊右側按鈕前往補齊聯絡人、電話、寄件地址、發票統編與參展概念簡述。',
+                    'Please complete your contact person, phone, mailing address, tax ID, and concept brief in the Brand Profile section.'
+                  )}
+                </span>
+              </div>
+            </div>
+            <Link
+              href="/exhibitor/portal#brand-profile-section"
+              className="px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs whitespace-nowrap self-start sm:self-auto transition cursor-pointer flex items-center gap-1.5 shadow-md"
+            >
+              <span>{t('立即前往補填 →', 'Complete Profile Now →')}</span>
+            </Link>
+          </div>
+        )}
 
         {children}
       </main>
