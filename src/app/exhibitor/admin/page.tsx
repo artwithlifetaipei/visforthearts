@@ -121,6 +121,8 @@ export default function ExhibitorAdminPage() {
     return [];
   });
   const [mediaAssets, setMediaAssets] = useState<any[]>([]);
+  const [productList, setProductList] = useState<any[]>([]);
+  const [isBatchDownloading, setIsBatchDownloading] = useState(false);
   
   // UI helper states
   const [appFilter, setAppFilter] = useState<'all' | 'pending' | 'approved' | 'rejected'>('all');
@@ -485,12 +487,13 @@ export default function ExhibitorAdminPage() {
 
   const loadAllAdminData = async () => {
     try {
-      // Parallel fetch all 4 data sources simultaneously
+      // Parallel fetch all 5 data sources simultaneously
       const [
         { data: apps },
         { data: vips },
         { data: compliances },
         { data: media },
+        { data: products },
       ] = await Promise.all([
         supabase
           .from('exhibitor_applications')
@@ -508,17 +511,23 @@ export default function ExhibitorAdminPage() {
           .from('exhibitor_media_assets')
           .select('*, exhibitor_brands(id, brand_name_zh, brand_name_en, portal_email, booth_type, zone_id)')
           .order('created_at', { ascending: false }),
+        supabase
+          .from('exhibitor_products')
+          .select('*')
+          .order('created_at', { ascending: false }),
       ]);
 
       const appData = apps || [];
       const vipData = vips || [];
       const complianceData = compliances || [];
       const mediaData = media || [];
+      const prodData = products || [];
 
       setApplications(appData);
       setVipList(vipData);
       setComplianceList(complianceData);
       setMediaAssets(mediaData);
+      setProductList(prodData);
 
       // Cache non-application states in sessionStorage
       try {
@@ -2690,9 +2699,33 @@ export default function ExhibitorAdminPage() {
                         參展品牌提交之去背透明 Logo（PNG / SVG / WebP），大會社群聯名視覺、專刊印刷與現場導覽排版專用。
                       </span>
                     </div>
-                    <span className="text-xs font-mono text-[#DFBA87] bg-[#DFBA87]/10 px-3 py-1 rounded-full border border-[#DFBA87]/20 self-start">
-                      透明去背
-                    </span>
+                    <div className="flex items-center gap-2 self-start">
+                      {logoAssets.length > 0 && (
+                        <button
+                          type="button"
+                          disabled={isBatchDownloading}
+                          onClick={async () => {
+                            setIsBatchDownloading(true);
+                            try {
+                              for (const logo of logoAssets) {
+                                const bName = logo.exhibitor_brands?.brand_name_zh || '參展品牌';
+                                await handleDownloadAssetFile(logo.file_url, `Logo_${bName}_${logo.file_name || 'logo.png'}`);
+                                await new Promise(r => setTimeout(r, 350));
+                              }
+                            } finally {
+                              setIsBatchDownloading(false);
+                            }
+                          }}
+                          className="text-xs font-medium bg-[#DFBA87] hover:bg-[#c9a370] text-black px-3 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50"
+                        >
+                          <Download className="w-3.5 h-3.5" />
+                          <span>一鍵下載全部 Logo ({logoAssets.length})</span>
+                        </button>
+                      )}
+                      <span className="text-xs font-mono text-[#DFBA87] bg-[#DFBA87]/10 px-3 py-1 rounded-full border border-[#DFBA87]/20">
+                        透明去背
+                      </span>
+                    </div>
                   </div>
 
                   {logoAssets.length === 0 ? (
@@ -2767,14 +2800,38 @@ export default function ExhibitorAdminPage() {
 
                 {/* 3. Visual Image Assets Grid */}
                 <div className="space-y-4">
-                  <div className="border-b border-white/5 pb-3">
-                    <h3 className="text-sm font-semibold text-white tracking-wider flex items-center gap-2">
-                      <ImageIcon className="w-4 h-4 text-[#DFBA87]" />
-                      品牌高解析視覺圖檔素材 ({imageAssets.length} 張)
-                    </h3>
-                    <span className="text-xs text-neutral-400 font-light mt-0.5 block">
-                      瀏覽所有品牌提交的高解析宣傳素材，大會公關小組下載編輯用。點擊圖片可放大檢視或直接下載原圖。
-                    </span>
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-white tracking-wider flex items-center gap-2">
+                        <ImageIcon className="w-4 h-4 text-[#DFBA87]" />
+                        品牌高解析視覺圖檔素材 ({imageAssets.length} 張)
+                      </h3>
+                      <span className="text-xs text-neutral-400 font-light mt-0.5 block">
+                        瀏覽所有品牌提交的高解析宣傳素材，大會公關小組下載編輯用。點擊圖片可放大檢視或直接下載原圖。
+                      </span>
+                    </div>
+                    {imageAssets.length > 0 && (
+                      <button
+                        type="button"
+                        disabled={isBatchDownloading}
+                        onClick={async () => {
+                          setIsBatchDownloading(true);
+                          try {
+                            for (const asset of imageAssets) {
+                              const bName = asset.exhibitor_brands?.brand_name_zh || asset.exhibitor_brands?.brand_name_en || '參展品牌';
+                              await handleDownloadAssetFile(asset.file_url, `視覺照片_${bName}_${asset.file_name || 'photo.jpg'}`);
+                              await new Promise(r => setTimeout(r, 350));
+                            }
+                          } finally {
+                            setIsBatchDownloading(false);
+                          }
+                        }}
+                        className="text-xs font-medium bg-[#DFBA87] hover:bg-[#c9a370] text-black px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 self-start"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>一鍵下載全部視覺照片 ({imageAssets.length} 張)</span>
+                      </button>
+                    )}
                   </div>
 
                   {imageAssets.length === 0 ? (
@@ -2840,6 +2897,113 @@ export default function ExhibitorAdminPage() {
                                   <Download className="w-3 h-3" /> 下載圖檔
                                 </button>
                               </div>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* 3.5 Module E Product Catalog Photos & Descriptions */}
+                <div className="space-y-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-white/5 pb-3">
+                    <div>
+                      <h3 className="text-sm font-semibold text-white tracking-wider flex items-center gap-2">
+                        <Sparkles className="w-4 h-4 text-[#DFBA87]" />
+                        模組 E — 品牌亮點展品型錄圖檔與介紹 ({productList.length} 件展品)
+                      </h3>
+                      <span className="text-xs text-neutral-400 font-light mt-0.5 block">
+                        參展品牌於「模組 E — 亮點展品型錄」上傳之展品照片、中英文品名、材質尺寸與定價，可直接下載原圖。
+                      </span>
+                    </div>
+                    {productList.length > 0 && (
+                      <button
+                        type="button"
+                        disabled={isBatchDownloading}
+                        onClick={async () => {
+                          setIsBatchDownloading(true);
+                          try {
+                            for (const prod of productList) {
+                              const imgUrl = Array.isArray(prod.images) && prod.images.length > 0 ? prod.images[0] : '';
+                              if (imgUrl) {
+                                const bName = prod.brand_name_zh || prod.brand_name_en || '參展品牌';
+                                const pTitle = (prod.title_zh || '展品').replace(/[\/\\:*?"<>|]/g, '_');
+                                await handleDownloadAssetFile(imgUrl, `展品_${bName}_${pTitle}.jpg`);
+                                await new Promise(r => setTimeout(r, 350));
+                              }
+                            }
+                          } finally {
+                            setIsBatchDownloading(false);
+                          }
+                        }}
+                        className="text-xs font-medium bg-[#DFBA87] hover:bg-[#c9a370] text-black px-3.5 py-1.5 rounded-lg flex items-center gap-1.5 transition cursor-pointer disabled:opacity-50 self-start"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>一鍵下載全部展品照片 ({productList.length} 件)</span>
+                      </button>
+                    )}
+                  </div>
+
+                  {productList.length === 0 ? (
+                    <div className="text-center py-8 text-neutral-500 text-xs font-light border border-dashed border-white/5 rounded-xl">
+                      目前尚無品牌上傳亮點展品型錄。
+                    </div>
+                  ) : (
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-5">
+                      {productList.map((prod: any) => {
+                        const imgUrl = Array.isArray(prod.images) && prod.images.length > 0 ? prod.images[0] : '';
+                        const bName = prod.brand_name_zh || prod.brand_name_en || '參展品牌';
+                        const safeTitle = (prod.title_zh || '展品').replace(/[\/\\:*?"<>|]/g, '_');
+                        return (
+                          <div
+                            key={prod.id}
+                            className="border border-white/10 bg-[#141414] rounded-xl overflow-hidden group hover:border-[#C9A96E]/40 transition-all flex flex-col justify-between"
+                          >
+                            {imgUrl ? (
+                              <div
+                                onClick={() => setMediaLightboxAsset({ url: imgUrl, fileName: `${prod.title_zh}.jpg`, brandName: bName })}
+                                className="aspect-[4/3] overflow-hidden bg-neutral-900 cursor-pointer relative"
+                              >
+                                <img
+                                  src={imgUrl}
+                                  alt={prod.title_zh}
+                                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-300"
+                                />
+                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center text-xs text-white font-medium gap-1.5">
+                                  <Eye className="w-4 h-4 text-[#DFBA87]" /> 點擊放大預覽
+                                </div>
+                              </div>
+                            ) : (
+                              <div className="aspect-[4/3] bg-neutral-900 flex items-center justify-center text-xs text-neutral-500">
+                                無圖片
+                              </div>
+                            )}
+                            <div className="p-3.5 text-xs space-y-2">
+                              <div>
+                                <div className="text-[11px] font-mono text-[#DFBA87] truncate">{bName}</div>
+                                <div className="font-semibold text-white truncate mt-0.5" title={prod.title_zh}>{prod.title_zh}</div>
+                                {prod.title_en && <div className="text-[10px] text-neutral-400 truncate">{prod.title_en}</div>}
+                                {prod.price_display && <div className="text-[11px] text-emerald-400 font-mono mt-1">{prod.price_display}</div>}
+                              </div>
+                              {imgUrl && (
+                                <div className="flex items-center gap-1.5 pt-2 border-t border-white/5">
+                                  <button
+                                    type="button"
+                                    onClick={() => setMediaLightboxAsset({ url: imgUrl, fileName: `${prod.title_zh}.jpg`, brandName: bName })}
+                                    className="py-1.5 px-2.5 rounded bg-white/5 hover:bg-white/15 text-neutral-300 hover:text-white text-[11px] transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                                  >
+                                    <Eye className="w-3 h-3" /> 預覽
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleDownloadAssetFile(imgUrl, `展品_${bName}_${safeTitle}.jpg`)}
+                                    className="flex-1 py-1.5 px-2.5 rounded bg-[#DFBA87]/15 hover:bg-[#DFBA87] text-[#DFBA87] hover:text-black border border-[#DFBA87]/30 text-[11px] font-medium transition-colors flex items-center justify-center gap-1 cursor-pointer"
+                                  >
+                                    <Download className="w-3 h-3" /> 下載展品圖
+                                  </button>
+                                </div>
+                              )}
                             </div>
                           </div>
                         );
