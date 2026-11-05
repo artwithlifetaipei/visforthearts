@@ -10,7 +10,7 @@ import {
   Calendar, CreditCard, Award, ClipboardCheck, Users, 
   Image as ImageIcon, HelpCircle, Check, Clock, AlertTriangle,
   Building2, Copy, Mail, Lock, CheckCircle2, Upload, Eye, X, 
-  FileText, Loader2
+  FileText, Loader2, Edit3, Globe, Phone, MapPin, User, Save
 } from 'lucide-react';
 
 function safeGetStorage(key: string): string | null {
@@ -86,6 +86,109 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   const [proofErrorMsg, setProofErrorMsg] = useState('');
 
   const [proofPreparing, setProofPreparing] = useState(false);
+
+  // Brand Profile (Application Form Basic Info) states
+  const [profileForm, setProfileForm] = useState({
+    brand_name_zh: '',
+    brand_name_en: '',
+    company_name_zh: '',
+    company_tax_id: '',
+    contact_name: '',
+    contact_email: '',
+    contact_phone: '',
+    contact_address: '',
+    website_url: '',
+    instagram_url: '',
+    concept_brief: '',
+  });
+  const [missingProfileFields, setMissingProfileFields] = useState<string[]>([]);
+  const [isEditingProfile, setIsEditingProfile] = useState(false);
+  const [profileSaving, setProfileSaving] = useState(false);
+  const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
+  const [profileErrorMsg, setProfileErrorMsg] = useState('');
+
+  const sanitizePlaceholderValue = (val: string | null | undefined, isMissing: boolean) => {
+    if (!val) return '';
+    if (isMissing) {
+      const trimmed = val.trim();
+      const dummyList = ['未填寫', '待補填', '事後補上', 'LINE 聯繫', 'LINE聯繫', '尚無', '無', 'Japan'];
+      if (dummyList.includes(trimmed) || trimmed.endsWith('負責人') || trimmed.startsWith('Japanese Exhibitor Brand')) {
+        return '';
+      }
+    }
+    return val;
+  };
+
+  const syncProfileFromApi = (p: any, missing: string[]) => {
+    if (!p) return;
+    const mSet = new Set(missing || []);
+    setMissingProfileFields(missing || []);
+    setProfileForm({
+      brand_name_zh: sanitizePlaceholderValue(p.brand_name_zh, mSet.has('brand_name_zh')),
+      brand_name_en: sanitizePlaceholderValue(p.brand_name_en, mSet.has('brand_name_en')),
+      company_name_zh: p.company_name_zh === '無' ? '' : (p.company_name_zh || ''),
+      company_tax_id: p.company_tax_id === '無' ? '' : (p.company_tax_id || ''),
+      contact_name: sanitizePlaceholderValue(p.contact_name, mSet.has('contact_name')),
+      contact_email: p.contact_email || '',
+      contact_phone: sanitizePlaceholderValue(p.contact_phone, mSet.has('contact_phone')),
+      contact_address: sanitizePlaceholderValue(p.contact_address, mSet.has('contact_address')),
+      website_url: p.website_url || '',
+      instagram_url: p.instagram_url || '',
+      concept_brief: sanitizePlaceholderValue(p.concept_brief, mSet.has('concept_brief')),
+    });
+    if ((missing || []).length > 0) {
+      setIsEditingProfile(true);
+    }
+  };
+
+  const handleSaveProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!brand) return;
+    setProfileSaving(true);
+    setProfileErrorMsg('');
+    setProfileSuccessMsg('');
+
+    try {
+      const res = await fetchWithTimeout('/api/exhibitor/profile', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          brand_id: brand.id,
+          email: brand.portal_email,
+          ...profileForm,
+        }),
+      });
+      const data = await safeJson(res);
+      if (!res.ok || data.error) {
+        setProfileErrorMsg(data.error || '儲存失敗，請檢查必填欄位後重試。');
+      } else {
+        if (data.profile) {
+          syncProfileFromApi(data.profile, data.missingFields || []);
+          const updatedBrand = {
+            ...brand,
+            brand_name_zh: data.profile.brand_name_zh || brand.brand_name_zh,
+            brand_name_en: data.profile.brand_name_en || brand.brand_name_en,
+          };
+          setBrand(updatedBrand);
+          safeSetStorage('vis_portal_brand_data', JSON.stringify(updatedBrand));
+          setAppData((prev: any) => {
+            const nextApp = { ...(prev || {}), ...data.profile };
+            safeSetStorage(`vis_portal_app_data_${brand.id}`, JSON.stringify(nextApp));
+            return nextApp;
+          });
+        }
+        setProfileSuccessMsg('✓ 參展品牌基本資料已成功更新並存檔！');
+        if ((data.missingFields || []).length === 0) {
+          setIsEditingProfile(false);
+        }
+        setTimeout(() => setProfileSuccessMsg(''), 5000);
+      }
+    } catch (err: any) {
+      setProfileErrorMsg(err?.message || '網路異常，請稍後再試。');
+    } finally {
+      setProfileSaving(false);
+    }
+  };
 
   const handleProofFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -335,15 +438,26 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             .then(res => res.proof || null)
             .catch(() => null);
 
-          const [app, compliance, vipC, mediaC, qCount, hasLogoResult, proofData] = await Promise.all([
+          const profilePromise = fetch(`/api/exhibitor/profile?brand_id=${currentBrand.id}&email=${encodeURIComponent(currentBrand.portal_email || '')}`)
+            .then(res => res.json())
+            .catch(() => null);
+
+          const [app, compliance, vipC, mediaC, qCount, hasLogoResult, proofData, profileRes] = await Promise.all([
             appPromise,
             compliancePromise,
             vipPromise,
             mediaPromise,
             qaPromise,
             logoPromise,
-            proofPromise
+            proofPromise,
+            profilePromise
           ]);
+
+          if (profileRes?.profile) {
+            syncProfileFromApi(profileRes.profile, profileRes.missingFields || []);
+          } else if (app) {
+            syncProfileFromApi(app, []);
+          }
 
           if (app) {
             setAppData(app);
@@ -603,6 +717,30 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
           </form>
         )}
       </div>
+
+      {/* Missing Basic Profile Quick Reminder Banner */}
+      {missingProfileFields.length > 0 && (
+        <div className="p-4 rounded-xl bg-gradient-to-r from-amber-500/15 via-amber-500/10 to-transparent border border-amber-500/40 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-lg">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+            <div className="text-xs leading-relaxed">
+              <span className="font-semibold text-amber-300 block sm:inline mr-1.5">
+                【重要提醒】貴品牌尚有 {missingProfileFields.length} 項參展基本資料待補填寫：
+              </span>
+              <span className="text-neutral-200 font-light">
+                貴品牌為大會直接開通席位（或原申請表尚有缺漏欄位），請前往下方「參展品牌基本資料」區塊補齊聯絡人、電話、寄件地址、發票統編與參展概念簡述。
+              </span>
+            </div>
+          </div>
+          <a
+            href="#brand-profile-section"
+            onClick={() => setIsEditingProfile(true)}
+            className="px-3.5 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-black font-bold text-xs whitespace-nowrap self-start sm:self-auto transition cursor-pointer"
+          >
+            立即前往補填 ↓
+          </a>
+        </div>
+      )}
 
       {/* Progress Bar Card */}
       <div className="bg-[#111111] border border-white/5 p-6 rounded-xl relative overflow-hidden">
@@ -1008,6 +1146,416 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             <strong className="text-amber-400 block font-semibold mb-0.5">場地維護保障與保證金退款說明</strong>
             參展保證金主要是為了確保展場設施及古蹟場地於佈撤展期間受到妥善維護。展覽結束並完成撤場後，經大會確認場地及設施完整還原、無損壞情形，即會全額退還保證金，可以放心！若因特殊因素需更動展位或參展規程，大會將依參展手冊及相關規程竭誠協助品牌辦理。
           </p>
+        </div>
+      </div>
+
+      {/* ─────────────────────────────────────────────────────────────
+          BRAND BASIC PROFILE & APPLICATION FORM RECORD SECTION
+      ───────────────────────────────────────────────────────────── */}
+      <div id="brand-profile-section" className="scroll-mt-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+          <h2 className="text-sm font-semibold tracking-widest text-[#DFBA87] uppercase flex items-center gap-2">
+            <FileText className="w-4 h-4" /> 參展品牌基本資料 Brand Profile & Application Info
+          </h2>
+          <div className="flex items-center gap-2.5">
+            {missingProfileFields.length > 0 ? (
+              <span className="text-xs bg-amber-500/15 border border-amber-500/40 text-amber-300 px-3 py-1 rounded-full font-semibold flex items-center gap-1.5">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                <span>尚有 {missingProfileFields.length} 項必填資料待補齊</span>
+              </span>
+            ) : (
+              <span className="text-xs bg-emerald-500/15 border border-emerald-500/30 text-emerald-400 px-3 py-1 rounded-full font-semibold flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
+                <span>基本資料已完整建檔 Completed</span>
+              </span>
+            )}
+            {!isEditingProfile && (
+              <button
+                type="button"
+                onClick={() => {
+                  setIsEditingProfile(true);
+                  setProfileErrorMsg('');
+                  setProfileSuccessMsg('');
+                }}
+                className="px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-[#DFBA87] text-white hover:text-black text-xs font-medium transition flex items-center gap-1.5 cursor-pointer border border-white/15"
+              >
+                <Edit3 className="w-3.5 h-3.5" />
+                <span>編輯／修改資料</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className={`bg-[#111111] rounded-xl p-6 border transition-all ${
+          missingProfileFields.length > 0
+            ? 'border-amber-500/40 shadow-lg shadow-amber-500/5'
+            : 'border-white/5'
+        }`}>
+          {/* Directly Activated / Missing Info Warning Callout */}
+          {missingProfileFields.length > 0 && (
+            <div className="mb-6 p-4 rounded-xl bg-amber-500/10 border border-amber-500/35 text-xs leading-relaxed space-y-1.5">
+              <div className="flex items-center gap-2 text-amber-300 font-semibold text-sm">
+                <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                <span>請補填參展申請基本資料（大會直接開通席位／資料待補齊提醒）</span>
+              </div>
+              <p className="text-neutral-200 font-light pl-6">
+                系統檢測到貴品牌是由大會直接開通後台（或當初申請表尚有部分欄位未填寫）。為確保<strong>大會開立統一發票、寄送參展重要通知文件、編印中英文官方導覽專刊及啟用 IG 導流門票</strong>無誤，請務必於下方補齊標示 <span className="text-amber-300 font-semibold">「⚠️ 請補填寫」</span> 之欄位並點擊儲存！
+              </p>
+            </div>
+          )}
+
+          {profileSuccessMsg && (
+            <div className="mb-5 p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+              <span>{profileSuccessMsg}</span>
+            </div>
+          )}
+
+          {profileErrorMsg && (
+            <div className="mb-5 p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+              <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+              <span>{profileErrorMsg}</span>
+            </div>
+          )}
+
+          {isEditingProfile ? (
+            <form onSubmit={handleSaveProfile} className="space-y-5">
+              <div className="grid sm:grid-cols-2 gap-4">
+                {/* 1. Brand Name ZH */}
+                <div>
+                  <label className="flex items-center justify-between text-xs text-neutral-300 mb-1.5 font-medium">
+                    <span>品牌中文名稱 Brand Name (ZH) <span className="text-[#DFBA87]">*</span></span>
+                    {missingProfileFields.includes('brand_name_zh') && (
+                      <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-semibold">
+                        ⚠️ 請補填寫
+                      </span>
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.brand_name_zh}
+                    onChange={(e) => setProfileForm({ ...profileForm, brand_name_zh: e.target.value })}
+                    placeholder="例如：蘭蕙雅集"
+                    className={`w-full px-3.5 py-2.5 bg-black/50 rounded-lg text-xs text-white focus:outline-none border ${
+                      missingProfileFields.includes('brand_name_zh')
+                        ? 'border-amber-500/60 focus:border-amber-400'
+                        : 'border-white/15 focus:border-[#DFBA87]'
+                    }`}
+                  />
+                </div>
+
+                {/* 2. Brand Name EN */}
+                <div>
+                  <label className="flex items-center justify-between text-xs text-neutral-300 mb-1.5 font-medium">
+                    <span>品牌英文名稱 Brand Name (EN) <span className="text-[#DFBA87]">*</span></span>
+                    {missingProfileFields.includes('brand_name_en') && (
+                      <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-semibold">
+                        ⚠️ 請補填寫
+                      </span>
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.brand_name_en}
+                    onChange={(e) => setProfileForm({ ...profileForm, brand_name_en: e.target.value })}
+                    placeholder="e.g. Lan Hui Atelier"
+                    className={`w-full px-3.5 py-2.5 bg-black/50 rounded-lg text-xs text-white focus:outline-none border ${
+                      missingProfileFields.includes('brand_name_en')
+                        ? 'border-amber-500/60 focus:border-amber-400'
+                        : 'border-white/15 focus:border-[#DFBA87]'
+                    }`}
+                  />
+                </div>
+
+                {/* 3. Company Name ZH */}
+                <div>
+                  <label className="block text-xs text-neutral-300 mb-1.5 font-medium">
+                    公司行號／發票抬頭 Company Name（選填，開立三聯式發票必填）
+                  </label>
+                  <input
+                    type="text"
+                    value={profileForm.company_name_zh}
+                    onChange={(e) => setProfileForm({ ...profileForm, company_name_zh: e.target.value })}
+                    placeholder="例如：台灣藝術文化有限公司（個人創作可留空）"
+                    className="w-full px-3.5 py-2.5 bg-black/50 border border-white/15 focus:border-[#DFBA87] rounded-lg text-xs text-white focus:outline-none"
+                  />
+                </div>
+
+                {/* 4. Company Tax ID */}
+                <div>
+                  <label className="block text-xs text-neutral-300 mb-1.5 font-medium">
+                    公司統一編號 Tax ID（選填，開立三聯式發票必填）
+                  </label>
+                  <input
+                    type="text"
+                    value={profileForm.company_tax_id}
+                    onChange={(e) => setProfileForm({ ...profileForm, company_tax_id: e.target.value })}
+                    placeholder="例如：12345678"
+                    className="w-full px-3.5 py-2.5 bg-black/50 border border-white/15 focus:border-[#DFBA87] rounded-lg text-xs text-white font-mono focus:outline-none"
+                  />
+                </div>
+
+                {/* 5. Contact Name */}
+                <div>
+                  <label className="flex items-center justify-between text-xs text-neutral-300 mb-1.5 font-medium">
+                    <span>負責人／主要聯絡人姓名 Contact Person <span className="text-[#DFBA87]">*</span></span>
+                    {missingProfileFields.includes('contact_name') && (
+                      <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-semibold">
+                        ⚠️ 請補填寫真實姓名
+                      </span>
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.contact_name}
+                    onChange={(e) => setProfileForm({ ...profileForm, contact_name: e.target.value })}
+                    placeholder="請輸入負責人或主要窗口真實姓名"
+                    className={`w-full px-3.5 py-2.5 bg-black/50 rounded-lg text-xs text-white focus:outline-none border ${
+                      missingProfileFields.includes('contact_name')
+                        ? 'border-amber-500/60 focus:border-amber-400'
+                        : 'border-white/15 focus:border-[#DFBA87]'
+                    }`}
+                  />
+                </div>
+
+                {/* 6. Contact Phone */}
+                <div>
+                  <label className="flex items-center justify-between text-xs text-neutral-300 mb-1.5 font-medium">
+                    <span>聯絡人電話 Contact Phone <span className="text-[#DFBA87]">*</span></span>
+                    {missingProfileFields.includes('contact_phone') && (
+                      <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-semibold">
+                        ⚠️ 請補填寫電話
+                      </span>
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.contact_phone}
+                    onChange={(e) => setProfileForm({ ...profileForm, contact_phone: e.target.value })}
+                    placeholder="例如：0912-345-678"
+                    className={`w-full px-3.5 py-2.5 bg-black/50 rounded-lg text-xs text-white font-mono focus:outline-none border ${
+                      missingProfileFields.includes('contact_phone')
+                        ? 'border-amber-500/60 focus:border-amber-400'
+                        : 'border-white/15 focus:border-[#DFBA87]'
+                    }`}
+                  />
+                </div>
+
+                {/* 7. Contact Email */}
+                <div>
+                  <label className="block text-xs text-neutral-300 mb-1.5 font-medium">
+                    聯絡人電子信箱 Contact Email <span className="text-[#DFBA87]">*</span>
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={profileForm.contact_email}
+                    onChange={(e) => setProfileForm({ ...profileForm, contact_email: e.target.value })}
+                    placeholder="name@example.com"
+                    className="w-full px-3.5 py-2.5 bg-black/50 border border-white/15 focus:border-[#DFBA87] rounded-lg text-xs text-white font-mono focus:outline-none"
+                  />
+                </div>
+
+                {/* 8. Contact Address */}
+                <div>
+                  <label className="flex items-center justify-between text-xs text-neutral-300 mb-1.5 font-medium">
+                    <span>聯繫／通訊寄件地址 Mailing Address <span className="text-[#DFBA87]">*</span></span>
+                    {missingProfileFields.includes('contact_address') && (
+                      <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-semibold">
+                        ⚠️ 請補填寫地址
+                      </span>
+                    )}
+                  </label>
+                  <input
+                    type="text"
+                    required
+                    value={profileForm.contact_address}
+                    onChange={(e) => setProfileForm({ ...profileForm, contact_address: e.target.value })}
+                    placeholder="例如：台北市信義區市民大道二段 XX 號 X 樓"
+                    className={`w-full px-3.5 py-2.5 bg-black/50 rounded-lg text-xs text-white focus:outline-none border ${
+                      missingProfileFields.includes('contact_address')
+                        ? 'border-amber-500/60 focus:border-amber-400'
+                        : 'border-white/15 focus:border-[#DFBA87]'
+                    }`}
+                  />
+                </div>
+
+                {/* 9. Website URL */}
+                <div>
+                  <label className="block text-xs text-neutral-300 mb-1.5 font-medium">
+                    品牌官方網站 Official Website（選填）
+                  </label>
+                  <input
+                    type="text"
+                    value={profileForm.website_url}
+                    onChange={(e) => setProfileForm({ ...profileForm, website_url: e.target.value })}
+                    placeholder="https://..."
+                    className="w-full px-3.5 py-2.5 bg-black/50 border border-white/15 focus:border-[#DFBA87] rounded-lg text-xs text-white font-mono focus:outline-none"
+                  />
+                </div>
+
+                {/* 10. Instagram URL */}
+                <div>
+                  <label className="block text-xs text-neutral-300 mb-1.5 font-medium">
+                    Instagram / 社群連結 Social Link（供模組 G 公眾門票追蹤導流使用）
+                  </label>
+                  <input
+                    type="text"
+                    value={profileForm.instagram_url}
+                    onChange={(e) => setProfileForm({ ...profileForm, instagram_url: e.target.value })}
+                    placeholder="https://www.instagram.com/your_brand 或 @your_brand"
+                    className="w-full px-3.5 py-2.5 bg-black/50 border border-white/15 focus:border-[#DFBA87] rounded-lg text-xs text-white font-mono focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              {/* 11. Concept Brief */}
+              <div>
+                <label className="flex items-center justify-between text-xs text-neutral-300 mb-1.5 font-medium">
+                  <span>品牌參展核心概念簡述 Concept Brief (250字內，供官方導覽與專刊介紹使用) <span className="text-[#DFBA87]">*</span></span>
+                  {missingProfileFields.includes('concept_brief') && (
+                    <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-semibold">
+                      ⚠️ 請補填寫品牌簡介
+                    </span>
+                  )}
+                </label>
+                <textarea
+                  rows={4}
+                  required
+                  value={profileForm.concept_brief}
+                  onChange={(e) => setProfileForm({ ...profileForm, concept_brief: e.target.value })}
+                  placeholder="請簡述貴品牌預計展出的核心概念、作品特色，以及如何結合中山堂古蹟空間底蘊進行美學演繹。"
+                  className={`w-full px-3.5 py-2.5 bg-black/50 rounded-lg text-xs text-white leading-relaxed focus:outline-none border ${
+                    missingProfileFields.includes('concept_brief')
+                      ? 'border-amber-500/60 focus:border-amber-400'
+                      : 'border-white/15 focus:border-[#DFBA87]'
+                  }`}
+                />
+              </div>
+
+              <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
+                {missingProfileFields.length === 0 && (
+                  <button
+                    type="button"
+                    onClick={() => setIsEditingProfile(false)}
+                    className="px-4 py-2 rounded-lg text-xs text-neutral-400 hover:text-white transition cursor-pointer"
+                  >
+                    取消
+                  </button>
+                )}
+                <button
+                  type="submit"
+                  disabled={profileSaving}
+                  className="px-6 py-2.5 rounded-lg bg-[#DFBA87] hover:bg-[#cf9e5e] text-[#14120E] font-bold text-xs transition flex items-center gap-2 shadow-lg shadow-[#DFBA87]/20 cursor-pointer disabled:opacity-50"
+                >
+                  {profileSaving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>儲存中...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Save className="w-4 h-4" />
+                      <span>儲存並更新參展基本資料 SAVE PROFILE</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
+          ) : (
+            <div className="space-y-5 text-xs">
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div className="bg-black/40 border border-white/5 rounded-lg p-3.5">
+                  <span className="text-[10px] text-neutral-500 block uppercase font-mono">品牌名稱 Brand Name</span>
+                  <div className="text-sm font-semibold text-white mt-1">
+                    {profileForm.brand_name_zh || brand.brand_name_zh}
+                    <span className="text-neutral-400 font-normal ml-1.5">
+                      ({profileForm.brand_name_en || brand.brand_name_en})
+                    </span>
+                  </div>
+                </div>
+
+                <div className="bg-black/40 border border-white/5 rounded-lg p-3.5">
+                  <span className="text-[10px] text-neutral-500 block uppercase font-mono">公司抬頭／統一編號 Company & Tax ID</span>
+                  <div className="text-sm font-medium text-white mt-1">
+                    {profileForm.company_name_zh || <span className="text-neutral-500 font-normal">未填寫（個人／免開統編）</span>}
+                    {profileForm.company_tax_id && (
+                      <span className="ml-2 text-xs font-mono text-[#DFBA87] bg-[#DFBA87]/10 px-2 py-0.5 rounded border border-[#DFBA87]/25">
+                        統編: {profileForm.company_tax_id}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                <div className="bg-black/40 border border-white/5 rounded-lg p-3.5">
+                  <span className="text-[10px] text-neutral-500 block uppercase font-mono flex items-center gap-1">
+                    <User className="w-3 h-3 text-[#DFBA87]" /> 負責人／主要聯絡人 Contact
+                  </span>
+                  <div className="text-sm font-medium text-white mt-1">
+                    {profileForm.contact_name || <span className="text-amber-400">⚠️ 待補填</span>}
+                  </div>
+                </div>
+
+                <div className="bg-black/40 border border-white/5 rounded-lg p-3.5">
+                  <span className="text-[10px] text-neutral-500 block uppercase font-mono flex items-center gap-1">
+                    <Phone className="w-3 h-3 text-[#DFBA87]" /> 聯絡電話 Phone
+                  </span>
+                  <div className="text-sm font-mono text-white mt-1">
+                    {profileForm.contact_phone || <span className="text-amber-400">⚠️ 待補填</span>}
+                  </div>
+                </div>
+
+                <div className="bg-black/40 border border-white/5 rounded-lg p-3.5">
+                  <span className="text-[10px] text-neutral-500 block uppercase font-mono flex items-center gap-1">
+                    <Mail className="w-3 h-3 text-[#DFBA87]" /> 聯繫電子信箱 Email
+                  </span>
+                  <div className="text-sm font-mono text-white mt-1 truncate" title={profileForm.contact_email || brand.portal_email}>
+                    {profileForm.contact_email || brand.portal_email}
+                  </div>
+                </div>
+
+                <div className="bg-black/40 border border-white/5 rounded-lg p-3.5">
+                  <span className="text-[10px] text-neutral-500 block uppercase font-mono flex items-center gap-1">
+                    <MapPin className="w-3 h-3 text-[#DFBA87]" /> 聯繫／寄件地址 Address
+                  </span>
+                  <div className="text-xs text-white mt-1 leading-snug">
+                    {profileForm.contact_address || <span className="text-amber-400">⚠️ 待補填</span>}
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div className="bg-black/40 border border-white/5 rounded-lg p-3.5">
+                  <span className="text-[10px] text-neutral-500 block uppercase font-mono flex items-center gap-1">
+                    <Globe className="w-3 h-3 text-[#DFBA87]" /> 品牌官方網站 Website
+                  </span>
+                  <div className="text-xs font-mono text-neutral-300 mt-1 truncate">
+                    {profileForm.website_url || <span className="text-neutral-500">未提供</span>}
+                  </div>
+                </div>
+
+                <div className="bg-black/40 border border-white/5 rounded-lg p-3.5">
+                  <span className="text-[10px] text-neutral-500 block uppercase font-mono">Instagram / 社群連結</span>
+                  <div className="text-xs font-mono text-neutral-300 mt-1 truncate">
+                    {profileForm.instagram_url || <span className="text-neutral-500">未提供</span>}
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-black/40 border border-white/5 rounded-lg p-4">
+                <span className="text-[10px] text-[#DFBA87] block uppercase font-mono mb-1.5">
+                  品牌參展核心概念簡述 Concept Brief
+                </span>
+                <p className="text-xs text-neutral-200 font-light leading-relaxed whitespace-pre-wrap">
+                  {profileForm.concept_brief || <span className="text-amber-400">⚠️ 尚未填寫參展核心概念簡述</span>}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
