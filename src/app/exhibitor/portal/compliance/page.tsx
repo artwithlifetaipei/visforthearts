@@ -617,10 +617,10 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
           <div>
             <h4 className="font-semibold text-white mb-1.5 flex items-center gap-1">
               <span className="w-1.5 h-3.5 bg-[#DFBA87] rounded-full inline-block"></span>
-              合約對價與一般展務界限 (備忘錄第二、三條)
+              合約對價與一般展務界限 (備忘錄第二、三、七條)
             </h4>
             <p className="text-neutral-400 mb-2">
-              品牌方支付之所有對價僅限包含：(1) 雙方協議之展位規格、(2) 參展暨佈撤展期間 (2027/1/6 10:00 ~ 1/9 21:30) [包含 1/6 10:00-17:00 佈展、1/6 18:00-21:00 VIP 預展與開幕酒會、1/7-1/8 12:00-18:00 及 1/9 13:00-19:00 公眾展期，以及 1/9 19:00-21:30 撤場]、(3) 貴賓卡 20-40 張、(4) 展商工作證 4 張。
+              品牌方支付之所有對價僅限包含：(1) 經雙方協議之展位規格、(2) 參展四日（2027 年 1 月 6 日～1 月 9 日：含 1/6 18:00–21:00 貴賓預展暨開幕酒會，及 1/7 12:00–18:00、1/8 12:00–18:00、1/9 13:00–19:00 公眾開放）、(3) 進場場佈（2027 年 1 月 6 日日間 10:00–17:00）與撤展（2027 年 1 月 9 日 19:00 展覽結束後，依大會公告之撤場時段及動線辦理）、(4) 貴賓卡／數位貴賓邀請名額（視展位規格如簡章所示，或經雙方協議而定）、(5) 展商工作證 4 張（造物計畫展位為 1 張）。
             </p>
             <p className="text-neutral-400">
               除上述五項之外，大會所提供之展務管理（如動線維護、公關新聞稿發送、行政協助等）為通案性管理，大會得依現場營運情況調整，不屬付費對價，品牌方不得據此要求賠償。
@@ -793,27 +793,39 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
         >
           <div className="absolute -right-10 -bottom-10 w-48 h-48 bg-emerald-500/5 rounded-full blur-3xl"></div>
           
-          <div className="flex items-start gap-4">
-            <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0 shadow-lg shadow-emerald-500/10">
-              <ShieldCheck className="w-6 h-6" />
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex items-start gap-4">
+              <div className="w-12 h-12 rounded-full bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 flex-shrink-0 shadow-lg shadow-emerald-500/10">
+                <ShieldCheck className="w-6 h-6" />
+              </div>
+              <div className="space-y-1">
+                <h2 className="text-lg font-medium text-white tracking-wide flex items-center gap-2">
+                  <span>{signedData.physical_contract_url ? '實體備忘錄合約用印檔案已提交存查' : '大會參展規範備忘錄電子簽署已完成'}</span>
+                  <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded font-mono">
+                    正式締約生效
+                  </span>
+                </h2>
+                <p className="text-xs text-neutral-400 font-light max-w-xl leading-relaxed">
+                  貴品牌已成功簽署參展規範備忘錄。此線上合約具有正式之法律拘束力。如有任何展務疑問，請透過大會官方群組與您的專屬專員聯絡。
+                </p>
+              </div>
             </div>
-            <div className="space-y-1">
-              <h2 className="text-lg font-medium text-white tracking-wide flex items-center gap-2">
-                <span>{signedData.physical_contract_url ? '實體備忘錄合約用印檔案已提交存查' : '大會參展規範備忘錄電子簽署已完成'}</span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 px-2 py-0.5 rounded font-mono">
-                  正式締約生效
-                </span>
-              </h2>
-              <p className="text-xs text-neutral-400 font-light max-w-xl leading-relaxed">
-                貴品牌已成功簽署參展規範備忘錄。此線上合約具有正式之法律拘束力。如有任何展務疑問，請透過大會官方群組與您的專屬專員聯絡。
-              </p>
-            </div>
+            <a
+              href="/2027_VIS_Contemporary_Culture_參展規範備忘錄.pdf"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 text-[11px] text-[#DFBA87] hover:text-white border border-[#C9A96E]/30 hover:border-[#C9A96E] rounded-lg px-3.5 py-2 bg-[#C9A96E]/5 hover:bg-[#C9A96E]/20 transition-all font-medium whitespace-nowrap self-start sm:self-auto"
+            >
+              <Download className="w-3.5 h-3.5" /> 下載完整合約 (PDF)
+            </a>
           </div>
 
           <div className="grid md:grid-cols-3 gap-4 bg-white/[0.02] border border-white/5 rounded-xl p-5 text-xs font-mono">
             <div>
               <span className="text-neutral-500 block text-[9px] uppercase tracking-wider mb-1">簽署品牌 Brand Name</span>
-              <span className="text-white font-medium">{brand?.brand_name_zh} ({brand?.brand_name_en || ''})</span>
+              <span className="text-white font-medium">
+                {brand?.brand_name_zh}{brand?.brand_name_en && brand.brand_name_en !== brand.brand_name_zh ? ` (${brand.brand_name_en})` : ''}
+              </span>
             </div>
             <div>
               <span className="text-neutral-500 block text-[9px] uppercase tracking-wider mb-1">
@@ -1104,8 +1116,8 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                 onScroll={(e) => handleScroll('damage', e)}
                 className="max-h-36 overflow-y-auto bg-black/40 border border-white/5 rounded-lg p-3.5 text-xs text-neutral-400 font-light leading-relaxed space-y-2 custom-scrollbar"
               >
-                <p className="text-[#DFBA87] font-semibold">重要提示：本展會於歷史古蹟園區舉辦，場地保護責任極為嚴苛。</p>
-                <p>1. <strong>古蹟禁止釘掛：</strong>由於本屆大展之展場（松山文創園區）屬國家級古蹟歷史場地，禁止於古蹟本體牆面、樑柱、地面、窗框進行任何釘掛、鑽孔、噴漆、油漆或破壞性黏貼。若需加掛燈具或佈置線材，僅能使用既有掛點與大會指定之防護材料。</p>
+                <p className="text-[#DFBA87] font-semibold">重要提示：本展會於國定古蹟歷史建築舉辦，場地保護責任極為嚴苛。</p>
+                <p>1. <strong>古蹟禁止釘掛：</strong>由於本屆大展之展場（臺北市中山堂 光復廳 Taipei Zhongshan Hall，臺北市中正區延平南路 98 號）屬國定古蹟歷史建築場地，禁止於古蹟本體牆面、樑柱、地面、窗框進行任何釘掛、鑽孔、噴漆、油漆或破壞性黏貼。若需加掛燈具或佈置線材，僅能使用既有掛點與大會指定之防護材料。</p>
                 <p>2. <strong>毀損修復與法律責任：</strong>若品牌方或其委託之搭設廠商在裝修、展出、撤展期間，因任何行為造成古蹟本體、場地歷史建構物或設施損害，品牌方須無條件負擔全額專業古蹟修復、清理及大會因此遭受之損害賠償費用，並承擔相關文化資產保護法之法律責任。</p>
               </div>
               <div className="flex items-center gap-3 pt-1">
@@ -1223,7 +1235,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                 </p>
               </div>
 
-              {/* Contracting Parties dynamic preview */}
+              {/* Contracting Parties & Schedule dynamic preview */}
               <div className="grid md:grid-cols-2 gap-4 bg-white/[0.02] border border-white/5 rounded-lg p-4 text-xs">
                 <div className="space-y-1">
                   <span className="text-neutral-500 block text-[9px] uppercase tracking-wider">甲方 (主辦單位) Party A</span>
@@ -1232,7 +1244,21 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                 <div className="space-y-1">
                   <span className="text-neutral-500 block text-[9px] uppercase tracking-wider">乙方 (參展品牌) Party B</span>
                   <span className="text-white font-medium text-amber-200">
-                    {brand?.brand_name_zh ? `${brand.brand_name_zh} (${brand.brand_name_en || ''})` : '_______________________________'}
+                    {brand?.brand_name_zh ? `${brand.brand_name_zh}${brand.brand_name_en && brand.brand_name_en !== brand.brand_name_zh ? ` (${brand.brand_name_en})` : ''}` : '_______________________________'}
+                  </span>
+                </div>
+                <div className="space-y-1 pt-2 border-t border-white/5">
+                  <span className="text-neutral-500 block text-[9px] uppercase tracking-wider">展覽期間 Exhibition Dates</span>
+                  <span className="text-neutral-200 font-light">2027 年 1 月 6 日（三）– 1 月 9 日（六）</span>
+                  <span className="text-[10px] text-neutral-400 block font-light">
+                    貴賓預展＆開幕酒會：1/6 18:00–21:00 ｜ 公眾開放：1/7–1/8 12:00–18:00、1/9 13:00–19:00
+                  </span>
+                </div>
+                <div className="space-y-1 pt-2 border-t border-white/5">
+                  <span className="text-neutral-500 block text-[9px] uppercase tracking-wider">展覽地點 Exhibition Venue</span>
+                  <span className="text-neutral-200 font-light">臺北市中山堂 光復廳 Taipei Zhongshan Hall</span>
+                  <span className="text-[10px] text-neutral-400 block font-light">
+                    臺北市中正區延平南路 98 號（1/6 日間場佈、1/9 19:00 後撤展）
                   </span>
                 </div>
               </div>
@@ -1249,7 +1275,7 @@ export default function ExhibitorCompliancePage({ brand: parentBrand }: { brand?
                     </p>
                   </div>
                   <a 
-                    href="https://drive.google.com/file/d/13VpAISbn3EvBSyBgNowZ3WYwWh4YwKA1/view?usp=sharing"
+                    href="/2027_VIS_Contemporary_Culture_參展規範備忘錄.pdf"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-1 text-[11px] text-[#DFBA87] hover:text-white border border-[#C9A96E]/30 hover:border-[#C9A96E] rounded px-3 py-1.5 bg-[#C9A96E]/5 hover:bg-[#C9A96E]/20 transition-all font-medium whitespace-nowrap"
