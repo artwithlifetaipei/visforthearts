@@ -325,12 +325,15 @@ export async function POST(req: Request) {
             </div>
           `;
         } else {
-          // --- REGULAR EXHIBITOR ADMISSION EMAIL ---
+          // --- REGULAR EXHIBITOR / GALLERY ADMISSION EMAIL ---
           const brandDisplay = (!app.brand_name_zh || app.brand_name_zh === '無' || app.brand_name_zh.trim() === '')
             ? (app.brand_name_en || '參展品牌')
             : app.brand_name_zh;
+          const isGallery = brandDisplay.toLowerCase().includes('artkake') || String(app.contact_email || '').toLowerCase().includes('artkake');
+          const entityTerm = isGallery ? '畫廊' : '品牌';
+          const entityTermEn = isGallery ? 'Gallery' : 'Brand';
 
-          subject = `【2027 VIS Contemporary Culture】正式核准錄取通知 Official Admission Notice — ${brandDisplay}`;
+          subject = `【2027 VIS Contemporary Culture】正式核准錄取通知 Official ${isGallery ? 'Gallery' : 'Admission'} Notice — ${brandDisplay}`;
 
           let regularFeeHtml = '';
           if (feeValue !== null && feeValue !== originalPrice) {
@@ -348,19 +351,19 @@ export async function POST(req: Request) {
                   VIS Contemporary Culture 2027
                 </span>
                 <h1 style="font-size: 23px; font-weight: 300; letter-spacing: 0.08em; color: #1A1A1A; margin: 0 0 4px 0;">
-                  參展申請正式核准錄取通知
+                  參展${isGallery ? '畫廊' : '申請'}正式核准錄取通知
                 </h1>
                 <p style="font-size: 12px; color: #8C7853; letter-spacing: 0.15em; text-transform: uppercase; margin: 0;">
-                  Official Exhibitor Admission Notice
+                  Official ${isGallery ? 'Gallery' : 'Exhibitor'} Admission Notice
                 </p>
               </div>
 
               <div style="background-color: #FFFFFF; border: 1px solid rgba(201, 169, 110, 0.3); border-radius: 4px; padding: 32px 28px; box-shadow: 0 4px 20px rgba(0,0,0,0.03);">
                 <p style="font-size: 14px; line-height: 1.8; color: #333333; margin-top: 0;">
-                  敬啟者 <strong>${app.contact_name}</strong>（${brandDisplay}）您好：
+                  敬啟者 <strong>${isGallery ? `${brandDisplay} 畫廊` : app.contact_name}</strong>（${isGallery ? app.contact_name : brandDisplay}）您好：
                 </p>
                 <p style="font-size: 14px; line-height: 1.8; color: #333333;">
-                  感謝貴品牌參與 2027 VIS 參展申請。大會策展委員會已完成審查評核與空間配置規劃，我們非常榮幸地正式通知您：貴品牌<strong>《${brandDisplay}》</strong>已獲大會正式核准入選！
+                  感謝貴${entityTerm}參與 2027 VIS 參展申請。大會策展委員會已完成審查評核與空間配置規劃，我們非常榮幸地正式通知您：貴${entityTerm}<strong>《${brandDisplay}》</strong>已獲大會正式核准入選！
                 </p>
 
                 <!-- Approval Status Card -->
@@ -379,7 +382,7 @@ export async function POST(req: Request) {
 
                 <!-- Portal Access -->
                 <h3 style="font-size: 13px; font-weight: 600; letter-spacing: 0.15em; text-transform: uppercase; color: #8C7853; border-bottom: 1px solid #EAEAEA; padding-bottom: 8px; margin-top: 28px;">
-                  01. 參展商專屬協作平台啟用指南 (Brand Portal Access)
+                  01. 參展${entityTerm}專屬協作平台啟用指南 (${entityTermEn} Portal Access)
                 </h3>
                 <p style="font-size: 13px; color: #444444; line-height: 1.8; margin: 10px 0;">
                   大會已為您開通專屬協作後台。請即刻登入以辦理後續參展手續（指定專屬 VIP 貴賓票受邀名單享全時段免排隊優先入場、簽署古蹟場地規範、上傳大會行銷視覺圖檔）。
@@ -394,7 +397,7 @@ export async function POST(req: Request) {
                     首次設定密碼開通後台 SET PASSWORD
                   </a>
                   <a href="${portalUrl}" target="_blank" style="display: inline-block; background-color: #0D0D0D; color: #FFFFFF; text-decoration: none; padding: 14px 28px; font-size: 11px; font-weight: 600; letter-spacing: 0.2em; text-transform: uppercase; border-radius: 2px; margin: 4px;">
-                    已有密碼直接登入 BRAND LOGIN
+                    已有密碼直接登入 ${entityTermEn.toUpperCase()} LOGIN
                   </a>
                 </div>
 
@@ -403,7 +406,7 @@ export async function POST(req: Request) {
                   02. 官方 LINE 即時諮詢與群組協助 (LINE Fast Support)
                 </h3>
                 <p style="font-size: 13px; color: #444444; line-height: 1.8; margin: 10px 0;">
-                  為提供入選品牌更即時、順暢的溝通與策展籌辦支援，大會特別成立【參展專屬工作溝通群組】。若您需要透過 LINE 進行快速諮詢或對接進度，請加入大會官方 LINE：
+                  為提供入選${entityTerm}更即時、順暢的溝通與策展籌辦支援，大會特別成立【參展專屬工作溝通群組】。若您需要透過 LINE 進行快速諮詢或對接進度，請加入大會官方 LINE：
                 </p>
                 <div style="background-color: #FAF9F6; border: 1px solid #EAEAEA; border-left: 3px solid #06C755; border-radius: 4px; padding: 16px; margin: 14px 0; font-size: 13px;">
                   <div style="margin-bottom: 8px;">
@@ -411,7 +414,7 @@ export async function POST(req: Request) {
                     <span style="font-family: monospace; font-size: 15px; font-weight: 700; color: #06C755; background: rgba(6,199,85,0.08); padding: 3px 10px; border-radius: 4px; border: 1px solid rgba(6,199,85,0.2);">vis_culture</span>
                   </div>
                   <div style="color: #555555; line-height: 1.7; font-size: 12.5px;">
-                    ✦ <strong>加入說明：</strong> 添加好友後，<strong>請主動傳送訊息告知您的「品牌名稱」與「負責人姓名」</strong>，大會秘書處專員將即刻為您確認並邀請加入【參展專屬工作溝通群組】。
+                    ✦ <strong>加入說明：</strong> 添加好友後，<strong>請主動傳送訊息告知您的「${entityTerm}名稱」與「負責人姓名」</strong>，大會秘書處專員將即刻為您確認並邀請加入【參展專屬工作溝通群組】。
                   </div>
                 </div>
 
