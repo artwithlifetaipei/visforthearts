@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { formatFriendlyError } from '@/lib/friendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -410,7 +411,7 @@ export async function POST(req: Request) {
         .maybeSingle();
 
       if (updateErr) {
-        return NextResponse.json({ error: `更新申請表資料失敗: ${updateErr.message}` }, { status: 500 });
+        return NextResponse.json({ error: formatFriendlyError(updateErr, '更新基本資料') }, { status: 500 });
       }
       updatedAppRow = {
         ...(updated || appRow),
@@ -453,7 +454,7 @@ export async function POST(req: Request) {
         .maybeSingle();
 
       if (insertErr) {
-        return NextResponse.json({ error: `建立申請表基本資料失敗: ${insertErr.message}` }, { status: 500 });
+        return NextResponse.json({ error: formatFriendlyError(insertErr, '建立基本資料') }, { status: 500 });
       }
       updatedAppRow = {
         ...(inserted || {}),
@@ -504,6 +505,6 @@ export async function POST(req: Request) {
     });
   } catch (err: any) {
     console.error('Error in POST /api/exhibitor/profile:', err);
-    return NextResponse.json({ error: err.message || 'Server error' }, { status: 500 });
+    return NextResponse.json({ error: formatFriendlyError(err, '儲存基本資料') }, { status: 500 });
   }
 }

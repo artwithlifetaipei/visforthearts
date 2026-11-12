@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { formatFriendlyError } from '@/lib/friendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -212,7 +213,7 @@ export async function POST(req: Request) {
 
                 if (error) {
                     console.error('Error updating brand logo:', error);
-                    return NextResponse.json({ error: `更新 Logo 失敗: ${error.message}` }, { status: 500 });
+                    return NextResponse.json({ error: formatFriendlyError(error, '更新品牌去背 Logo') }, { status: 500 });
                 }
                 savedLogo = data;
             } else {
@@ -229,7 +230,7 @@ export async function POST(req: Request) {
 
                 if (error) {
                     console.error('Error inserting brand logo:', error);
-                    return NextResponse.json({ error: `上傳 Logo 失敗: ${error.message}` }, { status: 500 });
+                    return NextResponse.json({ error: formatFriendlyError(error, '上傳品牌去背 Logo') }, { status: 500 });
                 }
                 savedLogo = data;
             }
@@ -249,7 +250,7 @@ export async function POST(req: Request) {
                 .not('file_type', 'in', '("brand_logo_transparent","pr_qa_submission","booth_fee_proof","compliance_contract","perspective_store_master","concierge_lead","brand_profile_ext")');
 
             if (!countErr && existingPhotos && existingPhotos.length >= 5) {
-                return NextResponse.json({ error: '最多僅能上傳 5 張媒體素材圖檔。' }, { status: 400 });
+                return NextResponse.json({ error: '無法繼續上傳：系統規定每個品牌最多僅能上傳 5 張媒體主視覺／作品圖檔（若需更換，請先刪除舊圖檔後再上傳）。' }, { status: 400 });
             }
 
             const { data, error: insErr } = await adminDb
@@ -265,7 +266,7 @@ export async function POST(req: Request) {
 
             if (insErr) {
                 console.error('Error inserting media visual asset:', insErr);
-                return NextResponse.json({ error: `上傳圖檔失敗: ${insErr.message}` }, { status: 500 });
+                return NextResponse.json({ error: formatFriendlyError(insErr, '上傳媒體圖檔') }, { status: 500 });
             }
 
             return NextResponse.json({

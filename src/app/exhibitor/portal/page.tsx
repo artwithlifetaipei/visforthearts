@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { supabase } from '@/lib/supabase';
 import { KEY_DATES, DEPOSIT_AMOUNT, ZONE_MAP, formatBoothDisplay, normalizeBoothCode, getBoothPrice } from '@/lib/exhibitorConstants';
 import { prepareFileUpload, safeJson, fetchWithTimeout } from '@/lib/uploadUtils';
+import { formatFriendlyError } from '@/lib/friendlyError';
 import { motion } from 'framer-motion';
 import { 
   Calendar, CreditCard, Award, ClipboardCheck, Users, 
@@ -160,7 +161,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
       });
       const data = await safeJson(res);
       if (!res.ok || data.error) {
-        setProfileErrorMsg(data.error || '儲存失敗，請檢查必填欄位後重試。');
+        setProfileErrorMsg(formatFriendlyError(data.error || '儲存失敗，請檢查必填欄位後重試。', '儲存基本資料'));
       } else {
         if (data.profile) {
           syncProfileFromApi(data.profile, data.missingFields || []);
@@ -187,7 +188,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
         setTimeout(() => setProfileSuccessMsg(''), 6000);
       }
     } catch (err: any) {
-      setProfileErrorMsg(err?.message || '網路異常，請稍後再試。');
+      setProfileErrorMsg(formatFriendlyError(err, '儲存基本資料'));
     } finally {
       setProfileSaving(false);
     }
@@ -981,13 +982,18 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
 
               {/* 11. Concept Brief */}
               <div>
-                <label className="flex items-center justify-between text-xs text-neutral-300 mb-1.5 font-medium">
-                  <span>品牌參展核心概念簡述 Concept Brief (供官方導覽與專刊介紹使用，不限字數自動完整存檔) <span className="text-[#DFBA87]">*</span></span>
-                  {missingProfileFields.includes('concept_brief') && (
-                    <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-semibold">
-                      ⚠️ 請補填寫品牌簡介
+                <label className="flex flex-wrap items-center justify-between gap-2 text-xs text-neutral-300 mb-1.5 font-medium">
+                  <span>品牌參展核心概念簡述 Concept Brief (供官方導覽與專刊介紹使用) <span className="text-[#DFBA87]">*</span></span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10.5px] font-mono text-neutral-400">
+                      目前字數：{Array.from(profileForm.concept_brief || '').length} 字
                     </span>
-                  )}
+                    {missingProfileFields.includes('concept_brief') && (
+                      <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-semibold">
+                        ⚠️ 請補填寫品牌簡介
+                      </span>
+                    )}
+                  </div>
                 </label>
                 <textarea
                   rows={4}
@@ -1000,6 +1006,9 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                       : 'border-white/15 focus:border-[#DFBA87]'
                   }`}
                 />
+                <p className="mt-1.5 text-[11px] text-neutral-400 font-light leading-relaxed">
+                  💡 填寫提示：建議將核心重點精簡於 250 字內以利紙本導覽專刊排版；若超過 250 字，系統亦會自動為您完整存檔，不會阻擋儲存。各欄位皆支援分段隨時存檔（填多少、存多少）。
+                </p>
               </div>
 
               {profileSuccessMsg && (

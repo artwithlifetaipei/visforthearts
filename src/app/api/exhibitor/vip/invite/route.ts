@@ -3,6 +3,7 @@ import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
 import nodemailer from 'nodemailer';
+import { formatFriendlyError } from '@/lib/friendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -202,7 +203,7 @@ export async function POST(req: Request) {
             if (subErr.code === '23505') {
                 return NextResponse.json({ error: '該電子信箱已在貴品牌的專屬邀請名單中' }, { status: 409 });
             }
-            return NextResponse.json({ error: `名單登記失敗: ${subErr.message}` }, { status: 500 });
+            return NextResponse.json({ error: formatFriendlyError(subErr, '登記貴賓邀請名單') }, { status: 500 });
         }
 
         submissionRecord = subData ? { ...subData, tier: selectedTier } : null;

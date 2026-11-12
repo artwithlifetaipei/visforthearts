@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { formatFriendlyError } from '@/lib/friendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -249,7 +250,7 @@ export async function POST(req: Request) {
 
       if (updErr) {
         console.error('Error updating payment proof:', updErr);
-        return NextResponse.json({ error: `更新憑證失敗: ${updErr.message}` }, { status: 500 });
+        return NextResponse.json({ error: formatFriendlyError(updErr, '更新匯款水單憑證') }, { status: 500 });
       }
       savedAsset = data;
     } else {
@@ -266,7 +267,7 @@ export async function POST(req: Request) {
 
       if (insErr) {
         console.error('Error inserting payment proof:', insErr);
-        return NextResponse.json({ error: `提交憑證失敗: ${insErr.message}` }, { status: 500 });
+        return NextResponse.json({ error: formatFriendlyError(insErr, '提交匯款水單憑證') }, { status: 500 });
       }
       savedAsset = data;
     }

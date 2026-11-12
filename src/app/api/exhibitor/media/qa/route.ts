@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { formatFriendlyError } from '@/lib/friendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -227,7 +228,7 @@ export async function POST(req: Request) {
 
             if (updateErr) {
                 console.error('Update error in exhibitor_media_assets:', updateErr);
-                return NextResponse.json({ error: updateErr.message }, { status: 500 });
+                return NextResponse.json({ error: formatFriendlyError(updateErr, '儲存公關專訪回稿') }, { status: 500 });
             }
 
             // Cleanup any duplicate rows if they exist
@@ -250,7 +251,7 @@ export async function POST(req: Request) {
 
             if (insertErr) {
                 console.error('Insert error in exhibitor_media_assets:', insertErr);
-                return NextResponse.json({ error: insertErr.message }, { status: 500 });
+                return NextResponse.json({ error: formatFriendlyError(insertErr, '儲存公關專訪回稿') }, { status: 500 });
             }
         }
 

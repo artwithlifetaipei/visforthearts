@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
 import { createClient } from '@supabase/supabase-js';
 import { cookies } from 'next/headers';
+import { formatFriendlyError } from '@/lib/friendlyError';
 
 async function createSupabaseServerClient() {
   const cookieStore = await cookies();
@@ -302,7 +303,7 @@ export async function POST(req: Request) {
     if (upsertErr) {
       console.error('Compliance upsert error:', upsertErr);
       return NextResponse.json(
-        { error: `合約簽署儲存失敗: ${upsertErr.message}` },
+        { error: formatFriendlyError(upsertErr, '儲存合約簽署紀錄') },
         { status: 500 }
       );
     }

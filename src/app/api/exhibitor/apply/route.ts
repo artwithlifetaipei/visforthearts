@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase';
 import { createClient } from '@supabase/supabase-js';
 import nodemailer from 'nodemailer';
 import { Resend } from 'resend';
+import { formatFriendlyError } from '@/lib/friendlyError';
 
 export const dynamic = 'force-dynamic';
 export const maxDuration = 60;
@@ -32,10 +33,24 @@ export async function POST(request: NextRequest) {
       deposit_proof_filename,
     } = body;
 
-    // Validate required fields
-    if (!brand_name_zh || !brand_name_en || !contact_name || !contact_email || !zone_id || !booth_type || !contact_address) {
-      return NextResponse.json({ success: false, error: '缺少必要欄位（含聯繫地址）' }, { status: 400 });
+    // Validate required fields with specific missing field names
+    const missingNames: string[] = [];
+    if (!brand_name_zh?.trim()) missingNames.push('品牌中文名稱');
+    if (!brand_name_en?.trim()) missingNames.push('品牌英文名稱');
+    if (!contact_name?.trim()) missingNames.push('聯絡人姓名');
+    if (!contact_email?.trim()) missingNames.push('聯絡人電子信箱');
+    if (!contact_address?.trim()) missingNames.push('聯繫／通訊地址');
+    if (!zone_id || !booth_type) missingNames.push('申請展區與展位規格');
+    if (missingNames.length > 0) {
+      return NextResponse.json(
+        { success: false, error: `無法送出申請：請先填寫以下必填欄位：【${missingNames.join('、')}】` },
+        { status: 400 }
+      );
     }
+
+    const safeConceptBrief = concept_brief
+      ? Array.from(String(concept_brief).trim()).slice(0, 245).join('')
+      : '';
 
     let deposit_proof_url = deposit_proof_base64 || '';
 
@@ -115,7 +130,7 @@ export async function POST(request: NextRequest) {
         zone_preference_1,
         zone_preference_2,
         zone_preference_3,
-        concept_brief,
+        concept_brief: safeConceptBrief,
         deposit_proof_url,
         status: 'pending',
         deposit_paid: false, // will be approved by admin after verifying transfer proof
@@ -148,7 +163,7 @@ export async function POST(request: NextRequest) {
             zone_preference_1,
             zone_preference_2,
             zone_preference_3,
-            concept_brief,
+            concept_brief: safeConceptBrief,
             deposit_proof_url,
             status: 'pending',
             deposit_paid: false,
@@ -158,12 +173,12 @@ export async function POST(request: NextRequest) {
 
         if (retryError) {
           console.error('Fallback retry error:', retryError);
-          return NextResponse.json({ success: false, error: `資料庫儲存失敗: ${dbError.message}` }, { status: 500 });
+          return NextResponse.json({ success: false, error: formatFriendlyError(dbError, '提交參展申請表') }, { status: 500 });
         }
         finalInsertedData = retryData;
       } catch (fallbackException) {
         console.error('Fallback exception:', fallbackException);
-        return NextResponse.json({ success: false, error: `資料庫儲存失敗: ${dbError.message}` }, { status: 500 });
+        return NextResponse.json({ success: false, error: formatFriendlyError(dbError, '提交參展申請表') }, { status: 500 });
       }
     }
 

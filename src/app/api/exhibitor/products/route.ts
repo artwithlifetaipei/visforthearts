@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { formatFriendlyError } from '@/lib/friendlyError';
 
 export const dynamic = 'force-dynamic';
 
@@ -82,7 +83,7 @@ export async function POST(req: Request) {
         .single();
 
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: formatFriendlyError(error, '更新作品／商品資料') }, { status: 500 });
       }
       return NextResponse.json({ success: true, product: data });
     } else {
@@ -93,7 +94,7 @@ export async function POST(req: Request) {
         .single();
 
       if (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
+        return NextResponse.json({ error: formatFriendlyError(error, '新增作品／商品資料') }, { status: 500 });
       }
       return NextResponse.json({ success: true, product: data });
     }

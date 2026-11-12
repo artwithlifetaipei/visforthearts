@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@supabase/supabase-js';
+import { formatFriendlyError } from '@/lib/friendlyError';
 
 async function getAdminClient() {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -73,7 +74,7 @@ export async function POST(req: Request) {
 
     if (brandUpdateErr) {
       console.error('Update exhibitor_brands portal_email error:', brandUpdateErr);
-      return NextResponse.json({ error: `更新品牌信箱失敗: ${brandUpdateErr.message}` }, { status: 500 });
+      return NextResponse.json({ error: formatFriendlyError(brandUpdateErr, '更新品牌綁定信箱') }, { status: 500 });
     }
 
     // 4. Update exhibitor_applications.contact_email
