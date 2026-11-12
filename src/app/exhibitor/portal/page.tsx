@@ -177,11 +177,14 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             return nextApp;
           });
         }
-        setProfileSuccessMsg('✓ 參展品牌基本資料已成功更新並存檔！');
-        if ((data.missingFields || []).length === 0) {
+        const remCount = (data.missingFields || []).length;
+        if (remCount === 0) {
+          setProfileSuccessMsg('✓ 參展品牌基本資料已全數更新並存檔完成！');
           setIsEditingProfile(false);
+        } else {
+          setProfileSuccessMsg(`✓ 已成功儲存您目前已填寫的資料！（尚有 ${remCount} 項欄位可隨時接續補齊）`);
         }
-        setTimeout(() => setProfileSuccessMsg(''), 5000);
+        setTimeout(() => setProfileSuccessMsg(''), 6000);
       }
     } catch (err: any) {
       setProfileErrorMsg(err?.message || '網路異常，請稍後再試。');
@@ -402,7 +405,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             .from('exhibitor_media_assets')
             .select('*', { count: 'exact', head: true })
             .eq('brand_id', currentBrand.id)
-            .not('file_type', 'in', '("pr_qa_submission","brand_logo_transparent","booth_fee_proof","compliance_contract","perspective_store_master","concierge_lead")')
+            .not('file_type', 'in', '("pr_qa_submission","brand_logo_transparent","booth_fee_proof","compliance_contract","perspective_store_master","concierge_lead","brand_profile_ext")')
             .then(res => res.count || 0);
 
           const logoPromise = supabase
@@ -802,7 +805,6 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   </label>
                   <input
                     type="text"
-                    required
                     value={profileForm.brand_name_zh}
                     onChange={(e) => setProfileForm({ ...profileForm, brand_name_zh: e.target.value })}
                     placeholder="例如：蘭蕙雅集"
@@ -826,7 +828,6 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   </label>
                   <input
                     type="text"
-                    required
                     value={profileForm.brand_name_en}
                     onChange={(e) => setProfileForm({ ...profileForm, brand_name_en: e.target.value })}
                     placeholder="e.g. Lan Hui Atelier"
@@ -878,7 +879,6 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   </label>
                   <input
                     type="text"
-                    required
                     value={profileForm.contact_name}
                     onChange={(e) => setProfileForm({ ...profileForm, contact_name: e.target.value })}
                     placeholder="請輸入負責人或主要窗口真實姓名"
@@ -902,7 +902,6 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   </label>
                   <input
                     type="text"
-                    required
                     value={profileForm.contact_phone}
                     onChange={(e) => setProfileForm({ ...profileForm, contact_phone: e.target.value })}
                     placeholder="例如：0912-345-678"
@@ -921,7 +920,6 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   </label>
                   <input
                     type="email"
-                    required
                     value={profileForm.contact_email}
                     onChange={(e) => setProfileForm({ ...profileForm, contact_email: e.target.value })}
                     placeholder="name@example.com"
@@ -941,7 +939,6 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   </label>
                   <input
                     type="text"
-                    required
                     value={profileForm.contact_address}
                     onChange={(e) => setProfileForm({ ...profileForm, contact_address: e.target.value })}
                     placeholder="例如：台北市信義區市民大道二段 XX 號 X 樓"
@@ -985,7 +982,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
               {/* 11. Concept Brief */}
               <div>
                 <label className="flex items-center justify-between text-xs text-neutral-300 mb-1.5 font-medium">
-                  <span>品牌參展核心概念簡述 Concept Brief (250字內，供官方導覽與專刊介紹使用) <span className="text-[#DFBA87]">*</span></span>
+                  <span>品牌參展核心概念簡述 Concept Brief (供官方導覽與專刊介紹使用，不限字數自動完整存檔) <span className="text-[#DFBA87]">*</span></span>
                   {missingProfileFields.includes('concept_brief') && (
                     <span className="text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded font-semibold">
                       ⚠️ 請補填寫品牌簡介
@@ -994,7 +991,6 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                 </label>
                 <textarea
                   rows={4}
-                  required
                   value={profileForm.concept_brief}
                   onChange={(e) => setProfileForm({ ...profileForm, concept_brief: e.target.value })}
                   placeholder="請簡述貴品牌預計展出的核心概念、作品特色，以及如何結合中山堂古蹟空間底蘊進行美學演繹。"
@@ -1005,6 +1001,20 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   }`}
                 />
               </div>
+
+              {profileSuccessMsg && (
+                <div className="p-3.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 shrink-0" />
+                  <span>{profileSuccessMsg}</span>
+                </div>
+              )}
+
+              {profileErrorMsg && (
+                <div className="p-3.5 rounded-lg bg-rose-500/10 border border-rose-500/30 text-rose-300 text-xs flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-rose-400 shrink-0" />
+                  <span>{profileErrorMsg}</span>
+                </div>
+              )}
 
               <div className="flex items-center justify-end gap-3 pt-2 border-t border-white/10">
                 {missingProfileFields.length === 0 && (

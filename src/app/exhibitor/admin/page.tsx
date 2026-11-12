@@ -517,11 +517,37 @@ export default function ExhibitorAdminPage() {
           .order('created_at', { ascending: false }),
       ]);
 
-      const appData = apps || [];
+      const rawAppData = apps || [];
       const vipData = vips || [];
       const complianceData = compliances || [];
       const mediaData = media || [];
       const prodData = products || [];
+
+      // Merge untruncated concept_brief from brand_profile_ext if present
+      const extBriefByEmailOrName = new Map<string, string>();
+      for (const m of mediaData) {
+        if (m.file_type === 'brand_profile_ext' && m.file_url) {
+          try {
+            const parsed = JSON.parse(m.file_url);
+            if (parsed?.concept_brief) {
+              const pEmail = (m.exhibitor_brands?.portal_email || parsed.contact_email || '').toLowerCase().trim();
+              const pName = (m.exhibitor_brands?.brand_name_zh || parsed.brand_name_zh || '').trim();
+              if (pEmail) extBriefByEmailOrName.set(pEmail, parsed.concept_brief);
+              if (pName) extBriefByEmailOrName.set(pName, parsed.concept_brief);
+            }
+          } catch {}
+        }
+      }
+
+      const appData = rawAppData.map((a: any) => {
+        const emailKey = (a.contact_email || '').toLowerCase().trim();
+        const nameKey = (a.brand_name_zh || '').trim();
+        const fullBrief = extBriefByEmailOrName.get(emailKey) || extBriefByEmailOrName.get(nameKey);
+        if (fullBrief && fullBrief.length >= (a.concept_brief || '').length) {
+          return { ...a, concept_brief: fullBrief };
+        }
+        return a;
+      });
 
       setApplications(appData);
       setVipList(vipData);
@@ -1345,7 +1371,7 @@ export default function ExhibitorAdminPage() {
               id: 'media' as const,
               label: '媒體素材匯總',
               icon: ImageIcon,
-              count: mediaAssets.filter((a) => !['perspective_store_master', 'compliance_contract', 'concierge_lead'].includes(a.file_type)).length,
+              count: mediaAssets.filter((a) => !['perspective_store_master', 'compliance_contract', 'concierge_lead', 'brand_profile_ext'].includes(a.file_type)).length,
             },
             {
               id: 'sales' as const,
@@ -2511,6 +2537,7 @@ export default function ExhibitorAdminPage() {
               'perspective_store_master',
               'compliance_contract',
               'concierge_lead',
+              'brand_profile_ext',
             ];
             const imageAssets = mediaAssets.filter(
               (a) =>

@@ -44,6 +44,73 @@ async function getAdminClient() {
     return adminClient;
 }
 
+async function resolveValidBrandId(adminDb: any, brandId?: string | null, email?: string | null): Promise<string | null> {
+    if (brandId) {
+        const { data: brand } = await adminDb
+            .from('exhibitor_brands')
+            .select('id')
+            .eq('id', brandId)
+            .maybeSingle();
+        if (brand?.id) return brand.id;
+
+        const { data: brandByApp } = await adminDb
+            .from('exhibitor_brands')
+            .select('id')
+            .eq('application_id', brandId)
+            .limit(1)
+            .maybeSingle();
+        if (brandByApp?.id) return brandByApp.id;
+
+        const { data: app } = await adminDb
+            .from('exhibitor_applications')
+            .select('*')
+            .eq('id', brandId)
+            .maybeSingle();
+        if (app) {
+            const cleanEmail = (email || app.contact_email || '').toLowerCase().trim();
+            if (cleanEmail) {
+                const { data: existingByEmail } = await adminDb
+                    .from('exhibitor_brands')
+                    .select('id')
+                    .ilike('portal_email', cleanEmail)
+                    .limit(1)
+                    .maybeSingle();
+                if (existingByEmail?.id) return existingByEmail.id;
+
+                const { data: created } = await adminDb
+                    .from('exhibitor_brands')
+                    .insert({
+                        application_id: app.id,
+                        brand_name_zh: app.brand_name_zh,
+                        brand_name_en: app.brand_name_en || app.brand_name_zh,
+                        zone_id: app.zone_id || 'artsy',
+                        booth_type: app.booth_type || 'A01',
+                        is_micro_exposure: app.booth_type === 'T',
+                        portal_email: cleanEmail,
+                        custom_fee: app.custom_fee ?? null,
+                        discount_note: app.discount_note ?? null,
+                    })
+                    .select('id')
+                    .maybeSingle();
+                if (created?.id) return created.id;
+            }
+        }
+    }
+
+    if (email) {
+        const cleanEmail = email.toLowerCase().trim();
+        const { data: brand } = await adminDb
+            .from('exhibitor_brands')
+            .select('id')
+            .ilike('portal_email', cleanEmail)
+            .limit(1)
+            .maybeSingle();
+        if (brand?.id) return brand.id;
+    }
+
+    return brandId || null;
+}
+
 export async function GET(req: Request) {
     try {
         const { searchParams } = new URL(req.url);
@@ -55,28 +122,7 @@ export async function GET(req: Request) {
         }
 
         const adminDb = await getAdminClient();
-        let targetBrandId = brandId;
-
-        if (!targetBrandId && email) {
-            const cleanEmail = email.toLowerCase().trim();
-            const { data: brand } = await adminDb
-                .from('exhibitor_brands')
-                .select('id')
-                .eq('portal_email', cleanEmail)
-                .maybeSingle();
-
-            if (brand) {
-                targetBrandId = brand.id;
-            } else {
-                const { data: app } = await adminDb
-                    .from('exhibitor_applications')
-                    .select('id')
-                    .eq('contact_email', cleanEmail)
-                    .eq('status', 'approved')
-                    .maybeSingle();
-                if (app) targetBrandId = app.id;
-            }
-        }
+        const targetBrandId = await resolveValidBrandId(adminDb, brandId, email);
 
         if (!targetBrandId) {
             return NextResponse.json({ success: true, exists: false, data: null });
@@ -134,6 +180,7 @@ export async function POST(req: Request) {
         }
 
         const adminDb = await getAdminClient();
+        const resolvedBrandId = (await resolveValidBrandId(adminDb, brand_id, body.email)) || brand_id;
 
         let filledCount = 0;
         ['q1', 'q2', 'q3', 'q4', 'q5'].forEach(k => {
@@ -158,7 +205,7 @@ export async function POST(req: Request) {
         const { data: existingRows, error: queryErr } = await adminDb
             .from('exhibitor_media_assets')
             .select('id')
-            .eq('brand_id', brand_id)
+            .eq('brand_id', resolvedBrandId)
             .eq('file_type', 'pr_qa_submission')
             .order('created_at', { ascending: true });
 
@@ -195,7 +242,7 @@ export async function POST(req: Request) {
             const { error: insertErr } = await adminDb
                 .from('exhibitor_media_assets')
                 .insert({
-                    brand_id: brand_id,
+                    brand_id: resolvedBrandId,
                     file_url: fileContent,
                     file_name: 'pr_editorial_answers.json',
                     file_type: 'pr_qa_submission',
