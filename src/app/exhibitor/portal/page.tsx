@@ -16,8 +16,8 @@ import {
 
 function safeGetStorage(key: string): string | null {
   try {
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      return window.sessionStorage.getItem(key);
+    if (typeof window !== 'undefined') {
+      return window.sessionStorage?.getItem(key) || window.localStorage?.getItem(key) || null;
     }
   } catch {
     // Ignore storage restriction errors
@@ -27,8 +27,9 @@ function safeGetStorage(key: string): string | null {
 
 function safeSetStorage(key: string, value: string): void {
   try {
-    if (typeof window !== 'undefined' && window.sessionStorage) {
-      window.sessionStorage.setItem(key, value);
+    if (typeof window !== 'undefined') {
+      window.sessionStorage?.setItem(key, value);
+      window.localStorage?.setItem(key, value);
     }
   } catch {
     // Ignore storage restriction errors
@@ -89,19 +90,20 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
   const [proofPreparing, setProofPreparing] = useState(false);
 
   // Brand Profile (Application Form Basic Info) states
-  const [profileForm, setProfileForm] = useState({
-    brand_name_zh: '',
-    brand_name_en: '',
-    company_name_zh: '',
-    company_tax_id: '',
-    contact_name: '',
-    contact_email: '',
-    contact_phone: '',
-    contact_address: '',
-    website_url: '',
-    instagram_url: '',
-    concept_brief: '',
-  });
+  const [profileForm, setProfileForm] = useState(() => ({
+    brand_name_zh: appData?.brand_name_zh || brand?.brand_name_zh || '',
+    brand_name_en: appData?.brand_name_en || brand?.brand_name_en || '',
+    company_name_zh: appData?.company_name_zh === '無' ? '' : (appData?.company_name_zh || ''),
+    company_tax_id: appData?.company_tax_id === '無' ? '' : (appData?.company_tax_id || ''),
+    contact_name: appData?.contact_name || '',
+    contact_email: appData?.contact_email || brand?.portal_email || '',
+    contact_phone: appData?.contact_phone || '',
+    contact_address: appData?.contact_address || '',
+    website_url: appData?.website_url || '',
+    instagram_url: appData?.instagram_url || '',
+    concept_brief: appData?.concept_brief || '',
+  }));
+  const [profileLoaded, setProfileLoaded] = useState<boolean>(() => Boolean(appData?.contact_name));
   const [missingProfileFields, setMissingProfileFields] = useState<string[]>([]);
   const [isEditingProfile, setIsEditingProfile] = useState(false);
   const [profileSaving, setProfileSaving] = useState(false);
@@ -124,7 +126,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
     if (!p) return;
     const mSet = new Set(missing || []);
     setMissingProfileFields(missing || []);
-    setProfileForm({
+    const nextForm = {
       brand_name_zh: sanitizePlaceholderValue(p.brand_name_zh, mSet.has('brand_name_zh')),
       brand_name_en: sanitizePlaceholderValue(p.brand_name_en, mSet.has('brand_name_en')),
       company_name_zh: p.company_name_zh === '無' ? '' : (p.company_name_zh || ''),
@@ -136,7 +138,13 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
       website_url: p.website_url || '',
       instagram_url: p.instagram_url || '',
       concept_brief: sanitizePlaceholderValue(p.concept_brief, mSet.has('concept_brief')),
-    });
+    };
+    setProfileForm(nextForm);
+    setProfileLoaded(true);
+    const cacheTargetId = p.brand_id || brand?.id;
+    if (cacheTargetId) {
+      safeSetStorage(`vis_portal_app_data_${cacheTargetId}`, JSON.stringify(p));
+    }
     if ((missing || []).length > 0) {
       setIsEditingProfile(true);
     }
@@ -326,10 +334,10 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
       try {
         let currentBrand = null;
 
-        // Fetch brand from current session with 600ms timeout race to prevent iOS WebKit deadlock
+        // Fetch brand from current session with 2000ms timeout race to prevent iOS WebKit deadlock while supporting overseas connections
         const sessionPromise = supabase.auth.getSession();
         const sessionTimeout = new Promise<any>((resolve) =>
-          setTimeout(() => resolve({ data: { session: null } }), 600)
+          setTimeout(() => resolve({ data: { session: null } }), 2000)
         );
         const { data: sessionData } = await Promise.race([sessionPromise, sessionTimeout]);
         const session = sessionData?.session;
@@ -346,7 +354,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
           if (!currentBrand) {
             const { data: approvedApp } = await supabase
               .from('exhibitor_applications')
-              .select('*')
+              .select('id, brand_name_zh, brand_name_en, company_name_zh, company_tax_id, contact_name, contact_email, contact_phone, contact_address, website_url, instagram_url, zone_id, booth_type, concept_brief, status, deposit_paid, custom_fee, discount_note, created_at')
               .eq('contact_email', email)
               .eq('status', 'approved')
               .maybeSingle();
@@ -372,18 +380,46 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
 
         // Fallback to cached state if session fetch fails (e.g. offline)
         if (!currentBrand) {
-          currentBrand = brand;
+          const latestSavedBrand = safeGetStorage('vis_portal_brand_data');
+          if (latestSavedBrand) {
+            try { currentBrand = JSON.parse(latestSavedBrand); } catch { currentBrand = brand; }
+          } else {
+            currentBrand = brand;
+          }
         }
 
         if (currentBrand) {
           setBrand(currentBrand);
           safeSetStorage('vis_portal_brand_data', JSON.stringify(currentBrand));
 
-          // Fetch all sub-module data in parallel to resolve waterfall
+          // Immediately restore any cached profile for this brand ID before network calls finish
+          const cachedAppStr = safeGetStorage(`vis_portal_app_data_${currentBrand.id}`);
+          if (cachedAppStr) {
+            try {
+              const cachedAppObj = JSON.parse(cachedAppStr);
+              if (cachedAppObj && cachedAppObj.contact_name) {
+                setAppData(cachedAppObj);
+                syncProfileFromApi(cachedAppObj, []);
+              }
+            } catch {}
+          }
+
+          // 1. Fire profile fetch immediately and independently so it is never delayed by other queries
+          fetch(`/api/exhibitor/profile?brand_id=${currentBrand.id}&email=${encodeURIComponent(currentBrand.portal_email || '')}`)
+            .then(res => res.json())
+            .then(profileRes => {
+              if (profileRes?.profile) {
+                setAppData(profileRes.profile);
+                syncProfileFromApi(profileRes.profile, profileRes.missingFields || []);
+              }
+            })
+            .catch(() => {});
+
+          // 2. Fetch lightweight sub-module status counters in parallel (excluding heavy base64 columns like physical_contract_url and deposit_proof_url)
           const appPromise = currentBrand.application_id
             ? supabase
                 .from('exhibitor_applications')
-                .select('*')
+                .select('id, brand_name_zh, brand_name_en, company_name_zh, company_tax_id, contact_name, contact_email, contact_phone, contact_address, website_url, instagram_url, zone_id, booth_type, concept_brief, status, deposit_paid, custom_fee, discount_note, created_at')
                 .eq('id', currentBrand.application_id)
                 .maybeSingle()
                 .then(res => res.data)
@@ -391,7 +427,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
 
           const compliancePromise = supabase
             .from('exhibitor_compliance')
-            .select('*')
+            .select('id, brand_id, signed_at')
             .eq('brand_id', currentBrand.id)
             .maybeSingle()
             .then(res => res.data);
@@ -442,11 +478,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             .then(res => res.proof || null)
             .catch(() => null);
 
-          const profilePromise = fetch(`/api/exhibitor/profile?brand_id=${currentBrand.id}&email=${encodeURIComponent(currentBrand.portal_email || '')}`)
-            .then(res => res.json())
-            .catch(() => null);
-
-          const [app, compliance, vipC, mediaC, qCount, hasLogoResult, proofData, profileRes] = await Promise.all([
+          const [app, compliance, vipC, mediaC, qCount, hasLogoResult, proofData] = await Promise.all([
             appPromise,
             compliancePromise,
             vipPromise,
@@ -454,18 +486,13 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
             qaPromise,
             logoPromise,
             proofPromise,
-            profilePromise
           ]);
 
-          if (profileRes?.profile) {
-            syncProfileFromApi(profileRes.profile, profileRes.missingFields || []);
-          } else if (app) {
-            syncProfileFromApi(app, []);
-          }
-
           if (app) {
-            setAppData(app);
-            safeSetStorage(`vis_portal_app_data_${currentBrand.id}`, JSON.stringify(app));
+            setAppData((prev: any) => {
+              const merged = { ...app, ...(prev || {}) };
+              return merged;
+            });
           }
           if (proofData) {
             setPaymentProof(proofData);
@@ -1084,7 +1111,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                     <User className="w-3 h-3 text-[#DFBA87]" /> 負責人／主要聯絡人 Contact
                   </span>
                   <div className="text-sm font-medium text-white mt-1">
-                    {profileForm.contact_name || <span className="text-amber-400">⚠️ 待補填</span>}
+                    {profileForm.contact_name || appData?.contact_name || (!profileLoaded ? <span className="text-neutral-500">載入中...</span> : <span className="text-amber-400">⚠️ 待補填</span>)}
                   </div>
                 </div>
 
@@ -1093,7 +1120,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                     <Phone className="w-3 h-3 text-[#DFBA87]" /> 聯絡電話 Phone
                   </span>
                   <div className="text-sm font-mono text-white mt-1">
-                    {profileForm.contact_phone || <span className="text-amber-400">⚠️ 待補填</span>}
+                    {profileForm.contact_phone || appData?.contact_phone || (!profileLoaded ? <span className="text-neutral-500">載入中...</span> : <span className="text-amber-400">⚠️ 待補填</span>)}
                   </div>
                 </div>
 
@@ -1101,8 +1128,8 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   <span className="text-[10px] text-neutral-500 block uppercase font-mono flex items-center gap-1">
                     <Mail className="w-3 h-3 text-[#DFBA87]" /> 聯繫電子信箱 Email
                   </span>
-                  <div className="text-sm font-mono text-white mt-1 truncate" title={profileForm.contact_email || brand.portal_email}>
-                    {profileForm.contact_email || brand.portal_email}
+                  <div className="text-sm font-mono text-white mt-1 truncate" title={profileForm.contact_email || appData?.contact_email || brand.portal_email}>
+                    {profileForm.contact_email || appData?.contact_email || brand.portal_email}
                   </div>
                 </div>
 
@@ -1111,7 +1138,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                     <MapPin className="w-3 h-3 text-[#DFBA87]" /> 聯繫／寄件地址 Address
                   </span>
                   <div className="text-xs text-white mt-1 leading-snug">
-                    {profileForm.contact_address || <span className="text-amber-400">⚠️ 待補填</span>}
+                    {profileForm.contact_address || appData?.contact_address || (!profileLoaded ? <span className="text-neutral-500">載入中...</span> : <span className="text-amber-400">⚠️ 待補填</span>)}
                   </div>
                 </div>
               </div>
@@ -1122,14 +1149,14 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                     <Globe className="w-3 h-3 text-[#DFBA87]" /> 品牌官方網站 Website
                   </span>
                   <div className="text-xs font-mono text-neutral-300 mt-1 truncate">
-                    {profileForm.website_url || <span className="text-neutral-500">未提供</span>}
+                    {profileForm.website_url || appData?.website_url || <span className="text-neutral-500">未提供</span>}
                   </div>
                 </div>
 
                 <div className="bg-black/40 border border-white/5 rounded-lg p-3.5">
                   <span className="text-[10px] text-neutral-500 block uppercase font-mono">Instagram / 社群連結</span>
                   <div className="text-xs font-mono text-neutral-300 mt-1 truncate">
-                    {profileForm.instagram_url || <span className="text-neutral-500">未提供</span>}
+                    {profileForm.instagram_url || appData?.instagram_url || <span className="text-neutral-500">未提供</span>}
                   </div>
                 </div>
               </div>
@@ -1139,7 +1166,7 @@ export default function ExhibitorDashboardPage({ brand: parentBrand }: { brand?:
                   品牌參展核心概念簡述 Concept Brief
                 </span>
                 <p className="text-xs text-neutral-200 font-light leading-relaxed whitespace-pre-wrap">
-                  {profileForm.concept_brief || <span className="text-amber-400">⚠️ 尚未填寫參展核心概念簡述</span>}
+                  {profileForm.concept_brief || appData?.concept_brief || (!profileLoaded ? <span className="text-neutral-500">載入中...</span> : <span className="text-amber-400">⚠️ 尚未填寫參展核心概念簡述</span>)}
                 </p>
               </div>
             </div>

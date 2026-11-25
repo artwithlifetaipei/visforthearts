@@ -75,6 +75,9 @@ function toDbSafeConceptBrief(brief: string | null | undefined): string | null {
   return chars.slice(0, 245).join('');
 }
 
+const APP_PROFILE_COLUMNS =
+  'id, brand_name_zh, brand_name_en, company_name_zh, company_tax_id, contact_name, contact_email, contact_phone, contact_address, website_url, instagram_url, zone_id, booth_type, concept_brief, status, deposit_paid, custom_fee, discount_note, created_at';
+
 async function resolveBrandAndApp(adminDb: any, brandId?: string | null, email?: string | null) {
   let brandRow: any = null;
   let appRow: any = null;
@@ -102,7 +105,7 @@ async function resolveBrandAndApp(adminDb: any, brandId?: string | null, email?:
   if (brandRow?.application_id) {
     const { data: a } = await adminDb
       .from('exhibitor_applications')
-      .select('*')
+      .select(APP_PROFILE_COLUMNS)
       .eq('id', brandRow.application_id)
       .maybeSingle();
     appRow = a;
@@ -111,7 +114,7 @@ async function resolveBrandAndApp(adminDb: any, brandId?: string | null, email?:
   if (!appRow && brandId) {
     const { data: a } = await adminDb
       .from('exhibitor_applications')
-      .select('*')
+      .select(APP_PROFILE_COLUMNS)
       .eq('id', brandId)
       .maybeSingle();
     appRow = a;
@@ -122,7 +125,7 @@ async function resolveBrandAndApp(adminDb: any, brandId?: string | null, email?:
     if (lookupEmail) {
       const { data: a } = await adminDb
         .from('exhibitor_applications')
-        .select('*')
+        .select(APP_PROFILE_COLUMNS)
         .ilike('contact_email', lookupEmail)
         .order('created_at', { ascending: false })
         .limit(1)
@@ -134,7 +137,7 @@ async function resolveBrandAndApp(adminDb: any, brandId?: string | null, email?:
   if (!appRow && brandRow?.brand_name_zh) {
     const { data: a } = await adminDb
       .from('exhibitor_applications')
-      .select('*')
+      .select(APP_PROFILE_COLUMNS)
       .eq('brand_name_zh', brandRow.brand_name_zh)
       .order('created_at', { ascending: false })
       .limit(1)
@@ -407,7 +410,7 @@ export async function POST(req: Request) {
           concept_brief: dbSafeBrief,
         })
         .eq('id', appRow.id)
-        .select('*')
+        .select(APP_PROFILE_COLUMNS)
         .maybeSingle();
 
       if (updateErr) {
@@ -450,7 +453,7 @@ export async function POST(req: Request) {
           custom_fee: brandRow?.custom_fee ?? null,
           discount_note: brandRow?.discount_note ?? null,
         })
-        .select('*')
+        .select(APP_PROFILE_COLUMNS)
         .maybeSingle();
 
       if (insertErr) {
@@ -462,28 +465,8 @@ export async function POST(req: Request) {
       };
     }
 
-    // Also sync brand_name_zh, brand_name_en, and application_id onto exhibitor_brands
+    // Also sync brand_name_zh, brand_name_en, and application_id onto exhibitor_brands & save extended profile in parallel
     let updatedBrandRow = brandRow;
-    if (brandRow?.id) {
-      const brandUpdatePayload: any = {
-        brand_name_zh: cleanBrandZh,
-        brand_name_en: cleanBrandEn,
-      };
-      if (!brandRow.application_id && updatedAppRow?.id) {
-        brandUpdatePayload.application_id = updatedAppRow.id;
-      }
-      const { data: bUpdated } = await adminDb
-        .from('exhibitor_brands')
-        .update(brandUpdatePayload)
-        .eq('id', brandRow.id)
-        .select('*')
-        .maybeSingle();
-      if (bUpdated) {
-        updatedBrandRow = bUpdated;
-      }
-    }
-
-    // Save full untruncated profile data (including >250 char concept_brief) in exhibitor_media_assets
     const extPayload = {
       brand_name_zh: cleanBrandZh,
       brand_name_en: cleanBrandEn,
@@ -497,7 +480,32 @@ export async function POST(req: Request) {
       instagram_url: cleanInstagram,
       concept_brief: fullConceptBrief,
     };
-    await saveExtendedProfile(adminDb, updatedBrandRow?.id || brandRow?.id, extPayload);
+
+    const brandUpdateTask = (async () => {
+      if (brandRow?.id) {
+        const brandUpdatePayload: any = {
+          brand_name_zh: cleanBrandZh,
+          brand_name_en: cleanBrandEn,
+        };
+        if (!brandRow.application_id && updatedAppRow?.id) {
+          brandUpdatePayload.application_id = updatedAppRow.id;
+        }
+        const { data: bUpdated } = await adminDb
+          .from('exhibitor_brands')
+          .update(brandUpdatePayload)
+          .eq('id', brandRow.id)
+          .select('*')
+          .maybeSingle();
+        if (bUpdated) {
+          updatedBrandRow = bUpdated;
+        }
+      }
+    })();
+
+    await Promise.all([
+      brandUpdateTask,
+      saveExtendedProfile(adminDb, brandRow?.id, extPayload),
+    ]);
 
     return NextResponse.json({
       success: true,
