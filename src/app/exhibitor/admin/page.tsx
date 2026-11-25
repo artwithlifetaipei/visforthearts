@@ -487,12 +487,13 @@ export default function ExhibitorAdminPage() {
 
   const loadAllAdminData = async () => {
     try {
-      // Parallel fetch all 5 data sources simultaneously
+      // Parallel fetch all data sources simultaneously (splitting media metadata vs JSON text rows to avoid 80MB+ base64 sort statement timeout)
       const [
         { data: apps },
         { data: vips },
         { data: compliances },
-        { data: media },
+        { data: mediaMeta },
+        { data: mediaTextRows },
         { data: products },
       ] = await Promise.all([
         supabase
@@ -509,18 +510,32 @@ export default function ExhibitorAdminPage() {
           .order('signed_at', { ascending: false }),
         supabase
           .from('exhibitor_media_assets')
-          .select('*, exhibitor_brands(id, brand_name_zh, brand_name_en, portal_email, booth_type, zone_id)')
+          .select('id, brand_id, file_name, file_type, created_at, exhibitor_brands(id, brand_name_zh, brand_name_en, portal_email, booth_type, zone_id)')
           .order('created_at', { ascending: false }),
+        supabase
+          .from('exhibitor_media_assets')
+          .select('id, file_url')
+          .in('file_type', ['pr_qa_submission', 'brand_profile_ext', 'concierge_lead', 'booth_fee_proof']),
         supabase
           .from('exhibitor_products')
           .select('*')
           .order('created_at', { ascending: false }),
       ]);
 
+      const textUrlMap = new Map<string, string>();
+      for (const r of (mediaTextRows || [])) {
+        if (r?.id && r?.file_url) {
+          textUrlMap.set(r.id, r.file_url);
+        }
+      }
+
       const rawAppData = apps || [];
       const vipData = vips || [];
       const complianceData = compliances || [];
-      const mediaData = media || [];
+      const mediaData = (mediaMeta || []).map((m: any) => ({
+        ...m,
+        file_url: textUrlMap.get(m.id) || `/api/exhibitor/media/file?id=${m.id}`,
+      }));
       const prodData = products || [];
 
       // Merge untruncated concept_brief from brand_profile_ext if present
@@ -2543,7 +2558,7 @@ export default function ExhibitorAdminPage() {
               (a) =>
                 !NON_VISUAL_TYPES.includes(a.file_type) &&
                 typeof a.file_url === 'string' &&
-                (a.file_url.startsWith('data:image/') || a.file_url.startsWith('http'))
+                (a.file_url.startsWith('data:image/') || a.file_url.startsWith('http') || a.file_url.startsWith('/api/exhibitor/media/file'))
             );
             const logoAssets = mediaAssets.filter((a) => a.file_type === 'brand_logo_transparent');
             const feeProofAssets = mediaAssets.filter((a) => a.file_type === 'booth_fee_proof');
